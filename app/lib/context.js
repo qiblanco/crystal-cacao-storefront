@@ -1,6 +1,7 @@
 import {createHydrogenContext} from '@shopify/hydrogen';
 import {AppSession} from '~/lib/session';
 import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
+import {resolveCountry} from '~/lib/markt-pricing';
 
 // Define the additional context object
 const additionalContext = {
@@ -36,6 +37,22 @@ export async function createHydrogenRouterContext(
     AppSession.init(request, [env.SESSION_SECRET]),
   ]);
 
+  // Markt-Kontext wie auf qiblanco-storefront (dort app/lib/context.js:29-40),
+  // mit DERSELBEN Funktion: markt-pricing.js liegt hier byte-gleich als K1 vor,
+  // resolveCountry ist also kein Nachbau, sondern der geteilte Bestand.
+  //   ?markt=XX (Preview) > Geo-Header, nur freigeschaltete Maerkte > 'DE'.
+  //
+  // WARUM DAS HIER STEHT (s09, 2026-08-22): der Skeleton-Default
+  // {language: 'EN', country: 'US'} laesst app/lib/fragments.js:220,236 mit
+  // @inContext(country: US) gegen dasselbe DACH-Backend fragen. Gemessen an der
+  // Vorschau des Commits bd6b9da hiess das fuer den Kunden: $69/$79/$99 statt
+  // 53/61/76 EUR und ein Warenkorb ueber $207.90, wo qiblanco.com 159 EUR bucht
+  // -- gegen die Auftragszusage "Preise sind ueberall gleich". Die drei Kakao-
+  // Routen sind daran unschuldig und byte-gleich; der Kontext, der sie mit
+  // Preisen beliefert, liegt ausserhalb ihrer Import-Huelle und deshalb in
+  // KEINER Klasse des shared/UPSTREAM.json.
+  const country = resolveCountry(request);
+
   const hydrogenContext = createHydrogenContext(
     {
       env,
@@ -43,10 +60,10 @@ export async function createHydrogenRouterContext(
       cache,
       waitUntil,
       session,
-      // Or detect from URL path based on locale subpath, cookies, or any other strategy
-      i18n: {language: 'EN', country: 'US'},
+      i18n: {language: 'DE', country},
       cart: {
         queryFragment: CART_QUERY_FRAGMENT,
+        getBuyerIdentity: () => ({countryCode: country}),
       },
     },
     additionalContext,

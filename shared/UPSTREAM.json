@@ -2,7 +2,7 @@
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
   "upstream_commit": "89c242288a8742fdbc3864c7708d06fb46eb33ee",
-  "erzeugt_utc": "2026-08-22T10:51:42Z",
+  "erzeugt_utc": "2026-08-22T13:35:59Z",
   "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py",
   "huelle": {
     "wurzeln": [
@@ -131,6 +131,13 @@
       "sha256_upstream": "9bc717e484a7bf98a7fb75b08f5a9613a5a1a74002ab83ba2e2adc1fe39ed37f",
       "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
       "grund": "Traegt TRACKING_PRODUCTION_HOSTS und TRACKING_COOKIE_NAMES. Nicht in der Huelle (haengt an den cart-Routen). crystal fuehrt eine eigenstaendige Naht; die Allowlist ist der Ort der _qpx_anon-Fehlerklasse und darf nicht blind kopiert werden, weil die Hostliste dort eine andere ist."
+    },
+    {
+      "upstream": "app/lib/context.js",
+      "klasse": "K3",
+      "sha256_upstream": "a27251d0913f86f082b2c6b9c23a9efabd2a5f8fa2cd0a37dfd665bbf29c6c14",
+      "enforcer": "CC_BASIS=<crystal-Origin> python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_cacao_seiten.py  # vergleicht den GERENDERTEN Hauptpreis beider Shops",
+      "grund": "Markt- und Sprachkontext der Storefront (i18n language/country, cart buyerIdentity). Nicht in der Import-Huelle der drei Routen, bestimmt aber ueber @inContext (app/lib/fragments.js) JEDEN Preis und jede Waehrung, die sie rendern. crystal fuehrt eine EIGENE Fassung: sie benutzt dieselbe K1-Funktion resolveCountry aus markt-pricing.js wie qiblanco, kann aber nicht byte-gleich sein (anderer Hydrogen-Major, createHydrogenRouterContext statt createAppLoadContext). Bewegt sich die Markt-Logik OBEN, ist der Nachzug hier faellig -- sonst laufen die Preise der beiden Shops auseinander, ohne dass eine andere Achse das sieht (Belegfall s09 2026-08-22: USD statt EUR bei gruener Wache)."
     },
     {
       "upstream": "app/root.jsx",
