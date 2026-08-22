@@ -125,8 +125,43 @@ aside header h2 {
   margin-top: 0;
 }
 
+/*
+ * ANGLEICHUNG an die uebernommene Aside.jsx (K1, ADR 0056) — 2026-08-22, s06.
+ * Die geteilte Fassung schiebt den <header> IN das <main>: aus
+ * <aside><header/><main>{children}</main></aside> wird
+ * <aside><main><header/>{children}</main></aside>. Ein Rand auf `main` legte
+ * sich damit UM den Kopf der Schublade und schnitte seine Trennlinie ein.
+ * Deshalb traegt der Rand jetzt der Inhalt, nicht der Container.
+ *
+ * Die Aenderung steht bewusst HIER, in einer crystal-eigenen Datei, und nicht
+ * in Aside.jsx: eine Aenderung in einer K1-Datei waere eine Klassen-Verletzung
+ * und machte die Drift-Wache dauerhaft rot ("um die Datei herum, nicht in sie
+ * hinein").
+ *
+ * ABWEICHUNG VON DER VORLAGE, ausdruecklich: qiblanco setzt hier
+ * `overflow: scroll` — das erzwingt eine Bildlaufleiste auch ohne Ueberlauf und
+ * steht woertlich auf der Prueflatte dieses Auftrags ("kein overflow:scroll wo
+ * overflow:auto gehoert"). Uebernommen wird `auto`. Einen benannten Fehler
+ * mitzukopieren, nur weil er in der Vorlage steht, waere das Gegenteil von
+ * Uebertragung.
+ */
 aside main {
-  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+  overflow: auto;
+}
+
+aside main > *:not(header) {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+aside main > header {
+  position: sticky;
+  top: 0;
+  background: inherit;
+  z-index: 1;
 }
 
 aside p {

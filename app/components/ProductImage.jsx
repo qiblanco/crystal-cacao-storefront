@@ -6,9 +6,8 @@ import {Image} from '@shopify/hydrogen';
  * }}
  */
 export function ProductImage({image}) {
-  if (!image) {
-    return <div className="product-image" />;
-  }
+  if (!image) return <div className="product-image" />;
+
   return (
     <div className="product-image">
       <Image

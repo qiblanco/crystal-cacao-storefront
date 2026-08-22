@@ -13,7 +13,12 @@ import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
+import kakaoStyles from '~/styles/kakao-seiten.css?url';
 import {PageLayout} from './components/PageLayout';
+import {MetaPixel} from './components/MetaPixel';
+import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
+import {strictRegions} from '~/lib/consent-policy';
+import '@fontsource-variable/open-sans';
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -73,6 +78,25 @@ export async function loader(args) {
   return {
     ...deferredData,
     ...criticalData,
+    // --- Tracking-Naht (K3, ADR 0056). Alles env-gesteuert und fail-closed:
+    // ohne gesetzte Variable laedt nichts, feuert nichts, und es entsteht
+    // KEIN Halb-Zustand. Was hier fehlt, fehlt sichtbar (siehe env.d.ts).
+    isProductionHost: isQiblancoProductionHost(args.request.url, env),
+    // ADR 0056 Festlegung 4: CONSENT-BYPASS. Nur Vorschau, NIE Produktion.
+    enableTrackingInPreview: env.PUBLIC_ENABLE_TRACKING_IN_PREVIEW === 'true',
+    // Region-aware Consent (Spiegel fuer die Client-Skripte). Ohne
+    // PUBLIC_CONSENT_STRICT_REGIONS bleibt clientseitig ALLES streng.
+    buyerCountry: args.request.headers.get('oxygen-buyer-country') || '',
+    consentStrictRegions: strictRegions(env).join(','),
+    // First-Party-Pixel (qpx) — setzt _qpx_anon. Laedt nur mit Endpoint.
+    qpxEndpoint: env.PUBLIC_QPX_ENDPOINT || '',
+    // Meta-Pixel: eigene Kennung fuer diese Domain, siehe MetaPixel.jsx.
+    metaPixelId: env.PUBLIC_META_PIXEL_ID || '',
+    // Hyros-Universal-Script: eigene Tag-Kennung, siehe qiblanco-tracker.js.
+    hyrosTagUrl: env.PUBLIC_HYROS_TAG_URL || '',
+    // Cookiebot-Domaingruppe dieser Domain. Ohne sie kein Consent-Banner —
+    // und damit (fail-closed) auch kein marketing-Consent und kein Tracking.
+    cookiebotId: env.PUBLIC_COOKIEBOT_ID || '',
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -144,16 +168,68 @@ function loadDeferredData({context}) {
  */
 export function Layout({children}) {
   const nonce = useNonce();
+  /** @type {RootLoader} */
+  const data = useRouteLoaderData('root');
+  // Drittskripte laufen NUR auf einem konfigurierten Produktions-Host oder in
+  // der ausdruecklich als Vorschau markierten Umgebung — nie "einfach so".
+  const shouldLoadThirdPartyScripts =
+    data?.isProductionHost || data?.enableTrackingInPreview;
+  const isTrackingPreview =
+    Boolean(data?.enableTrackingInPreview) && !data?.isProductionHost;
 
   return (
-    <html lang="en">
+    <html
+      lang="de"
+      data-qiblanco-tracking-preview={isTrackingPreview ? 'true' : undefined}
+      data-qb-region={data?.buyerCountry || undefined}
+      data-qb-consent-strict={data?.consentStrictRegions || undefined}
+    >
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
+        <link rel="stylesheet" href={kakaoStyles}></link>
+        {shouldLoadThirdPartyScripts && data?.cookiebotId ? (
+          <script
+            id="Cookiebot"
+            src="https://consent.cookiebot.com/uc.js"
+            data-cbid={data.cookiebotId}
+            data-blockingmode="auto"
+            type="text/javascript"
+            nonce={nonce}
+            async
+            suppressHydrationWarning
+          />
+        ) : null}
         <Meta />
         <Links />
+        {shouldLoadThirdPartyScripts && (
+          <>
+            <script
+              src="/cookiebot-shopify-consent-sync.js"
+              nonce={nonce}
+              defer
+              suppressHydrationWarning
+            />
+            <script
+              src="/qiblanco-tracker.js"
+              data-hyros-tag={data?.hyrosTagUrl || undefined}
+              nonce={nonce}
+              defer
+              suppressHydrationWarning
+            />
+            {data?.qpxEndpoint ? (
+              <script
+                src="/qiblanco-qpx-loader.js"
+                data-qpx-endpoint={data.qpxEndpoint}
+                nonce={nonce}
+                defer
+                suppressHydrationWarning
+              />
+            ) : null}
+          </>
+        )}
       </head>
       <body>
         {children}
@@ -181,6 +257,9 @@ export default function App() {
       <PageLayout {...data}>
         <Outlet />
       </PageLayout>
+      {(data.isProductionHost || data.enableTrackingInPreview) && (
+        <MetaPixel metaPixelId={data.metaPixelId} />
+      )}
     </Analytics.Provider>
   );
 }
