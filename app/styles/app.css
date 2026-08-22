@@ -9,7 +9,10 @@
 }
 
 img {
-  border-radius: 4px;
+  /* s07: EIN Bild-Radius-Token statt eines freien Werts. Der Token steht in
+   * kakao-seiten.css :root; der Fallback haelt das Geruest heil, falls die
+   * Token-Schicht einmal nicht geladen wird. */
+  border-radius: var(--cc-radius-bild, 4px);
 }
 
 /*
@@ -302,10 +305,42 @@ button.reset:hover:not(:has(> *)) {
   display: flex;
   grid-gap: 1rem;
   margin-left: auto;
+  min-width: 0;   /* s07: darf schrumpfen, sonst schiebt es den Kopf auf */
+}
+
+/* s07 — HORIZONTALER OVERFLOW BEHOBEN (gemessen 2026-08-22).
+ * Befund: scrollWidth 449 bei Viewport 390 (+59px) und 787 bei 768 (+19px);
+ * ursaechlich isoliert per display:none war a[href="/cart"] ("Cart 0") im
+ * Kopf. Die Vorlage qiblanco.com hat den Fehler NICHT (scrollWidth == vw bei
+ * beiden Breiten) — er stammt aus dem Hydrogen-Standardgeruest, nicht aus der
+ * Uebertragung.
+ *
+ * URSACHE, nicht Symptom: `min-width: fit-content` verbot den Kopf-Elementen
+ * das Schrumpfen, ihre Eigenbreite summierte sich ueber den Viewport hinaus.
+ * Bewusst KEIN `overflow-x: hidden` auf einem Vorfahren — das haette den
+ * Ueberlauf nur unsichtbar gemacht und zugleich `position: sticky` im Kopf
+ * gebrochen. Der Zaehler wird stattdessen zum Abzeichen, genau wie bei
+ * qiblanco (dort app.css:462 `.cart-count { position: absolute }`) — damit
+ * kostet "Cart 0" keine Zeilenbreite mehr.
+ *
+ * Christians Prueflatte verlangt ausserdem "kein Element bei x=0 ohne
+ * Seitenabstand": der Kopf behaelt deshalb seinen Innenabstand. */
+.header {
+  max-width: 100%;
+  gap: 0.75rem;
 }
 
 .header-ctas > * {
-  min-width: fit-content;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.header-ctas a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;   /* WCAG 2.5.5 AAA, wie web-dach.yaml trefferflaeche */
+  white-space: nowrap;
 }
 
 /*
