@@ -75,8 +75,18 @@ export function CartMain({layout, cart: originalCart}) {
             })}
           </ul>
         </div>
-        {cartHasItems && <CartSummary cart={cart} layout={layout} />}
       </div>
+      {/*
+        DREI-ZONEN-SCHUBLADE (2026-08-22): die Zusammenfassung mit dem Kaufknopf
+        ist GESCHWISTER von `.cart-details`, nicht mehr dessen Kind. Als Kind lag
+        sie im Scroll-Container und musste per `position: absolute` aus ihm
+        herausgehoben werden — womit sie ueber der letzten Warenkorb-Zeile lag.
+        Als Geschwister ist sie der ruhende Fuss der Schublade und beansprucht
+        ihren Platz, statt ihn zu ueberdecken (CSS: `aside .cart-summary-aside`).
+        Fuer `layout === 'page'` aendert sich nichts Sichtbares: dort stapeln
+        beide ohnehin im normalen Fluss untereinander.
+      */}
+      {cartHasItems && <CartSummary cart={cart} layout={layout} />}
     </section>
   );
 }
