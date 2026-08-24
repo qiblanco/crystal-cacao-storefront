@@ -1,5 +1,4 @@
 import {createContext, useContext, useEffect, useState} from 'react';
-import {useId} from 'react';
 
 /**
  * A side bar component with Overlay
@@ -19,7 +18,7 @@ import {useId} from 'react';
 export function Aside({children, heading, type}) {
   const {type: activeType, close} = useAside();
   const expanded = type === activeType;
-  const id = useId();
+
   useEffect(() => {
     const abortController = new AbortController();
 
@@ -42,17 +41,19 @@ export function Aside({children, heading, type}) {
       aria-modal
       className={`overlay ${expanded ? 'expanded' : ''}`}
       role="dialog"
-      aria-labelledby={id}
     >
       <button className="close-outside" onClick={close} />
       <aside>
+        <main>
         <header>
-          <h3 id={id}>{heading}</h3>
+          <h3>{heading === "MENU" ? 'Menü' : heading}</h3>
           <button className="close reset" onClick={close} aria-label="Close">
             &times;
           </button>
         </header>
-        <main>{children}</main>
+          {children}
+
+          </main>
       </aside>
     </div>
   );

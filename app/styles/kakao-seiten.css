@@ -1,0 +1,761 @@
+/*
+ * kakao-seiten.css — Stilschicht FUER die geteilten Kakao-Seiten,
+ * crystal-cacao-storefront. Diese Datei ist crystal-EIGEN (nicht Teil der
+ * 19-Datei-Huelle aus ADR 0056) und wird deshalb NICHT von der Drift-Wache
+ * gemessen. Das ist eine bewusste Grenze, keine Luecke:
+ *
+ *   Die Huelle enthaelt NULL Stylesheets -- die drei Routen importieren keine
+ *   CSS-Datei, ihr Aussehen haengt bei qiblanco an der globalen app.css.
+ *   Geteilt ist damit die STRUKTUR der Seiten, nicht ihre Erscheinung. Fuer
+ *   Crystal Cacao ist das gewollt: Christian hat ein eigenes Farbprofil
+ *   ausdruecklich erlaubt ("es darf auch weiterhin in diesem schwarz-goldenen
+ *   Ton gehalten werden ... man darf erkennen, dass die zwei Seiten
+ *   zusammengehoeren"). Die Marken-/Token-Schicht baut Segment s07, nicht s06.
+ *
+ * HERKUNFT DER REGELN, damit sie nachvollziehbar bleiben: mechanisch aus
+ * qiblanco-storefront @ 89c2422 (app/styles/app.css + reset.css) extrahiert --
+ * jede Regel, deren Selektor eine der von den Huellen-Dateien benutzten
+ * Klassen nennt. Werkzeug und Klassenliste liegen bei:
+ *   homepage-bauer/pruefungen/extrahiere_kakao_css.py
+ * Erneut ableitbar, nicht von Hand abgeschrieben.
+ *
+ * NACHGEMESSEN, damit die Herkunftszusage nicht mehr behauptet als sie haelt:
+ * die extrahierten Regeln enthalten KEIN `overflow: scroll`. Der Fall, den die
+ * Prueflatte des Auftrags nennt ("overflow:scroll wo overflow:auto gehoert"),
+ * steckt in der Vorlage an einer ANDEREN Stelle -- in ihrem `aside main`. Er
+ * ist deshalb dort behandelt, wo er auftritt: in app.css, mit `auto` statt
+ * `scroll`, ausdruecklich als Abweichung markiert.
+ */
+@import 'tailwindcss';
+
+/* ==========================================================================
+ * MARKENPROFIL CRYSTAL CACAO — TOKEN-SCHICHT (Segment s07, 2026-08-22)
+ * ==========================================================================
+ * Diese Schicht ist die EINZIGE Quelle fuer Groessen, Farben, Radien und
+ * Knopfmasse der Crystal-Cacao-Storefront. Freie Werte gehoeren ab hier
+ * nicht mehr in Regeln, sondern in einen Token.
+ *
+ * HERKUNFT JE GRUPPE — was gemessen ist und was entschieden:
+ *
+ *  TYPO   Modulare Skala, Ratio 1.25 ab Basis 16px (web-soll.yaml
+ *         typo_skala_ratio 1.25, body_px_min 16). Das ist eine bewusste
+ *         VERBESSERUNG gegenueber der Vorlage, kein Nachbau: web-dach.yaml
+ *         weist nach, dass die real gemessene qiblanco-Skala KEINER Ratio
+ *         folgt (Nachbarverhaeltnisse 1.03-1.57) und mit 9 Stufen bereits am
+ *         erlaubten Hoechstwert steht. Nachgebaut waere die Unordnung
+ *         mitgeerbt worden.
+ *
+ *  FARBE  EIN Gold-Akzent, --cc-gold: rgb(242,191,114) = #F2BF72. Das ist
+ *         exakt der Ton, den qiblanco.com real ausliefert (dort
+ *         app/styles/app.css:16). Gewaehlt wegen Christians Verwandtschafts-
+ *         Auflage: der Besucher misst Zusammengehoerigkeit an dem, was er
+ *         SIEHT. Bewusst NICHT der Doktrin-Ton #c9a14b — und damit bewusst
+ *         KEINE Antwort auf die offene Marken-Frage
+ *         `gold-akzent-web-vs-marke` (web-dach.yaml, zustaendig: Christian).
+ *         Diese Frage betrifft den qiblanco-Storefront; hier aendert sich
+ *         daran nichts. Entscheidet Christian dort anders, folgt crystal mit
+ *         EINER Zeile — deshalb steht der Ton genau einmal.
+ *         WARUM DAS UEBERHAUPT NOETIG WAR: --color-accent-primary war
+ *         verwendet, aber nirgends definiert; der Kaufknopf rendete
+ *         durchsichtig mit schwarzem Rand (gemessen s07).
+ *
+ *  EIGENES PROFIL gegenueber qiblanco liegt bewusst NICHT in einem zweiten
+ *         Gold (das waere ein Verstoss gegen akzent_farben_max 1), sondern im
+ *         waermeren, kakao-getoenten Neutral-Kontinuum. Verwandtschaft ueber
+ *         den geteilten Akzent, Eigenstaendigkeit ueber die Flaeche.
+ *
+ *  MASSE  Knopfhoehe 70px, Knopfschrift 17.6px, Radius 10px und
+ *         Trefferflaeche 44px stammen aus db/tokens/web-dach.yaml (Klasse
+ *         `gebaut` bzw. `gesetzt`, gemessen am DACH-Shop). Sie sind die
+ *         Verwandtschafts-Anker zu qiblanco und deshalb NICHT frei gewaehlt.
+ *         Der Radius 10 folgt dem gemessenen Shop, nicht dem Doktrin-Satz
+ *         [8,16] — die Abweichung ist in web-dach.yaml als offene Frage
+ *         `radius-doktrin-vs-shop` gefuehrt und wird hier nicht entschieden.
+ * ======================================================================== */
+
+:root {
+  /* ---- Typo: modulare Skala 1.25, Basis 16px (7 Stufen, Soll <= 9) ---- */
+  --cc-fs-1: 0.8rem;      /* 12.80px  Feindruck, Tabellen, Labels */
+  --cc-fs-2: 1rem;        /* 16.00px  Fliesstext (body_px_min)    */
+  --cc-fs-3: 1.25rem;     /* 20.00px  Lead, kleine Ueberschrift   */
+  --cc-fs-4: 1.5625rem;   /* 25.00px  H3                          */
+  --cc-fs-5: 1.9531rem;   /* 31.25px  H2 klein / Sektionstitel    */
+  --cc-fs-6: 2.4414rem;   /* 39.06px  H2                          */
+  --cc-fs-7: 3.0518rem;   /* 48.83px  H1                          */
+
+  /* ---- Abstand: 8pt-Raster (web-soll spacing_grid_px 8) ---- */
+  --cc-space-1: 0.5rem;   /*  8px */
+  --cc-space-2: 1rem;     /* 16px */
+  --cc-space-3: 1.5rem;   /* 24px */
+  --cc-space-4: 2rem;     /* 32px */
+  --cc-space-5: 3rem;     /* 48px */
+  --cc-space-6: 4rem;     /* 64px  Sektions-Takt mobil  */
+  --cc-space-7: 6rem;     /* 96px  Sektions-Takt Desktop */
+
+  /* ---- Farbe: warmes Neutral-Kontinuum + GENAU EIN Akzent ---- */
+  --cc-gold: rgb(242, 191, 114);   /* der eine Akzent — nur Handlung/Beweis */
+  --cc-gold-tief: rgb(200, 152, 90);
+  --cc-dunkel: #171310;            /* EIN dunkler Ton (schwarz-braun) */
+  --cc-text: #2c2a26;
+  --cc-muted: #6b665d;
+  --cc-flaeche: #f6f1ea;           /* kakao-getoentes Off-White */
+  --cc-grund: #fbf8f4;
+  --cc-linie: #e6ded3;
+
+  /* Die Bestandsregeln sprechen diese Variable an — hier bekommt sie
+   * endlich einen Wert. Genau EIN Ort, an dem der Goldton steht. */
+  --color-accent-primary: var(--cc-gold);
+
+  /* ---- Radius: EIN Bildradius, EIN Knopfradius ---- */
+  --cc-radius-bild: 10px;
+  --cc-radius-knopf: 10px;
+  --cc-radius-rund: 50%;
+
+  /* ---- Knopf: Masse aus web-dach.yaml (Klasse `gebaut`) ---- */
+  --cc-knopf-hoehe: 70px;
+  --cc-knopf-schrift: 1.1rem;   /* 17.6px */
+  --cc-knopf-gewicht: 600;
+  --cc-treffer-min: 44px;       /* WCAG 2.5.5 AAA */
+
+  /* ---- Lesbarkeit: Zeilenlaenge (web-soll zeilenlaenge_ch_max 75) ---- */
+  --cc-zeile-max: 70ch;
+}
+
+/* Tailwind-4-Theme: bindet die Utility-Klassen der uebertragenen Routen an
+ * dieselbe Skala. Der entscheidende Punkt — die drei Routen sind K1 und
+ * duerfen NICHT angefasst werden; ihre text-*-Klassen zeigen deshalb hier
+ * auf die Token statt auf Tailwinds Standardwerte. Mehrere Stufen fallen
+ * bewusst zusammen, das SENKT die Zahl distinkter Groessen. */
+@theme {
+  --text-xs: var(--cc-fs-1);
+  --text-sm: var(--cc-fs-1);
+  --text-base: var(--cc-fs-2);
+  --text-lg: var(--cc-fs-3);
+  --text-xl: var(--cc-fs-3);
+  --text-2xl: var(--cc-fs-4);
+  --text-3xl: var(--cc-fs-5);
+  --text-4xl: var(--cc-fs-5);
+  --text-5xl: var(--cc-fs-6);
+  --text-6xl: var(--cc-fs-7);
+  --text-7xl: var(--cc-fs-7);
+}
+
+/* ==== abgeleitet aus qiblanco-storefront app/styles/app.css (62 Regeln) ==== */
+.product .product-rating {
+  font-size: var(--cc-fs-4);
+  font-weight: 600;
+  color: var(--color-accent-primary);
+}
+.product .product-rating span:nth-child(2) {
+  font-size: var(--cc-fs-2);
+  color: #000;
+  font-weight: 500;
+}
+.btn--primary {
+  display: block;
+  font-size: var(--cc-knopf-schrift) !important;
+  font-weight: 600;
+  font-family: 'Open Sans Variable', sans-serif;
+  padding: 1.25rem;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  color: var(--color-dark)!important;
+  border: 2px solid var(--color-accent-primary);
+  border-radius: var(--cc-radius-knopf)!important;
+  background: var(--color-accent-primary);
+  transition: 0.2s all linear;
+}
+.btn--secondary {
+  display: block;
+  font-size: var(--cc-fs-2);
+  font-family: 'Open Sans Variable', sans-serif;
+  font-weight: 600;
+  padding: 1.25rem;
+  text-align: center;
+  max-width: 300px;
+  width: 100%;
+  border: 2px solid var(--color-dark);
+  border-radius: var(--cc-radius-knopf)!important;
+  color: var(--color-dark);
+  transition: 0.2s all linear;
+}
+.btn--primary:hover {
+  cursor: pointer;
+  text-decoration: none;
+  border: 2px solid rgb(208, 164, 98);
+  background: rgb(208, 164, 98);
+}
+.btn--secondary:hover {
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-accent-primary);
+  border: 2px solid var(--color-accent-primary);
+}
+.cartSummaryWrapper .btn--primary {
+  max-width: 100% !important;
+  font-family: 'Open Sans Variable', sans-serif;
+  opacity: 1;
+  font-size: var(--cc-fs-3) !important;
+  transition: 0.2s opacity ease-in-out;
+  border: none;
+  border-radius: 1000px;
+  margin-top: 15px;
+  padding: 1rem 1.25rem;
+}
+.cartSummaryWrapper .btn--primary p {
+  font-size: var(--cc-fs-3);
+}
+.cartSummaryWrapper .btn--primary:hover {
+  opacity: 0.8;
+}
+.cartSummaryWrapper .btn--primary div {
+  display: inline-block !important;
+}
+@media screen and (max-width: 749px) {
+  .btn--primary,
+  .btn--secondary {
+    max-width: 100%;
+  }
+}
+.course-lesson__nav .btn--primary,
+.course-lesson__nav .btn--secondary {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.5rem;
+  justify-content: center;
+  max-width: 280px;
+  text-decoration: none;
+}
+@media (max-width: 749px) {
+  .course-lesson__nav .btn--primary,
+  .course-lesson__nav .btn--secondary {
+    max-width: 100%;
+  }
+}
+/* ── Product FAQ Accordion ── */
+.ProductFAQ__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  user-select: none;
+}
+.ProductFAQ__list {
+  margin-top: 0;
+}
+.ProductFAQ__item {
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.ProductFAQ__question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 1.2rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 700;
+  font-size: var(--cc-fs-2);
+  color: inherit;
+  gap: 1rem;
+  font-family: inherit;
+}
+.ProductFAQ__question:hover {
+  opacity: 0.7;
+}
+.ProductFAQ__answer {
+  padding: 0 0 1.5rem;
+  line-height: 1.7;
+  color: rgba(0,0,0,0.8);
+}
+/* ── Cacao Variant Dropdown ── */
+.CacaoVariantSelect {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: var(--cc-fs-2);
+  font-family: inherit;
+  font-weight: 600;
+  color: #3a3a3a;
+  background-color: #f5f0e8;
+  border: 1px solid #d4c9b5;
+  border-radius: var(--cc-radius-bild);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%233a3a3a' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px;
+}
+.CacaoVariantSelect:focus {
+  outline: 2px solid #b8a88a;
+  outline-offset: 1px;
+}
+.CacaoVariantSelect option {
+  font-weight: 600;
+  padding: 0.5rem;
+  background-color: #f5f0e8;
+  color: #3a3a3a;
+}
+.CacaoBenefitList {
+  margin-top: 1.5rem; 
+}
+.CacaoBenefitList ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.CacaoBenefitList li {
+  font-size: var(--cc-fs-1);
+  line-height: 1.5;
+}
+.UpsellItem .btn--primary {
+  width: 100%;
+  padding: 1rem;
+  font-size: inherit;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  transition: none;
+}
+.ProductImages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  position: relative;
+  height: auto;
+}
+.ProductImageWrapperSticky {
+  position: sticky;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.ProductImages .product-image-list {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+.ProductImages .product-image-list img {
+  width: 100%;
+  transition: .2s all linear;
+}
+.ProductImages .product-image-list img:hover {
+  opacity: .8;
+}
+.thumb-image {
+  width: auto;
+  object-fit: cover;
+}
+.ImageSeeMore {
+  position: relative;
+  border-radius: var(--cc-radius-bild);
+  overflow: hidden;
+  z-index: 0;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: block;
+}
+.ImageSeeMore .imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--cc-fs-1);
+  font-weight: 600;
+}
+/* Image Gallery Modal */
+.ImageGalleryModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100000000000;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ImageGalleryModal__inner {
+  background: #fff;
+  border-radius: var(--cc-radius-knopf);
+  width: min(900px, 92vw);
+  max-height: 90vh;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.ImageGalleryModal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  padding: 6px;
+  border-radius: var(--cc-radius-rund);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+}
+.ImageGalleryModal__close:hover {
+  background: #f0f0f0;
+}
+.ImageGalleryModal__featured {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+  min-height: 0;
+}
+.ImageGalleryModal__featured-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto !important;
+  height: auto;
+  object-fit: contain;
+}
+.ImageGalleryModal__thumbs {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  border-top: 1px solid #eee;
+  flex-shrink: 0;
+}
+.ImageGalleryModal__thumb {
+  flex: 0 0 80px;
+  width: 80px;
+  height: 80px;
+  border: 2px solid transparent;
+  border-radius: var(--cc-radius-bild);
+  overflow: hidden;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+  transition: border-color 0.15s;
+}
+.ImageGalleryModal__thumb img {
+  width: 100% !important;
+  height: 100%;
+  object-fit: cover;
+}
+.ImageGalleryModal__thumb.active {
+  border-color: #111;
+}
+.ImageGalleryModal__thumb:hover:not(.active) {
+  border-color: #bbb;
+}
+@media (min-width: 1024px) {
+  .ProductImageWrapperSticky {
+    flex-direction: row;
+    align-items: stretch;
+    max-height: 75vh;
+    top: 20px;
+  }
+  .ProductImages {
+    position: relative;
+    height: 100%;
+  }
+  .ProductImages .product-image-list {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    flex: none;
+    width: auto;
+    gap: 8px;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+  .ProductImages .product-image-list > img.thumb-image,
+  .ProductImages .product-image-list .ImageSeeMore {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--cc-radius-bild);
+    display: block;
+  }
+  .ProductImages .product-image-list .ImageSeeMore img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+  .product-main .btn--primary {
+    max-width: 100% !important;
+    width: 100%;
+  }
+}
+@media screen and (max-width: 749px) {
+  .product-image-list {
+    padding: 10px;
+  }
+  .product-image-list .thumb-image, .product-image-list .ImageSeeMore {
+    flex: 0 0 calc(20% - 0.5em);
+  }
+  .ProductImages {
+    margin-bottom: 75px;
+  }
+  .ImageSeeMore,
+  .product-image-list img {
+    width: 20% !important;
+    height: auto !important;
+  }
+  .ImageSeeMore img {
+    width: 100% !important;
+  }
+}
+.ProductDescription ul {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  font-size: var(--cc-fs-3);
+}
+.ProductDescription ul li img {
+  width: 20px;
+  vertical-align: middle;
+}
+.AddToCartButtonWrapper {
+  width: 100%;
+  margin-top: 20px;
+}
+.AddToCartButtonWrapper form {
+  width: 100%;
+}
+.NormalSectionSize .SingleImageCentered {
+  border-radius: var(--cc-radius-bild);
+}
+.Bestseller-Price {
+  position: relative;
+}
+.Bestseller-Price .BestsellerLabel {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg,#f30,#ff6f82);
+  padding: 5px 10px;
+  border-radius: var(--cc-radius-knopf);
+  font-weight: 600;
+  color: #fff;
+}
+@media screen and (min-width: 750px) {
+  .Bestseller-Price {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+  width: fit-content;
+}
+  .Bestseller-Price .BestsellerLabel {
+  position: relative;
+  right: 0;
+  top: 0;
+  transform: translateY(0);
+  width: fit-content;
+}
+}
+.Bestseller-Price {
+  flex-wrap: wrap;
+}
+.CacaoPriceMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.CacaoPriceCurrent {
+  font-size: var(--cc-fs-5)!important;
+  font-weight: 700!important;
+  line-height: 1!important;
+}
+.CacaoPriceCurrent.sale {
+  color: #e00!important;
+}
+.CacaoPriceCurrent.exclusive {
+  color: #b8943e!important; 
+}
+.CacaoPriceCompare {
+  font-size: var(--cc-fs-5)!important;
+  color: var(--color-dark)!important;
+  text-decoration: line-through!important;
+}
+.CacaoPricePer100g {
+  width: 100%;
+  font-size: var(--cc-fs-1);
+  color: #888;
+  margin-top: 2px;
+}
+/* ==== abgeleitet aus qiblanco-storefront app/styles/reset.css (1 Regeln) ==== */
+.NormalSectionSize {
+  max-width: 1350px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
+/* ==========================================================================
+ * NORMALISIERUNG (s07) — behebt die EINZELN GEMESSENEN Befunde der
+ * design-rubrik-Baseline vom 2026-08-22. Jede Regel unten nennt den Befund,
+ * den sie schliesst; eine Regel ohne gemessenen Befund gehoert nicht hierher.
+ *
+ * Der Hebel ist bewusst CSS: die drei Routen sind K1 und byte-gleich zu
+ * halten. Was hier steht, aendert das AUSSEHEN, nicht die STRUKTUR — genau
+ * die Trennlinie, die ADR 0056 zieht.
+ * ======================================================================== */
+
+/* BEFUND "2 H2-Stil-Kombis (Groesse x Gewicht)" + "H2-Ausrichtung gemischt
+ * (center, left)". Gemessen waren 48px/700 und 19.2px/700 nebeneinander.
+ * EIN H2-Stil, EINE Ausrichtung — die Groesse kommt aus dem Token, damit sie
+ * nicht wieder auseinanderlaeuft. */
+.ProductPageKakao h2,
+main h2 {
+  font-size: var(--cc-fs-6);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--cc-dunkel);
+  margin-block: var(--cc-space-5) var(--cc-space-3);
+}
+
+/* BEFUND "28% der Textbloecke ueber 75 Zeichen Zeilenlaenge". Begrenzt wird
+ * der Fliesstext, NICHT Ueberschriften und NICHT Layout-Container (sonst
+ * bricht das Raster der uebertragenen Sektionen). */
+.ProductPageKakao p,
+.ProductPageKakao li,
+main > p {
+  max-width: var(--cc-zeile-max);
+  line-height: 1.65;
+}
+.ProductPageKakao p,
+main > p {
+  margin-inline: auto;
+}
+
+/* BEFUND "3 Bild-Radius-Werte" (Live-Vorlage) bzw. Radien-Streuung nach der
+ * Extraktion: EIN Bildradius-Token fuer alle Bildflaechen. */
+.ProductPageKakao img,
+.ProductImages img,
+main img {
+  border-radius: var(--cc-radius-bild);
+}
+
+/* Knopf-Token: Hoehe/Schrift/Radius aus web-dach.yaml (Klasse `gebaut`),
+ * Trefferflaeche aus WCAG 2.5.5. Das ist der Verwandtschafts-Anker zu
+ * qiblanco — dort real 70px/17.6px gemessen. */
+.btn--primary,
+.btn--secondary {
+  min-height: var(--cc-knopf-hoehe);
+  font-size: var(--cc-knopf-schrift) !important;
+  font-weight: var(--cc-knopf-gewicht);
+  border-radius: var(--cc-radius-knopf) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ProductPageKakao a,
+.ProductPageKakao button {
+  min-height: var(--cc-treffer-min);
+}
+.ProductPageKakao a:not(.btn--primary):not(.btn--secondary) {
+  min-height: 0;   /* Fliesstext-Links sind keine Trefferflaechen */
+}
+
+/* Sektions-Takt auf dem 8pt-Raster (BEFUND "nur 50% der Sektions-Abstaende
+ * auf dem 8px-Grid" der Live-Vorlage). */
+.NormalSectionSize {
+  padding-block: var(--cc-space-6);
+}
+@media (min-width: 48em) {
+  .NormalSectionSize { padding-block: var(--cc-space-7); }
+}
+
+/* INLINE-STILE DER K1-ROUTEN NEUTRALISIEREN (s07).
+ * Gemessen 2026-08-22: products.crystal-cacao-awake.jsx:108/109 und
+ * products.crystal-cacao-create.jsx:108/109 tragen INLINE-Stile
+ * `style={{fontSize:'3em'}}` (h2) und `style={{fontSize:'2em'}}` (h3).
+ * Gerendert waren das 48px und 32px — beide ausserhalb der Token-Skala, und
+ * das 48px-h2 war die Ursache des Befunds "2 H2-Stil-Kombis".
+ *
+ * Diese Dateien sind K1 und muessen byte-gleich zu qiblanco bleiben (ADR
+ * 0056) — die Markup-Aenderung ist mir also verboten. Ein Inline-Stil wird in
+ * CSS nur durch `!important` uebersteuert; das ist hier kein Stil-Hack,
+ * sondern der EINZIGE lawful Weg, ohne die Klassen-Regel zu verletzen.
+ * Der handgefuehrte Rueckweg aus ADR 0056 Festlegung 5 (Inline-Stile
+ * stromaufwaerts durch Klassen ersetzen) bleibt der saubere Endzustand und
+ * ist als Vorschlag an qiblanco vermerkt — nicht hier einseitig vollzogen. */
+.ProductPageKakao h2[style],
+main h2[style] {
+  font-size: var(--cc-fs-6) !important;
+}
+.ProductPageKakao h3[style],
+main h3[style] {
+  font-size: var(--cc-fs-4) !important;
+}
+
+/* Warenkorb-Zaehler als Abzeichen statt als mitlaufender Text (s07).
+ * Restbefund nach dem Kopf-Umbau: bei 390px blieben +4px Ueberhang, per
+ * display:none isoliert auf das <span> mit der Stueckzahl im Cart-Link
+ * (Header.jsx:147 `Cart <span>{count}</span>`). qiblanco loest es genauso
+ * (app.css:462 `.cart-count { position: absolute }`) — der Zaehler kostet
+ * dort keine Zeilenbreite. Selektor ueber den Link, weil das span in der
+ * K1-fremden, aber unveraenderten Header-Komponente keine Klasse traegt. */
+.header-ctas a[href='/cart'] span {
+  position: absolute;
+  top: -2px;
+  right: -10px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* s07: auch das Abzeichen bleibt auf der Token-Skala — ein freier 11px-Wert
+   * waere genau die Sorte Ausnahme, die diese Schicht abschaffen soll. */
+  font-size: var(--cc-fs-1);
+  line-height: 1;
+  border-radius: var(--cc-radius-rund);
+  background: var(--cc-gold);
+  color: var(--cc-dunkel);
+}

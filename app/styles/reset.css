@@ -23,7 +23,8 @@ p {
 }
 
 h1 {
-  font-size: 1.6rem;
+  /* s07: auf die Token-Skala gezogen (war freier Wert 1.6rem) */
+  font-size: var(--cc-fs-4, 1.6rem);
   font-weight: 700;
   line-height: 1.4;
   margin-bottom: 2rem;
@@ -31,7 +32,8 @@ h1 {
 }
 
 h2 {
-  font-size: 1.2rem;
+  /* s07: auf die Token-Skala gezogen (war freier Wert 1.2rem) */
+  font-size: var(--cc-fs-3, 1.2rem);
   font-weight: 700;
   line-height: 1.4;
   margin-bottom: 1rem;

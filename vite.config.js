@@ -3,9 +3,14 @@ import {defineConfig} from 'vite';
 import {hydrogen} from '@shopify/hydrogen/vite';
 import {oxygen} from '@shopify/mini-oxygen/vite';
 import {reactRouter} from '@react-router/dev/vite';
+// Stack-Angleichung fuer die geteilten Kakao-Seiten (ADR 0056): sie sind in
+// Tailwind-4-Utilities gebaut (`text-6xl!`, `flex`, `mb-[0px]!`). Der Plugin
+// gehoert UM die geteilten Dateien herum, nicht IN sie hinein -- jede
+// Aenderung in einer K1-Datei waere eine Klassen-Verletzung.
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  plugins: [hydrogen(), oxygen(), reactRouter()],
+  plugins: [hydrogen(), oxygen(), reactRouter(), tailwindcss()],
   resolve: {
     alias: {
       // Vite's native tsconfig path resolver does not cover JavaScript

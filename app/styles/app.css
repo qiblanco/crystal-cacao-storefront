@@ -9,7 +9,10 @@
 }
 
 img {
-  border-radius: 4px;
+  /* s07: EIN Bild-Radius-Token statt eines freien Werts. Der Token steht in
+   * kakao-seiten.css :root; der Fallback haelt das Geruest heil, falls die
+   * Token-Schicht einmal nicht geladen wird. */
+  border-radius: var(--cc-radius-bild, 4px);
 }
 
 /*
@@ -84,14 +87,30 @@ img {
   }
 }
 
+/*
+ * DREI-ZONEN-SCHUBLADE — 2026-08-22, Job ...warenkorb-doppelscroller-sronly-fehlalarm.
+ * Sinngemaess uebernommen aus dem qiblanco-Repair 20260820 (PR #234), NICHT kopiert:
+ * crystals Warenkorb ist eine eigene Datei mit eigenem Aufbau.
+ *
+ * `aside` wird zur Flex-Spalte und beschneidet sich selbst. Damit traegt der
+ * Container die Hoehe, und die Zonen darin teilen sie auf, statt dass jede Zone
+ * ihre Hoehe von Hand deckelt.
+ */
 aside {
   background: var(--color-light);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+  /* 100vh als Rueckfall zuerst, 100dvh gewinnt wo es der Browser kennt: auf
+   * Mobilgeraeten schrumpft die sichtbare Flaeche um die Browserleiste, und
+   * 100vh schoebe den Kaufknopf genau darunter. */
   height: 100vh;
+  height: 100dvh;
   width: min(var(--aside-width), 100vw);
   position: fixed;
   right: calc(-1 * var(--aside-width));
   top: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   transition: transform 200ms ease-in-out;
 }
 
@@ -125,8 +144,81 @@ aside header h2 {
   margin-top: 0;
 }
 
+/*
+ * ANGLEICHUNG an die uebernommene Aside.jsx (K1, ADR 0056) — 2026-08-22, s06.
+ * Die geteilte Fassung schiebt den <header> IN das <main>: aus
+ * <aside><header/><main>{children}</main></aside> wird
+ * <aside><main><header/>{children}</main></aside>. Ein Rand auf `main` legte
+ * sich damit UM den Kopf der Schublade und schnitte seine Trennlinie ein.
+ * Deshalb traegt der Rand jetzt der Inhalt, nicht der Container.
+ *
+ * Die Aenderung steht bewusst HIER, in einer crystal-eigenen Datei, und nicht
+ * in Aside.jsx: eine Aenderung in einer K1-Datei waere eine Klassen-Verletzung
+ * und machte die Drift-Wache dauerhaft rot ("um die Datei herum, nicht in sie
+ * hinein").
+ *
+ * ABWEICHUNG VON DER VORLAGE, ausdruecklich: qiblanco setzt hier
+ * `overflow: scroll` — das erzwingt eine Bildlaufleiste auch ohne Ueberlauf und
+ * steht woertlich auf der Prueflatte dieses Auftrags ("kein overflow:scroll wo
+ * overflow:auto gehoert"). Uebernommen wird `auto`. Einen benannten Fehler
+ * mitzukopieren, nur weil er in der Vorlage steht, waere das Gegenteil von
+ * Uebertragung.
+ *
+ * NACHTRAG 2026-08-22 (Doppelscroller-Job): `overflow: auto` war die halbe
+ * Korrektur. `main` blieb damit ein ZWEITER Scroll-Container neben
+ * `.cart-main` — zwei geschachtelte Scroller greifen bei mehreren Artikeln
+ * ineinander (der innere faengt die Geste, der aeussere scrollt nicht mit).
+ * `main` gibt das Scrollen jetzt vollstaendig ab und beschneidet nur noch.
+ *
+ * ENTFERNT: `max-height: 100vh`. Das war ein Symptomdeckel derselben Wurzel,
+ * die der qiblanco-Repair benannt hat — ein Flex-Kind traegt per Default
+ * `min-height: auto` und weigert sich, unter seinen Inhalt zu schrumpfen. Wer
+ * das nicht weiss, deckelt die Hoehe von Hand. Behoben wird die Ursache
+ * (`min-height: 0`), nicht das Symptom; der Deckel entfaellt ersatzlos.
+ */
 aside main {
-  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/*
+ * NUR DIE WARENKORB-SCHUBLADE gibt das Scrollen ab — und das ist der Grund fuer
+ * `:has()` statt einer eigenen Klasse. `<aside><main>` stammt aus Aside.jsx, und
+ * Aside.jsx ist K1 (ADR 0056): dort eine Klasse zu ergaenzen waere eine
+ * Klassen-Verletzung und machte die Drift-Wache dauerhaft rot. Also wird von
+ * aussen am Inhalt erkannt, um welche Schublade es geht — "um die Datei herum,
+ * nicht in sie hinein".
+ *
+ * Die anderen Schubladen (Suche, mobiles Menue) behalten ihren eigenen Scroller
+ * aus der Regel darueber; sie haben keinen ruhenden Fuss, den ein innerer
+ * Scroller freihalten muesste. Wer hier pauschal `overflow: hidden` setzt,
+ * macht die Suchergebnisse unscrollbar.
+ */
+aside main:has(.cart-main) {
+  overflow: hidden;
+}
+
+
+aside main > *:not(header) {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+/*
+ * ZONE 1 — der ruhende Kopf. `flex: 0 0 auto` seit 2026-08-22: er scrollt nicht
+ * mehr mit und schrumpft nicht, weil `main` das Scrollen abgegeben hat.
+ * `position: sticky` bleibt als Rueckfall fuer die uebrigen Aside-Varianten
+ * (Suche, mobiles Menue), deren `main` weiterhin selbst scrollt.
+ */
+aside main > header {
+  flex: 0 0 auto;
+  position: sticky;
+  top: 0;
+  background: inherit;
+  z-index: 1;
 }
 
 aside p {
@@ -267,10 +359,42 @@ button.reset:hover:not(:has(> *)) {
   display: flex;
   grid-gap: 1rem;
   margin-left: auto;
+  min-width: 0;   /* s07: darf schrumpfen, sonst schiebt es den Kopf auf */
+}
+
+/* s07 — HORIZONTALER OVERFLOW BEHOBEN (gemessen 2026-08-22).
+ * Befund: scrollWidth 449 bei Viewport 390 (+59px) und 787 bei 768 (+19px);
+ * ursaechlich isoliert per display:none war a[href="/cart"] ("Cart 0") im
+ * Kopf. Die Vorlage qiblanco.com hat den Fehler NICHT (scrollWidth == vw bei
+ * beiden Breiten) — er stammt aus dem Hydrogen-Standardgeruest, nicht aus der
+ * Uebertragung.
+ *
+ * URSACHE, nicht Symptom: `min-width: fit-content` verbot den Kopf-Elementen
+ * das Schrumpfen, ihre Eigenbreite summierte sich ueber den Viewport hinaus.
+ * Bewusst KEIN `overflow-x: hidden` auf einem Vorfahren — das haette den
+ * Ueberlauf nur unsichtbar gemacht und zugleich `position: sticky` im Kopf
+ * gebrochen. Der Zaehler wird stattdessen zum Abzeichen, genau wie bei
+ * qiblanco (dort app.css:462 `.cart-count { position: absolute }`) — damit
+ * kostet "Cart 0" keine Zeilenbreite mehr.
+ *
+ * Christians Prueflatte verlangt ausserdem "kein Element bei x=0 ohne
+ * Seitenabstand": der Kopf behaelt deshalb seinen Innenabstand. */
+.header {
+  max-width: 100%;
+  gap: 0.75rem;
 }
 
 .header-ctas > * {
-  min-width: fit-content;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.header-ctas a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;   /* WCAG 2.5.5 AAA, wie web-dach.yaml trefferflaeche */
+  white-space: nowrap;
 }
 
 /*
@@ -301,6 +425,11 @@ button.reset:hover:not(:has(> *)) {
 * components/Cart
 * --------------------------------------------------
 */
+/*
+ * Die unskopierten Regeln gelten weiter der /cart-SEITE. Der Auftrag vom
+ * 2026-08-22 gilt der Schublade; die Seite bleibt unveraendert, damit die
+ * Sprengweite so klein wie moeglich bleibt.
+ */
 .cart-main {
   height: 100%;
   max-height: calc(100vh - var(--cart-aside-summary-height));
@@ -310,6 +439,45 @@ button.reset:hover:not(:has(> *)) {
 
 .cart-main.with-discount {
   max-height: calc(100vh - var(--cart-aside-summary-height-with-discount));
+}
+
+/*
+ * ZONE 2+3 IN DER SCHUBLADE — 2026-08-22.
+ *
+ * `.cart-main` war der ZWEITE der beiden geschachtelten Scroll-Container
+ * (gemessen 390x844: `main` 241 px um `section.cart-main` 177 px). Beide
+ * Hoehendeckel — `height: 100%` und `max-height: calc(100vh - 250px)` — decken
+ * dieselbe Wurzel zu wie der Deckel auf `main`: `min-height: auto` auf dem
+ * Flex-Kind. Sie entfallen hier ersatzlos, weil die Ursache behoben ist.
+ *
+ * Warum ueberhaupt gescopt: `.cart-main` traegt auch die /cart-Seite, und dort
+ * waere ein innerer Scroller falsch. `aside .cart-main` gewinnt ueber die
+ * Spezifitaet, ohne die Seitenregel anzufassen.
+ */
+aside .cart-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: hidden;
+}
+
+/* Der Rabatt-Deckel deckte dieselbe Wurzel — in der Schublade ebenfalls hinfaellig. */
+aside .cart-main.with-discount {
+  max-height: none;
+}
+
+/*
+ * ZONE 2 — DIE SCROLLENDE MITTE. Der EINE Scroll-Container der Schublade.
+ * `.cart-details` steht seit jeher im DOM (CartMain.jsx), hatte aber nie eine
+ * Regel; deshalb scrollten die beiden Vorfahren an seiner Stelle.
+ */
+aside .cart-details {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .cart-line {
@@ -330,13 +498,30 @@ button.reset:hover:not(:has(> *)) {
   position: relative;
 }
 
+/*
+ * ZONE 3 — DER RUHENDE FUSS mit dem Kaufknopf. 2026-08-22 von
+ * `position: absolute; bottom: 0` auf ein statisches Flex-Kind umgestellt.
+ *
+ * WARUM DAS NOETIG WAR: absolut positioniert haengt der Fuss am `aside` (dem
+ * naechsten positionierten Vorfahren) und LIEGT UEBER der scrollenden Mitte.
+ * Solange die Mitte nur 241 px hoch war, fiel das nicht auf; sobald sie die
+ * Schublade fuellt, verschwaende die letzte Warenkorb-Zeile hinter dem Fuss.
+ * Als Flex-Geschwister beansprucht er seinen Platz, statt ihn zu ueberdecken —
+ * und die feste Breite `calc(--aside-width - 40px)`, die den absoluten Fuss
+ * von Hand an die Schublade anpasste, entfaellt damit ebenfalls ersatzlos.
+ *
+ * `env(safe-area-inset-bottom)` haelt den Knopf auf iPhones ueber dem
+ * Home-Indikator; `max()` sichert den Mindestabstand, wo es die Variable
+ * nicht gibt.
+ */
 .cart-summary-aside {
   background: white;
   border-top: 1px solid var(--color-dark);
-  bottom: 0;
   padding-top: 0.75rem;
-  position: absolute;
-  width: calc(var(--aside-width) - 40px);
+  position: static;
+  flex: 0 0 auto;
+  width: auto;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
 }
 
 .cart-line-quantity {

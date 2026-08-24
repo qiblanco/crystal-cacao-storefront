@@ -1,6 +1,7 @@
 import {useLoaderData, data} from 'react-router';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
+import {persistAttributionOnCartResult} from '~/lib/cart-attribution.server';
 
 /**
  * @type {Route.MetaFunction}
@@ -18,7 +19,7 @@ export const headers = ({actionHeaders}) => actionHeaders;
  * @param {Route.ActionArgs}
  */
 export async function action({request, context}) {
-  const {cart} = context;
+  const {cart, env} = context;
 
   const formData = await request.formData();
 
@@ -75,6 +76,13 @@ export async function action({request, context}) {
     default:
       throw new Error(`${action} cart action is not defined`);
   }
+
+  // CROSS-BOUNDARY-LINKAGE (ADR 0056): die Identitaets-Schluessel als
+  // Cart-Attribute festschreiben -- Shopify macht daraus die
+  // Order-note_attributes, aus denen das Backend stitcht. Genau dieser
+  // Schritt fehlte auf qiblanco fuer `_qpx_anon` (0/191 Orders, 90,6 %
+  // faelschlich "direct"). Consent-gegated in cart-attribution.server.js.
+  result = await persistAttributionOnCartResult({cart, request, env, result});
 
   const cartId = result?.cart?.id;
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();

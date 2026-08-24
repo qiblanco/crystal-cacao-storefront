@@ -1,4 +1,9 @@
 import {redirect} from 'react-router';
+import {
+  getAttributionCartAttributes,
+  getTrackedCheckoutUrl,
+  hasAttributionConsent,
+} from '~/lib/cart-attribution.server';
 
 /**
  * Automatically creates a new cart based on the URL and redirects straight to checkout.
@@ -20,7 +25,7 @@ import {redirect} from 'react-router';
  * @param {Route.LoaderArgs}
  */
 export async function loader({request, context, params}) {
-  const {cart} = context;
+  const {cart, env} = context;
   const {lines} = params;
   if (!lines) return redirect('/cart');
   const linesMap = lines.split(',').map((line) => {
@@ -40,10 +45,24 @@ export async function loader({request, context, params}) {
   const discount = searchParams.get('discount');
   const discountArray = discount ? [discount] : [];
 
+  // CROSS-BOUNDARY-LINKAGE (ADR 0056): die Identitaets-Schluessel muessen den
+  // Domainwechsel crystal-cacao.com -> checkout.qiblanco.com ueberleben. Sie
+  // reisen auf ZWEI Wegen, weil ein Weg allein je einen Fall verliert:
+  // als Cart-Attribut (wird zum Order-note_attribute, ueberlebt auch eine
+  // spaetere Kasse) UND als Query-Parameter an der checkoutUrl.
+  // Beides consent-gegated -- ohne Einwilligung reist nichts.
+  const hasMarketingConsent = hasAttributionConsent(request, env);
+  const attributionAttributes = hasMarketingConsent
+    ? getAttributionCartAttributes(request)
+    : [];
+
   // create a cart
   const result = await cart.create({
     lines: linesMap,
     discountCodes: discountArray,
+    ...(attributionAttributes.length
+      ? {attributes: attributionAttributes}
+      : {}),
   });
 
   const cartResult = result.cart;
@@ -59,7 +78,11 @@ export async function loader({request, context, params}) {
 
   // redirect to checkout
   if (cartResult.checkoutUrl) {
-    return redirect(cartResult.checkoutUrl, {headers});
+    const trackedCheckoutUrl = hasMarketingConsent
+      ? getTrackedCheckoutUrl(cartResult.checkoutUrl, request, env)
+      : cartResult.checkoutUrl;
+
+    return redirect(trackedCheckoutUrl, {headers});
   } else {
     throw new Error('No checkout URL found');
   }
