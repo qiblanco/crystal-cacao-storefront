@@ -397,6 +397,53 @@ button.reset:hover:not(:has(> *)) {
   white-space: nowrap;
 }
 
+/* FORTSCHREIBUNG des s07-Blocks (2026-08-24, Job kasse-knopf-englisch).
+ * BEFUND: die Uebersetzung "Cart" -> "Warenkorb" brachte den Overflow zurueck
+ * (body.scrollWidth 424 bei Viewport 390, origin/main hatte 390). Per Rueckbau
+ * einzelner Dateien isoliert: allein dieses eine Wort.
+ *
+ * URSACHE, nicht Symptom: s07 hatte die Kopfzeile schrumpfbar gemacht, aber die
+ * MARKE blieb starr — "Qi Blanco UG (haftungsbeschraenkt)" belegte gemessene
+ * 196px von 390px. Damit wurden die CTA-Boxen unter ihre Textbreite gequetscht
+ * (Warenkorb-Box 36px bei ~85px Textbedarf) und liefen wegen white-space:nowrap
+ * sichtbar aus. Der s07-Fix war faktisch auf die LAENGE DES ENGLISCHEN WORTES
+ * getunt und musste bei der ersten laengeren Uebersetzung brechen.
+ *
+ * FIX: die Marke darf schrumpfen und kuerzt mit Ellipse; die CTAs behalten ihre
+ * Breite. Damit verteilt der Kopf seinen Platz wieder selbst und passt ECHT in
+ * den Viewport — statt den Ueberlauf zu verstecken. Weiterhin BEWUSST kein
+ * `overflow-x: hidden` auf einem Vorfahren (bricht position: sticky, s07).
+ * Der volle Markenname bleibt ueber title= zugaenglich.
+ * min-width:0 ist Pflicht: ohne es greift text-overflow in Flex-Kindern nicht
+ * (implizites min-width:auto).
+ *
+ * Der Zaehler wird jetzt zum Abzeichen — das setzt die im s07-Kommentar
+ * dokumentierte, hier aber nie gebaute Absicht um (Schwester-Shop qiblanco:
+ * `.cart-count { position: absolute }`). */
+.header-marke {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.header-marke > strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-ctas {
+  flex-shrink: 0;
+}
+
+.header-ctas a .cart-count {
+  position: absolute;
+  top: 2px;
+  right: -2px;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
 /*
 * --------------------------------------------------
 * components/Footer

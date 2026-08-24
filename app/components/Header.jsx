@@ -10,7 +10,14 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
   return (
     <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
+      <NavLink
+        className="header-marke"
+        prefetch="intent"
+        to="/"
+        style={activeLinkStyle}
+        title={shop.name}
+        end
+      >
         <strong>{shop.name}</strong>
       </NavLink>
       <HeaderMenu
@@ -144,7 +151,7 @@ function CartBadge({count}) {
         });
       }}
     >
-      Warenkorb <span aria-label={`(Artikel: ${count})`}>{count}</span>
+      Warenkorb <span className="cart-count" aria-label={`(Artikel: ${count})`}>{count}</span>
     </a>
   );
 }
