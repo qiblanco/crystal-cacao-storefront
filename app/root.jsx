@@ -21,6 +21,24 @@ import {strictRegions} from '~/lib/consent-policy';
 import '@fontsource-variable/open-sans';
 
 /**
+ * Endpoint der COOKIELOSEN Basis-Ebene (qiblanco-qpx-basis.js).
+ *
+ * WARUM EINE KONSTANTE STATT NUR `env` (gemessen 2026-08-24, nicht vermutet):
+ * die qiblanco-Vorlage rendert das Basis-Skript ausschliesslich bei gesetztem
+ * `PUBLIC_QPX_BASIS_ENDPOINT`. Dieses Repo hat ZWEI Oxygen-Workflows, und der
+ * aktive (`oxygen-deployment-1000172095.yml`, `on: [push]`) ruft
+ * `npx shopify hydrogen deploy` OHNE `--env-file` — er injiziert also gar keine
+ * PUBLIC_*-Variablen. Byte-gleich uebernommen waere der Beacon hier STUMM:
+ * Build gruen, Seite laedt, Nenner tot. Exakt dieselbe Fehlerform, die
+ * `checkout-tracking.js` oben fuer `TRACKING_PRODUCTION_HOSTS` beschreibt —
+ * daher hier dieselbe Bauform: Konstante als Boden, `env` als Uebersteuerung.
+ *
+ * Der Wert ist am LIVE ausgelieferten qiblanco.com gemessen
+ * (`data-qpx-basis-endpoint`), nicht aus einer Konfigdatei abgeschrieben.
+ */
+const QPX_BASIS_ENDPOINT_DEFAULT = 'https://qpx.65-108-150-121.sslip.io/b';
+
+/**
  * This is important to avoid re-fetching root queries on sub-navigations
  * @type {ShouldRevalidateFunction}
  */
@@ -90,6 +108,12 @@ export async function loader(args) {
     consentStrictRegions: strictRegions(env).join(','),
     // First-Party-Pixel (qpx) — setzt _qpx_anon. Laedt nur mit Endpoint.
     qpxEndpoint: env.PUBLIC_QPX_ENDPOINT || '',
+    // Cookielose BASIS-Ebene — der NENNER fuer den Mess-Abdeckungsgrad.
+    // Setzt/liest nichts auf dem Endgeraet und fuehrt KEINEN Identitaets-
+    // Schluessel; deshalb bewusst NICHT hinter dem Consent-Gate, sondern nur
+    // hinter dem Produktions-Host-Gate (wie in der qiblanco-Vorlage).
+    qpxBasisEndpoint:
+      env.PUBLIC_QPX_BASIS_ENDPOINT || QPX_BASIS_ENDPOINT_DEFAULT,
     // Meta-Pixel: eigene Kennung fuer diese Domain, siehe MetaPixel.jsx.
     metaPixelId: env.PUBLIC_META_PIXEL_ID || '',
     // Hyros-Universal-Script: eigene Tag-Kennung, siehe qiblanco-tracker.js.
@@ -223,6 +247,20 @@ export function Layout({children}) {
               <script
                 src="/qiblanco-qpx-loader.js"
                 data-qpx-endpoint={data.qpxEndpoint}
+                nonce={nonce}
+                defer
+                suppressHydrationWarning
+              />
+            ) : null}
+            {data?.qpxBasisEndpoint ? (
+              // Cookielose Basis-Ebene: BEWUSST direkt (nicht über den
+              // Consent-Loader) — einwilligungsfrei, setzt nichts auf dem
+              // Endgerät. Sie ist der NENNER, gegen den die consent-gegatete
+              // Ebene gemessen wird; ohne sie ist der Abdeckungsgrad auf
+              // crystal-cacao.com baulich unmessbar.
+              <script
+                src="/qiblanco-qpx-basis.js"
+                data-qpx-basis-endpoint={data.qpxBasisEndpoint}
                 nonce={nonce}
                 defer
                 suppressHydrationWarning

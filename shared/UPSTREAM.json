@@ -145,6 +145,13 @@
       "sha256_upstream": "166c6e0d1e782837069cb778d288ec54c84595d9009f69059eceb2f75434ffb4",
       "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
       "grund": "Framework-Wurzel, nicht in der Import-Huelle der drei Routen. Sie gated ueber isQiblancoProductionHost die Drittskripte und den MetaPixel; crystal braucht hier eine EIGENE Fassung mit eigener Hostliste (ADR 0056 Festlegung 3). Eine byte-gleiche Uebernahme schaltet das Tracking auf crystal-cacao.com still aus."
+    },
+    {
+      "upstream": "public/qiblanco-qpx-basis.js",
+      "klasse": "K3",
+      "sha256_upstream": "89c11481c8bdbb5cecd94802372755b784f32b2a55de54f52c5eb51890169a07",
+      "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_basis_beacon.py",
+      "grund": "Cookielose Basis-Ebene (einwilligungsfrei, setzt nichts auf dem Endgeraet). Nicht in der Import-Huelle: public/-Assets werden per <script src> geladen, nicht importiert. Sie ist der NENNER, gegen den die consent-gegatete Ebene gemessen wird -- ohne sie ist der Abdeckungsgrad nicht schlecht, sondern unmessbar. crystal fuehrt sie BYTE-GLEICH zur Vorlage: eine eigene Fassung erzeugte zwei Nenner mit unterschiedlicher Semantik, und ein Quotient aus zwei verschiedenen Grundmengen ist eine Zahl, die es nicht gibt. Bewegt sich die Vorlage OBEN, ist der Nachzug hier faellig."
     }
   ]
 }
