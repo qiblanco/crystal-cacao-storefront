@@ -1,4 +1,5 @@
 import LazyImage from '../reusables/LazyImage';
+import {KAKAO_KENNZAHLEN} from '~/lib/kakao-zone';
 import {ActiveCampaignForm} from '../reusables/ActiveCampaignForm';
 
 export function Kakao() {
@@ -64,8 +65,8 @@ function Hero() {
           />
         </div>
         <h2 className="text-2xl">Crystal Cacao® - Bio</h2>
-        <div className="text-2xl font-bold text-[#eabb6e]!">5.0 ★★★★★</div>
-        <h3 className="text-2xl font-bold">Mehr als 1.000+ aktive Nutzer</h3>
+        <div className="text-2xl font-bold text-[#eabb6e]!">{KAKAO_KENNZAHLEN.bewertung} ★★★★★</div>
+        <h3 className="text-2xl font-bold">Mehr als {KAKAO_KENNZAHLEN.nutzer}+ aktive Nutzer</h3>
         <div className="text-lg text-[#4A4741]">
           Erfahre jetzt die Vorteile von Kristall Kakao
         </div>

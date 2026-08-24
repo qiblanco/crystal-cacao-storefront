@@ -1,157 +1,162 @@
 {
-  "schema_version": 2,
-  "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "89c242288a8742fdbc3864c7708d06fb46eb33ee",
-  "erzeugt_utc": "2026-08-22T13:35:59Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py",
-  "huelle": {
-    "wurzeln": [
-      "app/routes/pages.crystal-cacao.jsx",
-      "app/routes/products.crystal-cacao-awake.jsx",
-      "app/routes/products.crystal-cacao-create.jsx"
-    ],
-    "dateien_soll": 19,
-    "vollstaendigkeit": "streng"
+ "schema_version": 2,
+ "upstream_repo": "qiblanco/qiblanco-storefront",
+ "upstream_commit": "89c242288a8742fdbc3864c7708d06fb46eb33ee",
+ "erzeugt_utc": "2026-08-22T13:35:59Z",
+ "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py",
+ "huelle": {
+  "wurzeln": [
+   "app/routes/pages.crystal-cacao.jsx",
+   "app/routes/products.crystal-cacao-awake.jsx",
+   "app/routes/products.crystal-cacao-create.jsx"
+  ],
+  "dateien_soll": 19,
+  "vollstaendigkeit": "streng"
+ },
+ "dateien": [
+  {
+   "upstream": "app/components/AddToCartButton.jsx",
+   "klasse": "K1",
+   "sha256": "e45aeae8cd9cf5350cc6a1a9b7496f1ed66f29e04a4786e478b7a212b63b3d00"
   },
-  "dateien": [
-    {
-      "upstream": "app/components/AddToCartButton.jsx",
-      "klasse": "K1",
-      "sha256": "e45aeae8cd9cf5350cc6a1a9b7496f1ed66f29e04a4786e478b7a212b63b3d00"
-    },
-    {
-      "upstream": "app/components/Aside.jsx",
-      "klasse": "K1",
-      "sha256": "1a86c59f98d88c20464844c52f7566836d983b98110b9c33ff5e1c3ae12b9a87"
-    },
-    {
-      "upstream": "app/components/CacaoPriceDisplay.jsx",
-      "klasse": "K1",
-      "sha256": "f9545994679a506dbec4470ebb0b273b57501cfa1214d19eec4396e632bf473d"
-    },
-    {
-      "upstream": "app/components/CacaoProductForm.jsx",
-      "klasse": "K1",
-      "sha256": "2894761bbff053cfccc07abbdf6989f6e130955ec85c672e3b5efc0be2032fec"
-    },
-    {
-      "upstream": "app/components/ProductFAQ.jsx",
-      "klasse": "K1",
-      "sha256": "c63ceeb5925579daaded9e7afbcb74e3f38aed6482e90309c6d56a3772568bd2"
-    },
-    {
-      "upstream": "app/components/ProductImage.jsx",
-      "klasse": "K1",
-      "sha256": "e2b770bec62955e4e171882e9befc893540cbb78dafc4423040d2e8d3c2138c4"
-    },
-    {
-      "upstream": "app/components/ProductImageList.jsx",
-      "klasse": "K1",
-      "sha256": "b1fea10cf0cfc52a01201fecfb8b4faa852d0b5e45b6d98580a16683a8bb25fd"
-    },
-    {
-      "upstream": "app/components/product-pages/Awake.jsx",
-      "klasse": "K1",
-      "sha256": "69d298af4ee122f934122295dd7a38457260c5de4d4146f13116c11bbca72876"
-    },
-    {
-      "upstream": "app/components/product-pages/Create.jsx",
-      "klasse": "K1",
-      "sha256": "02ec973e6292073d5d95caf7ea70c6b56269e0e9b69838ad2e6a0e8412452667"
-    },
-    {
-      "upstream": "app/components/product-pages/Kakao.jsx",
-      "klasse": "K1",
-      "sha256": "89ded079efec865220c824a7dd7d7116c053c53607613e055ba233b558c7b2d2"
-    },
-    {
-      "upstream": "app/components/reusables/ActiveCampaignForm.jsx",
-      "klasse": "K1",
-      "sha256": "9528e49a582ce876b5238398a1c696854090edec1b264495fd426b2401ef9798"
-    },
-    {
-      "upstream": "app/components/reusables/LazyImage.jsx",
-      "klasse": "K1",
-      "sha256": "3b4a94491ee3d0a7f0df854ac09fa59eaf1565ec73d2a0e3338e6899fa6c4280"
-    },
-    {
-      "upstream": "app/data/product-faqs.js",
-      "klasse": "K1",
-      "sha256": "9fe9319d6b376d02a07f379e369286c145da97fd14015b3c2544078b81a6dc24"
-    },
-    {
-      "upstream": "app/lib/cart-display-pricing.js",
-      "klasse": "K1",
-      "sha256": "8c66c65b2fe9009f239e2baaaffb57fcf16e8eace0d47e087845133a4aeabf1d"
-    },
-    {
-      "upstream": "app/lib/markt-pricing.js",
-      "klasse": "K1",
-      "sha256": "e121602b1b32316f790594452d22e9f4350bb4d62547ce4ca96f0ef15889a9d3"
-    },
-    {
-      "upstream": "app/lib/redirect.js",
-      "klasse": "K2",
-      "sha256_upstream": "6fa1643ad84aa2f8625b1e3847a1b1247c29ad2690352dc3d91406583c009a62",
-      "sha256_lokal": "b926613a4c069e683df1a851f7e226fa3b0a524a5921a32fd368cc66d9d79d4b",
-      "abweichung_grund": "Byte-Gleichheit ist baulich unmoeglich: Zeile 1 importiert `redirect` aus @shopify/remix-oxygen; der Ziel-Major @shopify/hydrogen 2026.4 hat dieses Paket entfernt und crystal-cacao-storefront fuehrt es nicht in dependencies. Der Hersteller nennt den Ersatz woertlich (packages/hydrogen/CHANGELOG.md 2025.7.0): `redirect` ist aus 'react-router' zu importieren. Aufgehoben ist allein die Gleichheit der beiden Seiten -- beide Fassungen bleiben einzeln gepinnt."
-    },
-    {
-      "upstream": "app/routes/pages.crystal-cacao.jsx",
-      "klasse": "K1",
-      "sha256": "740271c44a4fd7f1b7ef7f6d24e5247f84819bb310a0585fd71f629b23d924bd"
-    },
-    {
-      "upstream": "app/routes/products.crystal-cacao-awake.jsx",
-      "klasse": "K1",
-      "sha256": "2c3a3d9f2c7d9112f92680266254a6e84fd7dbab3c1d4d1f60abd21c8ed76a7c"
-    },
-    {
-      "upstream": "app/routes/products.crystal-cacao-create.jsx",
-      "klasse": "K1",
-      "sha256": "fa80977ee20b97454874c67fa27799a4967361039223689dcec4cb4ab9abb510"
-    },
-    {
-      "upstream": "app/components/MetaPixel.jsx",
-      "klasse": "K3",
-      "sha256_upstream": "d11725b3a4e11899ca09a9d66a13c86764fd9045c17b3812a1f43e93a696f5ad",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
-      "grund": "Consent-gegateter Browser-Pixel, nicht in der Huelle. crystal baut ihn eigenstaendig; die Einwilligungs-Logik haengt an der Region und am Host, nicht am Seiteninhalt."
-    },
-    {
-      "upstream": "app/lib/cart-attribution.server.js",
-      "klasse": "K3",
-      "sha256_upstream": "8e3bf5f5d8767a8512fb84d102d3b9aaf41ef87003b2450f8fad5f03007773d0",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
-      "grund": "Serverseitige Attributionsnaht (Order-note_attribute), nicht in der Huelle. Sie gehoert zur Infrastruktur der jeweiligen Storefront, nicht zum geteilten Seitenbaustein."
-    },
-    {
-      "upstream": "app/lib/checkout-tracking.js",
-      "klasse": "K3",
-      "sha256_upstream": "9bc717e484a7bf98a7fb75b08f5a9613a5a1a74002ab83ba2e2adc1fe39ed37f",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
-      "grund": "Traegt TRACKING_PRODUCTION_HOSTS und TRACKING_COOKIE_NAMES. Nicht in der Huelle (haengt an den cart-Routen). crystal fuehrt eine eigenstaendige Naht; die Allowlist ist der Ort der _qpx_anon-Fehlerklasse und darf nicht blind kopiert werden, weil die Hostliste dort eine andere ist."
-    },
-    {
-      "upstream": "app/lib/context.js",
-      "klasse": "K3",
-      "sha256_upstream": "a27251d0913f86f082b2c6b9c23a9efabd2a5f8fa2cd0a37dfd665bbf29c6c14",
-      "enforcer": "CC_BASIS=<crystal-Origin> python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_cacao_seiten.py  # vergleicht den GERENDERTEN Hauptpreis beider Shops",
-      "grund": "Markt- und Sprachkontext der Storefront (i18n language/country, cart buyerIdentity). Nicht in der Import-Huelle der drei Routen, bestimmt aber ueber @inContext (app/lib/fragments.js) JEDEN Preis und jede Waehrung, die sie rendern. crystal fuehrt eine EIGENE Fassung: sie benutzt dieselbe K1-Funktion resolveCountry aus markt-pricing.js wie qiblanco, kann aber nicht byte-gleich sein (anderer Hydrogen-Major, createHydrogenRouterContext statt createAppLoadContext). Bewegt sich die Markt-Logik OBEN, ist der Nachzug hier faellig -- sonst laufen die Preise der beiden Shops auseinander, ohne dass eine andere Achse das sieht (Belegfall s09 2026-08-22: USD statt EUR bei gruener Wache)."
-    },
-    {
-      "upstream": "app/root.jsx",
-      "klasse": "K3",
-      "sha256_upstream": "166c6e0d1e782837069cb778d288ec54c84595d9009f69059eceb2f75434ffb4",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
-      "grund": "Framework-Wurzel, nicht in der Import-Huelle der drei Routen. Sie gated ueber isQiblancoProductionHost die Drittskripte und den MetaPixel; crystal braucht hier eine EIGENE Fassung mit eigener Hostliste (ADR 0056 Festlegung 3). Eine byte-gleiche Uebernahme schaltet das Tracking auf crystal-cacao.com still aus."
-    },
-    {
-      "upstream": "public/qiblanco-qpx-basis.js",
-      "klasse": "K3",
-      "sha256_upstream": "89c11481c8bdbb5cecd94802372755b784f32b2a55de54f52c5eb51890169a07",
-      "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_basis_beacon.py",
-      "grund": "Cookielose Basis-Ebene (einwilligungsfrei, setzt nichts auf dem Endgeraet). Nicht in der Import-Huelle: public/-Assets werden per <script src> geladen, nicht importiert. Sie ist der NENNER, gegen den die consent-gegatete Ebene gemessen wird -- ohne sie ist der Abdeckungsgrad nicht schlecht, sondern unmessbar. crystal fuehrt sie BYTE-GLEICH zur Vorlage: eine eigene Fassung erzeugte zwei Nenner mit unterschiedlicher Semantik, und ein Quotient aus zwei verschiedenen Grundmengen ist eine Zahl, die es nicht gibt. Bewegt sich die Vorlage OBEN, ist der Nachzug hier faellig."
-    }
-  ]
+  {
+   "upstream": "app/components/Aside.jsx",
+   "klasse": "K1",
+   "sha256": "1a86c59f98d88c20464844c52f7566836d983b98110b9c33ff5e1c3ae12b9a87"
+  },
+  {
+   "upstream": "app/components/CacaoPriceDisplay.jsx",
+   "klasse": "K1",
+   "sha256": "f9545994679a506dbec4470ebb0b273b57501cfa1214d19eec4396e632bf473d"
+  },
+  {
+   "upstream": "app/components/CacaoProductForm.jsx",
+   "klasse": "K1",
+   "sha256": "2894761bbff053cfccc07abbdf6989f6e130955ec85c672e3b5efc0be2032fec"
+  },
+  {
+   "upstream": "app/components/MetaPixel.jsx",
+   "klasse": "K3",
+   "sha256_upstream": "d11725b3a4e11899ca09a9d66a13c86764fd9045c17b3812a1f43e93a696f5ad",
+   "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
+   "grund": "Consent-gegateter Browser-Pixel, nicht in der Huelle. crystal baut ihn eigenstaendig; die Einwilligungs-Logik haengt an der Region und am Host, nicht am Seiteninhalt."
+  },
+  {
+   "upstream": "app/components/ProductFAQ.jsx",
+   "klasse": "K1",
+   "sha256": "c63ceeb5925579daaded9e7afbcb74e3f38aed6482e90309c6d56a3772568bd2"
+  },
+  {
+   "upstream": "app/components/ProductImage.jsx",
+   "klasse": "K1",
+   "sha256": "e2b770bec62955e4e171882e9befc893540cbb78dafc4423040d2e8d3c2138c4"
+  },
+  {
+   "upstream": "app/components/ProductImageList.jsx",
+   "klasse": "K1",
+   "sha256": "b1fea10cf0cfc52a01201fecfb8b4faa852d0b5e45b6d98580a16683a8bb25fd"
+  },
+  {
+   "upstream": "app/components/product-pages/Awake.jsx",
+   "klasse": "K1",
+   "sha256": "69d298af4ee122f934122295dd7a38457260c5de4d4146f13116c11bbca72876"
+  },
+  {
+   "upstream": "app/components/product-pages/Create.jsx",
+   "klasse": "K1",
+   "sha256": "02ec973e6292073d5d95caf7ea70c6b56269e0e9b69838ad2e6a0e8412452667"
+  },
+  {
+   "upstream": "app/components/product-pages/Kakao.jsx",
+   "klasse": "K1",
+   "sha256": "89ded079efec865220c824a7dd7d7116c053c53607613e055ba233b558c7b2d2"
+  },
+  {
+   "upstream": "app/components/reusables/ActiveCampaignForm.jsx",
+   "klasse": "K1",
+   "sha256": "9528e49a582ce876b5238398a1c696854090edec1b264495fd426b2401ef9798"
+  },
+  {
+   "upstream": "app/components/reusables/LazyImage.jsx",
+   "klasse": "K1",
+   "sha256": "3b4a94491ee3d0a7f0df854ac09fa59eaf1565ec73d2a0e3338e6899fa6c4280"
+  },
+  {
+   "upstream": "app/data/product-faqs.js",
+   "klasse": "K1",
+   "sha256": "9fe9319d6b376d02a07f379e369286c145da97fd14015b3c2544078b81a6dc24"
+  },
+  {
+   "upstream": "app/lib/cart-attribution.server.js",
+   "klasse": "K3",
+   "sha256_upstream": "8e3bf5f5d8767a8512fb84d102d3b9aaf41ef87003b2450f8fad5f03007773d0",
+   "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
+   "grund": "Serverseitige Attributionsnaht (Order-note_attribute), nicht in der Huelle. Sie gehoert zur Infrastruktur der jeweiligen Storefront, nicht zum geteilten Seitenbaustein."
+  },
+  {
+   "upstream": "app/lib/cart-display-pricing.js",
+   "klasse": "K1",
+   "sha256": "8c66c65b2fe9009f239e2baaaffb57fcf16e8eace0d47e087845133a4aeabf1d"
+  },
+  {
+   "upstream": "app/lib/checkout-tracking.js",
+   "klasse": "K3",
+   "sha256_upstream": "9bc717e484a7bf98a7fb75b08f5a9613a5a1a74002ab83ba2e2adc1fe39ed37f",
+   "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
+   "grund": "Traegt TRACKING_PRODUCTION_HOSTS und TRACKING_COOKIE_NAMES. Nicht in der Huelle (haengt an den cart-Routen). crystal fuehrt eine eigenstaendige Naht; die Allowlist ist der Ort der _qpx_anon-Fehlerklasse und darf nicht blind kopiert werden, weil die Hostliste dort eine andere ist."
+  },
+  {
+   "upstream": "app/lib/context.js",
+   "klasse": "K3",
+   "sha256_upstream": "a27251d0913f86f082b2c6b9c23a9efabd2a5f8fa2cd0a37dfd665bbf29c6c14",
+   "enforcer": "CC_BASIS=<crystal-Origin> python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_cacao_seiten.py  # vergleicht den GERENDERTEN Hauptpreis beider Shops",
+   "grund": "Markt- und Sprachkontext der Storefront (i18n language/country, cart buyerIdentity). Nicht in der Import-Huelle der drei Routen, bestimmt aber ueber @inContext (app/lib/fragments.js) JEDEN Preis und jede Waehrung, die sie rendern. crystal fuehrt eine EIGENE Fassung: sie benutzt dieselbe K1-Funktion resolveCountry aus markt-pricing.js wie qiblanco, kann aber nicht byte-gleich sein (anderer Hydrogen-Major, createHydrogenRouterContext statt createAppLoadContext). Bewegt sich die Markt-Logik OBEN, ist der Nachzug hier faellig -- sonst laufen die Preise der beiden Shops auseinander, ohne dass eine andere Achse das sieht (Belegfall s09 2026-08-22: USD statt EUR bei gruener Wache)."
+  },
+  {
+   "upstream": "app/lib/kakao-zone.js",
+   "klasse": "K1",
+   "sha256": "6cff87887abedcefcd5d1d6320b0253a98b9626f2619c0bef7f384d646e71c21"
+  },
+  {
+   "upstream": "app/lib/markt-pricing.js",
+   "klasse": "K1",
+   "sha256": "e121602b1b32316f790594452d22e9f4350bb4d62547ce4ca96f0ef15889a9d3"
+  },
+  {
+   "upstream": "app/lib/redirect.js",
+   "klasse": "K2",
+   "sha256_upstream": "6fa1643ad84aa2f8625b1e3847a1b1247c29ad2690352dc3d91406583c009a62",
+   "sha256_lokal": "b926613a4c069e683df1a851f7e226fa3b0a524a5921a32fd368cc66d9d79d4b",
+   "abweichung_grund": "Byte-Gleichheit ist baulich unmoeglich: Zeile 1 importiert `redirect` aus @shopify/remix-oxygen; der Ziel-Major @shopify/hydrogen 2026.4 hat dieses Paket entfernt und crystal-cacao-storefront fuehrt es nicht in dependencies. Der Hersteller nennt den Ersatz woertlich (packages/hydrogen/CHANGELOG.md 2025.7.0): `redirect` ist aus 'react-router' zu importieren. Aufgehoben ist allein die Gleichheit der beiden Seiten -- beide Fassungen bleiben einzeln gepinnt."
+  },
+  {
+   "upstream": "app/root.jsx",
+   "klasse": "K3",
+   "sha256_upstream": "166c6e0d1e782837069cb778d288ec54c84595d9009f69059eceb2f75434ffb4",
+   "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
+   "grund": "Framework-Wurzel, nicht in der Import-Huelle der drei Routen. Sie gated ueber isQiblancoProductionHost die Drittskripte und den MetaPixel; crystal braucht hier eine EIGENE Fassung mit eigener Hostliste (ADR 0056 Festlegung 3). Eine byte-gleiche Uebernahme schaltet das Tracking auf crystal-cacao.com still aus."
+  },
+  {
+   "upstream": "app/routes/pages.crystal-cacao.jsx",
+   "klasse": "K1",
+   "sha256": "740271c44a4fd7f1b7ef7f6d24e5247f84819bb310a0585fd71f629b23d924bd"
+  },
+  {
+   "upstream": "app/routes/products.crystal-cacao-awake.jsx",
+   "klasse": "K1",
+   "sha256": "2c3a3d9f2c7d9112f92680266254a6e84fd7dbab3c1d4d1f60abd21c8ed76a7c"
+  },
+  {
+   "upstream": "app/routes/products.crystal-cacao-create.jsx",
+   "klasse": "K1",
+   "sha256": "fa80977ee20b97454874c67fa27799a4967361039223689dcec4cb4ab9abb510"
+  },
+  {
+   "upstream": "public/qiblanco-qpx-basis.js",
+   "klasse": "K3",
+   "sha256_upstream": "89c11481c8bdbb5cecd94802372755b784f32b2a55de54f52c5eb51890169a07",
+   "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_basis_beacon.py",
+   "grund": "Cookielose Basis-Ebene (einwilligungsfrei, setzt nichts auf dem Endgeraet). Nicht in der Import-Huelle: public/-Assets werden per <script src> geladen, nicht importiert. Sie ist der NENNER, gegen den die consent-gegatete Ebene gemessen wird -- ohne sie ist der Abdeckungsgrad nicht schlecht, sondern unmessbar. crystal fuehrt sie BYTE-GLEICH zur Vorlage: eine eigene Fassung erzeugte zwei Nenner mit unterschiedlicher Semantik, und ein Quotient aus zwei verschiedenen Grundmengen ist eine Zahl, die es nicht gibt. Bewegt sich die Vorlage OBEN, ist der Nachzug hier faellig."
+  }
+ ]
 }
