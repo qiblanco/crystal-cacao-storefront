@@ -304,7 +304,7 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
-  let errorMessage = 'Unknown error';
+  let errorMessage = 'Unbekannter Fehler';
   let errorStatus = 500;
 
   if (isRouteErrorResponse(error)) {
@@ -316,7 +316,7 @@ export function ErrorBoundary() {
 
   return (
     <div className="route-error">
-      <h1>Oops</h1>
+      <h1>Da ist etwas schiefgelaufen</h1>
       <h2>{errorStatus}</h2>
       {errorMessage && (
         <fieldset>

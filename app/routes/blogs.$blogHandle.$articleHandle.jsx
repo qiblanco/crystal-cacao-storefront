@@ -6,7 +6,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.article.title ?? ''} article`}];
+  return [{title: `${data?.article.title ?? 'Beitrag'} | Qi Blanco UG (haftungsbeschränkt)`}];
 };
 
 /**
@@ -31,7 +31,7 @@ async function loadCriticalData({context, request, params}) {
   const {blogHandle, articleHandle} = params;
 
   if (!articleHandle || !blogHandle) {
-    throw new Response('Not found', {status: 404});
+    throw new Response('Beitrag nicht gefunden', {status: 404});
   }
 
   const [{blog}] = await Promise.all([

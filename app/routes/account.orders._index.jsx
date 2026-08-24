@@ -22,7 +22,7 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Orders'}];
+  return [{title: 'Bestellungen'}];
 };
 
 /**
@@ -47,7 +47,7 @@ export async function loader({request, context}) {
   });
 
   if (errors?.length || !data?.customer) {
-    throw Error('Customer orders not found');
+    throw Error('Bestellungen nicht gefunden');
   }
 
   return {customer: data.customer, filters};
@@ -96,18 +96,18 @@ function EmptyOrders({hasFilters = false}) {
     <div>
       {hasFilters ? (
         <>
-          <p>No orders found matching your search.</p>
+          <p>Zu deiner Suche gibt es keine Bestellungen.</p>
           <br />
           <p>
-            <Link to="/account/orders">Clear filters →</Link>
+            <Link to="/account/orders">Filter zurücksetzen →</Link>
           </p>
         </>
       ) : (
         <>
-          <p>You haven&apos;t placed any orders yet.</p>
+          <p>Du hast noch keine Bestellung aufgegeben.</p>
           <br />
           <p>
-            <Link to="/collections">Start Shopping →</Link>
+            <Link to="/collections">Jetzt einkaufen →</Link>
           </p>
         </>
       )}
@@ -153,25 +153,25 @@ function OrderSearchForm({currentFilters}) {
       ref={formRef}
       onSubmit={handleSubmit}
       className="order-search-form"
-      aria-label="Search orders"
+      aria-label="Bestellungen durchsuchen"
     >
       <fieldset className="order-search-fieldset">
-        <legend className="order-search-legend">Filter Orders</legend>
+        <legend className="order-search-legend">Bestellungen filtern</legend>
 
         <div className="order-search-inputs">
           <input
             type="search"
             name={ORDER_FILTER_FIELDS.NAME}
-            placeholder="Order #"
-            aria-label="Order number"
+            placeholder="Bestellnummer"
+            aria-label="Bestellnummer"
             defaultValue={currentFilters.name || ''}
             className="order-search-input"
           />
           <input
             type="search"
             name={ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER}
-            placeholder="Confirmation #"
-            aria-label="Confirmation number"
+            placeholder="Bestätigungsnummer"
+            aria-label="Bestätigungsnummer"
             defaultValue={currentFilters.confirmationNumber || ''}
             className="order-search-input"
           />
@@ -179,7 +179,7 @@ function OrderSearchForm({currentFilters}) {
 
         <div className="order-search-buttons">
           <button type="submit" disabled={isSearching}>
-            {isSearching ? 'Searching' : 'Search'}
+            {isSearching ? 'Wird gesucht' : 'Suchen'}
           </button>
           {hasFilters && (
             <button
@@ -210,14 +210,14 @@ function OrderItem({order}) {
         <Link to={`/account/orders/${btoa(order.id)}`}>
           <strong>#{order.number}</strong>
         </Link>
-        <p>{new Date(order.processedAt).toDateString()}</p>
+        <p>{new Date(order.processedAt).toLocaleDateString('de-DE')}</p>
         {order.confirmationNumber && (
-          <p>Confirmation: {order.confirmationNumber}</p>
+          <p>Bestätigungsnummer: {order.confirmationNumber}</p>
         )}
         <p>{order.financialStatus}</p>
         {fulfillmentStatus && <p>{fulfillmentStatus}</p>}
         <Money data={order.totalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
+        <Link to={`/account/orders/${btoa(order.id)}`}>Bestellung ansehen →</Link>
       </fieldset>
       <br />
     </>

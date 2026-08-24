@@ -6,7 +6,7 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Hydrogen | Blogs`}];
+  return [{title: `Magazin | Qi Blanco UG (haftungsbeschränkt)`}];
 };
 
 /**
@@ -60,7 +60,7 @@ export default function Blogs() {
 
   return (
     <div className="blogs">
-      <h1>Blogs</h1>
+      <h1>Magazin</h1>
       <div className="blogs-grid">
         <PaginatedResourceSection connection={blogs}>
           {({node: blog}) => (

@@ -3,6 +3,13 @@ import {getPaginationVariables, Image} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 
 /**
+ * @type {Route.MetaFunction}
+ */
+export const meta = () => {
+  return [{title: `Kollektionen | Qi Blanco UG (haftungsbeschränkt)`}];
+};
+
+/**
  * @param {Route.LoaderArgs} args
  */
 export async function loader(args) {
@@ -51,7 +58,7 @@ export default function Collections() {
 
   return (
     <div className="collections">
-      <h1>Collections</h1>
+      <h1>Kollektionen</h1>
       <PaginatedResourceSection
         connection={collections}
         resourcesClassName="collections-grid"

@@ -47,7 +47,7 @@ export function CartMain({layout, cart: originalCart}) {
   return (
     <section
       className={className}
-      aria-label={layout === 'page' ? 'Cart page' : 'Cart drawer'}
+      aria-label={layout === 'page' ? 'Warenkorb-Seite' : 'Warenkorb-Schublade'}
     >
       <CartEmpty hidden={linesCount} layout={layout} />
       <div className="cart-details">
@@ -103,12 +103,11 @@ function CartEmpty({hidden = false}) {
     <div hidden={hidden}>
       <br />
       <p>
-        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-        started!
+        Dein Warenkorb ist zurzeit leer!
       </p>
       <br />
       <Link to="/collections" onClick={close} prefetch="viewport">
-        Continue shopping →
+        Weiter einkaufen →
       </Link>
     </div>
   );

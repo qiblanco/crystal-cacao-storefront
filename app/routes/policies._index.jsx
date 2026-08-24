@@ -1,6 +1,13 @@
 import {useLoaderData, Link} from 'react-router';
 
 /**
+ * @type {Route.MetaFunction}
+ */
+export const meta = () => {
+  return [{title: `Rechtliche Hinweise | Qi Blanco UG (haftungsbeschränkt)`}];
+};
+
+/**
  * @param {Route.LoaderArgs}
  */
 export async function loader({context}) {
@@ -16,7 +23,7 @@ export async function loader({context}) {
   ].filter((policy) => policy != null);
 
   if (!policies.length) {
-    throw new Response('No policies found', {status: 404});
+    throw new Response('Keine rechtlichen Hinweise gefunden', {status: 404});
   }
 
   return {policies};
@@ -28,7 +35,7 @@ export default function Policies() {
 
   return (
     <div className="policies">
-      <h1>Policies</h1>
+      <h1>Rechtliche Hinweise</h1>
       <div>
         {policies.map((policy) => (
           <fieldset key={policy.id}>

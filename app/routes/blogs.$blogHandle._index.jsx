@@ -7,7 +7,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.blog.title ?? ''} blog`}];
+  return [{title: `${data?.blog.title ?? 'Magazin'} | Qi Blanco UG (haftungsbeschränkt)`}];
 };
 
 /**
@@ -34,7 +34,7 @@ async function loadCriticalData({context, request, params}) {
   });
 
   if (!params.blogHandle) {
-    throw new Response(`blog not found`, {status: 404});
+    throw new Response(`Magazin nicht gefunden`, {status: 404});
   }
 
   const [{blog}] = await Promise.all([
@@ -48,7 +48,7 @@ async function loadCriticalData({context, request, params}) {
   ]);
 
   if (!blog?.articles) {
-    throw new Response('Not found', {status: 404});
+    throw new Response('Nicht gefunden', {status: 404});
   }
 
   redirectIfHandleIsLocalized(request, {handle: params.blogHandle, data: blog});

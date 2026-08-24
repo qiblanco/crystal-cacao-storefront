@@ -5,7 +5,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.page.title ?? ''}`}];
+  return [{title: `${data?.page.title ?? 'Seite'} | Qi Blanco UG (haftungsbeschränkt)`}];
 };
 
 /**
@@ -28,7 +28,7 @@ export async function loader(args) {
  */
 async function loadCriticalData({context, request, params}) {
   if (!params.handle) {
-    throw new Error('Missing page handle');
+    throw new Error('Es wurde keine Seite angegeben');
   }
 
   const [{page}] = await Promise.all([
@@ -41,7 +41,7 @@ async function loadCriticalData({context, request, params}) {
   ]);
 
   if (!page) {
-    throw new Response('Not Found', {status: 404});
+    throw new Response('Seite nicht gefunden', {status: 404});
   }
 
   redirectIfHandleIsLocalized(request, {handle: params.handle, data: page});

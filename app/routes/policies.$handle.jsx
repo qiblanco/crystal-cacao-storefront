@@ -4,7 +4,7 @@ import {Link, useLoaderData} from 'react-router';
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.policy.title ?? ''}`}];
+  return [{title: `${data?.policy.title ?? 'Rechtliches'} | Qi Blanco UG (haftungsbeschränkt)`}];
 };
 
 /**
@@ -12,7 +12,7 @@ export const meta = ({data}) => {
  */
 export async function loader({params, context}) {
   if (!params.handle) {
-    throw new Response('No handle was passed in', {status: 404});
+    throw new Response('Es wurde keine Seite angegeben', {status: 404});
   }
 
   const policyName = params.handle.replace(/-([a-z])/g, (_, m1) =>
@@ -33,7 +33,7 @@ export async function loader({params, context}) {
   const policy = data.shop?.[policyName];
 
   if (!policy) {
-    throw new Response('Could not find the policy', {status: 404});
+    throw new Response('Dieser rechtliche Hinweis wurde nicht gefunden', {status: 404});
   }
 
   return {policy};
@@ -48,7 +48,7 @@ export default function Policy() {
       <br />
       <br />
       <div>
-        <Link to="/policies">← Back to Policies</Link>
+        <Link to="/policies">← Zurück zur Übersicht</Link>
       </div>
       <br />
       <h1>{policy.title}</h1>

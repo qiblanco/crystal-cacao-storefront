@@ -10,7 +10,14 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
   return (
     <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
+      <NavLink
+        className="header-marke"
+        prefetch="intent"
+        to="/"
+        style={activeLinkStyle}
+        title={shop.name}
+        end
+      >
         <strong>{shop.name}</strong>
       </NavLink>
       <HeaderMenu
@@ -90,9 +97,9 @@ function HeaderCtas({isLoggedIn, cart}) {
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
       <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense fallback="Sign in">
-          <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
+        <Suspense fallback="Anmelden">
+          <Await resolve={isLoggedIn} errorElement="Anmelden">
+            {(isLoggedIn) => (isLoggedIn ? 'Mein Konto' : 'Anmelden')}
           </Await>
         </Suspense>
       </NavLink>
@@ -118,7 +125,7 @@ function SearchToggle() {
   const {open} = useAside();
   return (
     <button className="reset" onClick={() => open('search')}>
-      Search
+      Suchen
     </button>
   );
 }
@@ -144,7 +151,7 @@ function CartBadge({count}) {
         });
       }}
     >
-      Cart <span aria-label={`(items: ${count})`}>{count}</span>
+      Warenkorb <span className="cart-count" aria-label={`(Artikel: ${count})`}>{count}</span>
     </a>
   );
 }
@@ -175,7 +182,7 @@ const FALLBACK_HEADER_MENU = {
       id: 'gid://shopify/MenuItem/461609500728',
       resourceId: null,
       tags: [],
-      title: 'Collections',
+      title: 'Kollektionen',
       type: 'HTTP',
       url: '/collections',
       items: [],
@@ -184,7 +191,7 @@ const FALLBACK_HEADER_MENU = {
       id: 'gid://shopify/MenuItem/461609533496',
       resourceId: null,
       tags: [],
-      title: 'Blog',
+      title: 'Magazin',
       type: 'HTTP',
       url: '/blogs/journal',
       items: [],
@@ -193,7 +200,7 @@ const FALLBACK_HEADER_MENU = {
       id: 'gid://shopify/MenuItem/461609566264',
       resourceId: null,
       tags: [],
-      title: 'Policies',
+      title: 'Rechtliches',
       type: 'HTTP',
       url: '/policies',
       items: [],
@@ -202,7 +209,7 @@ const FALLBACK_HEADER_MENU = {
       id: 'gid://shopify/MenuItem/461609599032',
       resourceId: 'gid://shopify/Page/92591030328',
       tags: [],
-      title: 'About',
+      title: 'Über uns',
       type: 'PAGE',
       url: '/pages/about',
       items: [],

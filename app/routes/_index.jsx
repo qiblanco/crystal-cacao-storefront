@@ -8,7 +8,7 @@ import {MockShopNotice} from '~/components/MockShopNotice';
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Hydrogen | Home'}];
+  return [{title: 'Crystal Cacao® – Bio-Kakao | Qi Blanco UG (haftungsbeschränkt)'}];
 };
 
 /**
@@ -111,8 +111,8 @@ function RecommendedProducts({products}) {
       className="recommended-products"
       aria-labelledby="recommended-products"
     >
-      <h2 id="recommended-products">Recommended Products</h2>
-      <Suspense fallback={<div>Loading...</div>}>
+      <h2 id="recommended-products">Unsere Empfehlungen</h2>
+      <Suspense fallback={<div>Wird geladen …</div>}>
         <Await resolve={products}>
           {(response) => (
             <div className="recommended-products-grid">

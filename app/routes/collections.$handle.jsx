@@ -8,7 +8,7 @@ import {ProductItem} from '~/components/ProductItem';
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+  return [{title: `${data?.collection.title ?? 'Kollektion'} | Qi Blanco UG (haftungsbeschränkt)`}];
 };
 
 /**
@@ -48,7 +48,7 @@ async function loadCriticalData({context, params, request}) {
   ]);
 
   if (!collection) {
-    throw new Response(`Collection ${handle} not found`, {
+    throw new Response(`Kollektion ${handle} nicht gefunden`, {
       status: 404,
     });
   }

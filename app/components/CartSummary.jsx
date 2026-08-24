@@ -16,9 +16,9 @@ export function CartSummary({cart, layout}) {
 
   return (
     <div aria-labelledby={summaryId} className={className}>
-      <h4 id={summaryId}>Totals</h4>
+      <h4 id={summaryId}>Summe</h4>
       <dl role="group" className="cart-subtotal">
-        <dt>Subtotal</dt>
+        <dt>Zwischensumme</dt>
         <dd>
           {cart?.cost?.subtotalAmount?.amount ? (
             <Money data={cart?.cost?.subtotalAmount} />
@@ -51,7 +51,7 @@ function CartCheckoutActions({checkoutUrl}) {
   return (
     <div>
       <a href={checkoutUrl} target="_self">
-        <p>Continue to Checkout &rarr;</p>
+        <p>Jetzt sicher zur Kasse</p>
       </a>
       <br />
     </div>
@@ -76,11 +76,11 @@ function CartDiscounts({
       ?.map(({code}) => code) || [];
 
   return (
-    <section aria-label="Discounts">
+    <section aria-label="Rabatte">
       {/* Have existing discount, display it with a remove option */}
       <dl hidden={!codes.length}>
         <div>
-          <dt id={discountsHeadingId}>Discounts</dt>
+          <dt id={discountsHeadingId}>Rabatte</dt>
           <UpdateDiscountForm>
             <div
               className="cart-discount"
@@ -89,8 +89,8 @@ function CartDiscounts({
             >
               <code>{codes?.join(', ')}</code>
               &nbsp;
-              <button type="submit" aria-label="Remove discount">
-                Remove
+              <button type="submit" aria-label="Rabattcode entfernen">
+                Entfernen
               </button>
             </div>
           </UpdateDiscountForm>
@@ -101,17 +101,17 @@ function CartDiscounts({
       <UpdateDiscountForm discountCodes={codes}>
         <div>
           <label htmlFor={discountCodeInputId} className="sr-only">
-            Discount code
+            Rabattcode
           </label>
           <input
             id={discountCodeInputId}
             type="text"
             name="discountCode"
-            placeholder="Discount code"
+            placeholder="Rabattcode"
           />
           &nbsp;
-          <button type="submit" aria-label="Apply discount code">
-            Apply
+          <button type="submit" aria-label="Rabattcode einlösen">
+            Einlösen
           </button>
         </div>
       </UpdateDiscountForm>
@@ -194,10 +194,10 @@ function CartGiftCard({giftCardCodes, giftCardHeadingId, giftCardInputId}) {
   };
 
   return (
-    <section aria-label="Gift cards">
+    <section aria-label="Geschenkgutscheine">
       {giftCardCodes && giftCardCodes.length > 0 && (
         <dl>
-          <dt id={giftCardHeadingId}>Applied Gift Card(s)</dt>
+          <dt id={giftCardHeadingId}>Eingelöste Geschenkgutscheine</dt>
           {giftCardCodes.map((giftCard) => (
             <dd key={giftCard.id} className="cart-discount">
               <RemoveGiftCardForm
@@ -224,22 +224,22 @@ function CartGiftCard({giftCardCodes, giftCardHeadingId, giftCardInputId}) {
       <AddGiftCardForm fetcherKey="gift-card-add">
         <div>
           <label htmlFor={giftCardInputId} className="sr-only">
-            Gift card code
+            Gutscheincode
           </label>
           <input
             id={giftCardInputId}
             type="text"
             name="giftCardCode"
-            placeholder="Gift card code"
+            placeholder="Gutscheincode"
             ref={giftCardCodeInput}
           />
           &nbsp;
           <button
             type="submit"
             disabled={giftCardAddFetcher.state !== 'idle'}
-            aria-label="Apply gift card code"
+            aria-label="Geschenkgutschein einlösen"
           >
-            Apply
+            Einlösen
           </button>
         </div>
       </AddGiftCardForm>
@@ -293,11 +293,11 @@ function RemoveGiftCardForm({
       &nbsp;
       <button
         type="submit"
-        aria-label={`Remove gift card ending in ${lastCharacters}`}
+        aria-label={`Geschenkgutschein mit der Endung ${lastCharacters} entfernen`}
         onClick={onRemoveClick}
         ref={buttonRef}
       >
-        Remove
+        Entfernen
       </button>
     </CartForm>
   );
