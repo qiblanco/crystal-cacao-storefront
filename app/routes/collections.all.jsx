@@ -7,7 +7,7 @@ import {ProductItem} from '~/components/ProductItem';
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Hydrogen | Products`}];
+  return [{title: `Alle Produkte | Qi Blanco UG (haftungsbeschränkt)`}];
 };
 
 /**
@@ -59,7 +59,7 @@ export default function Collection() {
 
   return (
     <div className="collection">
-      <h1>Products</h1>
+      <h1>Alle Produkte</h1>
       <PaginatedResourceSection
         connection={products}
         resourcesClassName="products-grid"

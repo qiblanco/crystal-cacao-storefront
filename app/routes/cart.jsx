@@ -7,7 +7,7 @@ import {persistAttributionOnCartResult} from '~/lib/cart-attribution.server';
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Hydrogen | Cart`}];
+  return [{title: `Warenkorb | Qi Blanco UG (haftungsbeschränkt)`}];
 };
 
 /**
@@ -26,7 +26,7 @@ export async function action({request, context}) {
   const {action, inputs} = CartForm.getFormInput(formData);
 
   if (!action) {
-    throw new Error('No action provided');
+    throw new Error('Es wurde keine Aktion angegeben');
   }
 
   let status = 200;
@@ -121,7 +121,7 @@ export default function Cart() {
 
   return (
     <div className="cart">
-      <h1>Cart</h1>
+      <h1>Warenkorb</h1>
       <CartMain layout="page" cart={cart} />
     </div>
   );

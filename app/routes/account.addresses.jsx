@@ -15,7 +15,7 @@ import {
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Addresses'}];
+  return [{title: 'Adressen'}];
 };
 
 /**
@@ -40,14 +40,14 @@ export async function action({request, context}) {
       ? String(form.get('addressId'))
       : null;
     if (!addressId) {
-      throw new Error('You must provide an address id.');
+      throw new Error('Es muss eine Adress-Kennung angegeben werden.');
     }
 
     // this will ensure redirecting to login never happen for mutatation
     const isLoggedIn = await customerAccount.isLoggedIn();
     if (!isLoggedIn) {
       return data(
-        {error: {[addressId]: 'Unauthorized'}},
+        {error: {[addressId]: 'Nicht angemeldet'}},
         {
           status: 401,
         },
@@ -102,7 +102,7 @@ export async function action({request, context}) {
           }
 
           if (!data?.customerAddressCreate?.customerAddress) {
-            throw new Error('Customer address create failed.');
+            throw new Error('Die Adresse konnte nicht angelegt werden.');
           }
 
           return {
@@ -152,7 +152,7 @@ export async function action({request, context}) {
           }
 
           if (!data?.customerAddressUpdate?.customerAddress) {
-            throw new Error('Customer address update failed.');
+            throw new Error('Die Adresse konnte nicht gespeichert werden.');
           }
 
           return {
@@ -200,7 +200,7 @@ export async function action({request, context}) {
           }
 
           if (!data?.customerAddressDelete?.deletedAddressId) {
-            throw new Error('Customer address delete failed.');
+            throw new Error('Die Adresse konnte nicht gelöscht werden.');
           }
 
           return {error: null, deletedAddress: addressId};
@@ -224,7 +224,7 @@ export async function action({request, context}) {
 
       default: {
         return data(
-          {error: {[addressId]: 'Method not allowed'}},
+          {error: {[addressId]: 'Methode nicht erlaubt'}},
           {
             status: 405,
           },
@@ -255,18 +255,18 @@ export default function Addresses() {
 
   return (
     <div className="account-addresses">
-      <h2>Addresses</h2>
+      <h2>Adressen</h2>
       <br />
       <div>
         <div>
-          <legend>Create address</legend>
+          <legend>Adresse anlegen</legend>
           <NewAddressForm key={addresses.nodes.length} />
         </div>
         <br />
         <hr />
         <br />
         {!addresses.nodes.length ? (
-          <p>You have no addresses saved.</p>
+          <p>Du hast noch keine Adresse gespeichert.</p>
         ) : (
           <ExistingAddresses
             addresses={addresses}
@@ -306,7 +306,7 @@ function NewAddressForm() {
             formMethod="POST"
             type="submit"
           >
-            {stateForMethod('POST') !== 'idle' ? 'Creating' : 'Create'}
+            {stateForMethod('POST') !== 'idle' ? 'Wird angelegt' : 'Anlegen'}
           </button>
         </div>
       )}
@@ -320,7 +320,7 @@ function NewAddressForm() {
 function ExistingAddresses({addresses, defaultAddress}) {
   return (
     <div>
-      <legend>Existing addresses</legend>
+      <legend>Gespeicherte Adressen</legend>
       {addresses.nodes.map((address) => (
         <AddressForm
           key={address.id}
@@ -335,14 +335,14 @@ function ExistingAddresses({addresses, defaultAddress}) {
                 formMethod="PUT"
                 type="submit"
               >
-                {stateForMethod('PUT') !== 'idle' ? 'Saving' : 'Save'}
+                {stateForMethod('PUT') !== 'idle' ? 'Wird gespeichert' : 'Speichern'}
               </button>
               <button
                 disabled={stateForMethod('DELETE') !== 'idle'}
                 formMethod="DELETE"
                 type="submit"
               >
-                {stateForMethod('DELETE') !== 'idle' ? 'Deleting' : 'Delete'}
+                {stateForMethod('DELETE') !== 'idle' ? 'Wird gelöscht' : 'Löschen'}
               </button>
             </div>
           )}
@@ -372,107 +372,107 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
     <Form id={addressId}>
       <fieldset>
         <input type="hidden" name="addressId" defaultValue={addressId} />
-        <label htmlFor="firstName">First name*</label>
+        <label htmlFor="firstName">Vorname*</label>
         <input
-          aria-label="First name"
+          aria-label="Vorname"
           autoComplete="given-name"
           defaultValue={address?.firstName ?? ''}
           id="firstName"
           name="firstName"
-          placeholder="First name"
+          placeholder="Vorname"
           required
           type="text"
         />
-        <label htmlFor="lastName">Last name*</label>
+        <label htmlFor="lastName">Nachname*</label>
         <input
-          aria-label="Last name"
+          aria-label="Nachname"
           autoComplete="family-name"
           defaultValue={address?.lastName ?? ''}
           id="lastName"
           name="lastName"
-          placeholder="Last name"
+          placeholder="Nachname"
           required
           type="text"
         />
-        <label htmlFor="company">Company</label>
+        <label htmlFor="company">Firma</label>
         <input
-          aria-label="Company"
+          aria-label="Firma"
           autoComplete="organization"
           defaultValue={address?.company ?? ''}
           id="company"
           name="company"
-          placeholder="Company"
+          placeholder="Firma"
           type="text"
         />
-        <label htmlFor="address1">Address line*</label>
+        <label htmlFor="address1">Straße und Hausnummer*</label>
         <input
-          aria-label="Address line 1"
+          aria-label="Straße und Hausnummer"
           autoComplete="address-line1"
           defaultValue={address?.address1 ?? ''}
           id="address1"
           name="address1"
-          placeholder="Address line 1*"
+          placeholder="Straße und Hausnummer*"
           required
           type="text"
         />
-        <label htmlFor="address2">Address line 2</label>
+        <label htmlFor="address2">Adresszusatz</label>
         <input
-          aria-label="Address line 2"
+          aria-label="Adresszusatz"
           autoComplete="address-line2"
           defaultValue={address?.address2 ?? ''}
           id="address2"
           name="address2"
-          placeholder="Address line 2"
+          placeholder="Adresszusatz"
           type="text"
         />
-        <label htmlFor="city">City*</label>
+        <label htmlFor="city">Stadt*</label>
         <input
-          aria-label="City"
+          aria-label="Stadt"
           autoComplete="address-level2"
           defaultValue={address?.city ?? ''}
           id="city"
           name="city"
-          placeholder="City"
+          placeholder="Stadt"
           required
           type="text"
         />
-        <label htmlFor="zoneCode">State / Province*</label>
+        <label htmlFor="zoneCode">Bundesland / Provinz*</label>
         <input
-          aria-label="State/Province"
+          aria-label="Bundesland / Provinz"
           autoComplete="address-level1"
           defaultValue={address?.zoneCode ?? ''}
           id="zoneCode"
           name="zoneCode"
-          placeholder="State / Province"
+          placeholder="Bundesland / Provinz"
           required
           type="text"
         />
-        <label htmlFor="zip">Zip / Postal Code*</label>
+        <label htmlFor="zip">Postleitzahl*</label>
         <input
-          aria-label="Zip"
+          aria-label="Postleitzahl"
           autoComplete="postal-code"
           defaultValue={address?.zip ?? ''}
           id="zip"
           name="zip"
-          placeholder="Zip / Postal Code"
+          placeholder="Postleitzahl"
           required
           type="text"
         />
-        <label htmlFor="territoryCode">Country Code*</label>
+        <label htmlFor="territoryCode">Länderkürzel*</label>
         <input
-          aria-label="Country code"
+          aria-label="Länderkürzel"
           autoComplete="country"
           defaultValue={address?.territoryCode ?? ''}
           id="territoryCode"
           name="territoryCode"
-          placeholder="Country"
+          placeholder="DE"
           required
           type="text"
           maxLength={2}
         />
-        <label htmlFor="phoneNumber">Phone</label>
+        <label htmlFor="phoneNumber">Telefon</label>
         <input
-          aria-label="Phone Number"
+          aria-label="Telefonnummer"
           autoComplete="tel"
           defaultValue={address?.phoneNumber ?? ''}
           id="phoneNumber"
@@ -488,7 +488,7 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             name="defaultAddress"
             type="checkbox"
           />
-          <label htmlFor="defaultAddress">Set as default address</label>
+          <label htmlFor="defaultAddress">Als Standardadresse festlegen</label>
         </div>
         {error ? (
           <p>

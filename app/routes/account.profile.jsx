@@ -11,7 +11,7 @@ import {
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Profile'}];
+  return [{title: 'Profil'}];
 };
 
 /**
@@ -30,7 +30,7 @@ export async function action({request, context}) {
   const {customerAccount} = context;
 
   if (request.method !== 'PUT') {
-    return data({error: 'Method not allowed'}, {status: 405});
+    return data({error: 'Methode nicht erlaubt'}, {status: 405});
   }
 
   const form = await request.formData();
@@ -63,7 +63,7 @@ export async function action({request, context}) {
     }
 
     if (!data?.customerUpdate?.customer) {
-      throw new Error('Customer profile update failed.');
+      throw new Error('Das Profil konnte nicht gespeichert werden.');
     }
 
     return {
@@ -89,30 +89,30 @@ export default function AccountProfile() {
 
   return (
     <div className="account-profile">
-      <h2>My profile</h2>
+      <h2>Mein Profil</h2>
       <br />
       <Form method="PUT">
-        <legend>Personal information</legend>
+        <legend>Persönliche Daten</legend>
         <fieldset>
-          <label htmlFor="firstName">First name</label>
+          <label htmlFor="firstName">Vorname</label>
           <input
             id="firstName"
             name="firstName"
             type="text"
             autoComplete="given-name"
-            placeholder="First name"
-            aria-label="First name"
+            placeholder="Vorname"
+            aria-label="Vorname"
             defaultValue={customer.firstName ?? ''}
             minLength={2}
           />
-          <label htmlFor="lastName">Last name</label>
+          <label htmlFor="lastName">Nachname</label>
           <input
             id="lastName"
             name="lastName"
             type="text"
             autoComplete="family-name"
-            placeholder="Last name"
-            aria-label="Last name"
+            placeholder="Nachname"
+            aria-label="Nachname"
             defaultValue={customer.lastName ?? ''}
             minLength={2}
           />
@@ -127,7 +127,7 @@ export default function AccountProfile() {
           <br />
         )}
         <button type="submit" disabled={state !== 'idle'}>
-          {state !== 'idle' ? 'Updating' : 'Update'}
+          {state !== 'idle' ? 'Wird gespeichert' : 'Speichern'}
         </button>
       </Form>
     </div>

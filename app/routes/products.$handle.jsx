@@ -48,7 +48,7 @@ async function loadCriticalData({context, params, request}) {
   const {storefront} = context;
 
   if (!handle) {
-    throw new Error('Expected product handle to be defined');
+    throw new Error('Es wurde kein Produkt angegeben');
   }
 
   const [{product}] = await Promise.all([

@@ -68,7 +68,7 @@ export async function loader({request, context, params}) {
   const cartResult = result.cart;
 
   if (result.errors?.length || !cartResult) {
-    throw new Response('Link may be expired. Try checking the URL.', {
+    throw new Response('Dieser Link ist möglicherweise abgelaufen. Bitte prüfe die Adresse.', {
       status: 410,
     });
   }
@@ -84,7 +84,7 @@ export async function loader({request, context, params}) {
 
     return redirect(trackedCheckoutUrl, {headers});
   } else {
-    throw new Error('No checkout URL found');
+    throw new Error('Es wurde kein Kassen-Link gefunden');
   }
 }
 
