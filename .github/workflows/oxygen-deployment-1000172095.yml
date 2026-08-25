@@ -1,3 +1,36 @@
+# Der EINZIGE Deploy-Weg dieser Storefront.
+#
+# WARUM ES NUR NOCH EINEN GIBT (gemessen 2026-08-24 an den Actions-Laeufen,
+# nicht vermutet): dieses Repo hatte ZWEI Oxygen-Workflows, die auf `main`
+# beide gleichzeitig ansprangen (4 Commits, beide Laeufe in derselben Sekunde:
+# dd8851e3, 7bce1f53, 0ce8c161, e0d4e9ea). Der zweite hiess "Crystal Cacao
+# Storefront" und liegt jetzt unter `.github/retired-workflows/` — ausser
+# Betrieb, aber lesbar. Er ist NIE erfolgreich gelaufen: 5 Laeufe, 5 Fehler,
+# jedes Mal im Deploy-Schritt mit "No deployment token provided", weil er das
+# Secret `OXYGEN_DEPLOYMENT_TOKEN` erwartete, das in diesem Repo nicht gesetzt
+# ist. Gesetzt ist allein `OXYGEN_DEPLOYMENT_TOKEN_1000172095` — der hier.
+#
+# UND DAS WAR EIN GLUECK, kein Schoenheitsfehler: der zweite Workflow fuhr
+# `--env-file` mit FUENF LEEREN Werten (im Runner-Log als leer sichtbar; ein
+# gesetztes Secret erscheint dort als `***`). Waere sein Token je gesetzt
+# worden, haette er die im Shopify-Admin gepflegte Runtime-Env der Storefront
+# mit leeren Zeichenketten UEBERSCHRIEBEN — samt PUBLIC_CHECKOUT_DOMAIN und
+# SESSION_SECRET, also samt Kaufweg. Sein Scheitern war der Schutz.
+#
+# WARUM HIER KEIN `--env-file` ERZWUNGEN WIRD: `hydrogen deploy` sendet
+# `overriddenEnvironmentVariables` NUR, wenn `--env-file` gesetzt ist — der
+# Default des Flags ist bei `deploy` ausdruecklich `undefined` (anders als bei
+# `dev`/`preview`, wo `.env` der Default ist; nachgelesen im ausgelieferten
+# CLI-Bundle node_modules/@shopify/cli/dist/index.js). OHNE das Flag wird also
+# nichts ueberschrieben, und die Storefront laeuft mit den Variablen der
+# Oxygen-Umgebung aus dem Shopify-Admin. "Kein --env-file" heisst NICHT
+# "leere Env" — es heisst "Admin-Env unangetastet".
+#
+# Der Block unten ist deshalb ein OPT-IN und ALLES-ODER-NICHTS: er greift erst,
+# wenn alle fuenf Repo-Secrets gesetzt sind, und schreibt niemals einen leeren
+# Wert. Solange sie fehlen, verhaelt sich dieser Workflow exakt wie zuvor.
+# Alles-oder-nichts, weil unbewiesen ist, ob Oxygen eine Teilmenge MERGT oder
+# die Umgebung ERSETZT — bei "ersetzt" wuerde eine Teilmenge den Rest loeschen.
 name: Storefront 1000172095
 on: [push]
 
@@ -35,7 +68,48 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Schreibt eine Override-Datei NUR, wenn alle fuenf Secrets gesetzt sind.
+      # Fehlt eines, bleibt die Admin-Env der Oxygen-Umgebung unangetastet.
+      # Ausgegeben werden ausschliesslich SCHLUESSELNAMEN, nie Werte.
+      - name: Assemble Oxygen runtime env (opt-in, all-or-nothing)
+        env:
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          PUBLIC_STOREFRONT_API_TOKEN: ${{ secrets.PUBLIC_STOREFRONT_API_TOKEN }}
+          PUBLIC_STORE_DOMAIN: ${{ secrets.PUBLIC_STORE_DOMAIN }}
+          PUBLIC_STOREFRONT_ID: ${{ secrets.PUBLIC_STOREFRONT_ID }}
+          PUBLIC_CHECKOUT_DOMAIN: ${{ secrets.PUBLIC_CHECKOUT_DOMAIN }}
+        run: |
+          set -u
+          KEYS="SESSION_SECRET PUBLIC_STOREFRONT_API_TOKEN PUBLIC_STORE_DOMAIN PUBLIC_STOREFRONT_ID PUBLIC_CHECKOUT_DOMAIN"
+          missing=""
+          for key in $KEYS; do
+            eval "value=\${$key:-}"
+            [ -n "$value" ] || missing="$missing $key"
+          done
+
+          if [ -n "$missing" ]; then
+            echo "Keine Env-Ueberschreibung. Nicht gesetzte Secrets:$missing"
+            echo "-> Deploy laeuft mit den Variablen der Oxygen-Umgebung (Shopify-Admin)."
+            exit 0
+          fi
+
+          env_file="$RUNNER_TEMP/oxygen.env"
+          umask 077
+          : > "$env_file"
+          for key in $KEYS; do
+            eval "value=\${$key}"
+            printf '%s=%s\n' "$key" "$value" >> "$env_file"
+            echo "Ueberschreibe: $key"
+          done
+          echo "OXYGEN_ENV_FILE=$env_file" >> "$GITHUB_ENV"
+
       - name: Build and Publish to Oxygen
-        run: npx shopify hydrogen deploy
+        run: |
+          set -u
+          if [ -n "${OXYGEN_ENV_FILE:-}" ]; then
+            npx shopify hydrogen deploy --env-file "$OXYGEN_ENV_FILE"
+          else
+            npx shopify hydrogen deploy
+          fi
         env:
           SHOPIFY_HYDROGEN_DEPLOYMENT_TOKEN: ${{ secrets.OXYGEN_DEPLOYMENT_TOKEN_1000172095 }}
