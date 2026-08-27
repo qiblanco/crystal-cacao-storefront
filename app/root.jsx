@@ -16,6 +16,7 @@ import appStyles from '~/styles/app.css?url';
 import kakaoStyles from '~/styles/kakao-seiten.css?url';
 import {PageLayout} from './components/PageLayout';
 import {MetaPixel} from './components/MetaPixel';
+import {UpPromoteTracking} from './components/UpPromoteTracking';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
 import {strictRegions} from '~/lib/consent-policy';
 import '@fontsource-variable/open-sans';
@@ -243,6 +244,18 @@ export function Layout({children}) {
               defer
               suppressHydrationWarning
             />
+            {/*
+              UpPromote-Basis: legt nur Queue + config an, lädt und sendet
+              nichts. Das einwilligungspflichtige Nachladen von collect.js
+              macht <UpPromoteTracking /> weiter unten. defer, damit die
+              config-Aufrufe vor der Hydration in der Queue liegen.
+            */}
+            <script
+              src="/crystal-cacao-uppromote-tracker.js"
+              nonce={nonce}
+              defer
+              suppressHydrationWarning
+            />
             {data?.qpxEndpoint ? (
               <script
                 src="/qiblanco-qpx-loader.js"
@@ -296,7 +309,15 @@ export default function App() {
         <Outlet />
       </PageLayout>
       {(data.isProductionHost || data.enableTrackingInPreview) && (
-        <MetaPixel metaPixelId={data.metaPixelId} />
+        <>
+          <MetaPixel metaPixelId={data.metaPixelId} />
+          {/*
+            UpPromote hängt bewusst im SELBEN Produktions-/Vorschau-Gate wie
+            das Meta-Pixel — eine Fläche, ein Tor. Das Einwilligungstor sitzt
+            zusätzlich in der Komponente selbst (trackingAllowed()).
+          */}
+          <UpPromoteTracking />
+        </>
       )}
     </Analytics.Provider>
   );

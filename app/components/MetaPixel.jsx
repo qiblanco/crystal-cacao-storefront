@@ -69,10 +69,41 @@ function hasDeclined() {
   );
 }
 
-function trackingAllowed() {
+// EXPORTIERT, damit UpPromoteTracking.jsx dasselbe Einwilligungstor benutzt und
+// keins nachbaut. Zwei Tore, die dieselbe Frage stellen, sind keine zwei
+// Sicherungen — sie sind eine Sicherung an zwei Orten, und sie driften
+// auseinander, sobald jemand nur eins davon pflegt. Die Kakao-Fläche hat
+// dieselbe Region-Policy wie qiblanco.com, also darf sie auch nur EINE
+// Auslegung davon haben. Das Verhalten dieser Funktion ist unverändert.
+export function trackingAllowed() {
   if (hasPreviewTrackingConsent()) return true;
   if (regionPolicy() === 'optout') return !hasDeclined();
   return hasMarketingConsent();
+}
+
+/**
+ * Ruft `boot` sofort und erneut bei jeder Cookiebot-Entscheidung.
+ *
+ * Additiv ergänzt: die MetaPixel-Komponente unten führt ihr eigenes, wörtlich
+ * gleiches Abo weiter — hier wird nichts umgebaut, nur derselbe Mechanismus
+ * für einen zweiten Verbraucher verfügbar gemacht. Spiegelt bewusst
+ * qiblanco-storefront app/components/MetaPixel.jsx, damit beide Storefronts
+ * dieselbe Bauart haben.
+ *
+ * @param {() => void} boot
+ * @returns {() => void} Abmelder
+ */
+export function subscribeConsentChanges(boot) {
+  boot();
+  const onConsent = () => boot();
+  window.addEventListener('CookiebotOnAccept', onConsent);
+  window.addEventListener('CookiebotOnConsentReady', onConsent);
+  window.addEventListener('CookiebotOnLoad', onConsent);
+  return () => {
+    window.removeEventListener('CookiebotOnAccept', onConsent);
+    window.removeEventListener('CookiebotOnConsentReady', onConsent);
+    window.removeEventListener('CookiebotOnLoad', onConsent);
+  };
 }
 
 function bootMetaPixel(metaPixelId) {
