@@ -13,7 +13,14 @@
  *   Steuer-Zeile (CH 1.048 CHF belegt; inkl. Wechselkursaufschlag 1,5 %
  *   + Aufrundung bei Auto-FX-Preisen bzw. manuell fixierter Marktpreis).
  */
-import {taxRateForHandle} from '~/lib/cart-display-pricing';
+// RELATIV statt über den '~'-Alias (2026-08-15): der Alias wird nur von
+// Vite aufgeloest, nicht von Node. Solange dieser Import hier stand, war
+// jede reine Datenfabrik, die den Preis-Kanon benutzt, mit `node --test`
+// nicht mehr pruefbar — und genau das ist die Eigenschaft, wegen der es
+// diese Dateien gibt (siehe Kopf von produkt-seo.js). Vite loest den
+// relativen Pfad identisch auf; cart-display-pricing importiert selbst
+// nichts, die Kette ist damit vollstaendig node-aufloesbar.
+import {taxRateForHandle} from './cart-display-pricing.js';
 
 /**
  * Anzeige-Steuersatz eines Produkts im Waehrungs-Kontext.

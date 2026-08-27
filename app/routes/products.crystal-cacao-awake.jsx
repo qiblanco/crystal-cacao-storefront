@@ -1,4 +1,5 @@
 import {useLoaderData} from 'react-router';
+import {KAKAO_KENNZAHLEN} from '~/lib/kakao-zone';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -16,17 +17,20 @@ import {useState} from 'react';
 import Awake from '~/components/product-pages/Awake';
 import LazyImage from '~/components/reusables/LazyImage';
 
+import {produktMeta, MARKE} from '~/lib/produkt-seo';
 /** 
  * @type {MetaFunction<typeof loader>}
  */
 export const meta = ({data}) => {
-  return [
-    {title: `${data?.product.title ?? ''} | Qi Blanco UG (haftungsbeschränkt)`},
-    {
-      rel: 'canonical',
-      href: `/products/crystal-cacao-awake`,
-    },
-  ];
+  return produktMeta({
+    // Product-Auszeichnung (Preis/Verfügbarkeit) — siehe produkt-seo.js
+    produkt: data?.product,
+    pfad: '/products/crystal-cacao-awake',
+    titel: `${data?.product?.title ?? ''} | ${MARKE}`,
+    bildUrl:
+      data?.product?.selectedOrFirstAvailableVariant?.image?.url ??
+      data?.product?.images?.nodes?.[0]?.url,
+  });
 };
 
 /**
@@ -121,7 +125,7 @@ export default function Product() {
         <div className="product-main">
           <h1>{title}</h1>
           <div className="product-rating">
-            <span>4.8</span> ★★★★★ <span>Über 14.000 Nutzer</span>
+            <span>{KAKAO_KENNZAHLEN.bewertung}</span> ★★★★★ <span>Über {KAKAO_KENNZAHLEN.nutzer} Nutzer</span>
           </div>
           <div
             className="ProductDescription"
@@ -129,7 +133,7 @@ export default function Product() {
           />
 
           <p className="mt-2">
-            <b>Mehr als 14.000+ aktive Nutzer</b>
+            <b>Mehr als {KAKAO_KENNZAHLEN.nutzer}+ aktive Nutzer</b>
           </p>
 
           <CacaoPriceDisplay
@@ -171,7 +175,7 @@ function CacaoBenefitList() {
   return (
     <div className="CacaoBenefitList">
       <ul>
-        <li>✅ Kostenloser Versand ab 99 €</li>
+        <li>✅ Kostenloser Versand ab 99 € innerhalb Deutschlands</li>
         <li>🚚 Lieferung in 1–3 Werktagen</li>
         <li>🔄 100 % Geld-zurück-Garantie bei Unzufriedenheit</li>
         <li>🔬 Laboranalytisch geprüft (Dartsch Institut)</li>

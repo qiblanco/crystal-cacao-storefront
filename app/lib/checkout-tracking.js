@@ -75,6 +75,62 @@ const TRACKING_COOKIE_NAMES = new Set([
 
 const MAX_CART_ATTRIBUTE_VALUE_LENGTH = 500;
 
+// NACHZUG aus der Vorlage (#175, s03 2026-08-27).
+// Query-Keys, die nie in ein Order-note_attribute gehoeren (Identitaet,
+// Zugangsdaten, Kontakt). Bewusst eine DENYLIST, keine Allowlist:
+// die Backend-Konsumenten der `landing_page`-Query sitzen in mehreren fremden
+// Modulen (hyros-eigenbau own_source `_landing_params` + herkunft,
+// capi-rueckspeisung order_to_event, google-rueckspeisung click_conversions,
+// funnel-substrat sources) und lesen dort Keys, die in TRACKING_PARAM_NAMES
+// bewusst NICHT stehen und darum ausschliesslich ueber diese Query erreichbar
+// sind. Eine Allowlist waere hier eine handgepflegte Spiegelliste fremder
+// Parser ohne Durchsetzer: ein uebersehener Key = stiller Attributionsverlust.
+// Bei der Denylist ist ein uebersehener Key = unveraenderter Bestand.
+// Die Fehlerrichtung entscheidet.
+const SENSITIVE_QUERY_PARAM_NAMES = new Set([
+  'email',
+  'e_mail',
+  'mail',
+  'user_email',
+  'customer_email',
+  'phone',
+  'telephone',
+  'mobile',
+  'first_name',
+  'firstname',
+  'last_name',
+  'lastname',
+  'fullname',
+  'address',
+  'street',
+  'postal_code',
+  'birthday',
+  'birthdate',
+  'dob',
+  'password',
+  'passwd',
+  'pwd',
+  'secret',
+  'token',
+  'access_token',
+  'id_token',
+  'refresh_token',
+  'auth',
+  'authorization',
+  'api_key',
+  'apikey',
+  'otp',
+  'session',
+  'session_id',
+  'sessionid',
+  'sid',
+  'iban',
+  'card_number',
+  'cvv',
+  'cvc',
+  'ssn',
+]);
+
 /**
  * Appends only allowlisted ad attribution values to a checkout URL.
  *
@@ -172,15 +228,47 @@ export function buildAttributionCartAttributes({
     addCartAttribute(attributes, key, value);
   }
 
-  if (!attributes.length) return attributes;
+  // NACHZUG aus der Vorlage (#174, qiblanco 2026-08-09; hier uebernommen im
+  // s03-Nachzug 2026-08-27): frueher stand hier
+  // `if (!attributes.length) return attributes;` VOR dem Marker. Ein
+  // signal-loser Besucher verliess die Funktion damit, bevor irgendetwas
+  // geschrieben wurde — upstream gemessen trugen 41,7 % der DACH-Orders GAR
+  // KEIN note_attribute. Folge: "Order lief nicht ueber die instrumentierte
+  // Kasse" war von "Besucher hatte kein Ad-Signal" nicht mehr unterscheidbar.
+  // Der Befund gilt fuer diesen Shop unveraendert — dieselbe Bauform.
+  // ZWEI Haelften, beide noetig:
+  //   1. Der Marker wird UNBEDINGT geschrieben (auch ohne jedes Signal).
+  //   2. Der Marker zaehlt NICHT als Signal — sonst wuerden landing_page und
+  //      referrer ploetzlich fuer jeden organischen Besucher mitgeschrieben,
+  //      also eine stille Ausweitung der Datenmenge statt eines Fixes.
+  const hasTrackingSignal = attributes.length > 0;
 
-  addCartAttribute(attributes, 'landing_page', storedAttribution?.href);
-  addCartAttribute(attributes, 'referrer', storedAttribution?.referrer);
-  addCartAttribute(
-    attributes,
-    'attribution_saved_at',
-    storedAttribution?.savedAt,
-  );
+  if (hasTrackingSignal) {
+    // NACHZUG aus der Vorlage (#175): `landing_page`/`referrer` trugen bisher
+    // den VOLLEN href inklusive Query und Fragment in ein Order-note_attribute.
+    // Ein Query-String kann personenbeziehbar sein (`?email=`, `?token=`); er
+    // wird deshalb vor dem Schreiben bereinigt.
+    addCartAttribute(
+      attributes,
+      'landing_page',
+      sanitizeAttributionUrl(storedAttribution?.href),
+    );
+    addCartAttribute(
+      attributes,
+      'referrer',
+      sanitizeAttributionUrl(storedAttribution?.referrer),
+    );
+    addCartAttribute(
+      attributes,
+      'attribution_saved_at',
+      storedAttribution?.savedAt,
+    );
+  }
+
+  // BEWUSST UNVERAENDERT beim Nachzug: der Wert bleibt 'qiblanco_hydrogen'.
+  // Ihn hier auf einen eigenen Wert zu setzen waere eine Aenderung an einer
+  // FREMDEN Naht — die Backend-Parser (own_source, capi-rueckspeisung,
+  // funnel-substrat) lesen ihn. Das gehoert entschieden, nicht nebenbei.
   addCartAttribute(attributes, 'attribution_source', 'qiblanco_hydrogen');
 
   return attributes;
@@ -329,6 +417,49 @@ function addCartAttribute(attributes, key, value) {
     key,
     value: truncateCartAttributeValue(value),
   });
+}
+
+/**
+ * @param {string} value
+ */
+/**
+ * NACHZUG aus der Vorlage (#175, s03 2026-08-27).
+ *
+ * Entfernt Identitaets-/Zugangs-Query-Keys und den Fragment-Teil aus einer
+ * URL, bevor sie als `landing_page`/`referrer` in ein Order-note_attribute
+ * geht.
+ *
+ * Gibt den Eingabe-String BYTE-IDENTISCH zurueck, wenn nichts zu entfernen war
+ * — so bleibt der Bestandswert (den fremde Parser per `urlsplit().query`
+ * lesen) frei von URL-Normalisierungs-Nebenwirkungen.
+ *
+ * @param {string | null | undefined} rawUrl
+ * @returns {string} bereinigte URL oder '' wenn unbrauchbar
+ */
+function sanitizeAttributionUrl(rawUrl) {
+  if (typeof rawUrl !== 'string' || !rawUrl) return '';
+
+  let url;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    return '';
+  }
+
+  // Nur echte Web-URLs (schuetzt vor javascript:/data:/android-app: im referrer).
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+
+  let removed = false;
+  for (const name of [...url.searchParams.keys()]) {
+    if (!SENSITIVE_QUERY_PARAM_NAMES.has(name.toLowerCase())) continue;
+    url.searchParams.delete(name);
+    removed = true;
+  }
+
+  if (!removed && !url.hash) return rawUrl;
+
+  url.hash = '';
+  return url.toString();
 }
 
 /**

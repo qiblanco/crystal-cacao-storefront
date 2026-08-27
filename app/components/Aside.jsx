@@ -43,7 +43,12 @@ export function Aside({children, heading, type}) {
       role="dialog"
     >
       <button className="close-outside" onClick={close} />
-      <aside>
+      {/* Der Typ steht als Klasse am Element, weil derselbe Drawer drei sehr
+          verschiedene Inhalte trägt (cart / search / mobile) und genau EINER
+          davon sein Scrollen abgeben muss: beim Warenkorb scrollt die
+          Positionsliste, bei Suche und Menü die Zone selbst. Ohne diesen
+          Haken müsste das CSS über :has() raten. */}
+      <aside className={`aside--${type}`}>
         <main>
         <header>
           <h3>{heading === "MENU" ? 'Menü' : heading}</h3>
