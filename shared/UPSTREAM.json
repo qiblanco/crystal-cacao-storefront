@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "a6ec77eac3799d4b4cc40168f32b04288db9c04a",
-  "erzeugt_utc": "2026-08-27T00:09:31Z",
+  "upstream_commit": "2648d92ecdc5f1c01f083fe4924a1269f0686f01",
+  "erzeugt_utc": "2026-08-29T22:20:37Z",
   "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py",
   "huelle": {
     "wurzeln": [
@@ -42,7 +42,7 @@
     {
       "upstream": "app/components/ProductImage.jsx",
       "klasse": "K1",
-      "sha256": "e2b770bec62955e4e171882e9befc893540cbb78dafc4423040d2e8d3c2138c4"
+      "sha256": "a59e40e7b5dbab5af986a5db7c84a65d0d691c48e151413b729e08813dcc96aa"
     },
     {
       "upstream": "app/components/ProductImageList.jsx",
@@ -134,8 +134,8 @@
     {
       "upstream": "app/lib/seo.js",
       "klasse": "K2",
-      "sha256_upstream": "e66d48d09e44387c6572bb9961f3b6cac757df0b2c36308a06998b9b1129de6f",
-      "sha256_lokal": "5faf6d33fc9d7ab0487afd45f4c19bcaa7c72a1c7f3f0dea52d625deaa7f402f",
+      "sha256_upstream": "d01e0015204ad1d23dda9a529dbb104a68fb909bda7774362ca6fb74550690d7",
+      "sha256_lokal": "f2d66c6b05452bc37481d238c27487d9168f00249c5efde08f7256dbd71ea365",
       "abweichung_grund": "Byte-Gleichheit ist baulich unmoeglich: die Datei fuehrt `CANONICAL_ORIGIN` als Quelltext-Konstante mit der qiblanco-Domain. Byte-gleich uebernommen truege JEDE crystal-Seite einen Canonical auf qiblanco.com — und weil dort dieselbe geteilte Seite liegt, ist das Ziel gueltig: Google konsolidiert crystal-cacao.com auf qiblanco.com und der Kakao-Laden verschwindet aus dem Index, ohne Fehlermeldung. Die Konstante ist zugleich die Wurzel von og:url (produkt-seo.js) und der JSON-LD-Knoten-IDs ORG_ID/SITE_ID (entity-schema.js) — eine Adaption, drei Wirkungen. Aufgehoben ist allein die Gleichheit der beiden Seiten; beide Fassungen bleiben einzeln gepinnt, damit eine spaetere Bewegung auf BEIDEN Seiten sichtbar wird."
     },
     {
@@ -157,21 +157,21 @@
       "upstream": "app/components/MetaPixel.jsx",
       "klasse": "K3",
       "sha256_upstream": "1ef83f7675033f3bcec41dce349bc7ea649cff5debc4e7f9976af15f540550de",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /var/tmp/cc-s03-baum",
+      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
       "grund": "Consent-gegateter Browser-Pixel, nicht in der Huelle. crystal baut ihn eigenstaendig; die Einwilligungs-Logik haengt an der Region und am Host, nicht am Seiteninhalt."
     },
     {
       "upstream": "app/lib/cart-attribution.server.js",
       "klasse": "K3",
       "sha256_upstream": "8e3bf5f5d8767a8512fb84d102d3b9aaf41ef87003b2450f8fad5f03007773d0",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /var/tmp/cc-s03-baum",
+      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
       "grund": "Serverseitige Attributionsnaht (Order-note_attribute), nicht in der Huelle. Sie gehoert zur Infrastruktur der jeweiligen Storefront, nicht zum geteilten Seitenbaustein."
     },
     {
       "upstream": "app/lib/checkout-tracking.js",
       "klasse": "K3",
       "sha256_upstream": "7d422d04084c2315fcd469e51fc927735b73376a92acd86c74b3b243182fb0d9",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /var/tmp/cc-s03-baum",
+      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
       "grund": "Traegt TRACKING_PRODUCTION_HOSTS und TRACKING_COOKIE_NAMES. Nicht in der Huelle (haengt an den cart-Routen). crystal fuehrt eine eigenstaendige Naht; die Allowlist ist der Ort der _qpx_anon-Fehlerklasse und darf nicht blind kopiert werden, weil die Hostliste dort eine andere ist."
     },
     {
@@ -185,13 +185,13 @@
       "upstream": "app/root.jsx",
       "klasse": "K3",
       "sha256_upstream": "ca5e3ff5f0b0fec216a88af6bdf58f4cc077f269d41abfd5f3cac439b016a072",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /var/tmp/cc-s03-baum",
+      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
       "grund": "Framework-Wurzel, nicht in der Import-Huelle der drei Routen. Sie gated ueber isQiblancoProductionHost die Drittskripte und den MetaPixel; crystal braucht hier eine EIGENE Fassung mit eigener Hostliste (ADR 0056 Festlegung 3). Eine byte-gleiche Uebernahme schaltet das Tracking auf crystal-cacao.com still aus."
     },
     {
       "upstream": "public/qiblanco-qpx-basis.js",
       "klasse": "K3",
-      "sha256_upstream": "89c11481c8bdbb5cecd94802372755b784f32b2a55de54f52c5eb51890169a07",
+      "sha256_upstream": "bd6d3719474af8fe3b4fabcd7aa2d994efdd2e7d6e4c87ea59ff786510930d37",
       "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_basis_beacon.py  # Repo-Vorbereitung + ab Livegang die reale Auslieferung und ankommende Hits",
       "grund": "Cookielose Basis-Ebene (einwilligungsfrei, setzt nichts auf dem Endgeraet). Nicht in der Import-Huelle: public/-Assets werden per <script src> geladen, nicht importiert. Sie ist der NENNER, gegen den die consent-gegatete Ebene gemessen wird -- ohne sie ist der Abdeckungsgrad nicht schlecht, sondern unmessbar. crystal fuehrt sie BYTE-GLEICH zur Vorlage: eine eigene Fassung erzeugte zwei Nenner mit unterschiedlicher Semantik, und ein Quotient aus zwei verschiedenen Grundmengen ist eine Zahl, die es nicht gibt. Bewegt sich die Vorlage OBEN, ist der Nachzug hier faellig."
     }
