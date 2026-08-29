@@ -2,7 +2,7 @@
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
   "upstream_commit": "2648d92ecdc5f1c01f083fe4924a1269f0686f01",
-  "erzeugt_utc": "2026-08-29T22:20:37Z",
+  "erzeugt_utc": "2026-08-29T23:40:47Z",
   "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py",
   "huelle": {
     "wurzeln": [
@@ -157,21 +157,21 @@
       "upstream": "app/components/MetaPixel.jsx",
       "klasse": "K3",
       "sha256_upstream": "1ef83f7675033f3bcec41dce349bc7ea649cff5debc4e7f9976af15f540550de",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
+      "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_k3_substanz.py --repo {repo} --datei app/components/MetaPixel.jsx",
       "grund": "Consent-gegateter Browser-Pixel, nicht in der Huelle. crystal baut ihn eigenstaendig; die Einwilligungs-Logik haengt an der Region und am Host, nicht am Seiteninhalt."
     },
     {
       "upstream": "app/lib/cart-attribution.server.js",
       "klasse": "K3",
       "sha256_upstream": "8e3bf5f5d8767a8512fb84d102d3b9aaf41ef87003b2450f8fad5f03007773d0",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
+      "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_k3_substanz.py --repo {repo} --datei app/lib/cart-attribution.server.js",
       "grund": "Serverseitige Attributionsnaht (Order-note_attribute), nicht in der Huelle. Sie gehoert zur Infrastruktur der jeweiligen Storefront, nicht zum geteilten Seitenbaustein."
     },
     {
       "upstream": "app/lib/checkout-tracking.js",
       "klasse": "K3",
       "sha256_upstream": "7d422d04084c2315fcd469e51fc927735b73376a92acd86c74b3b243182fb0d9",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
+      "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_k3_substanz.py --repo {repo} --datei app/lib/checkout-tracking.js && /srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo {repo}",
       "grund": "Traegt TRACKING_PRODUCTION_HOSTS und TRACKING_COOKIE_NAMES. Nicht in der Huelle (haengt an den cart-Routen). crystal fuehrt eine eigenstaendige Naht; die Allowlist ist der Ort der _qpx_anon-Fehlerklasse und darf nicht blind kopiert werden, weil die Hostliste dort eine andere ist."
     },
     {
@@ -185,7 +185,7 @@
       "upstream": "app/root.jsx",
       "klasse": "K3",
       "sha256_upstream": "ca5e3ff5f0b0fec216a88af6bdf58f4cc077f269d41abfd5f3cac439b016a072",
-      "enforcer": "/srv/openclaw/shared-state/tracking-linkage/bin/linkage-check --repo /srv/openclaw/shared-state/homepage-bauer/werkbank/crystal-cacao-storefront",
+      "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_k3_substanz.py --repo {repo} --datei app/root.jsx",
       "grund": "Framework-Wurzel, nicht in der Import-Huelle der drei Routen. Sie gated ueber isQiblancoProductionHost die Drittskripte und den MetaPixel; crystal braucht hier eine EIGENE Fassung mit eigener Hostliste (ADR 0056 Festlegung 3). Eine byte-gleiche Uebernahme schaltet das Tracking auf crystal-cacao.com still aus."
     },
     {
