@@ -1078,3 +1078,51 @@ main h3[style] {
   height: 100%;
   overflow: hidden;
 }
+
+/* ZWEITE ANWENDUNG DER SORTENFARBE — der Auftrag von s04, und bewusst die
+ * letzte. s03 hat die Token gebaut und EINE Anwendung gesetzt (die
+ * Claim-Zeile = Sortenkennung) und die Frage "wie weit geht die Sortenfarbe
+ * darueber hinaus" ausdruecklich an s04 uebergeben. Hier ist die Antwort,
+ * und sie faellt kleiner aus als erwartet — weil sie GEMESSEN ist:
+ *
+ * Der Korridor steht im Kopf dieses Blocks: Akzent nur an HANDLUNG (Knopf,
+ * Link), ZUSTAND (aktiv/ausgewaehlt) und SORTENKENNUNG. Am 2026-09-02 am
+ * gerenderten HTML beider Kaufseiten nachgezaehlt, was der Korridor auf
+ * diesen Seiten ueberhaupt an Flaeche hat:
+ *   - HANDLUNG/Link: `<main>` der beiden Sortenseiten traegt 0 (null)
+ *     `<a>`-Elemente — in der Vorlage qiblanco.com/products/crystal-cacao-awake
+ *     ebenfalls 0. Es gibt hier also keinen Link einzufaerben.
+ *   - HANDLUNG/Knopf: der Kaufknopf traegt Gold. Das bleibt so; zwei Akzente
+ *     an einem Element entwerten beide (s03).
+ *   - ZUSTAND: die Mengenstaffel ist ein natives <select>, dessen
+ *     ausgewaehlter Eintrag sich nicht gestalten laesst, ohne das Markup zu
+ *     aendern — und das Markup ist K1 (byte-gleich zur Vorlage). Was BLEIBT
+ *     und ohne eine einzige Markup-Zeile geht, ist der Tastatur-Zustand.
+ *   - SORTENKENNUNG: die Claim-Zeile, s03, erledigt.
+ *
+ * ALSO GENAU DIESE EINE REGEL. Sie ist die dezenteste denkbare Anwendung:
+ * sie ist im Ruhezustand UNSICHTBAR und erscheint erst, wenn der Besucher
+ * tatsaechlich handelt. Damit kann sie das statische Aussehen der Seite
+ * gegenueber der Vorlage baulich nicht veraendern — genau die Bedingung, die
+ * Christians "sehr nah am Original uebertragen" an dieses Segment stellt.
+ *
+ * WARUM :focus-visible UND NICHT :focus — :focus feuert auch beim Mausklick
+ * und wuerde einen Ring zeigen, den niemand angefordert hat. :focus-visible
+ * ist die vom Browser getroffene Unterscheidung "Tastatur ja, Maus nein".
+ *
+ * SICHTBARKEIT DES RINGS NACHGEMESSEN, nicht angenommen: --cc-sorte-text
+ * ist per Bau >= 4,5:1 auf beiden hellen Gruenden (s03), also weit ueber der
+ * 3:1-Schwelle, die WCAG 1.4.11 fuer ein Bedien-Element verlangt. Auf Seiten
+ * OHNE Sortenzuordnung (die Uebersicht) loest --cc-sorte-text auf den
+ * Gold-Ton --cc-gold-tief auf (:root-Vorgabe oben) — die Regel ist dort also
+ * nicht wirkungslos, sondern neutral. Das ist Absicht: die Uebersicht zeigt
+ * beide Sorten gleichberechtigt. */
+[data-cc-sorte] a:focus-visible,
+[data-cc-sorte] button:focus-visible,
+[data-cc-sorte] select:focus-visible,
+[data-cc-sorte] summary:focus-visible,
+[data-cc-sorte] [tabindex]:focus-visible {
+  outline: 2px solid var(--cc-sorte-text);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

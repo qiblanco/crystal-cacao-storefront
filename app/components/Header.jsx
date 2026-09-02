@@ -2,7 +2,11 @@ import {Suspense} from 'react';
 import {Await, NavLink, useAsyncValue} from 'react-router';
 import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
 import {useAside} from '~/components/Aside';
-import {ABSENDER_MARKE, KAKAO_MENUE} from '~/lib/kakao-zone';
+import {
+  ABSENDER_MARKE,
+  KAKAO_KENNZAHLEN,
+  KAKAO_MENUE,
+} from '~/lib/kakao-zone';
 
 /**
  * @param {HeaderProps}
@@ -13,7 +17,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   // trugen dadurch die fremde Absender-Marke und das fremde Sortiment in die
   // Kopfzeile JEDER Seite. Beide werden hier bewusst nicht mehr gelesen.
   return (
-    <header className="header">
+    <>
+      <CacaoAnnouncementBanner />
+      <header className="header">
       <NavLink
         className="header-marke"
         prefetch="intent"
@@ -31,7 +37,55 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
         publicStoreDomain={publicStoreDomain}
       />
       <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
-    </header>
+      </header>
+    </>
+  );
+}
+
+/**
+ * Der Vertrauensbalken ueber der Kopfzeile — UEBERTRAGEN, nicht erfunden.
+ *
+ * HERKUNFT, woertlich aus der Vorlage: qiblanco-storefront
+ * app/components/Header.jsx Zeile 184-216 rendert `<AnnouncementBanner>` und
+ * waehlt seinen Inhalt ueber `isCacaoPage`. Der Kakao-Zweig lautet dort
+ * "{KAKAO_KENNZAHLEN.bewertungSkala} ⭐⭐⭐⭐⭐ - Über {KAKAO_KENNZAHLEN.nutzer}
+ * aktive Nutzer" + " - " + "jetzt mit Zufriedenheitsgarantie!" und verlinkt
+ * auf /pages/crystal-cacao. Genau dieser Zweig steht hier; der Qi-Blanco-Zweig
+ * (GoogleSterneBadge, 14.000 zufriedene Kunden, 20 Tage risikofrei) und der
+ * Rezensionen-Popup-Handler sind NICHT uebernommen — sie gehoeren zur fremden
+ * Welt und waeren genau der Fremdinhalt, den s02 getilgt hat.
+ *
+ * WARUM ER HIER OHNE `isCacaoPage`-Abfrage STEHT: auf crystal-cacao.com ist
+ * JEDE Seite eine Kakao-Seite (Sortiments-Zaun, kakao-zone.js). Eine
+ * Fallunterscheidung haette hier baulich keinen zweiten Zweig — sie waere
+ * toter Code, und toter Code sieht spaeter wie eine vergessene Bedingung aus.
+ *
+ * WARUM ER DEN SCROLL-EINZUG DER VORLAGE NICHT MITBRINGT: dort haengt
+ * `maxHeight: scrolled ? 0 : 100px` an einem Scroll-Listener, den crystals
+ * Kopfzeile nicht fuehrt (sie ist `position: sticky` statt eigen-versteckend).
+ * Den Listener nachzubauen waere ein zweites Verhalten in einer fremden
+ * Kopfzeile, nicht eine Uebertragung. Der Balken scrollt hier schlicht mit
+ * weg, weil er ausserhalb des sticky-Elements steht.
+ *
+ * DIE ZAHLEN kommen aus derselben SSoT wie in der Vorlage
+ * (KAKAO_KENNZAHLEN in app/lib/kakao-zone.js: 4,9/5,0 und 1.000) — sie sind
+ * ABGELEITET, nicht danebengeschrieben. Sie gehoeren bewusst NICHT ins
+ * JSON-LD; die Begruendung steht im Kopf jener Konstante.
+ */
+function CacaoAnnouncementBanner() {
+  return (
+    <div className="Header-AnnouncementBanner">
+      <NavLink prefetch="intent" to="/pages/crystal-cacao">
+        <p>
+          <span className="banner-line">
+            {KAKAO_KENNZAHLEN.bewertungSkala} ⭐⭐⭐⭐⭐ - Über{' '}
+            {KAKAO_KENNZAHLEN.nutzer} aktive Nutzer
+          </span>
+          <span className="banner-offer-sep"> - </span>
+          <span className="banner-line">jetzt mit Zufriedenheitsgarantie!</span>
+        </p>
+      </NavLink>
+    </div>
   );
 }
 

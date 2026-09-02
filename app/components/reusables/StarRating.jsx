@@ -18,10 +18,27 @@
  *   "s"  Sprung zum Bewertungsbereich derselben Seite  (DEFAULT)
  *   "g"  Link auf das Google-Profil — genau 1 je Seite mit Bewertungsbereich
  *   "d"  rein darstellend (Sterne der einzelnen Bewertungskarten)
+ *   "z"  ZIERDE/Piktogramm — KEIN gerendertes Rating (seit 2026-09-02, Job
+ *        20260831-sterne-vertrag-luecken-schließen-wirtliste-prio35)
  *
  * OHNE Marker = Fehlstelle. "Darstellend" gilt nur, wenn es im Code STEHT —
  * die Klasse wird an der VERWENDUNGSSTELLE gesetzt, nie zur Laufzeit aus dem
  * DOM erraten (Christian 2026-08-20 21:47).
+ *
+ * DER UNTERSCHIED ZWISCHEN "d" UND "z" IST DIE FARB-ACHSE, und er ist der
+ * ganze Grund für den vierten Wert: "d" ist eine BEWERTUNG, die nur nicht
+ * springt — ihre Farbe WIRD geurteilt und muss --qb-sterne-gold tragen. "z"
+ * ist überhaupt keine Bewertung, sondern ein Symbol neben einer Zahl; seine
+ * Farbe folgt seinem Kontext und wird NICHT geurteilt (sterne-farbe-wache
+ * zählt ihn getrennt aus, statt ihn stillzuschweigen).
+ * MISSBRAUCHS-GRENZE: "z" ist kein Freibrief, dem Farb-Urteil zu entkommen.
+ * Er gilt für ein Piktogramm aus einem Icon-Satz (MmKit MM_ICON_PATHS), wo
+ * der Stern dieselbe Rolle hat wie ↺ oder ✓ daneben. Eine Sternenreihe, die
+ * einen Wert RENDERT (auch eine unklickbare), ist "d" — nie "z".
+ * WEGLASSEN BLEIBT AUSGESCHLOSSEN: ein Stern ohne Marker, den das strukturelle
+ * Prädikat als Bewertung erkennt, fällt auf exit 2 (Vertragslücke) — nicht
+ * auf grün. Ein UNBEKANNTER Wert fällt seit 2026-09-02 ebenfalls dorthin
+ * (fail-closed), damit ein Tippfehler nicht still zur Zierde wird.
  *
  * WARUM DIE GRAFIK UNVERAENDERT BLEIBT — das ist der teure Teil dieser Datei:
  * die Wache enumeriert ihren NENNER unter anderem über das Signal ARIA

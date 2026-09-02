@@ -71,7 +71,13 @@ function Hero() {
         <h2 className="text-2xl">Crystal Cacao® - Bio</h2>
         <div className="text-2xl font-bold">
           {KAKAO_KENNZAHLEN.bewertung}{' '}
-          <span className="qb-sterne">★★★★★</span>
+          {/* Klasse "d" = rein darstellend: die Zeile ZEIGT die Bewertung und
+              springt bewusst nirgendwohin — diese Seite hat keinen
+              Bewertungsbereich (Christians ausdrueckliche Cacao-No-Op-Vorgabe,
+              s. sterne-klick-scroll-wache). Marker-Vertrag: StarRating.jsx. */}
+          <span className="qb-sterne" data-qb-rating="d">
+            ★★★★★
+          </span>
         </div>
         <h3 className="text-2xl font-bold">
           Mehr als {KAKAO_KENNZAHLEN.nutzer}+ aktive Nutzer

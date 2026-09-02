@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "23a0f7147d69ef919b68c22eb11083ce22f33b4f",
-  "erzeugt_utc": "2026-09-02T06:36:11Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py",
+  "upstream_commit": "dda7b7b76447af274acc942222dff0ad8e3b9154",
+  "erzeugt_utc": "2026-09-02T16:30:00Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py (Bestand) + CHIRURGISCHER Nachzug durch Job 20260902-GROSSJOB-crystal-cacao-…-prio6-s04: der Erzeuger stuft handgepflegte K2-Eintraege auf K1 herunter und LOESCHT ihr Feld abweichung_grund (2026-09-02 ausgeloest, gemessen, zurueckgenommen). Bewegt wurden deshalb nur upstream_commit und die sha-Werte der zwei real bewegten Dateien.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -66,8 +66,8 @@
     {
       "upstream": "app/components/product-pages/Kakao.jsx",
       "klasse": "K2",
-      "sha256_upstream": "44048313364a9530633885bbe6bb4b9dba22d28d3386262a81b4319c35dc1141",
-      "sha256_lokal": "afb18ca0ffb1b7981954fa7baef2afa9aef71c277cbe182c0902c799283fe575",
+      "sha256_upstream": "e6624673e80b71a392aceaa87b8a32b7cb0c00898c28d7ca37b9c5a6cbdb3a14",
+      "sha256_lokal": "da5d184bbefad2e573fc7d813573284e0ab579b143f2465e856ccc99b8d11c3b",
       "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02, Christian: \"da ist auch noch QiHome-Werbung drauf\"). Die Vorlage bewirbt im Block \"Wusstest du?\" woertlich die QiHome(R) Air-Technologie und verweist auf QiOne(R) und QiBracelet(R); der alt-Text eines Video-Titelbilds lautete \"Bild von einer Frau mit QiOne und QiBracelet\". Auf einem Kakao-Shop ist das Werbung fuer ein fremdes Sortiment. Byte-Gleichheit ist hier baulich unmoeglich, weil die Vorlage in der Qi-Blanco-Welt steht, wo genau diese Saetze RICHTIG sind — die Abweichung ist der Zweck der Datei, nicht ihr Mangel. Ersetzt wurde durch eine kakao-eigene Prozessaussage (langsames Auskristallisieren) ohne neue Wirkzusage. ZUSAETZLICH seit Job 20260902-…-prio6-s03: die Tabellen-Ueberschrift 'Crystal Cacao(R)' trug den INLINE-Farbwert '#cab581' — einen ZWEITEN Goldton neben --cc-gold (dE 19,71) und mit 2,01:1 auf Weiss unter jeder WCAG-Schwelle. Sie zeigt jetzt auf den Token var(--cc-gold-text) (5,07:1). Auch das ist baulich nicht byte-gleich haltbar: der Token existiert nur in dieser Storefront (app/styles/kakao-seiten.css), die qiblanco-Vorlage kennt ihn nicht."
     },
     {
@@ -83,7 +83,7 @@
     {
       "upstream": "app/components/reusables/StarRating.jsx",
       "klasse": "K1",
-      "sha256": "04996b2e5c48141d00bcf644cf976ecd4895506503c8486647b84422160abffb"
+      "sha256": "72c4d3d916e0a8080bec889a8a3e56e4ea640a4098e65ba80c374d89b95a645c"
     },
     {
       "upstream": "app/components/reusables/SwipeTable.jsx",

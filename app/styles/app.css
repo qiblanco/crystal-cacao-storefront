@@ -875,3 +875,91 @@ aside .cart-details {
   gap: 0.75rem;
   flex-wrap: wrap;
 }
+
+/*
+* --------------------------------------------------
+* Vertrauensbalken ueber der Kopfzeile
+* (Job 20260902-GROSSJOB-crystal-cacao-…-prio6, Segment s04)
+* --------------------------------------------------
+*
+* UEBERTRAGEN aus der Vorlage qiblanco-storefront app/styles/app.css
+* Zeile 836-894 (`.Header-AnnouncementBanner`), einschliesslich der beiden
+* Umbruch-Regeln fuer schmale Geraete. Die Vorlage begruendet sie dort selbst:
+* die zwei Sinneinheiten (Zeile 1 Beleg, Zeile 2 Angebot) bleiben je
+* ungebrochen, damit ein Umbruch sauber ZWISCHEN ihnen faellt und nie mitten
+* im Satz; der Trenner " - " ist Desktop-only und wird mobil durch column-gap
+* ersetzt. "Mobil zuerst" heisst hier also: die mobilen Regeln sind Teil der
+* Uebertragung, nicht ein Nachtrag.
+*
+* WAS BEWUSST ABWEICHT, und warum genau diese zwei Werte:
+* (1) `background: #151515` der Vorlage -> `var(--cc-dunkel)` (#171310).
+*     Das ist der GEMESSENE Etikett-Ton der Kakao-Verpackung (s03: dE 2,63
+*     zum echten Etikett-Schwarz). Ein zweiter, fast gleicher Dunkelton
+*     neben dem Token waere exakt die Lage "konkurrierende Farbtoene", die
+*     die Design-Pflicht als Ursache von "sieht von AI gemacht aus" benennt.
+*     Optisch ist der Unterschied nicht wahrnehmbar (dE < 3), baulich ist er
+*     der Unterschied zwischen einem Token und einem freien Wert.
+* (2) `.ReviewCount` der Vorlage entfaellt: dieses Element gibt es hier nicht
+*     (es traegt den LIVE geholten Google-Haendlerscore der Qi-Blanco-Welt).
+*     Der Kakao-Zweig der Vorlage benutzt es ebenfalls nicht.
+*
+* KONTRAST NACHGEMESSEN, nicht angenommen: #FFFFFF auf #171310 = 18,64:1
+* (WCAG 2.1, sRGB-Relativluminanz) — weit ueber der AA-Schwelle 4,5:1.
+* Nachrechnen: python3 pruefungen/probe_kakao_naehe.py --kontrast-balken
+*/
+.Header-AnnouncementBanner {
+  width: 100%;
+}
+.Header-AnnouncementBanner a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  color: var(--color-light) !important;
+  transition: 0.2s background linear;
+  background: var(--cc-dunkel, #171310);
+}
+.Header-AnnouncementBanner a p {
+  color: var(--color-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+}
+.Header-AnnouncementBanner a:hover {
+  text-decoration: none;
+  background: #000000;
+}
+/* Two meaning units (line 1 proof, line 2 offer): each stays unbroken, so any
+   wrap happens cleanly between them, never mid-phrase. */
+.Header-AnnouncementBanner .banner-line {
+  white-space: nowrap;
+}
+@media (max-width: 749px) {
+  /* No ellipsis truncation: the units wrap as whole, centered lines. The
+     textual " - " separator is desktop-only; column-gap spaces the units
+     when they still share one line. */
+  .Header-AnnouncementBanner a p {
+    font-size: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 0.4em;
+    row-gap: 0.1em;
+    line-height: 1.45;
+    max-width: 100%;
+  }
+  .Header-AnnouncementBanner .banner-offer-sep {
+    display: none;
+  }
+  .Header-AnnouncementBanner a {
+    padding: 0.5rem 0.75rem;
+  }
+}
+@media (max-width: 374px) {
+  /* very narrow devices: line 1 must fit without overflow */
+  .Header-AnnouncementBanner a p {
+    font-size: 0.7rem;
+  }
+}
