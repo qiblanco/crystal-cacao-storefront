@@ -759,3 +759,107 @@ main h3[style] {
   background: var(--cc-gold);
   color: var(--cc-dunkel);
 }
+
+/* ==== Sterne-Zeile der Kaufseiten (Vendoring-Nachzug 2026-09-02) ==========
+ * ANLASS: die geteilten Routen products.crystal-cacao-awake/-create rendern
+ * die Bewertung seit dem Upstream-Stand 23a0f71 nicht mehr als ★-Textzeichen,
+ * sondern ueber die Komponente app/components/reusables/StarRating.jsx
+ * (fraktionale Fuellung: 4 volle Sterne + der fuenfte zu 80 %).
+ *
+ * WARUM DIESE REGELN HIER STEHEN UND NICHT MITKOPIERT WURDEN — der Punkt,
+ * an dem man es falsch macht: Das Stylesheet ist NICHT Teil des
+ * Vendoring-Manifests. Globales CSS wird von keiner Route importiert, kann
+ * also per Konstruktion nie in der Import-Huelle auftauchen und faellt der
+ * Drift-Wache nicht auf. Die Byte-Gleichheits-Pflicht gilt fuer die Huelle,
+ * nicht fuer diese Datei — hier gilt die Designsprache DIESES Ladens.
+ *
+ * DESHALB DIE EIGENEN TOKEN: die Vorlage haengt an --qb-sterne-gold (#F4B400,
+ * Google-Gelb) und --qb-sterne-leer (#dadce0). Beide fehlen hier, und sie
+ * einzufuehren hiesse, einen ZWEITEN Goldton neben --cc-gold zu stellen —
+ * genau das, was die Farbregel oben ausschliesst. Es ist zugleich die
+ * optisch richtige Wahl: die Bewertungszeile traegt schon heute
+ * --color-accent-primary (.product .product-rating), die alten Glyph-Sterne
+ * erbten also bereits diesen Ton. Gefuellt = var(--cc-gold), leer =
+ * var(--cc-linie). Kein neuer Wert, kein zweiter Akzent.
+ *
+ * KEINE FARBE IM JSX, UND DAS IST ABSICHT: StarRating.jsx setzt bewusst kein
+ * fill-Attribut (Kommentar dort). Fehlt dieser Block, rendern die Sterne
+ * ungefaerbt — die Seite waere dann zwar "synchron", saehe aber kaputt aus.
+ * ======================================================================= */
+
+/* Bedienbarer Traeger der ganzen Zeile. Reiner Button-Reset, KEIN neues
+ * Aussehen: die Optik kommt weiter aus .product-rating. Neu ist nur die
+ * Affordanz — Zeigehand und ein sichtbarer Fokusring. */
+.sterne-sprung {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.sterne-sprung:hover {
+  opacity: 0.85;
+}
+
+/* Nur :focus-visible — ein Mausklick soll keinen Rahmen hinterlassen, die
+ * Tastaturbedienung dagegen sichtbar sein. Ring ueber den bestehenden Token,
+ * kein zweiter Goldton und keine freie Groesse. */
+.sterne-sprung:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* DIE REGEL, OHNE DIE DER NACHZUG DIE ZEILE VERUNSTALTET: Die Bestandsregel
+ * `.product .product-rating span:nth-child(2)` (klein, schwarz) meinte die
+ * NUTZERZAHL. Seit der Glyphen-Migration stehen drei Kinder in der Zeile —
+ * Bewertungszahl, StarRating-Grafik, Nutzerzahl — und das zweite Kind ist
+ * jetzt die GRAFIK. Die Nutzerzahl wird deshalb ueber last-child adressiert.
+ * Die alte nth-child(2)-Regel bleibt stehen und ist auf der Grafik
+ * wirkungslos: das SVG traegt eigene Masse, und `color` faerbt kein `fill`. */
+.product .sterne-sprung.product-rating span:last-child {
+  font-size: var(--cc-fs-2);
+  color: #000;
+  font-weight: 500;
+}
+
+.star-rating {
+  display: inline-flex;
+  gap: 2px;
+  vertical-align: middle;
+}
+
+.star-rating__star {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.star-rating__star svg {
+  display: block;
+}
+
+/* Die beiden Sterntoene — hier und NUR hier. */
+.star-rating__star > svg {
+  fill: var(--cc-linie);
+}
+
+.star-rating__fill > svg {
+  fill: var(--cc-gold);
+}
+
+.star-rating__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow: hidden;
+}
