@@ -197,10 +197,7 @@ const herkunftRows = [
         Nach der Formung geben wir dem Kakao die Zeit, die er braucht: In Ruhe
         kristallisiert er langsam und entwickelt dabei sein charakteristisches
         Kristallmuster – Sinnbild für naturbelassene Qualität, aromatische Tiefe
-        und unsere tiefe Achtung vor dem Ursprung. Während dieser Reifephase
-        setzen wir das <b>QiHome® Air</b> ein: Es schafft eine besondere
-        Atmosphäre, die die Kristallisation begleitet und den Kakao auf seinem
-        Weg zu seiner einzigartigen Struktur unterstützt.
+        und unsere tiefe Achtung vor dem Ursprung.
       </>
     ),
     img: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC02183_1.jpg?v=1764259399',

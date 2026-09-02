@@ -1,12 +1,13 @@
 import {Link, useLoaderData} from 'react-router';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {ABSENDER_MARKE} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Magazin | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `Magazin | ${ABSENDER_MARKE}`}];
 };
 
 /**

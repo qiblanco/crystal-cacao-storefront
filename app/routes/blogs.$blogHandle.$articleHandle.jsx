@@ -1,12 +1,13 @@
 import {useLoaderData} from 'react-router';
 import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {ABSENDER_MARKE} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `${data?.article.title ?? 'Beitrag'} | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `${data?.article.title ?? 'Beitrag'} | ${ABSENDER_MARKE}`}];
 };
 
 /**

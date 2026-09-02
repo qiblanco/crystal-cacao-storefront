@@ -2,12 +2,16 @@ import {Suspense} from 'react';
 import {Await, NavLink, useAsyncValue} from 'react-router';
 import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
 import {useAside} from '~/components/Aside';
+import {ABSENDER_MARKE, KAKAO_MENUE} from '~/lib/kakao-zone';
 
 /**
  * @param {HeaderProps}
  */
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
-  const {shop, menu} = header;
+  // SORTIMENTS-ZAUN (app/lib/kakao-zone.js): `header.shop.name` und
+  // `header.menu` kommen aus dem Shopify-Shop qi-blanco.myshopify.com und
+  // trugen dadurch die fremde Absender-Marke und das fremde Sortiment in die
+  // Kopfzeile JEDER Seite. Beide werden hier bewusst nicht mehr gelesen.
   return (
     <header className="header">
       <NavLink
@@ -15,13 +19,13 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
         prefetch="intent"
         to="/"
         style={activeLinkStyle}
-        title={shop.name}
+        title={ABSENDER_MARKE}
         end
       >
-        <strong>{shop.name}</strong>
+        <strong>{ABSENDER_MARKE}</strong>
       </NavLink>
       <HeaderMenu
-        menu={menu}
+        menu={KAKAO_MENUE}
         viewport="desktop"
         primaryDomainUrl={header.shop.primaryDomain.url}
         publicStoreDomain={publicStoreDomain}
@@ -61,7 +65,7 @@ export function HeaderMenu({
           Home
         </NavLink>
       )}
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
+      {(menu || KAKAO_MENUE).items.map((item) => {
         if (!item.url) return null;
 
         // if the url is internal, we strip the domain

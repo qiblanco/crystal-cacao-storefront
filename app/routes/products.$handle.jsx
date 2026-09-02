@@ -11,13 +11,14 @@ import {ProductPrice} from '~/components/ProductPrice';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {istKakaoProdukt, fremdinhaltAbweisen, ABSENDER_MARKE} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
   return [
-    {title: `${data?.product.title ?? 'Produkt'} | Qi Blanco UG (haftungsbeschränkt)`},
+    {title: `${data?.product.title ?? 'Produkt'} | ${ABSENDER_MARKE}`},
     {
       rel: 'canonical',
       href: `/products/${data?.product.handle}`,
@@ -60,6 +61,14 @@ async function loadCriticalData({context, params, request}) {
 
   if (!product?.id) {
     throw new Response(null, {status: 404});
+  }
+
+  // SORTIMENTS-ZAUN: der Shopify-Katalog hinter dieser Storefront führt auch
+  // die Energieprodukte (QiOne, QiBracelet, QiHome Air). Ohne diese Prüfung
+  // liefert /products/qione-2-pro hier HTTP 200 mit voll gerenderter
+  // Fremdproduktseite — gemessen 2026-09-02, 26497 Bytes.
+  if (!istKakaoProdukt(product.collections?.nodes?.map((k) => k.handle))) {
+    throw fremdinhaltAbweisen();
   }
 
   // The API handle might be localized, so redirect to the localized handle
@@ -228,6 +237,14 @@ const PRODUCT_FRAGMENT = `#graphql
     seo {
       description
       title
+    }
+    # SORTIMENTS-ZAUN (app/lib/kakao-zone.js): entscheidet im Loader, ob dieses
+    # Produkt zum Kakao-Sortiment gehört. Bewusst hier mitgezogen und NICHT als
+    # zweite Query — die Mitgliedschaftsprüfung kostet so keinen Round-Trip.
+    collections(first: 50) {
+      nodes {
+        handle
+      }
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}

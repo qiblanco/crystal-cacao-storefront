@@ -1,10 +1,11 @@
 import {Link, useLoaderData} from 'react-router';
+import {ABSENDER_MARKE} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `${data?.policy.title ?? 'Rechtliches'} | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `${data?.policy.title ?? 'Rechtliches'} | ${ABSENDER_MARKE}`}];
 };
 
 /**

@@ -51,18 +51,24 @@
     },
     {
       "upstream": "app/components/product-pages/Awake.jsx",
-      "klasse": "K1",
-      "sha256": "69d298af4ee122f934122295dd7a38457260c5de4d4146f13116c11bbca72876"
+      "klasse": "K2",
+      "sha256_upstream": "69d298af4ee122f934122295dd7a38457260c5de4d4146f13116c11bbca72876",
+      "sha256_lokal": "b81f907e7d67994d227ca2596c1404ffdad99dee597ccb908653190fa0c9a279",
+      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02). Die Vorlage schreibt die Reifephase der \"harmonisierenden QiHome(R) Air Atmosphaere\" und der \"GitterChip(TM)-Technologie\" zu — Werbung fuer Fremdprodukte auf einer Kakao-Kaufseite. Lokal bleibt die Aussage ueber das langsame Auskristallisieren erhalten, ohne die Fremdtechnik. Dieselbe Begruendung wie Kakao.jsx: in der Vorlage ist der Satz richtig, hier nicht."
     },
     {
       "upstream": "app/components/product-pages/Create.jsx",
-      "klasse": "K1",
-      "sha256": "02ec973e6292073d5d95caf7ea70c6b56269e0e9b69838ad2e6a0e8412452667"
+      "klasse": "K2",
+      "sha256_upstream": "02ec973e6292073d5d95caf7ea70c6b56269e0e9b69838ad2e6a0e8412452667",
+      "sha256_lokal": "e162e161b9a9a52a55a98e1662baf262f36a4faeee373e2002fe7228e5b9c8e0",
+      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02). Die Vorlage setzt in der Reifephase \"das QiHome(R) Air\" ein. Lokal ersatzlos gestrichen; die umgebende Aussage ueber Kristallmuster und Ursprung bleibt unveraendert. Dieselbe Begruendung wie Kakao.jsx."
     },
     {
       "upstream": "app/components/product-pages/Kakao.jsx",
-      "klasse": "K1",
-      "sha256": "44048313364a9530633885bbe6bb4b9dba22d28d3386262a81b4319c35dc1141"
+      "klasse": "K2",
+      "sha256_upstream": "44048313364a9530633885bbe6bb4b9dba22d28d3386262a81b4319c35dc1141",
+      "sha256_lokal": "afb18ca0ffb1b7981954fa7baef2afa9aef71c277cbe182c0902c799283fe575",
+      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02, Christian: \"da ist auch noch QiHome-Werbung drauf\"). Die Vorlage bewirbt im Block \"Wusstest du?\" woertlich die QiHome(R) Air-Technologie und verweist auf QiOne(R) und QiBracelet(R); der alt-Text eines Video-Titelbilds lautete \"Bild von einer Frau mit QiOne und QiBracelet\". Auf einem Kakao-Shop ist das Werbung fuer ein fremdes Sortiment. Byte-Gleichheit ist hier baulich unmoeglich, weil die Vorlage in der Qi-Blanco-Welt steht, wo genau diese Saetze RICHTIG sind — die Abweichung ist der Zweck der Datei, nicht ihr Mangel. Ersetzt wurde durch eine kakao-eigene Prozessaussage (langsames Auskristallisieren) ohne neue Wirkzusage."
     },
     {
       "upstream": "app/components/reusables/ActiveCampaignForm.jsx",
@@ -91,8 +97,10 @@
     },
     {
       "upstream": "app/data/product-faqs.js",
-      "klasse": "K1",
-      "sha256": "871523994923fe0e31e25c34e9f06110dab33cc475e41f580b904aa03dc253cb"
+      "klasse": "K2",
+      "sha256_upstream": "871523994923fe0e31e25c34e9f06110dab33cc475e41f580b904aa03dc253cb",
+      "sha256_lokal": "fa85fcd51b5ab49840ae757bc5a637afebec66f9db4550c8f1629009e07772b9",
+      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02), zwei verschiedene Faelle in einer Datei. (1) Die vier Konstanten FAQ_QIONE_2_PRO, FAQ_QIBRACELET, FAQ_QIHOME_AIR und FAQ_QIONE_KETTE waren in crystal TOTER CODE — gemessen 2026-09-02 importierte sie keine Datei, die einzigen Importeure holen nur FAQ_CACAO. (2) In FAQ_CACAO stand dagegen ein LIVE gerenderter Eintrag \"Welche Effekte entstehen durch die Kombination von Qi Blanco(R)-Produkten und zeremoniellem Kakao?\" mit Gitterchip- und Kohaerenz-Aussage; er stand ueber FAQ_CACAO auf beiden Kakao-Kaufseiten. Beides in der Qi-Blanco-Vorlage sachgerecht, im Kakao-Laden nicht."
     },
     {
       "upstream": "app/lib/cart-display-pricing.js",
@@ -111,8 +119,10 @@
     },
     {
       "upstream": "app/lib/kakao-zone.js",
-      "klasse": "K1",
-      "sha256": "6cff87887abedcefcd5d1d6320b0253a98b9626f2619c0bef7f384d646e71c21"
+      "klasse": "K2",
+      "sha256_upstream": "6cff87887abedcefcd5d1d6320b0253a98b9626f2619c0bef7f384d646e71c21",
+      "sha256_lokal": "b796e41b7a311bfe27987040a4a73bd0141bf0a2f56a0f43cdd051d1e922b14c",
+      "abweichung_grund": "Traegt seit Job 20260902-…-prio6-s02 zusaetzlich den SORTIMENTS-ZAUN dieser Storefront: KAKAO_KOLLEKTION/KAKAO_KOLLEKTIONEN/KAKAO_SEITEN, die Praedikate istKakaoProdukt/istKakaoKollektion/istKakaoSeite, die Absender-Marke ABSENDER_MARKE sowie KAKAO_MENUE sowie KAKAO_FUSSMENUE. Grund: die Hydrogen-Catch-all-Routen fragten den geteilten Shopify-Katalog ungefiltert ab, wodurch /products/qione-2-pro, /pages/studien und /collections/all auf crystal-cacao.com mit HTTP 200 und voll gerendertem Fremdinhalt antworteten. Diese Begriffe haben in der qiblanco-Vorlage keinen Gegenstand — dort IST das Sortiment das eigene. Byte-Gleichheit ist damit baulich unmoeglich."
     },
     {
       "upstream": "app/lib/markt-pricing.js",

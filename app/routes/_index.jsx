@@ -3,12 +3,13 @@ import {Suspense} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
 import {MockShopNotice} from '~/components/MockShopNotice';
+import {ABSENDER_MARKE, KAKAO_KOLLEKTION} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Crystal Cacao® – Bio-Kakao | Qi Blanco UG (haftungsbeschränkt)'}];
+  return [{title: `${ABSENDER_MARKE} – Bio-Kakao aus zeremonieller Ernte`}];
 };
 
 /**
@@ -30,14 +31,16 @@ export async function loader(args) {
  * @param {Route.LoaderArgs}
  */
 async function loadCriticalData({context}) {
-  const [{collections}] = await Promise.all([
-    context.storefront.query(FEATURED_COLLECTION_QUERY),
+  const [{collection}] = await Promise.all([
+    context.storefront.query(FEATURED_COLLECTION_QUERY, {
+      variables: {handle: KAKAO_KOLLEKTION},
+    }),
     // Add other queries here, so that they are loaded in parallel
   ]);
 
   return {
     isShopLinked: Boolean(context.env.PUBLIC_STORE_DOMAIN),
-    featuredCollection: collections.nodes[0],
+    featuredCollection: collection,
   };
 }
 
@@ -49,7 +52,7 @@ async function loadCriticalData({context}) {
  */
 function loadDeferredData({context}) {
   const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
+    .query(RECOMMENDED_PRODUCTS_QUERY, {variables: {handle: KAKAO_KOLLEKTION}})
     .catch((error) => {
       // Log query errors, but don't throw them so the page can still render
       console.error(error);
@@ -116,8 +119,8 @@ function RecommendedProducts({products}) {
         <Await resolve={products}>
           {(response) => (
             <div className="recommended-products-grid">
-              {response
-                ? response.products.nodes.map((product) => (
+              {response?.collection
+                ? response.collection.products.nodes.map((product) => (
                     <ProductItem key={product.id} product={product} />
                   ))
                 : null}
@@ -130,6 +133,18 @@ function RecommendedProducts({products}) {
   );
 }
 
+// SORTIMENTS-ZAUN AN DER STARTSEITE — der Grund steht in app/lib/kakao-zone.js.
+//
+// VORHER standen hier die unveränderten Hydrogen-Schablonen-Queries:
+//   collections(first: 1, sortKey: UPDATED_AT, reverse: true)
+//   products(first: 4,   sortKey: UPDATED_AT, reverse: true)
+// Sie fragen nicht nach SORTIMENT, sondern nach AKTUALITÄT — über den ganzen
+// Shopify-Katalog, der auch die Energieprodukte führt. Am 2026-09-02 zeigte die
+// Startseite deshalb zufällig Kakao (weil Kakao zuletzt bearbeitet worden war);
+// EINE Produktbearbeitung an QiOne/QiBracelet/QiHome Air im Admin hätte das
+// Fremdsortiment ohne jede Code-Änderung auf die Kakao-Startseite gestellt.
+// Eine Probe, die den damaligen Zustand misst, wäre grün gewesen und hätte
+// nichts bewiesen. Deshalb bindet die Query jetzt die KOLLEKTION, nicht die Zeit.
 const FEATURED_COLLECTION_QUERY = `#graphql
   fragment FeaturedCollection on Collection {
     id
@@ -143,12 +158,10 @@ const FEATURED_COLLECTION_QUERY = `#graphql
     }
     handle
   }
-  query FeaturedCollection($country: CountryCode, $language: LanguageCode)
+  query FeaturedCollection($country: CountryCode, $language: LanguageCode, $handle: String!)
     @inContext(country: $country, language: $language) {
-    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {
-      nodes {
-        ...FeaturedCollection
-      }
+    collection(handle: $handle) {
+      ...FeaturedCollection
     }
   }
 `;
@@ -172,11 +185,13 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       height
     }
   }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+  query RecommendedProducts ($country: CountryCode, $language: LanguageCode, $handle: String!)
     @inContext(country: $country, language: $language) {
-    products(first: 4, sortKey: UPDATED_AT, reverse: true) {
-      nodes {
-        ...RecommendedProduct
+    collection(handle: $handle) {
+      products(first: 4) {
+        nodes {
+          ...RecommendedProduct
+        }
       }
     }
   }

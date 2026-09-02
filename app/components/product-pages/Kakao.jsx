@@ -48,8 +48,11 @@ export function Kakao() {
 
       <div className="my-[10vh]! NormalSectionSize">
         <h2>Wusstest du?</h2>
-        <p>Unser Kakao wird in einer strukturierten Umgebung mit der QiHome® Air-Technologie verarbeitet – einer innovativen Lösung, die ein harmonisches Feld erzeugt und die Qualität natürlicher Rohstoffe in ihrer feinen Struktur unterstützen kann.</p>
-        <p>👉 Erfahre mehr über unsere unterstützenden Tools – wie der QiOne® oder das QiBracelet® – und entdecke, wie du dein eigenes Umfeld energetisch stärken und bewusster gestalten kannst.</p>
+        <p>Nach dem Vermahlen bekommt unser Kakao Zeit statt Tempo: Er ruht,
+        bis er langsam auskristallisiert – daher das feine Kristallmuster, das
+        du im Bruch der Tafel siehst.</p>
+        <p>👉 Wie du ihn zubereitest und welche Sorte zu dir passt, findest du
+        bei AWAKE und CREATE.</p>
       </div>
     </div>
   );
@@ -563,7 +566,7 @@ function KursRegistration() {
 const videos = [
   {
     src: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001190-Kopie-1024x589_jpg.webp?v=1666617198',
-    alt: 'Bild von einer Frau mit QiOne und QiBracelet',
+    alt: 'Titelbild zum Video „Intuition erfahren“',
     title:
       'Video 1: Intuition erfahren - Raus aus dem Kopf, rein ins Herz! – 9 min',
     items: [

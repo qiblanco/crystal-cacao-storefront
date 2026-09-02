@@ -205,10 +205,9 @@ const herkunftRows = [
           Block <b>Bio Kristall Kakao®.</b>
         </p>
         <p className="mt-3">
-          Nach der Formung geben wir dem Kakao die Zeit, die er braucht: In der
-          harmonisierenden <b>QiHome® Air</b> Atmosphäre – unterstützt durch
-          die <b>GitterChip™-Technologie</b> – kristallisiert er langsam aus
-          und entfaltet dabei sein charakteristisches Kristallmuster.
+          Nach der Formung geben wir dem Kakao die Zeit, die er braucht: In
+          Ruhe kristallisiert er langsam aus und entfaltet dabei sein
+          charakteristisches Kristallmuster.
         </p>
       </>
     ),

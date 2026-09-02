@@ -2,12 +2,13 @@ import {useLoaderData, data} from 'react-router';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 import {persistAttributionOnCartResult} from '~/lib/cart-attribution.server';
+import {ABSENDER_MARKE} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Warenkorb | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `Warenkorb | ${ABSENDER_MARKE}`}];
 };
 
 /**

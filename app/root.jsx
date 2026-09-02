@@ -10,7 +10,7 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import favicon from '~/assets/favicon.svg';
-import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import {HEADER_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import kakaoStyles from '~/styles/kakao-seiten.css?url';
@@ -147,11 +147,10 @@ async function loadCriticalData({context}) {
   const {storefront} = context;
 
   const [header] = await Promise.all([
+    // SORTIMENTS-ZAUN: ohne headerMenuHandle — das Fremdmenü `main-menu` wird
+    // nicht mehr geholt (Begründung in app/lib/fragments.js).
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
-      variables: {
-        headerMenuHandle: 'main-menu', // Adjust to your header menu handle
-      },
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
@@ -168,23 +167,15 @@ async function loadCriticalData({context}) {
 function loadDeferredData({context}) {
   const {storefront, customerAccount, cart} = context;
 
-  // defer the footer query (below the fold)
-  const footer = storefront
-    .query(FOOTER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {
-        footerMenuHandle: 'footer', // Adjust to your footer menu handle
-      },
-    })
-    .catch((error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
+  // SORTIMENTS-ZAUN: die Fußzeilen-Abfrage entfällt vollständig. Sie holte das
+  // Shopify-Menü `footer` des Fremdshops samt Links auf checkout.qiblanco.com;
+  // die Fußzeile rendert jetzt KAKAO_FUSSMENUE aus app/lib/kakao-zone.js.
+  // `footer` bleibt als aufgelöstes null im Vertrag, damit PageLayout und
+  // Footer unverändert weiterlaufen (beide warten ohnehin auf ein Promise).
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
+    footer: Promise.resolve(null),
   };
 }
 

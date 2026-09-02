@@ -3,12 +3,13 @@ import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {SearchForm} from '~/components/SearchForm';
 import {SearchResults} from '~/components/SearchResults';
 import {getEmptyPredictiveSearchResult} from '~/lib/search';
+import {ABSENDER_MARKE, istKakaoProdukt, istKakaoSeite, istKakaoKollektion} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Suche | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `Suche | ${ABSENDER_MARKE}`}];
 };
 
 /**
@@ -87,6 +88,13 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
     title
     trackingParameters
     vendor
+    # SORTIMENTS-ZAUN (app/lib/kakao-zone.js): mitgezogen, damit der Loader
+    # Fremdtreffer verwerfen kann, ohne eine zweite Query zu fahren.
+    collections(first: 50) {
+      nodes {
+        handle
+      }
+    }
     selectedOrFirstAvailableVariant(
       selectedOptions: []
       ignoreUnknownOptions: true
@@ -230,7 +238,13 @@ async function regularSearch({request, context}) {
     throw new Error('Die Suche lieferte keine Daten von Shopify zurück');
   }
 
-  const total = Object.values(items).reduce(
+  // SORTIMENTS-ZAUN: die Shopify-Suche durchsucht den GANZEN Katalog hinter
+  // dieser Storefront, also auch die Energieprodukte. Gemessen 2026-09-02 gab
+  // /search?q=qione hier 38 sichtbare Fremdnennungen. Gefiltert wird NACH der
+  // Abfrage, weil die Storefront-Suche kein Kollektions-Prädikat kennt.
+  const gefiltert = nurKakaoTreffer(items);
+
+  const total = Object.values(gefiltert).reduce(
     (acc, {nodes}) => acc + nodes.length,
     0,
   );
@@ -239,7 +253,32 @@ async function regularSearch({request, context}) {
     ? errors.map(({message}) => message).join(', ')
     : undefined;
 
-  return {type: 'regular', term, error, result: {total, items}};
+  return {type: 'regular', term, error, result: {total, items: gefiltert}};
+}
+
+/**
+ * Wirft aus einem Shopify-Suchergebnis alles heraus, was nicht zur Kakao-Welt
+ * gehört: Produkte über die Kollektions-Mitgliedschaft, Seiten über die
+ * Seiten-Allowlist. ARTIKEL bleiben unangetastet — das Magazin ist eine eigene
+ * Fläche und wird in diesem Segment bewusst nicht mitentschieden (siehe RESULT).
+ * Die Form des Ergebnisses ({nodes: [...]} je Gattung) bleibt erhalten, damit
+ * die Zähl- und Anzeigelogik unverändert weiterläuft.
+ */
+function nurKakaoTreffer(items) {
+  const raus = {};
+  for (const [gattung, wert] of Object.entries(items)) {
+    const nodes = wert?.nodes ?? [];
+    let behalten = nodes;
+    if (gattung === 'products') {
+      behalten = nodes.filter((n) =>
+        istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)),
+      );
+    } else if (gattung === 'pages') {
+      behalten = nodes.filter((n) => istKakaoSeite(n?.handle));
+    }
+    raus[gattung] = {...wert, nodes: behalten};
+  }
+  return raus;
 }
 
 /**
@@ -298,6 +337,12 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
     title
     handle
     trackingParameters
+    # SORTIMENTS-ZAUN (app/lib/kakao-zone.js) — siehe SearchProduct.
+    collections(first: 50) {
+      nodes {
+        handle
+      }
+    }
     selectedOrFirstAvailableVariant(
       selectedOptions: []
       ignoreUnknownOptions: true
@@ -407,12 +452,36 @@ async function predictiveSearch({request, context}) {
     throw new Error('Die Sucheingabe lieferte keine Daten von Shopify zurück');
   }
 
-  const total = Object.values(items).reduce(
-    (acc, item) => acc + item.length,
+  // SORTIMENTS-ZAUN, auch hier: die Sucheingabe im Kopf ist derselbe Katalog.
+  // Die Vorschlagsliste liefert je Gattung ein ARRAY (nicht {nodes}), deshalb
+  // ein eigener Zweig statt nurKakaoTreffer().
+  const gefiltert = Object.fromEntries(
+    Object.entries(items).map(([gattung, liste]) => {
+      if (!Array.isArray(liste)) return [gattung, liste];
+      if (gattung === 'products') {
+        return [
+          gattung,
+          liste.filter((n) =>
+            istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)),
+          ),
+        ];
+      }
+      if (gattung === 'pages') {
+        return [gattung, liste.filter((n) => istKakaoSeite(n?.handle))];
+      }
+      if (gattung === 'collections') {
+        return [gattung, liste.filter((n) => istKakaoKollektion(n?.handle))];
+      }
+      return [gattung, liste];
+    }),
+  );
+
+  const total = Object.values(gefiltert).reduce(
+    (acc, item) => acc + (Array.isArray(item) ? item.length : 0),
     0,
   );
 
-  return {type, term, result: {items, total}};
+  return {type, term, result: {items: gefiltert, total}};
 }
 
 /** @typedef {import('./+types/search').Route} Route */
