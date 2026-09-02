@@ -119,6 +119,198 @@
 
   /* ---- Lesbarkeit: Zeilenlaenge (web-soll zeilenlaenge_ch_max 75) ---- */
   --cc-zeile-max: 70ch;
+
+  /* ======================================================================
+   * AB HIER: AUS DEN VERPACKUNGSBILDERN GEMESSEN (Segment s03, 2026-09-02)
+   * ======================================================================
+   * Christian: "Gerne darf die Seite einen passenden Farbton bekommen,
+   * ABGELEITET von den Verpackungsbildern. Achtung: Awake und Create haben
+   * zwei unterschiedliche Farbgebungen im Namen — blau und rot/rosa.
+   * Auswerten und dezent entsprechend nutzen."
+   *
+   * WERKZEUG UND NACHRECHENBARKEIT: pruefungen/farbmessung_verpackung.py.
+   * k-means in CIELAB mit festem Seed 42 — dieselbe Mechanik wie
+   * design-meister/src/bildsprache.py (dort wiederverwendet, nicht
+   * nachgebaut). Jeder Wert unten steht mit Hex, Flaechenanteil und Bild.
+   * Ein `python3 pruefungen/farbmessung_verpackung.py` rechnet alles nach.
+   *
+   * WELCHE BILDER — UND WELCHE AUSDRUECKLICH NICHT: gemessen wurde
+   * ausschliesslich an Bildern aus dem Shopify-PRODUKTDATENSATZ der beiden
+   * Sorten. Die Black-Friday-Kompositionen (2x-Awake.webp, 2x-Create-BF.webp,
+   * Create_Awake.png) sind BEWUSST ausgeschlossen: Schneeszene, rote
+   * Laserstrahlen, farbiges Licht auf der Tuete — eine Messung darauf misst
+   * die Kampagne, nicht die Verpackung. Der Studiogrund der benutzten Bilder
+   * ist als Farbstich-Kontrolle MITGEMESSEN: #DBD6D2, CIELAB L*85.91 a*1.00
+   * b*2.58, Chroma 2.77, Eckstreuung 0.00 RGB — neutral, kein Licht, das
+   * eine Farbe verschieben koennte.
+   * ---------------------------------------------------------------------- */
+
+  /* ---- Kraftpapier: der DOMINANTESTE Ton der Verpackung ----
+   * Gemessen an der freigestellten Tuete (Maske: CIELAB-Abstand > 10 zum
+   * Studiogrund; Tuete = 44,7 % der Bildflaeche). Beide Sorten liefern
+   * praktisch dieselben Werte — sie bestaetigen sich gegenseitig:
+   *   mittel  #BE9A74 (awake, 32,8 %) / #BD9B79 (create, 33,9 %)
+   *   hell    #D8C2A8 (19,1 %)        / #D6C4AB (17,4 %)
+   *   tief    #876444  (9,6 %)        / #815F41  (9,3 %)
+   * Die Token sind das CIELAB-Mittel beider Sorten — der Kakaobeutel ist
+   * derselbe, die Sorte steckt im Etikett, nicht im Papier.
+   * WARUM DAS UEBERHAUPT NEU IST: das warme Neutral-Kontinuum oben war
+   * richtig gewaehlt, aber es hatte fuer den dominantesten Ton der ganzen
+   * Verpackung KEINEN Token — Abstand --cc-flaeche zum Kraftpapier: dE 20,0.
+   * Genau hier fehlte die Ableitung. */
+  --cc-kraft: #BE9A77;        /* Lab(66.05, 8.49, 23.44) */
+  --cc-kraft-hell: #D7C3A9;   /* Lab(79.81, 2.93, 15.64) */
+  --cc-kraft-tief: #846142;   /* Lab(44.02, 10.15, 23.17) — NUR mit heller
+                               * Schrift: --cc-grund darauf 5,26:1;
+                               * --cc-text darauf nur 2,57:1. */
+
+  /* ---- Sortenfarbe: gemessen an der Wortmarke, je Sorte dreimal ----
+   * AWAKE = ROSA/MAGENTA, Farbton-Spanne ueber drei Messungen 1,0 Grad:
+   *   #D94076 HSL(338.8, 66.8%, 55.1%) Lab(51.53, 62.88, 4.34) — Rueckseiten-
+   *           Etikett, 27,5 % des Ausschnitts (der sauberste Fall: planar,
+   *           heller Grund)
+   *   #B53D66 HSL(339.5, 49.6%, 47.5%) — Vorderseite auf schwarzem Etikett
+   *   #CA4773 HSL(339.8, 55.3%, 53.5%) — freigestellte Tuete, 3,0 %
+   * CREATE = BLAU, Spanne 3,5 Grad:
+   *   #5BA3F8 HSL(212.5, 91.8%, 66.5%) Lab(65.90, 3.14, -49.08) — Rueckseite
+   *   #3792E7 HSL(209.0, 78.6%, 56.1%) — Vorderseite
+   *   #3E7EC3 HSL(211.1, 52.6%, 50.4%) — freigestellte Tuete, 2,9 %
+   * Die beiden Sorten liegen 128,5 Farbton-Grad auseinander.
+   *
+   * WIDERSPRUCH ZUR AUFTRAGS-VORGABE, OFFEN AUSGEWIESEN UND NICHT STILL
+   * UMGEDREHT: Christian gibt "Awake blau, Create rot/rosa" vor. Gemessen
+   * ist es umgekehrt — und zwar an vier sauberen Studiobildern, Vorder- wie
+   * Rueckseite beider Sorten, ohne farbige Beleuchtung. Ein Restwarmstich von
+   * b*=+2,6 kann 128 Farbton-Grad weder erzeugen noch umkehren; die Messung
+   * ist damit nicht interpretierbar. Die Token tragen die GEMESSENE Farbe,
+   * weil eine Seite, die Awake blau faerbt, waehrend die Tuete in der Hand
+   * des Kunden rosa ist, ihm am Regal widerspricht. Will Christian es
+   * anders, ist das ein Tausch DIESER ZWEI ZEILEN — deshalb steht jede
+   * Sortenfarbe genau einmal. Der Befund liegt in jobmem als offene Flanke
+   * und im RESULT von s03. */
+  --cc-sorte-awake: #D94076;
+  --cc-sorte-create: #5BA3F8;
+
+  /* ---- Dieselbe Farbe, lesbar gemacht ----
+   * DIE FALLE, UND SIE IST GEMESSEN: der rohe Messton traegt auf hellem
+   * Grund KEINEN Text. #D94076 erreicht auf --cc-grund 4,01:1 und auf
+   * --cc-flaeche 3,78:1 (AA verlangt 4,5:1); #5BA3F8 nur 2,47:1 bzw. 2,32:1
+   * und reisst damit sogar die 3:1-Schwelle fuer UI und grosse Schrift. Auch
+   * die Gegenrichtung faellt durch: helle Schrift auf roher Sorten-Fuellung
+   * gibt 4,01:1 (awake) bzw. 2,47:1 (create).
+   * WARUM DAS SO SEIN MUSS: auf der Tuete sitzt die Wortmarke auf dem
+   * SCHWARZEN Etikett, nie auf Papier. Dort traegt sie muehelos (awake
+   * 4,35:1, create 7,07:1 auf --cc-dunkel, beide ueber der 3:1-UI-Schwelle).
+   * Wer die Farbe von dort auf eine helle Seite umzieht, uebernimmt sie ohne
+   * ihren Grund.
+   * ABLEITUNGSREGEL: Farbton-Winkel bleibt, L* sinkt in CIELAB, bis 4,5:1
+   * auf BEIDEN hellen Grundtoenen haelt, Chroma wird leicht mitgefuehrt.
+   *   awake  L* 51,5 -> 46,7, Chroma x0,90 -> #C23C6B (Hue 339,0 statt 339,4)
+   *   create L* 65,9 -> 46,5, Chroma x0,95 -> #1771BD (Hue 207,5 statt 210,9)
+   * Ehrlich dazu: Create wandert um 3,4 Farbton-Grad — das liegt INNERHALB
+   * der Streuung, die die drei Messungen dieser Sorte selbst haben (3,5
+   * Grad). Es ist derselbe Ton im Rahmen seiner eigenen Messunsicherheit,
+   * kein neuer. */
+  --cc-sorte-awake-text: #C23C6B;    /* 4,78:1 / 4,50:1 auf grund/flaeche */
+  --cc-sorte-create-text: #1771BD;   /* 4,80:1 / 4,52:1 */
+  --cc-sorte-awake-flaeche: #FFF0F5; /* --cc-text darauf 12,98:1 */
+  --cc-sorte-create-flaeche: #F0F7FF;/* --cc-text darauf 13,27:1 */
+
+  /* ---- Dieselbe Ableitung fuer den Goldton ----
+   * BEIM MESSEN DER SORTENFARBE MIT AUFGEFALLEN, und es ist derselbe Fehler
+   * eine Etage hoeher: --cc-gold #F2BF72 ist ein FLAECHEN-Ton (auf
+   * --cc-dunkel 10,97:1, tadellos) und traegt auf HELLEM Grund keinen Text.
+   * Gemessen am gerenderten DOM mit design-meister/bin/kontrast-sweep: die
+   * Bewertungszahl "4,9" der Kaufseiten steht in genau diesem Gold auf Weiss
+   * und erreicht 1,68:1 — sie ist praktisch unsichtbar, obwohl sie eine
+   * Information traegt. Das ist kein zweiter Akzent, sondern DERSELBE Akzent
+   * in lesbar: gleicher Farbton-Winkel, L* gesenkt bis 4,5:1 auf Weiss UND
+   * auf beiden hellen Grundtoenen haelt (L* 80,4 -> 46,6, Chroma unveraendert,
+   * Hue 38,6 statt 36,1 Grad).
+   * ABGRENZUNG, damit hier niemand ueber eine fremde Entscheidung faehrt: die
+   * gefuellten Stern-GRAFIKEN behalten var(--cc-gold). Ihre Farbe ist eine
+   * ausdrueckliche Entscheidung des Sterne-Vertrags weiter unten in dieser
+   * Datei; sie sind Grafik, nicht Text, und ich drehe sie nicht im
+   * Vorbeigehen um. Der Befund dazu steht im RESULT von s03. */
+  --cc-gold-text: #90671D;    /* 5,07:1 auf Weiss · 4,79:1 auf --cc-grund */
+
+  /* GEMESSEN, ABER BEWUSST NICHT EINGEBAUT: das Gold der Art-Deco-Zeichnung
+   * auf der Tuete ist #D49529, Lab(66.26, 14.76, 61.84), 2,4 % der Flaeche —
+   * es unterscheidet sich vom Bestands-Token --cc-gold #F2BF72 um dE 22,3,
+   * ist also wirklich ein anderer Ton. Er kommt TROTZDEM nicht herein:
+   * web-soll.yaml setzt akzent_farben_max 1, und --cc-gold ist der bewusst
+   * gewaehlte Verwandtschafts-Anker zu qiblanco.com (dort real ausgeliefert).
+   * Ein zweiter Goldton haette die Design-Pflicht verletzt — durch den
+   * Versuch, sie zu erfuellen. Die Frage "Marken-Gold vs Web-Gold" ist als
+   * offene Frage gold-akzent-web-vs-marke gefuehrt (web-dach.yaml,
+   * zustaendig: Christian) und wird hier nicht entschieden. */
+}
+
+/* ==========================================================================
+ * SORTEN-SCHALTER — genau EINE Sortenfarbe je Seite
+ * ==========================================================================
+ * Gesetzt wird das Attribut in app/root.jsx aus sorteZuPfad() der SSoT
+ * app/lib/kakao-zone.js. Ohne Attribut faellt der Akzent auf den Goldton
+ * zurueck: eine Seite ohne Sorte (die Uebersicht /pages/crystal-cacao)
+ * bleibt bewusst neutral und zeigt beide Sorten gleichberechtigt.
+ *
+ * WAS "DEZENT" HIER KONKRET HEISST — und woran man es nachmisst:
+ * der Sortenakzent darf NUR an Handlung (Knopf, Link), Zustand
+ * (aktiv/ausgewaehlt) und Sortenkennung. Flaeche und Fliesstext bleiben
+ * ruhig; es gibt bewusst KEINE Regel, die --cc-sorte-* auf `background` einer
+ * grossen Flaeche legt. Damit bleibt der Flaechenanteil des Akzents strukturell
+ * klein — das ist die Groesse, an der der Design-Meister "dezent" misst
+ * (soll_signale saettigung_max 0.52).
+ *
+ * ZUR ZAHL DER AKZENTE, ehrlich: web-soll.yaml sagt akzent_farben_max 1.
+ * Eine gerenderte Seite traegt hier Gold PLUS eine Sortenfarbe, also zwei.
+ * Das ist eine bewusste, benannte Abweichung auf Christians ausdrueckliche
+ * Anweisung ("zwei unterschiedliche Farbgebungen … dezent entsprechend
+ * nutzen") — explizite Auftrags-Vorgabe sticht das Profil-Muster. Sie ist
+ * eng gefasst: die zwei Sortentoene sind NIE gleichzeitig aktiv (das
+ * Attribut traegt genau einen Wert), und der Sortenakzent uebernimmt nie die
+ * Rolle des Goldes am Kaufknopf. */
+:root {
+  --cc-sorte: var(--cc-gold);
+  --cc-sorte-text: var(--cc-gold-tief);
+  --cc-sorte-flaeche: var(--cc-flaeche);
+}
+[data-cc-sorte='awake'] {
+  --cc-sorte: var(--cc-sorte-awake);
+  --cc-sorte-text: var(--cc-sorte-awake-text);
+  --cc-sorte-flaeche: var(--cc-sorte-awake-flaeche);
+}
+[data-cc-sorte='create'] {
+  --cc-sorte: var(--cc-sorte-create);
+  --cc-sorte-text: var(--cc-sorte-create-text);
+  --cc-sorte-flaeche: var(--cc-sorte-create-flaeche);
+}
+
+/* DIE EINE ANWENDUNG, DIE s03 SELBST VORNIMMT — und warum es genau eine ist.
+ * Der Auftrag trennt sauber: s03 baut und BELEGT die Token, s04 uebertraegt
+ * die Kakao-Seiten, s05 gleicht die uebrigen an. Ein Token, der nirgends
+ * malt, ist aber kein Beleg, sondern eine leere Huelle — genau der Fall, an
+ * dem der Blog-Vorfall vom 2026-08-31 haengt (Erreichbarkeit ist nicht
+ * Inhalt). Also: GENAU EIN sichtbarer Einsatz, und zwar an dem Element, das
+ * seiner Natur nach die SORTENKENNUNG ist — die Claim-Zeile ueber dem
+ * Produktnamen ("Wach. Mutig. Kraftvoll." bzw. das Create-Gegenstueck).
+ * Die Flaeche bleibt unberuehrt, der Fliesstext bleibt --cc-text, der
+ * Kaufknopf behaelt sein Gold. Wie weit die Sortenfarbe darueber hinaus
+ * geht, entscheidet s04 — nicht diese Zeile.
+ *
+ * WARUM PER CSS UND NICHT IM MARKUP: die Claim-Zeile steht in
+ * app/routes/products.crystal-cacao-{awake,create}.jsx, und die sind K1
+ * (byte-gleich zur Vorlage). Ein Eingriff dort waere Vendoring-Drift und
+ * beim naechsten Nachzug still weg.
+ *
+ * WARUM DIESER SELEKTOR UND NICHT h2:first-of-type: `:first-of-type` gilt JE
+ * ELTERNKNOTEN — es haette jede erste h2 in jedem Container eingefaerbt, also
+ * quer ueber die ganze Seite. Der Anker `.items-center-justify-center` ist
+ * dagegen nachgemessen eindeutig: er kommt im ganzen Baum nur in den zwei
+ * Sortenrouten vor und im gerenderten HTML genau EINMAL je Seite. Die Probe
+ * pruefungen/probe_sortenfarbe.py zaehlt das nach, statt es zu glauben. */
+[data-cc-sorte] .items-center-justify-center > h2 {
+  color: var(--cc-sorte-text);
 }
 
 /* Tailwind-4-Theme: bindet die Utility-Klassen der uebertragenen Routen an
@@ -144,7 +336,14 @@
 .product .product-rating {
   font-size: var(--cc-fs-4);
   font-weight: 600;
-  color: var(--color-accent-primary);
+  /* s03, 2026-09-02: war var(--color-accent-primary) = --cc-gold #F2BF72 und
+   * damit 1,68:1 auf Weiss — die Bewertungszahl "4,9" war faktisch
+   * unsichtbar (gemessen mit design-meister/bin/kontrast-sweep am
+   * gerenderten DOM, Soll 3,0:1 fuer grosse Schrift, AA 4,5:1 fuer Text).
+   * Derselbe Goldton, nur lesbar: 5,07:1. Kein zweiter Akzent — der Farbton
+   * bleibt, nur die Helligkeit sinkt. Die Stern-GRAFIK daneben behaelt
+   * bewusst --cc-gold (Sterne-Vertrag, eigene Entscheidung, siehe dort). */
+  color: var(--cc-gold-text);
 }
 .product .product-rating span:nth-child(2) {
   font-size: var(--cc-fs-2);
@@ -385,7 +584,13 @@
   height: 100%;
   width: 100%;
   z-index: 1;
-  background: rgba(0, 0, 0, 0.5);
+  /* s03, 2026-09-02: war rgba(0,0,0,0.5). Ueber einem hellen Bild ergibt das
+   * effektiv #808080, und die weisse "+6"-Zahl darauf nur 3,95:1 — unter AA
+   * (gemessen mit kontrast-sweep). Der Schleier ist der einzige Grund, aus
+   * dem die Zahl ueberhaupt lesbar sein KANN; er muss dick genug sein, um
+   * auch das hellste Bild zu tragen. Bei 0,65 sind es 7,00:1 gegen einen
+   * rein weissen Untergrund, also der ungünstigste denkbare Fall. */
+  background: rgba(0, 0, 0, 0.65);
   color: #fff;
   display: flex;
   align-items: center;
@@ -614,7 +819,13 @@
   color: #e00!important;
 }
 .CacaoPriceCurrent.exclusive {
-  color: #b8943e!important; 
+  /* s03, 2026-09-02: war der freie Wert #b8943e — ein DRITTER Goldton neben
+   * --cc-gold (dE 18,45) und dem Inline-Gold in Kakao.jsx (#cab581, dE
+   * 19,71). Genau die Lage, die die Design-Pflicht als Ursache von
+   * "von AI gemacht" benennt: mehrere konkurrierende Goldtoene. Auf Weiss
+   * ergab er ausserdem nur 2,86:1 — an einem PREIS. Jetzt derselbe eine
+   * Goldton in seiner lesbaren Ableitung: 5,07:1. */
+  color: var(--cc-gold-text)!important;
 }
 .CacaoPriceCompare {
   font-size: var(--cc-fs-5)!important;
@@ -624,7 +835,11 @@
 .CacaoPricePer100g {
   width: 100%;
   font-size: var(--cc-fs-1);
-  color: #888;
+  /* s03, 2026-09-02: war der freie Wert #888 und damit 3,54:1 auf Weiss —
+   * unter AA, und ausgerechnet am Grundpreis, den der Kunde zum Vergleichen
+   * braucht. --cc-muted ist der Token fuer genau diese Rolle (zurueckhaltend,
+   * aber lesbar) und misst 5,70:1. Kein neuer Wert, ein Wert weniger. */
+  color: var(--cc-muted);
   margin-top: 2px;
 }
 /* ==== abgeleitet aus qiblanco-storefront app/styles/reset.css (1 Regeln) ==== */

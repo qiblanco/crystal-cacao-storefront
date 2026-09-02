@@ -260,3 +260,41 @@ export function istKakaoPfad(pathname) {
   const p = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
   return KAKAO_PFADE.includes(p);
 }
+
+/**
+ * WELCHE SORTE ZEIGT DIESE SEITE? (Job …-prio6, Segment s03)
+ * ==========================================================
+ * Christian: „Awake und Create haben zwei unterschiedliche Farbgebungen im
+ * Namen … auswerten und dezent entsprechend nutzen."
+ *
+ * Die Farbe selbst steht in app/styles/kakao-seiten.css (gemessen an den
+ * Verpackungsbildern, dort mit Werten belegt). Hier steht nur, WELCHE Seite
+ * welche Sorte ist — dieselbe Trennung wie oben: die Zuordnung Pfad→Bedeutung
+ * wohnt in dieser Datei, nicht in einer Komponente.
+ *
+ * WARUM HIER UND NICHT IN DEN ROUTEN: die beiden Produktrouten
+ * products.crystal-cacao-awake.jsx und -create.jsx sind K1 (byte-gleich zur
+ * Vorlage, shared/UPSTREAM.json). Eine Sorten-Markierung dort wäre
+ * Vendoring-Drift und würde beim nächsten Nachzug kommentarlos überschrieben
+ * — die Sortenfarbe wäre still wieder weg. Der Weg über den Pfad kommt ohne
+ * eine einzige K1-Zeile aus.
+ *
+ * WARUM KEIN SUBSTRING-TEST: derselbe Grund wie bei KAKAO_PFADE oben. Die
+ * Übersichtsseite /pages/crystal-cacao trägt „crystal-cacao" im Pfad und ist
+ * bewusst KEINE Sorte — sie zeigt beide und bleibt deshalb neutral.
+ */
+export const SORTEN_PFADE = Object.freeze({
+  '/products/crystal-cacao-awake': 'awake',
+  '/products/crystal-cacao-create': 'create',
+});
+
+/**
+ * Sorte dieses Pfades — 'awake', 'create' oder null (keine Sortenseite).
+ * @param {string} pathname
+ * @returns {string|null}
+ */
+export function sorteZuPfad(pathname) {
+  if (!pathname) return null;
+  const p = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+  return SORTEN_PFADE[p] ?? null;
+}

@@ -8,6 +8,7 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteLoaderData,
+  useLocation,
 } from 'react-router';
 import favicon from '~/assets/favicon.svg';
 import {HEADER_QUERY} from '~/lib/fragments';
@@ -19,6 +20,7 @@ import {MetaPixel} from './components/MetaPixel';
 import {UpPromoteTracking} from './components/UpPromoteTracking';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
 import {strictRegions} from '~/lib/consent-policy';
+import {sorteZuPfad} from '~/lib/kakao-zone';
 import '@fontsource-variable/open-sans';
 
 /**
@@ -192,10 +194,17 @@ export function Layout({children}) {
     data?.isProductionHost || data?.enableTrackingInPreview;
   const isTrackingPreview =
     Boolean(data?.enableTrackingInPreview) && !data?.isProductionHost;
+  // Sorten-Kennung fuer die Farbschicht (Job …-prio6 s03). Die Zuordnung
+  // Pfad->Sorte steht in app/lib/kakao-zone.js, die Farbe in
+  // app/styles/kakao-seiten.css. Hier faellt nur zusammen, was beide wissen —
+  // ohne eine Zeile in den K1-geschuetzten Produktrouten anzufassen.
+  const {pathname} = useLocation();
+  const ccSorte = sorteZuPfad(pathname);
 
   return (
     <html
       lang="de"
+      data-cc-sorte={ccSorte || undefined}
       data-qiblanco-tracking-preview={isTrackingPreview ? 'true' : undefined}
       data-qb-region={data?.buyerCountry || undefined}
       data-qb-consent-strict={data?.consentStrictRegions || undefined}

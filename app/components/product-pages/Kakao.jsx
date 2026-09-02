@@ -247,7 +247,16 @@ function ComparisonTable() {
                     alt=""
                     className="mx-auto! mb-1"
                   />
-                  <h3 className="text-sm font-bold" style={{color: '#cab581'}}>
+                  {/* s03 2026-09-02: war der freie Wert '#cab581' — ein
+                      ZWEITER Goldton neben --cc-gold (dE 19,71) und auf
+                      Weiss nur 2,01:1 lesbar, an einer Tabellen-Ueberschrift.
+                      Jetzt derselbe eine Goldton in seiner lesbaren
+                      Ableitung (5,07:1). Der Wert wohnt in
+                      app/styles/kakao-seiten.css, hier steht keiner mehr. */}
+                  <h3
+                    className="text-sm font-bold"
+                    style={{color: 'var(--cc-gold-text)'}}
+                  >
                     Crystal Cacao®
                   </h3>
                   <h4 className="text-gray-500">15g</h4>
