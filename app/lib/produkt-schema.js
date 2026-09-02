@@ -72,6 +72,33 @@
  * Auszeichnung exakt das, was der Shop ohnehin sagt, und der Claim-Korridor
  * (HWG §3/§11; bei den Kakao-Sorten zusätzlich EU 1924/2006) wird durch
  * diese Datei weder erweitert noch neu bewertet.
+ *
+ * RETOUREN UND VERSAND (Nachtrag 2026-09-01, Grossjob-Segment s03):
+ * `hasMerchantReturnPolicy` und `shippingDetails` fehlten auf allen drei
+ * gemeldeten Produktseiten — der Merchant-Wächter des SEO-Managers meldet
+ * das seit Wochen (seo-manager/conf/merchant.yaml, die beiden Felder für
+ * Rückgabe- und Versand-Strukturdaten).
+ *
+ * DIESELBE REGEL WIE BEIM PREIS, EINE ACHSE WEITER: kein Wert, der nicht
+ * belegt ist. Jede Zahl unten stammt aus einer Live-Seite, die der Kunde
+ * selbst lesen kann — nicht aus einer Annahme über unsere Konditionen. Wo
+ * nichts belegt ist, entsteht KEIN Feld: eine Lücke bewirkt nichts, eine
+ * erfundene Angabe ist eine Falschaussage gegenüber dem Kunden und ein
+ * Verstoß gegen Googles Richtlinien für strukturierte Daten.
+ *
+ * WAS BEWUSST NICHT DRINSTEHT — jedes Land außer Deutschland: Die
+ * Versandrichtlinie listet rund 90 Länder mit Preisen (Österreich 6,90 €,
+ * Schweiz 21,00 €, …), die AGB § 5 sagen dagegen, die Übersendung erfolge
+ * „innerhalb der Bundesrepublik Deutschland". Welcher der beiden Rechtstexte
+ * gilt, ist eine Rechtsfrage und gehört Christian, nicht dieser Datei. Für
+ * Deutschland sagen beide dasselbe — deshalb steht hier nur Deutschland.
+ *
+ * WAS BEWUSST NICHT DRINSTEHT — `returnShippingFeesAmount`: Die
+ * Widerrufsbelehrung sagt, wer die Rücksendung zahlt („Sie tragen die
+ * unmittelbaren Kosten der Rücksendung der Waren"), aber nirgends, wie viel
+ * das ist. `ReturnFeesCustomerResponsibility` drückt genau diese Aussage aus
+ * und braucht keinen Betrag; `ReturnShippingFees` würde einen verlangen, den
+ * wir uns ausdenken müssten.
  */
 
 import {CANONICAL_ORIGIN} from './seo.js';
@@ -108,6 +135,144 @@ export const OHNE_PREIS_NACHWEIS = [
   'mengenrabatt-3x-create',
 ];
 
+/**
+ * Versandtabelle Deutschland — wörtlich aus /policies/shipping-policy
+ * („Versandrichtlinie", live gelesen 2026-09-01):
+ *   „Deutschland 5,90 € (Versandkostenfrei ab 99€)"
+ *
+ * WARUM DIE SCHWELLE HIER NACHGERECHNET WIRD STATT PAUSCHAL „KOSTENLOS":
+ * Sie ist die einzige Form, in der die Auszeichnung dasselbe sagt wie die
+ * Seite. An allen fünf Produktseiten mit Preis nachgemessen (2026-09-01):
+ *   qione-2-pro 1087 € · qibracelet 1578 € · qihome-air 4983 €
+ *     → Buybox: „Kostenloser Versand innerhalb Deutschlands" (unbedingt)
+ *   qione-kette 94 € · crystal-cacao-create 76 €
+ *     → Buybox: „Kostenloser Versand ab 99 € innerhalb Deutschlands"
+ * Die Regel reproduziert damit 5 von 5 sichtbaren Seitenaussagen. Ein
+ * pauschales „kostenlos" hätte auf den beiden Kakao-/Ketten-Seiten das
+ * Gegenteil dessen behauptet, was dort steht.
+ */
+const DE_VERSAND_EUR = 5.9;
+const DE_VERSANDFREI_AB_EUR = 99;
+
+/**
+ * Lieferzeit in Tagen [min, max] — NUR für Handles, deren Seite selbst eine
+ * nennt. An allen 13 DACH-Produktseiten live abgezählt (2026-09-01):
+ *   „In 2-3 Tagen bei Dir"      → qione-2-pro, qibracelet, qihome-air,
+ *                                  qione-kette
+ *   „Lieferung in 1–3 Werktagen" → crystal-cacao-awake, crystal-cacao-create
+ *   keine Aussage                → die übrigen sieben
+ *
+ * ES GIBT ALSO KEINE EINE LIEFERZEIT, DIE MAN GLOBAL EINTRAGEN KÖNNTE. Der
+ * naheliegende Griff — eine Zahl für den ganzen Shop — hätte auf mindestens
+ * neun von dreizehn Seiten etwas anderes gesagt als die Seite selbst.
+ *
+ * Die Versandrichtlinie hilft hier NICHT: ihre Fußnote verweist für
+ * Lieferzeiten auf „Liefer- und Zahlungsbedingungen", und dieser Link zeigt
+ * auf /policies/shipping-policy — also auf sich selbst. Ein neues Produkt
+ * bekommt deshalb kein `deliveryTime`, bis seine Seite eine Zusage trägt.
+ * Das ist die gewollte Richtung: lieber ein Feld weniger als eine Zahl,
+ * die der Kunde auf der Seite nicht wiederfindet.
+ */
+const LIEFERZEIT_TAGE = {
+  'qione-2-pro': [2, 3],
+  qibracelet: [2, 3],
+  'qihome-air': [2, 3],
+  'qione-kette': [2, 3],
+  'crystal-cacao-awake': [1, 3],
+  'crystal-cacao-create': [1, 3],
+};
+
+/**
+ * Rückgabefrist in Tagen ab Erhalt.
+ *
+ * DIE EINE ENTSCHEIDUNG DIESER DATEI, DIE EINE BEGRÜNDUNG BRAUCHT: Der Shop
+ * nennt ZWEI Fristen, und sie meinen nicht dasselbe.
+ *
+ *  - Die Widerrufsbelehrung (/policies/refund-policy) nennt „vierzehn Tage".
+ *    Das ist das gesetzliche Widerrufsrecht — ein eigener Rechtsbehelf, der
+ *    von dieser Datei nicht berührt, nicht ausgelegt und nicht verkürzt wird.
+ *  - Die Kopfleiste JEDER Seite nennt „Jetzt 20 Tage risikofrei erleben!",
+ *    der Seitentitel der QiOne-Produktseite lautet „QiOne® 2 Pro kaufen —
+ *    20 Tage risikofrei", und die Bedingungen sind ausformuliert:
+ *    „Frist: 20 Tage ab Erhalt · Grund: keiner nötig · Ablauf: melden,
+ *    zurücksenden, Erstattung" (app/components/campaign/MmWirMachenIhnAuf.jsx
+ *    und Schwesterseiten).
+ *
+ * `merchantReturnDays` fragt nach der Zahl der Tage nach Zustellung, in denen
+ * der Kunde zurückgeben kann. Die Antwort, die unser Shop dem Kunden auf
+ * genau der ausgezeichneten Seite gibt, ist 20 — und sie ist die für ihn
+ * günstigere. Hier 14 einzutragen hieße, die Auszeichnung gegen die eigene,
+ * überall sichtbare Zusage zu stellen: Google vergleicht strukturierte Daten
+ * mit dem Seiteninhalt, und der Kunde läse zwei verschiedene Versprechen.
+ */
+const RETOURENFRIST_TAGE_AB_ERHALT = 20;
+
+/**
+ * Versandbedingungen für Deutschland. `null`, wenn die EUR-Tabelle oben auf
+ * den Markt des Produkts nicht anwendbar ist — dann lieber kein Knoten als
+ * ein Betrag in der falschen Währung.
+ *
+ * @param {string} handle
+ * @param {number} preis Brutto-Anzeigewert (bruttoAnzeige)
+ * @param {string} waehrung ISO-4217 aus der Variante
+ * @returns {object|null}
+ */
+function versandDetails(handle, preis, waehrung) {
+  if (waehrung !== 'EUR') return null;
+
+  const satz = preis >= DE_VERSANDFREI_AB_EUR ? 0 : DE_VERSAND_EUR;
+  const details = {
+    '@type': 'OfferShippingDetails',
+    shippingRate: {
+      '@type': 'MonetaryAmount',
+      value: satz,
+      currency: 'EUR',
+    },
+    shippingDestination: {
+      '@type': 'DefinedRegion',
+      addressCountry: 'DE',
+    },
+  };
+
+  const spanne = LIEFERZEIT_TAGE[handle];
+  if (spanne) {
+    details.deliveryTime = {
+      '@type': 'ShippingDeliveryTime',
+      transitTime: {
+        '@type': 'QuantitativeValue',
+        minValue: spanne[0],
+        maxValue: spanne[1],
+        unitCode: 'DAY',
+      },
+    };
+  }
+  return details;
+}
+
+/**
+ * Rückgabebedingungen. Für alle Produkte gleich — anders als beim Versand
+ * kennt der Shop hier keine Staffelung nach Produkt oder Warenwert.
+ *
+ * `handlingTime` fehlt bewusst: die Seiten nennen eine Gesamtzusage („in
+ * 2-3 Tagen bei Dir"), keine Aufteilung in Bearbeitung und Transport. Sie zu
+ * erfinden würde die zugesagte Gesamtdauer verlängern.
+ *
+ * @returns {object}
+ */
+function retourenRichtlinie() {
+  return {
+    '@type': 'MerchantReturnPolicy',
+    applicableCountry: 'DE',
+    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+    merchantReturnDays: RETOURENFRIST_TAGE_AB_ERHALT,
+    returnMethod: 'https://schema.org/ReturnByMail',
+    // „Sie tragen die unmittelbaren Kosten der Rücksendung der Waren."
+    // (/policies/refund-policy) — die Aussage ohne Betrag, den niemand
+    // beziffert hat.
+    returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
+  };
+}
+
 export function produktSchema(produkt) {
   if (!produkt?.handle || !produkt?.title) return null;
   if (OHNE_PREIS_NACHWEIS.includes(produkt.handle)) return null;
@@ -143,8 +308,12 @@ export function produktSchema(produkt) {
       availability: verfuegbarkeit(variante?.availableForSale),
       itemCondition: 'https://schema.org/NewCondition',
       seller: {'@id': ORG_ID},
+      hasMerchantReturnPolicy: retourenRichtlinie(),
     },
   };
+
+  const versand = versandDetails(produkt.handle, preis, waehrung);
+  if (versand) knoten.offers.shippingDetails = versand;
 
   // Beschreibung: Vorrang für das gepflegte SEO-Feld, sonst der Produkttext.
   // Dieselbe Reihenfolge wie in pages.$handle.jsx für den Titel.

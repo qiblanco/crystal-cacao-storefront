@@ -86,7 +86,7 @@ export const MARKE = 'Qi Blanco';
 export const PRODUKT_BESCHREIBUNGEN = {
   '/products/qione-2-pro':
     'E-Smog ist überall, wo du bist — der QiOne® 2 Pro auch. Sein Gitterchip™ ' +
-    'reduziert die Auswirkungen und unterstützt ein Umfeld aus Klarheit und Fokus.',
+    'reduziert die Auswirkungen. Original vom Hersteller, 20 Tage risikofrei.',
   '/products/qibracelet':
     'Schutz, den man nicht sieht: Der QiBracelet® reduziert mit integriertem ' +
     'Gitterchip™ die Auswirkungen von E-Smog und 5G — elegant am Handgelenk.',
@@ -117,6 +117,50 @@ export function produktBeschreibung(pfad) {
 }
 
 /**
+ * Titel je Produktpfad — NUR dort gesetzt, wo der Produktname allein die
+ * Suchabsicht nicht trifft. Unbekannter Pfad -> undefined, dann bleibt es
+ * beim bisherigen `Produktname | Marke` der Route.
+ *
+ * WARUM ES DIESEN ÜBERSCHREIBER GIBT (Befund s02 des Grossjobs
+ * 20260831-…-warum-ranken-kritiker… (s02), an der Live-SERP gemessen):
+ * Auf der Suche nach „QiOne 2 Pro" — unserem eigenen Produktnamen — stand am
+ * 2026-08-24 auf den Plätzen 1 und 3 je ein GEBRAUCHTWAREN-Marktplatz
+ * (kleinanzeigen.de, ebay.de), und unsere Produktseite war in den erfassten
+ * neun Zeilen nicht dabei. Wer diese Suche tippt, kennt das Produkt bereits;
+ * er ist nicht auf der Suche nach einer Erklärung, sondern nach einer
+ * Bezugsquelle, der er trauen kann.
+ *
+ * Der bisherige Titel „QiOne® 2 Pro | Qi Blanco" ist 24 Zeichen lang und
+ * beantwortet diese Frage nicht: er wiederholt nur, wonach gesucht wurde.
+ * Google zeigt rund 60 Zeichen — die übrigen 36 standen ungenutzt leer,
+ * während der Wettbewerb auf derselben Seite „gebraucht" und „Privatverkauf"
+ * schreibt. Der neue Titel besetzt genau den Unterschied, den ein
+ * Marktplatz-Treffer nicht bieten kann: Bezug beim Hersteller und
+ * Risikoumkehr.
+ *
+ * ZUR SPRACHE — beide Zusätze sind BELEGT, nicht erfunden: „20 Tage
+ * risikofrei" steht wörtlich als H2 auf der Produktseite selbst und trägt
+ * eine eigene Seite (/pages/das-20-tage-versprechen); „Original vom
+ * Hersteller" ist eine Herkunftsaussage über den Vertriebsweg und keine
+ * Wirkzusage — der Claim-Korridor des Dateikopfs bleibt damit unberührt.
+ * Die Risikoumkehr ist zugleich das für DACH gemessene Closer-Thema
+ * (SSoT kaufueberzeugung/kanon: Rückgabe/20-Tage-Test/Garantie, n=22).
+ * @type {Record<string, string>}
+ */
+export const PRODUKT_TITEL = {
+  '/products/qione-2-pro': `QiOne® 2 Pro kaufen — 20 Tage risikofrei | ${MARKE}`,
+};
+
+/**
+ * Der Titel eines Produktpfads, falls überschrieben.
+ * @param {string} pfad
+ * @returns {string|undefined}
+ */
+export function produktTitel(pfad) {
+  return PRODUKT_TITEL[pfad];
+}
+
+/**
  * Vollständige meta-Descriptor-Liste einer Produktroute: Titel, Beschreibung,
  * Canonical und Open Graph in EINEM Aufruf.
  *
@@ -142,9 +186,14 @@ export function produktBeschreibung(pfad) {
  */
 export function produktMeta({pfad, titel, bildUrl, produkt}) {
   const beschreibung = produktBeschreibung(pfad);
+  // Der Überschreiber gewinnt, wenn es einen gibt — sonst bleibt es exakt
+  // beim Titel der Route. Bewusst hier und nicht in der Route: sonst trägt
+  // jede der sechs Flaggschiff-Routen ihre eigene Titel-Logik, und genau
+  // diese Drift war der Ausgangsbefund dieser Datei.
+  const titelEffektiv = produktTitel(pfad) ?? titel;
   const url = absoluteCanonical(pfad);
   const descriptoren = [
-    {title: titel},
+    {title: titelEffektiv},
     // Canonical als echtes <link> (tagName) und absolut — Begründung im Kopf
     // von app/lib/seo.js. Hier NICHT über canonicalLink(), weil derselbe
     // absoluteCanonical()-Wert unten auch als og:url gebraucht wird und zwei
@@ -153,7 +202,10 @@ export function produktMeta({pfad, titel, bildUrl, produkt}) {
     {property: 'og:type', content: 'product'},
     {property: 'og:site_name', content: 'Qi Blanco'},
     {property: 'og:locale', content: 'de_DE'},
-    {property: 'og:title', content: titel},
+    // Muss dem <title> folgen, nicht dem Routen-Rohwert: sonst zeigt ein
+    // geteilter Link etwas anderes als das Suchergebnis — dieselbe
+    // Zwei-Versprechen-Falle, die unten für die Beschreibung benannt ist.
+    {property: 'og:title', content: titelEffektiv},
     {property: 'og:url', content: url},
   ];
   if (beschreibung) {

@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "2648d92ecdc5f1c01f083fe4924a1269f0686f01",
-  "erzeugt_utc": "2026-08-29T23:40:47Z",
+  "upstream_commit": "23a0f7147d69ef919b68c22eb11083ce22f33b4f",
+  "erzeugt_utc": "2026-09-02T06:36:11Z",
   "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py",
   "huelle": {
     "wurzeln": [
@@ -10,7 +10,7 @@
       "app/routes/products.crystal-cacao-awake.jsx",
       "app/routes/products.crystal-cacao-create.jsx"
     ],
-    "dateien_soll": 27,
+    "dateien_soll": 28,
     "vollstaendigkeit": "streng"
   },
   "dateien": [
@@ -75,6 +75,11 @@
       "sha256": "3b4a94491ee3d0a7f0df854ac09fa59eaf1565ec73d2a0e3338e6899fa6c4280"
     },
     {
+      "upstream": "app/components/reusables/StarRating.jsx",
+      "klasse": "K1",
+      "sha256": "04996b2e5c48141d00bcf644cf976ecd4895506503c8486647b84422160abffb"
+    },
+    {
       "upstream": "app/components/reusables/SwipeTable.jsx",
       "klasse": "K1",
       "sha256": "b8c50fc914b8f6295b3b54f614d0462b5b4034f924911a99e4a54473a4d2a6eb"
@@ -117,12 +122,12 @@
     {
       "upstream": "app/lib/produkt-schema.js",
       "klasse": "K1",
-      "sha256": "22fa368fb66b051b6ff3f653dd7dd508052d45d69cf0428bfaef79006135997a"
+      "sha256": "710f29baf40ebbeda74456283fd710a3e92ac41c3ddf8f42263043bc92f65e92"
     },
     {
       "upstream": "app/lib/produkt-seo.js",
       "klasse": "K1",
-      "sha256": "a5acf2aab77197fd685ca36e4fac0378de04944f5351d890eab3dd8be60a72f9"
+      "sha256": "5e964de8f085b5a47e4b2bebe3d58d9fe801bff049d1ce205088c49604d3e8d9"
     },
     {
       "upstream": "app/lib/redirect.js",
@@ -134,24 +139,24 @@
     {
       "upstream": "app/lib/seo.js",
       "klasse": "K2",
-      "sha256_upstream": "d01e0015204ad1d23dda9a529dbb104a68fb909bda7774362ca6fb74550690d7",
-      "sha256_lokal": "f2d66c6b05452bc37481d238c27487d9168f00249c5efde08f7256dbd71ea365",
+      "sha256_upstream": "184d61b0c66350b82a0ff18cc2571e88120f477e6c9f97074ce8522f70b352e3",
+      "sha256_lokal": "bdd7a4312d4efe68185cf9ecf24679c8de3b09c60acf8224506a1ee670732651",
       "abweichung_grund": "Byte-Gleichheit ist baulich unmoeglich: die Datei fuehrt `CANONICAL_ORIGIN` als Quelltext-Konstante mit der qiblanco-Domain. Byte-gleich uebernommen truege JEDE crystal-Seite einen Canonical auf qiblanco.com — und weil dort dieselbe geteilte Seite liegt, ist das Ziel gueltig: Google konsolidiert crystal-cacao.com auf qiblanco.com und der Kakao-Laden verschwindet aus dem Index, ohne Fehlermeldung. Die Konstante ist zugleich die Wurzel von og:url (produkt-seo.js) und der JSON-LD-Knoten-IDs ORG_ID/SITE_ID (entity-schema.js) — eine Adaption, drei Wirkungen. Aufgehoben ist allein die Gleichheit der beiden Seiten; beide Fassungen bleiben einzeln gepinnt, damit eine spaetere Bewegung auf BEIDEN Seiten sichtbar wird."
     },
     {
       "upstream": "app/routes/pages.crystal-cacao.jsx",
       "klasse": "K1",
-      "sha256": "f101353c08cd63a6709bcc8d8b2c873ec45fe230298c9880fc4855b14a67eabe"
+      "sha256": "a21e428f9f43e31755d92876c4342d00cb8b606d49f8a071c5c0622c29720796"
     },
     {
       "upstream": "app/routes/products.crystal-cacao-awake.jsx",
       "klasse": "K1",
-      "sha256": "5e2c02bd55b083094df5673e9273b2938df7753076183eb8d852b25c71e890a8"
+      "sha256": "b4a9bbb431c8198b94f10396af10aef10b3996157eb716c903ae7899d12a70a4"
     },
     {
       "upstream": "app/routes/products.crystal-cacao-create.jsx",
       "klasse": "K1",
-      "sha256": "3e53be53e6ee6cc9008353ab2fadcaf27a43f929074c1cb0ded8c15d1dfbf103"
+      "sha256": "c79d1e6c26b01830e5957afeeae37a7f0c4aabda5f74b7c3b1b5226eeba032f6"
     },
     {
       "upstream": "app/components/MetaPixel.jsx",

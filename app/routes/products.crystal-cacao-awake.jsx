@@ -18,6 +18,7 @@ import Awake from '~/components/product-pages/Awake';
 import LazyImage from '~/components/reusables/LazyImage';
 
 import {produktMeta, MARKE} from '~/lib/produkt-seo';
+import {StarRating, SterneSprung} from '~/components/reusables/StarRating';
 /** 
  * @type {MetaFunction<typeof loader>}
  */
@@ -124,9 +125,24 @@ export default function Product() {
         </div>
         <div className="product-main">
           <h1>{title}</h1>
-          <div className="product-rating">
-            <span>{KAKAO_KENNZAHLEN.bewertung}</span> ★★★★★ <span>Über {KAKAO_KENNZAHLEN.nutzer} Nutzer</span>
-          </div>
+          {/*
+            * MERGE 2026-08-30 (Job 20260830-sterne-s05-...): VEREINIGUNG, kein
+            * Seiten-Sieg. Von diesem Zweig kommt die Bedienbarkeit (SterneSprung
+            * + StarRating + Marker), von origin/main (a75fd47) kommen die
+            * KENNZAHLEN. Der Zweig trug hier noch hartkodiert 4.8 und "14.000
+            * Nutzer" — das ist der Stand VOR jener Aenderung. Wer beim
+            * Aufloesen "ours" nimmt, dreht eine juengere, bewusste
+            * Inhalts-Entscheidung an einer KUNDENSICHTBAREN ZAHL zurück.
+            * Die Sterne-Zahl wird aus derselben Konstante ABGELEITET statt
+            * daneben geschrieben, damit sie nicht erneut auseinanderlaufen kann.
+            */}
+          <SterneSprung className="product-rating">
+            <span>{KAKAO_KENNZAHLEN.bewertung}</span>{' '}
+            <StarRating
+              value={Number(KAKAO_KENNZAHLEN.bewertung.replace(',', '.'))}
+            />{' '}
+            <span>Über {KAKAO_KENNZAHLEN.nutzer} Nutzer</span>
+          </SterneSprung>
           <div
             className="ProductDescription"
             dangerouslySetInnerHTML={{__html: descriptionHtml}}

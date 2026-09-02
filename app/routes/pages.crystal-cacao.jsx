@@ -8,7 +8,7 @@ import {canonicalLink} from '~/lib/seo';
  */
 export const meta = ({data}) => {
   return [
-    {title: `Crystal Cacao® | Qi Blanco UG (haftungsbeschränkt)`},
+    {title: `Crystal Cacao® | Qi Blanco`},
     {
       name: 'description',
       content:
