@@ -184,8 +184,16 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
   }
 `;
 
+// Der Fragment-/Operationsname traegt bewusst das Praefix `Skeleton`: die
+// vendorten Kakao-Routen (products.crystal-cacao-awake/-create.jsx, K1 aus
+// qiblanco, ADR 0056) bringen ein gleichnamiges, aber ANDERES `Product`-Fragment
+// mit. Codegen dedupliziert byte-gleiche Duplikate still, bricht bei
+// abweichenden aber ab -- und zwar VOR dem Buendeln, also mit einem Rot, das
+// nichts ueber den restlichen Code aussagt. Umbenannt wird hier, weil diese
+// Datei crystal allein gehoert (nicht im Manifest shared/UPSTREAM.json); eine
+// Aenderung an den K1-Kopien waere LOKAL-DRIFT und ginge beim Nachzug verloren.
 const PRODUCT_FRAGMENT = `#graphql
-  fragment Product on Product {
+  fragment SkeletonProduct on Product {
     id
     title
     vendor
@@ -226,14 +234,14 @@ const PRODUCT_FRAGMENT = `#graphql
 `;
 
 const PRODUCT_QUERY = `#graphql
-  query Product(
+  query SkeletonProduct(
     $country: CountryCode
     $handle: String!
     $language: LanguageCode
     $selectedOptions: [SelectedOptionInput!]!
   ) @inContext(country: $country, language: $language) {
     product(handle: $handle) {
-      ...Product
+      ...SkeletonProduct
     }
   }
   ${PRODUCT_FRAGMENT}
