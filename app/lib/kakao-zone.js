@@ -117,6 +117,35 @@ export const KAKAO_KOLLEKTIONEN = Object.freeze([KAKAO_KOLLEKTION]);
 export const KAKAO_SEITEN = Object.freeze(['crystal-cacao', 'kristall-kakao']);
 
 /**
+ * Blog-Handles, die diese Storefront ausliefern darf. HEUTE BEWUSST LEER.
+ *
+ * GEMESSEN 2026-09-02 (Job …-prio6-s05, am gerenderten HTML des dev-Servers):
+ * `/blogs` listete die drei Shopify-Blogs des Fremdshops — und alle drei sind
+ * für einen Kakao-Laden falsch, jeder auf seine Weise:
+ *   /blogs/news     HTTP 200, NULL Artikel — leere Hülle
+ *   /blogs/e-smog   HTTP 200, NULL Artikel — leere Hülle, dazu ein Qi-Blanco-Thema
+ *   /blogs/wissen   HTTP 200, VIER Artikel, alle ohne Kakao-Bezug
+ *                   ("Strukturiertes Wasser", "Nervensystem regulieren",
+ *                    "Schlafqualität und Hydration", "Schlaf vermessen")
+ *
+ * WARUM SPERREN UND NICHT LEER STEHEN LASSEN — zwei Gründe, beide gemessen:
+ * (1) HTTP 200 auf einer leeren Seite ist der teuerste Fall: die Kette sieht an
+ *     jedem Glied gesund aus, und der Kunde findet nichts. Eine 404 sagt die
+ *     Wahrheit.
+ * (2) Die vier Artikel stehen wortgleich live auf qiblanco.com. Auf einer
+ *     ZWEITEN Domain ist das Duplicate Content — und die schwächere Domain
+ *     verliert, hier also crystal-cacao.com.
+ *
+ * WARUM NICHT NUR DIE ZWEI LEEREN: /blogs/wissen zu behalten hieße, genau den
+ * Fremdinhalt zu behalten, den dieser Zaun sperrt. Die Achse ist die
+ * Zugehörigkeit, nicht die Füllmenge.
+ *
+ * DER RÜCKWEG IST EINE ZEILE: sobald Crystal Cacao einen eigenen Blog hat,
+ * kommt sein Handle hier herein — Route, Sitemap und Suche folgen von selbst.
+ */
+export const KAKAO_BLOGS = Object.freeze([]);
+
+/**
  * Gehört dieses Produkt zum Kakao-Sortiment?
  * Entscheidet über die Kollektions-Mitgliedschaft, damit ein im Admin neu
  * angelegtes Kakao-Produkt OHNE Code-Änderung sofort erreichbar ist.
@@ -138,6 +167,11 @@ export function istKakaoKollektion(handle) {
 /** Darf diese CMS-Seite ausgeliefert werden? @param {string} handle */
 export function istKakaoSeite(handle) {
   return Boolean(handle) && KAKAO_SEITEN.includes(handle);
+}
+
+/** Darf dieser Blog ausgeliefert werden? @param {string} handle */
+export function istKakaoBlog(handle) {
+  return Boolean(handle) && KAKAO_BLOGS.includes(handle);
 }
 
 /**
@@ -192,15 +226,87 @@ export const KAKAO_MENUE = Object.freeze({
 });
 
 /**
+ * DEUTSCHE ANZEIGE-TITEL DER RECHTSTEXTE — und was das ausdrücklich NICHT ist.
+ *
+ * DER BEFUND (gemessen 2026-09-02, Job …-prio6-s05, am gerenderten HTML):
+ * Die Rechtstexte kommen als Shopify-Shop-Policies herein und tragen dort
+ * ENGLISCHE Titel — "Privacy Policy", "Shipping Policy", "Terms of Service",
+ * "Refund Policy". Ihr INHALT ist durchgehend deutsch und trägt seine eigene
+ * deutsche Überschrift ("Datenschutzerklärung", "Allgemeine
+ * Geschäftsbedingungen", "§ 7 Widerrufsbelehrung", "Bezahlmethoden"). Der
+ * englische Titel ist also allein eine Anzeige-Lücke, kein inhaltlicher Zustand.
+ *
+ * DAS HIER FASST KEINE RECHTSFRAGE AN. Geändert wird ausschliesslich die
+ * BESCHRIFTUNG des Links und der Seitenüberschrift; kein Zeichen des
+ * Rechtstextes wird berührt, keine Pflichtseite kommt hinzu oder fällt weg.
+ * Welche Pflichtseiten es geben muss und was darin steht, bleibt Christians
+ * Frage — unverändert.
+ *
+ * DIE WÖRTER SIND NICHT ERFUNDEN: sie stehen bereits im Shopify-Fussmenü des
+ * Schwester-Shops (Header.jsx/Footer.jsx FALLBACK_*_MENU: "Datenschutz",
+ * "Widerrufsbelehrung", "Versand", "AGB"). Übernommen, nicht ausgedacht.
+ *
+ * FAIL-SOFT: ein Handle ohne Eintrag behält seinen Shopify-Titel. Legt jemand
+ * im Admin eine fünfte Policy an, erscheint sie mit ihrem eigenen Namen statt
+ * zu verschwinden.
+ */
+export const RECHTSTEXT_TITEL = Object.freeze({
+  'privacy-policy': 'Datenschutz',
+  'shipping-policy': 'Versand & Zahlung',
+  'terms-of-service': 'AGB',
+  'refund-policy': 'Widerruf',
+  'subscription-policy': 'Abo-Bedingungen',
+});
+
+/**
+ * Deutscher Anzeige-Titel eines Rechtstextes, sonst der Shopify-Titel.
+ * @param {string} handle
+ * @param {string} [shopifyTitel]
+ * @returns {string}
+ */
+export function rechtstextTitel(handle, shopifyTitel) {
+  return RECHTSTEXT_TITEL[handle] ?? shopifyTitel ?? handle;
+}
+
+/**
  * Fusszeile: bewusst nur die Rechtstexte.
  * Sie werden hier NICHT inhaltlich angefasst — welche Pflichtseiten es geben
  * muss und was darin steht, ist eine Rechtsfrage und gehört Christian, nicht
- * diesem Zaun. Verlinkt wird die Shopify-eigene Policy-Übersicht.
+ * diesem Zaun.
+ *
+ * 2026-09-02 (s05): statt EINES Sammel-Links "Rechtliches" stehen die vier
+ * Pflichtseiten jetzt einzeln und auf Deutsch in der Fusszeile. Grund ist der
+ * Kunde, nicht die Ästhetik: wer den Widerruf sucht, brauchte vorher zwei
+ * Klicks und landete dazwischen auf einer Liste mit englischen Titeln. Die
+ * Übersicht /policies bleibt erreichbar und unverändert.
  */
 export const KAKAO_FUSSMENUE = Object.freeze({
   id: 'kakao-fussmenue',
   items: Object.freeze([
-    {id: 'kakao-policies', title: 'Rechtliches', url: '/policies', items: []},
+    {
+      id: 'kakao-datenschutz',
+      title: RECHTSTEXT_TITEL['privacy-policy'],
+      url: '/policies/privacy-policy',
+      items: [],
+    },
+    {
+      id: 'kakao-agb',
+      title: RECHTSTEXT_TITEL['terms-of-service'],
+      url: '/policies/terms-of-service',
+      items: [],
+    },
+    {
+      id: 'kakao-widerruf',
+      title: RECHTSTEXT_TITEL['refund-policy'],
+      url: '/policies/refund-policy',
+      items: [],
+    },
+    {
+      id: 'kakao-versand',
+      title: RECHTSTEXT_TITEL['shipping-policy'],
+      url: '/policies/shipping-policy',
+      items: [],
+    },
   ]),
 });
 

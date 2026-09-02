@@ -477,7 +477,7 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
           defaultValue={address?.phoneNumber ?? ''}
           id="phoneNumber"
           name="phoneNumber"
-          placeholder="+16135551111"
+          placeholder="+49 170 1234567"
           pattern="^\+?[1-9]\d{3,14}$"
           type="tel"
         />

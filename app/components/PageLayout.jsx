@@ -130,7 +130,7 @@ function SearchAside() {
                     to={`${SEARCH_ENDPOINT}?q=${term.current}`}
                   >
                     <p>
-                      View all results for <q>{term.current}</q>
+                      Alle Treffer zu <q>{term.current}</q> ansehen
                       &nbsp; →
                     </p>
                   </Link>

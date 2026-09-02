@@ -1,7 +1,12 @@
 import {Link, useLoaderData} from 'react-router';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import {ABSENDER_MARKE} from '~/lib/kakao-zone';
+import {
+  ABSENDER_MARKE,
+  KAKAO_BLOGS,
+  istKakaoBlog,
+  fremdinhaltAbweisen,
+} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
@@ -29,6 +34,16 @@ export async function loader(args) {
  * @param {Route.LoaderArgs}
  */
 async function loadCriticalData({context, request}) {
+  // SORTIMENTS-ZAUN (app/lib/kakao-zone.js): solange KAKAO_BLOGS leer ist, gibt
+  // es auf diesem Laden kein Magazin — und eine Übersicht, die nur leere bzw.
+  // fremde Blogs auflistet, ist schlimmer als keine. Sie sah gemessen am
+  // 2026-09-02 wie eine gefüllte Seite aus (HTTP 200, drei Überschriften) und
+  // führte in drei Sackgassen. Sobald ein Kakao-Blog existiert, trägt genau
+  // diese Route ihn wieder — ohne weitere Änderung.
+  if (KAKAO_BLOGS.length === 0) {
+    throw fremdinhaltAbweisen();
+  }
+
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 10,
   });
@@ -63,7 +78,12 @@ export default function Blogs() {
     <div className="blogs">
       <h1>Magazin</h1>
       <div className="blogs-grid">
-        <PaginatedResourceSection connection={blogs}>
+        <PaginatedResourceSection
+          connection={{
+            ...blogs,
+            nodes: blogs.nodes.filter((b) => istKakaoBlog(b.handle)),
+          }}
+        >
           {({node: blog}) => (
             <Link
               className="blog"

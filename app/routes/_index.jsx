@@ -70,6 +70,7 @@ export default function Homepage() {
   return (
     <div className="home">
       {data.isShopLinked ? null : <MockShopNotice />}
+      <Aufmacher />
       <FeaturedCollection collection={data.featuredCollection} />
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
@@ -77,13 +78,76 @@ export default function Homepage() {
 }
 
 /**
+ * DER AUFMACHER DER STARTSEITE — 2026-09-02 (s05).
+ *
+ * WAS VORHER DA STAND, gemessen am gerenderten HTML: eine <h1> mit dem
+ * Kollektionsnamen "Zeremonie Kakao" und darunter sofort das Produktraster.
+ * Kein Satz darüber, was das ist, für wen es ist, und wo es weitergeht — die
+ * Startseite war eine Kategorieseite ohne Kategorieseiten-Zweck.
+ *
+ * WAS HIER BEWUSST *NICHT* STEHT, und das ist die wichtigere Hälfte:
+ * KEINE Wirkzusage, KEINE Studie, KEINE Zahl. Die Startseite ist der Einstieg
+ * (Awareness 1–2) — dort zieht sozialer Beweis, nicht Wissenschaft; der Beweis
+ * ist ein Closer und gehört auf die Kaufseite, wo er auch steht. Der einzige
+ * Vertrauensanker hier ist der Balken über der Kopfzeile, den s04 übertragen
+ * hat (4,9/5,0, über 1.000 aktive Nutzer) — er steht ohnehin auf jeder Seite
+ * und wird hier NICHT gedoppelt.
+ *
+ * WOHER DER TEXT KOMMT: die Zeile unter der Überschrift ist wörtlich der
+ * Seitentitel, der seit s02 in `meta` steht ("Bio-Kakao aus zeremonieller
+ * Ernte"). Der Knopf führt auf /pages/crystal-cacao — die Übersichtsseite, die
+ * s04 nah an die Vorlage gebracht hat und die den Inhalt trägt. Die Startseite
+ * verkauft nicht, sie erzeugt den nächsten Klick.
+ */
+function Aufmacher() {
+  return (
+    <section className="cc-aufmacher">
+      <h1>{ABSENDER_MARKE}</h1>
+      <p className="cc-lead">Bio-Kakao aus zeremonieller Ernte</p>
+      <p className="cc-aufmacher-text">
+        Zwei Sorten, ein Kakao — Awake für den Start in den Tag, Create für den
+        klaren Kopf. Welche zu dir passt, siehst du in einer Minute.
+      </p>
+      <div className="cc-knopfreihe">
+        <Link className="cc-knopf" to="/pages/crystal-cacao">
+          Unseren Kakao ansehen
+        </Link>
+        <Link
+          className="cc-knopf cc-knopf--ruhig"
+          to={`/collections/${KAKAO_KOLLEKTION}`}
+        >
+          Alle Sorten
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Die Kollektionskachel — bleibt, aber ohne die <h1>. Zwei <h1> auf einer Seite
+ * waeren ein Struktur-, kein Geschmacksfehler; die Ueberschrift traegt jetzt
+ * der Aufmacher.
+ *
+ * BILD-EHRLICHKEIT: die Kollektion `zeremonie-kakao` fuehrt im Shopify-Admin
+ * KEIN Bild (gemessen 2026-09-02, `collection.image` ist null). Die Kachel
+ * rendert deshalb heute nur ihren Titel. Das ist bewusst kein Platzhalterbild:
+ * ein erfundenes Bild sieht wie Gestaltung aus und verdeckt, dass im Admin
+ * etwas fehlt. -> Klicklisten-Punkt, nicht Code.
+ *
  * @param {{
  *   collection: FeaturedCollectionFragment;
  * }}
  */
 function FeaturedCollection({collection}) {
-  if (!collection) return null;
   const image = collection?.image;
+  // OHNE BILD RENDERT DIESE KACHEL NUR IHREN EIGENEN TITEL — und der stand
+  // gemessen als 39px-Ueberschrift "Zeremonie Kakao" zwischen dem Aufmacher
+  // und dem Sortenraster, ohne etwas zu sagen, was nicht schon dasteht. Eine
+  // Ueberschrift ohne Inhalt ist keine Gestaltung, sie ist eine leere Huelle
+  // im Kleinen. Sobald im Shopify-Admin ein Kollektionsbild hinterlegt ist,
+  // erscheint die Kachel von selbst wieder — das ist ein Klicklisten-Punkt,
+  // kein Code-Fehler.
+  if (!collection || !image) return null;
   return (
     <Link
       className="featured-collection"
@@ -98,7 +162,7 @@ function FeaturedCollection({collection}) {
           />
         </div>
       )}
-      <h1>{collection.title}</h1>
+      <h2>{collection.title}</h2>
     </Link>
   );
 }
@@ -114,7 +178,7 @@ function RecommendedProducts({products}) {
       className="recommended-products"
       aria-labelledby="recommended-products"
     >
-      <h2 id="recommended-products">Unsere Empfehlungen</h2>
+      <h2 id="recommended-products">Unsere Sorten</h2>
       <Suspense fallback={<div>Wird geladen …</div>}>
         <Await resolve={products}>
           {(response) => (

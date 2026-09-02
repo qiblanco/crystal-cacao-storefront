@@ -963,3 +963,892 @@ aside .cart-details {
     font-size: 0.7rem;
   }
 }
+
+/* ==========================================================================
+ * ANGLEICHUNG DER UEBRIGEN SEITEN AN DIE KAKAO-SEITEN — 2026-09-02, Segment s05
+ * ==========================================================================
+ * Christian: "Ich erwarte, dass die bestehenden Kakao-Seiten sehr nah am
+ * Original uebertragen werden UND SICH DIE ANDEREN SEITEN OPTISCH DARAN
+ * ANGLEICHEN." Die Richtung ist damit vorgegeben: die Kakao-Seiten sind der
+ * Massstab, alles andere zieht nach.
+ *
+ * WAS DIESER BLOCK IST UND WAS ER AUSDRUECKLICH NICHT IST:
+ * Er definiert KEINEN einzigen neuen Token. Die Token-Schicht steht in
+ * app/styles/kakao-seiten.css (Segment s03, aus den Verpackungsbildern
+ * gemessen) und wird in app/root.jsx auf JEDER Seite geladen — sie war hier
+ * also immer schon verfuegbar und wurde bloss nie benutzt. Diese Datei fuehrte
+ * stattdessen ihre eigene :root mit freien Werten (--color-dark #000,
+ * --color-light #fff) und setzte Groessen, Farben und Radien direkt.
+ *
+ * EINE ZWEITE TOKEN-DATEI WAERE GENAU DER ZWEITE GOLDTON, den die
+ * Design-Pflicht verbietet — durch den Versuch, sie einzuhalten. Deshalb:
+ * ergaenzen, nicht neu bauen (P10).
+ *
+ * DER SORTEN-AKZENT KOMMT HIER NICHT VOR. --cc-sorte-* faerbt ausschliesslich
+ * die Sortenkennung auf den beiden Kaufseiten; s03 hat das ausdruecklich so
+ * entschieden ("eine Seite ohne Sorte bleibt bewusst neutral"). Ein
+ * Warenkorb traegt den ruhigen Grundton, nicht Awake-Rosa.
+ * ======================================================================== */
+
+/* --- 1. Die Altlast-Variablen zeigen auf die Token, statt sie zu doppeln ---
+ * Sie bleiben stehen, weil rund zwei Dutzend Bestandsregeln sie ansprechen.
+ * Ein Suchen-und-Ersetzen ueber alle waere mehr Bewegung als Nutzen und haette
+ * jede dieser Regeln zu einer neuen Fehlerquelle gemacht. Ein Alias erreicht
+ * dasselbe Ergebnis an EINER Stelle. */
+:root {
+  --color-dark: var(--cc-dunkel, #171310);
+  --color-light: #fff;
+  --header-height: 64px;
+}
+
+/* --- 2. Grundflaeche und Grundschrift ---
+ * Die Kakao-Seiten stehen auf dem warmen Off-White --cc-grund; alles andere
+ * stand auf reinem Weiss. Der Unterschied ist klein und genau deshalb wichtig:
+ * ein Wechsel von /pages/crystal-cacao nach /cart wechselte bisher sichtbar
+ * den Grundton. */
+body {
+  background: var(--cc-grund, #fbf8f4);
+  color: var(--cc-text, #2c2a26);
+  font-size: var(--cc-fs-2, 1rem);
+}
+
+body > main {
+  /* 8pt-Raster statt 1rem-Freiwert; unten mehr Luft zum Fuss. */
+  margin: 0 var(--cc-space-2, 1rem) var(--cc-space-5, 3rem);
+}
+
+/* --- 3. EIN Ueberschriften-Stil, aus der modularen Skala (Ratio 1.25) ---
+ * Vorher standen auf den Nicht-Kakao-Seiten drei Groessen nebeneinander, die
+ * zu keiner Skala gehoerten (1.6rem, 1.2rem, 1rem) — genau das Bild, das die
+ * Design-Doktrin als Ursache von "sieht von AI gemacht aus" benennt. */
+main h1,
+.route-error h1 {
+  font-size: var(--cc-fs-6, 2.44rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: var(--cc-space-5, 3rem) 0 var(--cc-space-2, 1rem);
+  color: var(--cc-dunkel, #171310);
+}
+
+main h2 {
+  font-size: var(--cc-fs-5, 1.95rem);
+  line-height: 1.2;
+  margin: var(--cc-space-5, 3rem) 0 var(--cc-space-2, 1rem);
+  color: var(--cc-dunkel, #171310);
+}
+
+main h3 {
+  font-size: var(--cc-fs-4, 1.56rem);
+  line-height: 1.25;
+  margin: var(--cc-space-4, 2rem) 0 var(--cc-space-1, 0.5rem);
+  color: var(--cc-dunkel, #171310);
+}
+
+main p {
+  font-size: var(--cc-fs-2, 1rem);
+  line-height: 1.6;
+}
+
+/* --- 4. Der Seitenrahmen: eine Zeilenlaenge, ein Takt ---
+ * web-soll.yaml zeilenlaenge_ch_max 75; --cc-zeile-max steht auf 70ch. Ohne
+ * Deckel lief der Rechtstext auf einem breiten Bildschirm ueber die volle
+ * Fensterbreite und war praktisch unlesbar. */
+.cc-seite {
+  margin-inline: auto;
+  max-width: 72rem;
+  width: 100%;
+}
+
+.cc-seite--text {
+  max-width: var(--cc-zeile-max, 70ch);
+}
+
+.cc-lead {
+  font-size: var(--cc-fs-3, 1.25rem);
+  line-height: 1.5;
+  color: var(--cc-muted, #6b665d);
+  max-width: var(--cc-zeile-max, 70ch);
+  margin-bottom: var(--cc-space-3, 1.5rem);
+}
+
+/* --- 5. Der Knopf. EINE Form, zwei Rollen ---
+ * Masse aus web-dach.yaml (Klasse `gebaut`, am DACH-Shop gemessen) und damit
+ * dieselben, die die Kakao-Kaufseiten benutzen: Hoehe 70, Schrift 17.6px,
+ * Radius 10, Trefferflaeche >= 44. Gold traegt HANDLUNG — und nur die. */
+.cc-knopf {
+  align-items: center;
+  background: var(--cc-gold, rgb(242, 191, 114));
+  border: 1px solid transparent;
+  border-radius: var(--cc-radius-knopf, 10px);
+  color: var(--cc-dunkel, #171310);
+  display: inline-flex;
+  font-size: var(--cc-knopf-schrift, 1.1rem);
+  font-weight: var(--cc-knopf-gewicht, 600);
+  justify-content: center;
+  line-height: 1.2;
+  min-height: var(--cc-treffer-min, 44px);
+  padding: var(--cc-space-2, 1rem) var(--cc-space-3, 1.5rem);
+  text-align: center;
+  text-decoration: none;
+  transition: background 160ms ease;
+}
+
+.cc-knopf:hover {
+  background: var(--cc-gold-tief, rgb(200, 152, 90));
+  text-decoration: none;
+}
+
+/* Die zweite Rolle ist bewusst KEIN zweiter Akzent, sondern derselbe Knopf
+ * ohne Fuellung — sonst konkurrieren zwei Farben um dieselbe Aufmerksamkeit. */
+.cc-knopf--ruhig {
+  background: transparent;
+  border-color: var(--cc-linie, #e6ded3);
+  color: var(--cc-text, #2c2a26);
+}
+
+.cc-knopf--ruhig:hover {
+  background: var(--cc-flaeche, #f6f1ea);
+}
+
+.cc-knopfreihe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2, 1rem);
+  margin-top: var(--cc-space-3, 1.5rem);
+}
+
+/* Auf schmalen Geraeten stehen die Knoepfe untereinander und nehmen die volle
+ * Breite — nebeneinander wuerde jeder unter 44px Hoehe gedrueckt oder ueber
+ * den Rand laufen. Gemessen bei 360px: zwei Knoepfe nebeneinander brauchen
+ * 372px. */
+@media (max-width: 29.99em) {
+  .cc-knopfreihe {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* --- 6. Der Leerzustand. Vorher eine Feststellung, jetzt ein Angebot ---
+ * Gilt fuer leeren Warenkorb, leere Suche und die Fehlerseite. Eine leere
+ * Flaeche ohne Weg ist eine Sackgasse, und Sackgassen sind teuer. */
+.cc-leerzustand {
+  padding: var(--cc-space-5, 3rem) 0;
+  max-width: var(--cc-zeile-max, 70ch);
+}
+
+.cc-leerzustand p {
+  font-size: var(--cc-fs-3, 1.25rem);
+  margin-bottom: var(--cc-space-1, 0.5rem);
+}
+
+.cc-leerzustand .cc-leerzustand-hinweis {
+  font-size: var(--cc-fs-2, 1rem);
+  color: var(--cc-muted, #6b665d);
+  margin-bottom: var(--cc-space-3, 1.5rem);
+}
+
+.cc-leerzustand .cc-knopf {
+  margin-top: var(--cc-space-2, 1rem);
+}
+
+/* In der Schublade ist weniger Platz — derselbe Baustein, engerer Takt. */
+aside .cc-leerzustand {
+  padding: var(--cc-space-3, 1.5rem) 0;
+}
+
+aside .cc-leerzustand .cc-knopf {
+  width: 100%;
+}
+
+/* --- 7. Der Aufmacher der Startseite --- */
+.cc-aufmacher {
+  padding: var(--cc-space-6, 4rem) 0 var(--cc-space-4, 2rem);
+  max-width: var(--cc-zeile-max, 70ch);
+}
+
+.cc-aufmacher h1 {
+  font-size: var(--cc-fs-7, 3.05rem);
+  margin-top: 0;
+  margin-bottom: var(--cc-space-1, 0.5rem);
+}
+
+.cc-aufmacher .cc-lead {
+  margin-bottom: var(--cc-space-2, 1rem);
+}
+
+.cc-aufmacher-text {
+  max-width: var(--cc-zeile-max, 70ch);
+}
+
+@media (max-width: 47.99em) {
+  .cc-aufmacher {
+    padding-top: var(--cc-space-4, 2rem);
+  }
+  .cc-aufmacher h1 {
+    font-size: var(--cc-fs-6, 2.44rem);
+  }
+}
+
+/* --- 8. Listen von Links (Rechtstext-Uebersicht) ---
+ * Vorher ein <fieldset> je Eintrag: ein Formular-Element ohne Formular, mit
+ * 1rem Innenabstand und ohne Trefferflaeche. */
+.cc-linkliste {
+  border-top: 1px solid var(--cc-linie, #e6ded3);
+  margin-top: var(--cc-space-3, 1.5rem);
+  max-width: var(--cc-zeile-max, 70ch);
+}
+
+.cc-linkliste li {
+  border-bottom: 1px solid var(--cc-linie, #e6ded3);
+  margin: 0;
+}
+
+.cc-linkliste a {
+  align-items: center;
+  color: var(--cc-text, #2c2a26);
+  display: flex;
+  font-size: var(--cc-fs-3, 1.25rem);
+  min-height: var(--cc-treffer-min, 44px);
+  padding: var(--cc-space-2, 1rem) 0;
+  text-decoration: none;
+}
+
+.cc-linkliste a:hover {
+  color: var(--cc-gold-text, #90671d);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.cc-zurueck {
+  margin-top: var(--cc-space-3, 1.5rem);
+}
+
+.cc-zurueck a {
+  color: var(--cc-muted, #6b665d);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--cc-treffer-min, 44px);
+}
+
+/* --- 9. Rechtstexte: Lesbarkeit, kein Umbau ---
+ * Der Rechtstext kommt als fertiges HTML aus Shopify und wird inhaltlich NICHT
+ * angefasst. Gesetzt wird nur, was ihn lesbar macht: Zeilenlaenge, Abstand,
+ * eine Tabelle, die auf dem Handy nicht ueber den Rand laeuft. */
+.cc-rechtstext {
+  max-width: var(--cc-zeile-max, 70ch);
+  padding-bottom: var(--cc-space-5, 3rem);
+}
+
+.cc-rechtstext p,
+.cc-rechtstext li {
+  line-height: 1.65;
+  margin-bottom: var(--cc-space-2, 1rem);
+}
+
+.cc-rechtstext h1,
+.cc-rechtstext h2,
+.cc-rechtstext h3,
+.cc-rechtstext h4,
+.cc-rechtstext strong {
+  color: var(--cc-dunkel, #171310);
+}
+
+.cc-rechtstext a {
+  color: var(--cc-gold-text, #90671d);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cc-rechtstext ul,
+.cc-rechtstext ol {
+  list-style: revert;
+  margin: 0 0 var(--cc-space-2, 1rem);
+  padding-left: var(--cc-space-3, 1.5rem);
+}
+
+/* Fremdes HTML bringt eigene Breiten mit. Ohne diesen Deckel schob eine
+ * einzige Tabelle im Datenschutztext die ganze Seite ueber den Viewport. */
+.cc-rechtstext img,
+.cc-rechtstext table,
+.cc-rechtstext iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.cc-rechtstext table {
+  display: block;
+  overflow-x: auto;
+}
+
+/* --- 10. Kopfzeile: die Marke muss lesbar bleiben ---
+ * GEMESSEN 2026-09-02 (Playwright, echte Elementbreiten am gerenderten DOM):
+ *   320px  Kopf scrollWidth 327 > 320  -> horizontaler Ueberlauf,
+ *          Marke gerendert 0px (vollstaendig weggeschnitten)
+ *   360px  Marke 27px   -> "C…"
+ *   390px  Marke 57px   -> "Crys…"
+ * Ursache ist NICHT die Marke, sondern die Summe der drei Wort-CTAs
+ * ("Anmelden" 81px + "Suchen" 59px + "Warenkorb" 86px = 226px von 358px
+ * Innenbreite). Die Ellipse aus dem Vorgaengerbau hat den Ueberlauf gebaendigt
+ * und dabei den Ladennamen geopfert — auf einem Shop, den der Kunde noch nicht
+ * kennt, ist das der falsche Tausch.
+ *
+ * FIX AN DER URSACHE: "Anmelden" verlaesst auf schmalen Geraeten die Kopfzeile
+ * und steht stattdessen IM Menue-Drawer, wo Platz ist (Header.jsx). Das ist
+ * kein Funktionsverlust — der Weg zum Konto bleibt zwei Fingertipps entfernt.
+ * Bewusst weiterhin KEIN overflow-x: hidden auf einem Vorfahren: das macht den
+ * Ueberlauf unsichtbar statt weg und bricht position: sticky. */
+@media (max-width: 47.99em) {
+  .header-ctas .header-konto {
+    display: none;
+  }
+  .header {
+    gap: var(--cc-space-1, 0.5rem);
+    padding: 0 0.75rem;
+  }
+  .header-ctas {
+    gap: var(--cc-space-2, 1rem);
+  }
+}
+
+.header {
+  background: var(--cc-grund, #fbf8f4);
+  border-bottom: 1px solid var(--cc-linie, #e6ded3);
+}
+
+.header-marke > strong {
+  color: var(--cc-dunkel, #171310);
+  font-size: var(--cc-fs-3, 1.25rem);
+  letter-spacing: -0.01em;
+}
+
+.header-menu-item,
+.header-ctas a,
+.header-ctas button.reset {
+  font-size: var(--cc-fs-2, 1rem);
+}
+
+/* KEIN EIGENER BLOCK FUER DEN WARENKORB-ZAEHLER (P10, 2026-09-02).
+ * Ich hatte hier einen gebaut und dann gemessen, dass er wirkungslos ist: das
+ * Abzeichen ist bereits fertig gestaltet in kakao-seiten.css
+ * (`.header-ctas a[href='/cart'] span`, Segment s07) — und diese Datei wird in
+ * root.jsx NACH app.css geladen, gewinnt also ohnehin. Zwei Regeln fuer
+ * dasselbe Element haetten sich nur gegenseitig verdeckt; korrigiert wurde
+ * stattdessen die eine bestehende Regel dort. */
+
+/* --- 11. Fusszeile ---
+ * Vorher: reines Schwarz (#000) und EIN Link ("Rechtliches"). Jetzt derselbe
+ * dunkle Ton wie der Vertrauensbalken ueber der Kopfzeile (--cc-dunkel, aus
+ * dem Etikett-Schwarz der Verpackung gemessen, dE 2.63) — damit rahmen Kopf
+ * und Fuss die Seite im selben Ton statt in zwei verschiedenen Schwarz.
+ * KONTRAST NACHGEMESSEN: #fff auf #171310 = 18,64:1 (WCAG 2.1). */
+.footer {
+  background: var(--cc-dunkel, #171310);
+  margin-top: auto;
+  padding: var(--cc-space-4, 2rem) var(--cc-space-2, 1rem);
+}
+
+.footer-menu {
+  gap: var(--cc-space-3, 1.5rem);
+  grid-gap: var(--cc-space-3, 1.5rem);
+  margin-inline: auto;
+  max-width: 72rem;
+  padding: 0;
+}
+
+.footer-menu a {
+  align-items: center;
+  display: inline-flex;
+  font-size: var(--cc-fs-2, 1rem);
+  min-height: var(--cc-treffer-min, 44px);
+}
+
+.footer-menu a:hover {
+  color: var(--cc-gold, rgb(242, 191, 114));
+  text-decoration: none;
+}
+
+/* --- 12. Produkt- und Kollektionsraster: EIN Kartenstil, EIN Bildradius ---
+ * Vorher: nackte Bilder auf der Seitenflaeche, Titel und Preis ohne Rhythmus,
+ * zwei verschiedene Radien im Baum. */
+.recommended-products-grid,
+.products-grid,
+.collections-grid {
+  gap: var(--cc-space-3, 1.5rem);
+  grid-gap: var(--cc-space-3, 1.5rem);
+  margin-bottom: var(--cc-space-5, 3rem);
+}
+
+.recommended-products-grid > a,
+.products-grid > a,
+.collections-grid > a,
+.product-item {
+  background: var(--cc-flaeche, #f6f1ea);
+  border: 1px solid var(--cc-linie, #e6ded3);
+  border-radius: var(--cc-radius-bild, 10px);
+  color: var(--cc-text, #2c2a26);
+  display: block;
+  overflow: hidden;
+  padding-bottom: var(--cc-space-2, 1rem);
+  text-decoration: none;
+  transition: border-color 160ms ease;
+}
+
+.recommended-products-grid > a:hover,
+.products-grid > a:hover,
+.collections-grid > a:hover,
+.product-item:hover {
+  border-color: var(--cc-kraft, #be9a77);
+  text-decoration: none;
+}
+
+.recommended-products-grid > a img,
+.products-grid > a img,
+.collections-grid > a img,
+.product-item img {
+  border-radius: 0;
+  display: block;
+  width: 100%;
+}
+
+.recommended-products-grid > a h4,
+.products-grid > a h4,
+.collections-grid > a h5,
+.product-item h4 {
+  font-size: var(--cc-fs-2, 1rem);
+  line-height: 1.35;
+  margin: var(--cc-space-2, 1rem) var(--cc-space-2, 1rem) var(--cc-space-1, 0.5rem);
+}
+
+.recommended-products-grid > a small,
+.products-grid > a small,
+.product-item small {
+  color: var(--cc-dunkel, #171310);
+  display: block;
+  font-size: var(--cc-fs-2, 1rem);
+  font-weight: 600;
+  margin: 0 var(--cc-space-2, 1rem);
+}
+
+/* --- 13. Startseiten-Kollektionskachel --- */
+.featured-collection {
+  border-radius: var(--cc-radius-bild, 10px);
+  margin-bottom: var(--cc-space-4, 2rem);
+  overflow: hidden;
+}
+
+.featured-collection h2 {
+  margin-top: var(--cc-space-3, 1.5rem);
+}
+
+/* --- 14. Suche ---
+ * Das Eingabefeld war ein Schablonen-Feld mit hartem 1px-Schwarzrand neben
+ * einem nackten Textknopf. Jetzt: EIN Feld, EIN Knopf, dieselben Masse wie
+ * ueberall. */
+.search form,
+.predictive-search-form form {
+  display: flex;
+  gap: var(--cc-space-1, 0.5rem);
+  max-width: 34rem;
+  width: 100%;
+}
+
+.search form input,
+.predictive-search-form input {
+  background: var(--color-light);
+  border: 1px solid var(--cc-linie, #e6ded3);
+  border-radius: var(--cc-radius-knopf, 10px);
+  flex: 1 1 auto;
+  font-size: var(--cc-fs-2, 1rem);
+  min-height: var(--cc-treffer-min, 44px);
+  min-width: 0;
+  padding: var(--cc-space-1, 0.5rem) var(--cc-space-2, 1rem);
+}
+
+.search form input:focus-visible,
+.predictive-search-form input:focus-visible {
+  border-color: var(--cc-kraft, #be9a77);
+  outline: 2px solid var(--cc-gold-tief, rgb(200, 152, 90));
+  outline-offset: 1px;
+}
+
+.search form button,
+.predictive-search-form button {
+  background: var(--cc-gold, rgb(242, 191, 114));
+  border: 1px solid transparent;
+  border-radius: var(--cc-radius-knopf, 10px);
+  color: var(--cc-dunkel, #171310);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-size: var(--cc-fs-2, 1rem);
+  font-weight: var(--cc-knopf-gewicht, 600);
+  min-height: var(--cc-treffer-min, 44px);
+  padding: 0 var(--cc-space-3, 1.5rem);
+}
+
+.search form button:hover,
+.predictive-search-form button:hover {
+  background: var(--cc-gold-tief, rgb(200, 152, 90));
+  text-decoration: none;
+}
+
+.search-result {
+  margin-bottom: var(--cc-space-4, 2rem);
+}
+
+.cc-trefferliste {
+  border-top: 1px solid var(--cc-linie, #e6ded3);
+}
+
+.cc-trefferliste .search-results-item {
+  border-bottom: 1px solid var(--cc-linie, #e6ded3);
+  margin: 0;
+}
+
+.cc-trefferliste .search-results-item a {
+  gap: var(--cc-space-2, 1rem);
+  min-height: var(--cc-treffer-min, 44px);
+  padding: var(--cc-space-2, 1rem) 0;
+  text-decoration: none;
+}
+
+.cc-trefferliste .search-results-item img {
+  border-radius: var(--cc-radius-bild, 10px);
+  flex: 0 0 auto;
+}
+
+.cc-trefferliste .search-results-item p {
+  margin-bottom: 2px;
+}
+
+.cc-trefferliste .search-results-item small {
+  color: var(--cc-dunkel, #171310);
+  font-weight: 600;
+}
+
+/* --- 15. Warenkorb-Seite und -Schublade --- */
+.cart-line {
+  border-bottom: 1px solid var(--cc-linie, #e6ded3);
+  padding-bottom: var(--cc-space-2, 1rem);
+}
+
+.cart-line img {
+  border-radius: var(--cc-radius-bild, 10px);
+}
+
+.cart-summary-page,
+.cart-summary-aside {
+  background: var(--cc-flaeche, #f6f1ea);
+  border-radius: var(--cc-radius-bild, 10px);
+  padding: var(--cc-space-3, 1.5rem);
+}
+
+/* --- 16. Fehlerseite --- */
+.cc-fehler-code {
+  color: var(--cc-muted, #6b665d);
+  font-size: var(--cc-fs-1, 0.8rem) !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.route-error h1 {
+  margin-top: var(--cc-space-1, 0.5rem);
+}
+
+/* --- 17. Konto-Bereich: dieselben Formularmasse wie ueberall ---
+ * Der Konto-Bereich ist im lokalen dev-Server nicht messbar (die Customer
+ * Account API verlangt einen Hydrogen-Tunnel und antwortet ohne ihn mit 400).
+ * Deshalb wird hier NICHTS strukturell umgebaut, sondern nur das gesetzt, was
+ * ohne Sicht auf die Seite sicher richtig ist: Trefferflaechen, Feldmasse und
+ * Radien auf denselben Token wie der Rest. Ehrlich vermerkt im RESULT. */
+main input:not([type='checkbox']):not([type='radio']),
+main select,
+main textarea {
+  border: 1px solid var(--cc-linie, #e6ded3);
+  border-radius: var(--cc-radius-knopf, 10px);
+  font-size: var(--cc-fs-2, 1rem);
+  min-height: var(--cc-treffer-min, 44px);
+  padding: var(--cc-space-1, 0.5rem) var(--cc-space-2, 1rem);
+}
+
+main button:not(.reset):not(.cc-knopf),
+main input[type='submit'] {
+  background: var(--cc-gold, rgb(242, 191, 114));
+  border: 1px solid transparent;
+  border-radius: var(--cc-radius-knopf, 10px);
+  color: var(--cc-dunkel, #171310);
+  cursor: pointer;
+  font-size: var(--cc-fs-2, 1rem);
+  font-weight: var(--cc-knopf-gewicht, 600);
+  min-height: var(--cc-treffer-min, 44px);
+  padding: 0 var(--cc-space-3, 1.5rem);
+}
+
+main button:not(.reset):not(.cc-knopf):hover,
+main input[type='submit']:hover {
+  background: var(--cc-gold-tief, rgb(200, 152, 90));
+}
+
+/* --- 18. Der letzte Riegel gegen horizontalen Ueberlauf ---
+ * NICHT overflow-x: hidden (das versteckt den Ueberlauf und bricht sticky),
+ * sondern die Ursache: ein Bild oder eine Tabelle aus fremdem HTML darf nie
+ * breiter werden als ihr Kasten. */
+main img,
+main video,
+main table {
+  max-width: 100%;
+}
+
+/* --- 19. EIN Umschaltpunkt fuer die Navigation, nicht zwei ---
+ * BEFUND, gemessen 2026-09-02: die Schablone schaltet das Desktop-Menue ab
+ * 45em (720px) EIN und blendet den Burger erst ab 48em (768px) AUS. Zwischen
+ * 720 und 768 px standen also BEIDE Navigationen gleichzeitig in der Kopfzeile
+ * — und weil sie zusammen 587 von 736 px Innenbreite belegten, blieben der
+ * Marke 76 px: "Crystal C…" auf einem Tablet.
+ *
+ * Beide Schwellen liegen jetzt auf 64em (1024px). Unterhalb traegt der Burger
+ * die Navigation allein, oberhalb das Desktop-Menue allein. Nachgemessen
+ * stehen der Marke damit bei 768px 636 px zur Verfuegung statt 76.
+ * Der Menue-Einzug faellt von 3rem auf --cc-space-4, damit die Kopfzeile auch
+ * bei 1024px nicht wieder auf Kante steht. */
+.header-menu-mobile-toggle {
+  display: inline-flex;
+}
+
+@media (min-width: 48em) {
+  .header-menu-mobile-toggle {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 64em) {
+  .header-menu-mobile-toggle {
+    display: none;
+  }
+}
+
+.header-menu-desktop {
+  display: none;
+}
+
+@media (min-width: 45em) {
+  .header-menu-desktop {
+    display: none;
+  }
+}
+
+@media (min-width: 64em) {
+  .header-menu-desktop {
+    display: flex;
+    gap: var(--cc-space-3, 1.5rem);
+    grid-gap: var(--cc-space-3, 1.5rem);
+    margin-left: var(--cc-space-4, 2rem);
+  }
+}
+
+/* Der Konto-Eintrag verlaesst die Kopfzeile ueberall dort, wo der Burger
+ * traegt — sonst faende ihn ein Tablet-Nutzer weder oben noch im Drawer. */
+@media (max-width: 63.99em) {
+  .header-ctas .header-konto {
+    display: none;
+  }
+}
+
+/* Die Marke darf nicht mehr unter ihre Lesbarkeit schrumpfen. 9.5rem traegt
+ * "Crystal Cacao®" bei --cc-fs-3 vollstaendig; darunter (320px-Geraete) kuerzt
+ * die Ellipse weiterhin, aber erst dann und nicht schon bei 390px. */
+.header-marke {
+  flex: 0 1 auto;
+  min-width: min(9.5rem, 100%);
+}
+
+/* --- 20. Die schmalsten Geraete (<= 360px) ---
+ * NACHGEMESSEN, warum es diesen Block braucht: mit der Mindestbreite der Marke
+ * aus Block 19 (9,5rem = 152px) lief die Kopfzeile bei 320px und 360px wieder
+ * ueber (scrollWidth 374). Die Rechnung geht dort nicht auf: 320px minus
+ * Innenabstand sind 296px, die drei CTA-Elemente belegen bei 16px Schrift 192px
+ * plus Abstaende — fuer die Marke bleiben 96px, sie braucht 152.
+ *
+ * Statt die Marke wieder zu opfern, wird hier der GESAMTE Kopf eine Stufe
+ * kleiner gesetzt: Marke auf --cc-fs-2, CTAs auf --cc-fs-1, Abstaende auf die
+ * kleinste Rasterstufe. Beides sind Token, keine freien Werte. Die
+ * Trefferflaechen bleiben unangetastet bei >= 44px — kleiner wird die Schrift,
+ * nicht der Knopf. */
+@media (max-width: 22.5em) {
+  .header {
+    gap: var(--cc-space-1, 0.5rem);
+    padding: 0 var(--cc-space-1, 0.5rem);
+  }
+  .header-ctas {
+    gap: var(--cc-space-1, 0.5rem);
+  }
+  .header-marke {
+    min-width: 7.6rem;
+  }
+  .header-marke > strong {
+    font-size: var(--cc-fs-2, 1rem);
+  }
+  .header-ctas a,
+  .header-ctas button.reset {
+    font-size: var(--cc-fs-1, 0.8rem);
+  }
+}
+
+/* --- 21. Zwei gemessene Ueberlaeufe, die NICHT vom Kopf kamen ---
+ *
+ * (a) DAS PRODUKTRASTER. `--grid-item-width: 355px` steht als feste
+ *     Mindestbreite in `minmax()`. Gemessen bei 320px und 360px: eine
+ *     Produktkachel wurde 355px breit und ragte bis x=371 — die
+ *     Kollektionsseite scrollte quer. Die Mindestbreite ist als WUNSCH
+ *     gemeint, nicht als Zusage; `min(100%, …)` macht daraus eine Obergrenze,
+ *     die der Viewport gewinnt.
+ *
+ * (b) DER DATENSCHUTZTEXT. Er kommt als fertiges HTML aus Shopify und enthaelt
+ *     Links, deren SICHTBARER Text die volle URL ist
+ *     ("https://www.facebook.com/business/…", 486px breit). Ein solcher String
+ *     hat keine Umbruchstelle; gemessen ergab das scrollWidth 608 bei
+ *     clientWidth 390 — auf ALLEN Breiten. Das ist kein Gestaltungsfehler,
+ *     sondern fremder Inhalt in einem zu engen Kasten, und die einzige
+ *     Antwort, die ihn nicht faelscht, ist ein erzwungener Umbruch. Der
+ *     Rechtstext selbst bleibt unangetastet. */
+:root {
+  --grid-item-width: min(100%, 355px);
+}
+
+.cc-rechtstext {
+  overflow-wrap: anywhere;
+}
+
+.cc-rechtstext a {
+  word-break: break-word;
+}
+
+/* --- 22. Der Ladenname wird auf dem Handy nicht mehr abgeschnitten ---
+ * NACHGEMESSEN nach Block 19/20: die Mindestbreite reichte, die SCHRIFTGROESSE
+ * nicht. "Crystal Cacao®" braucht bei --cc-fs-3 (20px, 700) rund 175px; bei
+ * 390px standen der Marke 166px zur Verfuegung — es blieb bei "Crystal Caca…".
+ * Auf --cc-fs-2 (16px) misst derselbe Name rund 140px und passt ab 360px
+ * vollstaendig. Der Name des Ladens ist auf einem Shop, den der Kunde noch
+ * nicht kennt, die wichtigste Information der Kopfzeile; die Kopfzeile hat
+ * genau dafuer eine Groessenstufe uebrig. */
+@media (max-width: 63.99em) {
+  .header-marke > strong {
+    font-size: var(--cc-fs-2, 1rem);
+  }
+  .header-marke {
+    min-width: min(9rem, 100%);
+  }
+}
+
+/* --- 23. Ruhigerer Takt auf den kurzen Dienstseiten ---
+ * Warenkorb, Suche und Fehlerseite haben wenig Inhalt. Mit dem vollen
+ * Sektions-Takt (3rem Ueberschriftenabstand PLUS 3rem Leerzustand-Polster)
+ * klaffte darunter ein Loch von 6rem, das wie ein Ladefehler aussah. */
+.cart h1,
+.search h1,
+.policies h1 {
+  margin-top: var(--cc-space-4, 2rem);
+  margin-bottom: var(--cc-space-2, 1rem);
+}
+
+.cart .cc-leerzustand,
+.search .cc-leerzustand {
+  padding-top: var(--cc-space-2, 1rem);
+}
+
+/* --- 24. Ein gemeinsamer Seitenrahmen fuer die uebrigen Seiten ---
+ * DIE ABGRENZUNG IST HIER DIE GANZE ARBEIT: der Rahmen wird NICHT auf `main`
+ * gesetzt, sondern namentlich auf die Wurzelelemente der Klasse-(b)-Routen.
+ * Die drei Kakao-Seiten (pages.crystal-cacao, products.crystal-cacao-*) haengen
+ * ebenfalls in `main`, sind aber s04-Gebiet und byte-nah an der Vorlage —
+ * ein Deckel auf `main` haette sie mitverschoben und die Naehe-Probe von s04
+ * gebrochen. Kein Kakao-Wrapper steht in dieser Liste.
+ *
+ * Ohne Rahmen lief das Sortenraster auf 1280px ueber die volle Fensterbreite
+ * und der Aufmacher stand als 70ch-Saeule allein links daneben — zwei
+ * verschiedene Massen auf einer Seite. */
+.home,
+.cart,
+.search,
+.policies,
+.policy,
+.collection,
+.collections,
+.account,
+.route-error {
+  margin-inline: auto;
+  max-width: 72rem;
+  width: 100%;
+}
+
+/* Der Aufmacher steht mittig — so wie die Ueberschriften der Kakao-Seiten.
+ * Das ist der sichtbarste Teil der Angleichung: wer von /pages/crystal-cacao
+ * auf die Startseite wechselt, soll denselben Laden erkennen. */
+.cc-aufmacher {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.cc-aufmacher .cc-lead,
+.cc-aufmacher-text {
+  margin-inline: auto;
+}
+
+.cc-aufmacher .cc-knopfreihe {
+  justify-content: center;
+}
+
+/* Die Sektionsueberschrift des Sortenrasters folgt derselben Mitte. */
+.home h2 {
+  text-align: center;
+}
+
+/* --- 25. Das Schliesskreuz der Schublade wird treffbar ---
+ * ANGESCHLOSSEN, NICHT GEDOPPELT: die Regel stammt aus dem parallel laufenden
+ * Auftrag 20260901-…-popups-und-ansicht-auf-jedem-handy-schliesskreuz-erreichbar
+ * und ist dort als Bedingung B2 der Probe
+ * homepage-bauer/bin/probe_overlay_schliesskreuz.py festgeschrieben: jedes
+ * Schliesskreuz misst mindestens 44x44 CSS-px, gemessen an der Border-Box
+ * INKLUSIVE Innenabstand, nicht an der Icon-Groesse. Es entsteht hier KEINE
+ * zweite Wache — nur die Umsetzung ihrer Regel in diesem Repo.
+ *
+ * SELBST GEMESSEN 2026-09-02 (Playwright, alle drei Schubladen — Warenkorb,
+ * Suche, Menue — bei 320x568, 360x740, 390x844 und 768x1024):
+ *   Trefferflaeche 20 x 24 px auf ALLEN zwoelf Kombinationen. B2 verletzt.
+ *   B1 (elementFromPoint trifft den Knopf) war ueberall erfuellt, B4 (kein
+ *   Randuebertritt) ebenfalls — das Kreuz war also sichtbar und technisch
+ *   klickbar, nur zu klein fuer einen Daumen. Genau der Fall, den die
+ *   Vorgaenger-Pruefungen nicht gesehen haben, weil das X ja DA war.
+ *
+ * WARUM DIE REGEL HIER STEHT UND NICHT IN Aside.jsx: Aside.jsx ist K1 im
+ * Vendoring-Manifest (byte-gleich zur Vorlage). Eine Aenderung dort waere
+ * Drift und beim naechsten Nachzug kommentarlos weg — "um die Datei herum,
+ * nicht in sie hinein".
+ *
+ * Das Zeichen selbst bleibt optisch gleich gross; groesser wird nur die
+ * Flaeche, die auf den Finger reagiert. */
+aside header .close {
+  align-items: center;
+  display: inline-flex;
+  height: var(--cc-treffer-min, 44px);
+  justify-content: center;
+  /* Der negative Aussenabstand haelt das Zeichen optisch an seinem Platz —
+   * ohne ihn schoebe die groessere Flaeche den Kopf der Schublade auf. */
+  margin: 0 calc(-1 * var(--cc-space-1, 0.5rem));
+  min-width: var(--cc-treffer-min, 44px);
+  width: var(--cc-treffer-min, 44px);
+}
+
+/* Die Schublade traegt denselben Grundton wie der Rest des Ladens; sie stand
+ * als einzige Flaeche noch auf reinem Weiss. */
+aside {
+  background: var(--cc-grund, #fbf8f4);
+}
+
+aside header {
+  border-bottom: 1px solid var(--cc-linie, #e6ded3);
+}
+
+aside header h3 {
+  font-size: var(--cc-fs-3, 1.25rem);
+  color: var(--cc-dunkel, #171310);
+}

@@ -50,8 +50,22 @@ FREMD_MARKEN = re.compile(r"QiOne|QiHome|QiBracelet|Gitterchip", re.I)
 # Routen, die es geben MUSS — mit dem Inhalt, den ein Mensch dort sehen soll.
 # Der zweite Eintrag ist der Riegel gegen die leere Huelle: er nennt einen
 # INHALT, nie nur einen Statuscode.
+#
+# NACHGEZOGEN 2026-09-02 (Segment s05), und die Begruendung gehoert hierher,
+# weil der naheliegende Verdacht ("die Probe wurde weichgeklopft") falsch waere:
+# Der Marker fuer "/" war "Zeremonie Kakao" — der TITEL der Shopify-Kollektion,
+# den die Startseite als Kachel rendert. Diese Kachel traegt im Admin KEIN Bild
+# (gemessen: collection.image ist null); sie bestand also aus nichts als dieser
+# einen 39px-Ueberschrift mit einem Backend-Namen darin und wurde deshalb
+# entfernt. Damit verschwand der Marker — die Probe wurde rot, ohne dass etwas
+# kaputt war.
+# DER NEUE MARKER IST STAERKER, NICHT SCHWAECHER: "Unsere Sorten" ist die
+# Ueberschrift ueber dem Produktraster und existiert NUR auf "/". Sie steht
+# unmittelbar vor der Liste, die aus der gezaeunten Kollektions-Query kommt —
+# fehlt die Route-Antwort, fehlt sie mit. Der alte Marker haette dagegen auch
+# dann noch gestanden, wenn das Raster selbst leer geblieben waere.
 KAKAO_ROUTEN = [
-    ("/", "Zeremonie Kakao"),
+    ("/", "Unsere Sorten"),
     ("/pages/crystal-cacao", "Kakao"),
     ("/products/crystal-cacao-awake", "AWAKE"),
     ("/products/crystal-cacao-create", "CREATE"),

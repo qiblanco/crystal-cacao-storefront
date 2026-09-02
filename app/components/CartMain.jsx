@@ -52,7 +52,7 @@ export function CartMain({layout, cart: originalCart}) {
       <CartEmpty hidden={linesCount} layout={layout} />
       <div className="cart-details">
         <p id="cart-lines" className="sr-only">
-          Line items
+          Positionen im Warenkorb
         </p>
         <div>
           <ul aria-labelledby="cart-lines">
@@ -100,14 +100,23 @@ export function CartMain({layout, cart: originalCart}) {
 function CartEmpty({hidden = false}) {
   const {close} = useAside();
   return (
-    <div hidden={hidden}>
-      <br />
-      <p>
-        Dein Warenkorb ist zurzeit leer!
+    // Ein leerer Warenkorb ist kein Fehler, sondern der häufigste Zustand —
+    // und die letzte Stelle, an der wir dem Kunden noch etwas anbieten können,
+    // bevor er die Schublade wieder zumacht. Deshalb steht hier ein Weg zu den
+    // Sorten und nicht nur eine Feststellung.
+    <div hidden={hidden} className="cc-leerzustand">
+      <p>Dein Warenkorb ist noch leer.</p>
+      <p className="cc-leerzustand-hinweis">
+        Zwei Sorten, ein Kakao: Awake für den Start in den Tag, Create für den
+        klaren Kopf.
       </p>
-      <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
-        Weiter einkaufen →
+      <Link
+        className="cc-knopf"
+        to="/pages/crystal-cacao"
+        onClick={close}
+        prefetch="viewport"
+      >
+        Unseren Kakao ansehen
       </Link>
     </div>
   );

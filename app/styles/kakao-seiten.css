@@ -960,7 +960,14 @@ main h3[style] {
 .header-ctas a[href='/cart'] span {
   position: absolute;
   top: -2px;
-  right: -10px;
+  /* NACHGEMESSEN 2026-09-02 (s05), Playwright am gerenderten DOM: bei -10px
+   * ragte das Abzeichen ueber den Kopf hinaus und erzeugte auf 320px und 360px
+   * genau 2px horizontalen Ueberlauf am DOKUMENT (scrollWidth 322 bei
+   * clientWidth 320) — ein absolut positioniertes Kind zaehlt zur scrollWidth
+   * seines Vorfahren, auch wenn es optisch nur "ein bisschen" heraussteht.
+   * Der Kopf hat auf den schmalsten Geraeten 8px Innenabstand; -6px bleibt
+   * darin und sieht unveraendert wie eine Ecken-Marke aus. */
+  right: -6px;
   min-width: 20px;
   height: 20px;
   display: flex;

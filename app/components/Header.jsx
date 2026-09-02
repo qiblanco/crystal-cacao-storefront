@@ -108,17 +108,6 @@ export function HeaderMenu({
 
   return (
     <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink
-          end
-          onClick={close}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to="/"
-        >
-          Home
-        </NavLink>
-      )}
       {(menu || KAKAO_MENUE).items.map((item) => {
         if (!item.url) return null;
 
@@ -143,6 +132,25 @@ export function HeaderMenu({
           </NavLink>
         );
       })}
+      {/* Der Drawer traegt seit 2026-09-02 (s05) auch den Weg zum Konto: in der
+          Kopfzeile hat er auf schmalen Geraeten die Marke verdraengt (siehe
+          HeaderCtas), hier ist Platz. Kein Funktionsverlust, ein Fingertipp
+          mehr — und er steht NACH der Navigation, weil ein Besucher zuerst den
+          Laden sucht und erst danach sein Konto.
+          "Home" ist dabei entfallen: der erste Menuepunkt heisst bereits
+          "Start" und zeigt auf dasselbe Ziel; zwei Eintraege fuer eine Seite
+          sahen wie zwei verschiedene Ziele aus. */}
+      {viewport === 'mobile' && (
+        <NavLink
+          className="header-menu-item header-menu-konto"
+          onClick={close}
+          prefetch="intent"
+          style={activeLinkStyle}
+          to="/account"
+        >
+          Mein Konto
+        </NavLink>
+      )}
     </nav>
   );
 }
@@ -154,7 +162,18 @@ function HeaderCtas({isLoggedIn, cart}) {
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
+      {/* Die Klasse ist der Griff, an dem app.css diesen Eintrag auf schmalen
+          Geraeten aus der Kopfzeile nimmt — den Weg zum Konto uebernimmt dort
+          der Menue-Drawer (HeaderMenu, viewport="mobile"). Gemessen 2026-09-02:
+          die drei Wort-CTAs belegten 226 von 358 px Innenbreite bei 390px und
+          drueckten den Ladennamen auf "Crys…"; bei 320px lief die Kopfzeile
+          sogar ueber (scrollWidth 327). */}
+      <NavLink
+        className="header-konto"
+        prefetch="intent"
+        to="/account"
+        style={activeLinkStyle}
+      >
         <Suspense fallback="Anmelden">
           <Await resolve={isLoggedIn} errorElement="Anmelden">
             {(isLoggedIn) => (isLoggedIn ? 'Mein Konto' : 'Anmelden')}

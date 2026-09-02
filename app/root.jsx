@@ -9,6 +9,7 @@ import {
   ScrollRestoration,
   useRouteLoaderData,
   useLocation,
+  Link,
 } from 'react-router';
 import favicon from '~/assets/favicon.svg';
 import {HEADER_QUERY} from '~/lib/fragments';
@@ -323,18 +324,74 @@ export default function App() {
   );
 }
 
+/**
+ * DIE FEHLERSEITE — 2026-09-02 (s05) aus der Sackgasse geholt.
+ *
+ * DER BEFUND, gemessen am gerenderten HTML: /gibtesnicht-404 lieferte 69
+ * Zeichen sichtbaren Text, den rohen Pfad in Monospace, KEINE Kopfzeile, KEINE
+ * Fusszeile, KEINEN Link. Wer auf einem toten Link landete — und nach dem
+ * Sortiments-Zaun aus s02 tut das jeder, der einer alten Qi-Blanco-Adresse
+ * folgt —, hatte keinen Weg zurück in den Laden.
+ *
+ * WARUM DIE SCHABLONE DAS LAYOUT BEWUSST WEGLIESS, und warum das hier nicht
+ * mehr gilt: diese ErrorBoundary fängt AUCH Fehler des root-Loaders. Rendert
+ * sie dann ein Layout, das von genau diesem Loader lebt, kracht die
+ * Fehlerseite selbst — man tauscht eine hässliche Seite gegen gar keine. Hier
+ * ist die Gefahr entschärft, weil die Navigation seit s02 STATISCH im Code
+ * steht (KAKAO_MENUE, KAKAO_FUSSMENUE) und keinen Loader braucht.
+ *
+ * DIE RESTGEFAHR BLEIBT UND WIRD BEHANDELT, nicht weggeredet:
+ *   - `useRouteLoaderData('root')` ist in der ErrorBoundary `undefined`, wenn
+ *     der root-Loader derjenige war, der geworfen hat. Alles Weitergereichte
+ *     ist deshalb optional (`?.`) und darf fehlen.
+ *   - Der Layout-Weg gilt NUR für eine echte Route-Antwort (404/403/…). Ein
+ *     unerwarteter Ausnahmefehler behält den nackten Minimal-Render — dort ist
+ *     unbekannt, was noch trägt, und ein zweiter Absturz wäre teurer als eine
+ *     karge Seite.
+ */
 export function ErrorBoundary() {
   const error = useRouteError();
-  let errorMessage = 'Unbekannter Fehler';
-  let errorStatus = 500;
+  const rootData = useRouteLoaderData('root');
+  const istRouteFehler = isRouteErrorResponse(error);
+  const errorStatus = istRouteFehler ? error.status : 500;
 
-  if (isRouteErrorResponse(error)) {
-    errorMessage = error?.data?.message ?? error.data;
-    errorStatus = error.status;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
+  const inhalt = istRouteFehler ? (
+    <div className="route-error cc-leerzustand">
+      <p className="cc-fehler-code">Fehler {errorStatus}</p>
+      <h1>{errorStatus === 404 ? 'Diese Seite gibt es nicht' : 'Da ist etwas schiefgelaufen'}</h1>
+      <p>
+        {errorStatus === 404
+          ? 'Vielleicht hat sich die Adresse geändert, vielleicht ein Tippfehler. Unseren Kakao findest du hier:'
+          : 'Wir konnten die Seite gerade nicht laden. Versuch es gleich noch einmal — oder geh direkt zu unserem Kakao:'}
+      </p>
+      <div className="cc-knopfreihe">
+        <Link className="cc-knopf" to="/pages/crystal-cacao">
+          Unseren Kakao ansehen
+        </Link>
+        <Link className="cc-knopf cc-knopf--ruhig" to="/">
+          Zur Startseite
+        </Link>
+      </div>
+    </div>
+  ) : null;
+
+  if (istRouteFehler) {
+    return (
+      <PageLayout
+        cart={rootData?.cart}
+        footer={rootData?.footer}
+        header={rootData?.header}
+        isLoggedIn={rootData?.isLoggedIn}
+        publicStoreDomain={rootData?.publicStoreDomain ?? ''}
+      >
+        {inhalt}
+      </PageLayout>
+    );
   }
 
+  // Unerwarteter Ausnahmefehler: bewusst ohne Layout. Siehe Kopfkommentar.
+  const errorMessage =
+    error instanceof Error ? error.message : 'Unbekannter Fehler';
   return (
     <div className="route-error">
       <h1>Da ist etwas schiefgelaufen</h1>
