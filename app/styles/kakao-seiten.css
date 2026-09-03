@@ -1133,3 +1133,106 @@ main h3[style] {
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* ==========================================================================
+ * ZEILENLAENGE AUF DEN KAUFSEITEN — 2026-09-03 (Segment s06)
+ *
+ * DER BEFUND, selbst gemessen am gerenderten DOM mit der Formel, die die
+ * Rubrik selbst benutzt (breite / (schriftgroesse * 0.52), Grenze 90):
+ * auf /products/crystal-cacao-awake lagen 19 von 41 Textbloecken (46 %)
+ * darueber, auf -create 49 %. Die drei teuersten waren keine Grenzfaelle:
+ * drei <p> mit 16 px Schrift standen 1318 px breit, also rund 158 Zeichen
+ * je Zeile — mehr als doppelt so lang wie die 70 ch, die web-soll.yaml als
+ * Obergrenze fuehrt und die als --cc-zeile-max seit s03 als Token bereitsteht.
+ * Der Rest waren Aufzaehlungen mit 12.8 px Schrift bei 623 bis 672 px.
+ *
+ * WARUM DAS TOKEN DA WAR UND TROTZDEM NICHTS TAT: --cc-zeile-max wurde von
+ * s03 definiert, aber von keiner Regel angewandt. Ein Token ohne Benutzer ist
+ * wie ein Regelwerk ohne Aufrufer — vorhanden und wirkungslos.
+ *
+ * WARUM DER ZAUN AN DER EIGENSCHAFT HAENGT UND NICHT AN KLASSENNAMEN: die
+ * Vorlage bringt Tailwind-Klassen wie `NormalSectionSize` oder
+ * `space-y-1 text-sm text-gray-800` mit. Ein Zaun aus diesen Literalen
+ * erreicht die naechste Sektion nicht, die anders heisst. Gemessen wird
+ * deshalb "Fliesstext im Hauptteil einer Sortenseite", nicht ein Klassenname.
+ *
+ * WAS BEWUSST AUSGENOMMEN BLEIBT: Tabellenzellen (die Vergleichstabelle
+ * braucht ihre Spaltenbreite), Knopf- und Preisflaechen (dort ist die Breite
+ * die Trefferflaeche, nicht der Lesefluss) und alles innerhalb der Schubladen.
+ * ========================================================================== */
+html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
+  table *, .btn--primary *, .btn--secondary *, aside *,
+  .qb-swipetab *, [class*='price'] *, [class*='Price'] *
+)) {
+  max-width: var(--cc-zeile-max);
+}
+
+/* ==========================================================================
+ * SCHLEIER UNTER DEN BANNER-UEBERSCHRIFTEN — 2026-09-03 (Segment s06)
+ *
+ * DER AUFTRAG KAM AUS s03 und lag seither offen: dessen RESULT uebergab
+ * woertlich "Adressat: s04, mit dem fertigen Rezept" — s04 hat ihn nicht
+ * ausgefuehrt, hier wird er eingeloest.
+ *
+ * DER BEFUND, und er ist mit dem AUGE belegt, nicht nur mit einer Zahl:
+ * `HerobannerWithText` (Kakao.jsx) legt eine weisse <h2> absolut ueber ein
+ * Foto, ohne jede Absicherung. Auf dem zweiten Banner steht "100% naturrein"
+ * in Weiss direkt auf einer hellgelben Kakaofrucht vor hellem Blattwerk —
+ * der Screenshot zeigt Buchstaben, die im Motiv verschwinden. Das ist keine
+ * Messgrenze, das ist schlecht lesbar.
+ *
+ * WARUM EIN VERLAUF UND NICHT DER FLAECHIGE SCHLEIER AUS DEM REZEPT:
+ * rgba(0,0,0,0.65) ueber das GANZE Bild traegt die Schrift zwar sicher, macht
+ * aber aus einem hellen, freundlichen Foto eine dunkle Flaeche — der Preis
+ * waere das Bild. Der Verlauf sichert genau das obere Drittel, in dem die
+ * Schrift steht, und laesst den Rest unberuehrt. Der dunkle Ton ist
+ * --cc-dunkel, also KEINE neue Farbe.
+ *
+ * WAS DIESER FIX NICHT TUT, und das gehoert dazu: kontrast-sweep wird die
+ * beiden <h2> WEITERHIN als Riss melden. Das Werkzeug liest weder Bilder noch
+ * Pseudo-Elemente und faellt auf den hellen Elterngrund zurueck; der Schleier
+ * ist ein ::after und damit fuer es unsichtbar. Der Nachweis dieses Fixes ist
+ * deshalb der Screenshot, NICHT der Exit-Code — wer hier auf Gruen wartet,
+ * wartet auf etwas, das das Werkzeug baulich nicht liefern kann.
+ *
+ * ZAUN AN DER EIGENSCHAFT, nicht am Klassennamen: getroffen wird "ein
+ * Container, dessen Bild unmittelbar eine Ueberschrift folgt" — die
+ * Tailwind-Literale `my-[10vh]!` und `top-10` der Vorlage kommen nicht vor,
+ * sie wuerden den naechsten gleichgebauten Banner verfehlen.
+ * ========================================================================== */
+.ProductPageKakao div:has(> img + h2) {
+  position: relative;
+}
+
+.ProductPageKakao div:has(> img + h2)::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 45%;
+  border-radius: var(--cc-radius-bild) var(--cc-radius-bild) 0 0;
+  background: linear-gradient(
+    to bottom,
+    rgb(23 19 16 / 72%) 0%,
+    rgb(23 19 16 / 52%) 45%,
+    rgb(23 19 16 / 18%) 75%,
+    rgb(23 19 16 / 0%) 100%
+  );
+  pointer-events: none;
+}
+
+/* Der Schleier ist das LETZTE Kind und laege ohne diese Zeile ueber der
+ * Schrift statt darunter — beide sind positioniert und ohne z-index
+ * entscheidet die Baumreihenfolge.
+ *
+ * HIER STAND ZUERST `position: relative` DAZU, UND DAS WAR EIN FEHLER, DEN
+ * KEIN SCORE GEFANGEN HAETTE: die Ueberschrift traegt ihre Positionierung aus
+ * Tailwinds `.absolute`, diese Regel ist spezifischer und hat sie auf
+ * `relative` zurueckgeholt — die Ueberschrift fiel damit AUS dem Bild heraus
+ * in den normalen Fluss darunter, der Banner wurde 87 px hoeher und die
+ * Schrift war schlicht weg. Gefunden hat es der Screenshot nach dem Bau,
+ * nicht die Rubrik. z-index allein genuegt: das Element IST bereits absolut
+ * positioniert, und nur darauf wirkt z-index ohnehin. */
+.ProductPageKakao div:has(> img + h2) > h2 {
+  z-index: 1;
+}

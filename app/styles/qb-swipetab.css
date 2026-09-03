@@ -1,0 +1,224 @@
+/* ==========================================================================
+   BAUKASTEN  qb-swipetab  —  breite Tabelle: erste Spalte FEST, Wertspalten WISCHBAR
+   DACH-Ausfertigung (Hydrogen). SSoT der Regeln:
+     shared-state/homepage-bauer/baukasten/qb-swipetab/qb-swipetab.css
+   Gebaut: 2026-08-12, Job 20260811-responsive-tabelle-sticky-...-prio95 (Christian PRIO-95)
+
+   ZWECK
+   Eine Vergleichs-/Wertetabelle passt auf dem Handy nicht in den Viewport. Statt
+   sie zu stauchen (unlesbar) oder abzuschneiden (Spalten unerreichbar), bleibt die
+   BESCHRIFTUNGS-Spalte stehen und die WERT-Spalten werden horizontal gewischt.
+   Damit bleibt jede Zeile zuordenbar — genau das geht beim reinen overflow-x verloren.
+
+   DREI FALLEN, DIE DIESEN BAUSTEIN NOETIG MACHEN (alle am Live-Objekt gemessen)
+   1) `overflow:hidden` auf dem <table> (dort meist nur wegen border-radius) macht die
+      Tabelle selbst zum Clip-Container und toetet `position:sticky` der Zellen
+      LAUTLOS — die Spalte scrollt einfach mit. Radius gehoert deshalb auf __vp.
+   2) `border-collapse:collapse` laesst die Raender der sticky-Spalte verschwinden
+      (die Raender gehoeren im collapse-Modell der Tabelle, nicht der Zelle).
+      Darum separate+border-spacing:0; die Trennkante zeichnet ein ::after.
+   3) FOLGE VON (2), DACH-spezifisch: im separate-Modell werden Raender auf <tr>
+      laut CSS-Spezifikation NICHT gezeichnet. Tailwind-Markup traegt Trennlinien
+      gern als `border-b` auf dem <tr> — diese Linie verschwindet beim Umstellen
+      lautlos. Sie gehoert an die ZELLEN (th/td), nicht an die Zeile.
+      Siehe Kakao.jsx: die Kopf-Unterkante sitzt deshalb auf den <th>.
+   Ein `overflow-x:auto`-Wrapper ALLEIN reicht ausserdem nicht: solange die Tabelle
+   `width:100%` hat, staucht sie sich statt zu ueberlaufen — es gibt dann nichts zu
+   scrollen. Erst eine Mindestbreite je Spalte erzeugt echten Scrollweg.
+
+   ERWARTETES MARKUP — liefert die Komponente SwipeTable.jsx, nicht von Hand bauen:
+     <div class="qb-swipetab">
+       <div class="qb-swipetab__vp" tabindex="0" role="region" aria-label="...">
+         <table> ... </table>
+       </div>
+       <p class="qb-swipetab__hinweis" aria-hidden="true">Wischen</p>
+     </div>
+
+   ANPASSUNG je Einsatzort ausschliesslich ueber diese Variablen (keine freien Werte):
+     --qb-swipetab-grund   Flaechenfarbe der festen Spalte — MUSS DECKEND sein,
+                           sonst scheinen die wandernden Wertspalten durch.
+     --qb-swipetab-linie   Trennkante
+     --qb-swipetab-radius  Eckenradius (wandert vom <table> auf __vp)
+     --qb-swipetab-fest    Breite der festen Spalte (mobil)
+     --qb-swipetab-wert    Mindestbreite je Wertspalte (mobil)
+   ========================================================================== */
+
+.qb-swipetab {
+  position: relative;
+  /* Vorgaben: bewusst neutral, jeder Einsatzort ueberschreibt mit seinen Tokens */
+  --qb-swipetab-grund: #fff;
+  --qb-swipetab-linie: rgba(0, 0, 0, 0.12);
+  --qb-swipetab-radius: 12px;
+  --qb-swipetab-fest: 132px;
+  --qb-swipetab-wert: 92px;
+}
+
+/* --- Der Scroll-Container. NICHT die Tabelle. --- */
+.qb-swipetab__vp {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* verhindert, dass das Wischen am Ende die Seiten-Zurueck-Geste ausloest */
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  border-radius: var(--qb-swipetab-radius);
+  background: var(--qb-swipetab-grund);
+  /* senkrecht gemeinte Gesten gehoeren der Seite (Achsen-Entscheid im Hook) */
+  touch-action: pan-y;
+}
+/* Der Bereich ist per Tastatur erreichbar (tabindex=0) — Fokus muss sichtbar sein. */
+.qb-swipetab__vp:focus-visible {
+  outline: 2px solid var(--qb-swipetab-fokus, currentColor);
+  outline-offset: 2px;
+}
+
+/* --- Tabelle: die Killer aus dem Kopf neutralisieren --- */
+.qb-swipetab__vp > table {
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: visible; /* NIE hidden: toetet sticky */
+  width: 100%;
+}
+
+/* --- Die feste Spalte --- */
+.qb-swipetab__vp > table > thead > tr > :first-child,
+.qb-swipetab__vp > table > tbody > tr > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--qb-swipetab-grund); /* deckend, sonst scheint es durch */
+  /* Luft zur Trennkante. Die Kante zeichnet DIESER Baustein (::after unten),
+     also schuldet er ihr auch den Abstand. Gemessen 2026-08-12 an der echten
+     DACH-Route: die Zellen der Tabelle haben real 0 px Innenkante (die
+     Tailwind-Klasse px-3 schlaegt dort nicht durch -- das ist Bestand, auch
+     auf der unveraenderten Live-Seite so gemessen). Ohne diesen Zuschlag
+     endete "Phenylethylamin" exakt auf der Trennlinie. padding-right statt
+     einer festen Spaltenbreite, damit die Spalte sprachunabhaengig bleibt. */
+  padding-right: calc(var(--qb-swipetab-inset, 10px) + 1px);
+}
+/* Trennkante als ::after — im separate-Modell traegt sie die Zelle, nicht die Tabelle.
+   (sticky ist positioniert, also ankert das absolute Kind an der Zelle.) */
+.qb-swipetab__vp > table > thead > tr > :first-child::after,
+.qb-swipetab__vp > table > tbody > tr > :first-child::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--qb-swipetab-linie);
+  pointer-events: none;
+}
+/* --- ZEBRA-Tabellen (opt-in) ---
+   Bei gestreiften Zeilen ist eine feste Flaechenfarbe FALSCH: die Beschriftungs-
+   spalte staende dann weiss neben grau gestreiften Zeilen. Stattdessen traegt die
+   ZEILE ihre Farbe und die Zelle erbt sie.
+   BEDINGUNG: jede Zeile braucht dann eine DECKENDE eigene Farbe — auch die
+   "leere". Eine transparente Zeile wuerde die wandernden Wertspalten durch die
+   feste Spalte durchscheinen lassen. Siehe Kakao.jsx (bg-gray-50 / bg-white).
+   Bewusst ohne Farbwerte hier: so bleibt die Farbquelle das Markup und es
+   entsteht keine zweite Wahrheit, die auseinanderlaufen kann. */
+.qb-swipetab--zebra .qb-swipetab__vp > table > thead > tr > :first-child,
+.qb-swipetab--zebra .qb-swipetab__vp > table > tbody > tr > :first-child {
+  background-color: inherit;
+}
+
+/* Sobald wirklich weggescrollt ist, hebt sich die feste Spalte sichtbar ab. */
+.qb-swipetab.is-ab-links .qb-swipetab__vp > table > thead > tr > :first-child,
+.qb-swipetab.is-ab-links .qb-swipetab__vp > table > tbody > tr > :first-child {
+  box-shadow: 6px 0 12px -6px rgba(0, 0, 0, 0.28);
+}
+
+/* --- Mindestbreiten: OHNE sie staucht sich die Tabelle und es gibt keinen Scrollweg --- */
+@media (max-width: 749px) {
+  /* NUR ein BODEN, bewusst keine feste und keine Hoechstbreite.
+     Gemessen 2026-08-12 an der echten Route: mit hart gesetzten
+     width/max-width:132px stand "Phenylethylamin" mit exakt 0,0 px Luft auf der
+     Trennkante -- es hatte die komplette 12-px-Innenkante aufgebraucht und war
+     nur noch durch Zufall nicht abgeschnitten. Eine harte Breite muesste je
+     Sprache neu kalibriert werden (EN "Phenylethylamine" ist noch laenger).
+     Mit einem reinen Boden waehlt das Auto-Layout die Spalte selbst so breit,
+     dass das laengste WORT hineinpasst -- sprachunabhaengig und ohne Umbruch
+     mitten im Wort. Der Scrollweg entsteht dadurch nicht weniger, nur ehrlicher. */
+  .qb-swipetab__vp > table > thead > tr > :first-child,
+  .qb-swipetab__vp > table > tbody > tr > :first-child {
+    min-width: var(--qb-swipetab-fest);
+  }
+  .qb-swipetab__vp > table > thead > tr > :not(:first-child),
+  .qb-swipetab__vp > table > tbody > tr > :not(:first-child) {
+    min-width: var(--qb-swipetab-wert);
+  }
+}
+
+/* --- Kanten-Verlauf: "hier geht es weiter". Nur wenn es wirklich weitergeht. --- */
+.qb-swipetab::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none; /* darf das Wischen NIE abfangen */
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  border-radius: 0 var(--qb-swipetab-radius) var(--qb-swipetab-radius) 0;
+  background: linear-gradient(
+    to left,
+    var(--qb-swipetab-grund),
+    rgba(255, 255, 255, 0)
+  );
+}
+.qb-swipetab.is-mehr-rechts::after {
+  opacity: 0.92;
+}
+
+/* --- Textlicher Hinweis: UNTER der Tabelle, verdeckt also nie einen Wert. --- */
+.qb-swipetab__hinweis {
+  display: none;
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  color: var(--qb-swipetab-hinweis-farbe, inherit);
+  opacity: 0.72;
+  text-align: right;
+  user-select: none;
+}
+/* Erst wenn gemessen ist, dass es ueberhaupt etwas zu wischen gibt. */
+.qb-swipetab.is-wischbar .qb-swipetab__hinweis {
+  display: block;
+}
+.qb-swipetab.is-ab-links .qb-swipetab__hinweis {
+  display: none;
+}
+.qb-swipetab__hinweis::after {
+  content: ' \2192';
+  display: inline-block;
+  animation: qb-swipetab-wink 1.6s ease-in-out infinite;
+}
+@keyframes qb-swipetab-wink {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+/* --- Maus-Drag (die Komponente setzt .is-ziehen ueber useDragSwipe) --- */
+.qb-swipetab.is-zieh-faehig .qb-swipetab__vp {
+  cursor: grab;
+}
+.qb-swipetab.is-ziehen .qb-swipetab__vp {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* --- Barrierefreiheit: wer Bewegung reduziert, bekommt keinen wackelnden Pfeil --- */
+@media (prefers-reduced-motion: reduce) {
+  .qb-swipetab__hinweis::after {
+    animation: none;
+  }
+  .qb-swipetab::after {
+    transition: none;
+  }
+}

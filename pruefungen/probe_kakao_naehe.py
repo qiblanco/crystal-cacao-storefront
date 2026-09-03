@@ -160,6 +160,78 @@ ABWEICHUNGEN = [
                  'gestrichen statt umformuliert — eine neue Wirkzusage an '
                  'seiner Stelle zu erfinden waere schlimmer als die Luecke.',
     },
+    # --- Die STRUKTUR-Spur des Hydration-Fixes aus s06 ------------------------
+    # KEINE Tilgung, sondern eine REPARATUR: Awake.jsx/Create.jsx rendern
+    # `row.text` — ein Fragment aus mehreren <p> — und legten es in ein
+    # weiteres <p>. Ein <p> in einem <p> ist ungueltiges HTML; der Parser
+    # schliesst das aeussere vorzeitig, Server- und Client-Baum laufen
+    # auseinander, und React bricht die Hydration ab (gemessen 2026-09-03:
+    # 6 verschachtelte <p>, 8 Konsolenfehler, zweimal woertlich "Hydration
+    # failed because the initial UI does not match what was rendered on the
+    # server"). Der aeussere Traeger ist deshalb hier ein <div>, bei
+    # unveraenderten Klassen und unveraendertem Text.
+    #
+    # WARUM DIE VORLAGE MEHR ELEMENTE HAT ALS CRYSTAL (259 gegen 252 bzw.
+    # 255 gegen 249) UND DAS KEIN VERLUST IST: die Zusatz-Elemente der
+    # Vorlage sind die REPARATUR DES BROWSERS an ihrem kaputten Markup — er
+    # reisst die inneren <p> aus dem aeusseren heraus und haengt sie als
+    # Geschwister daneben. Crystal hat sie weiterhin, nur korrekt
+    # verschachtelt. Die Textachse belegt das getrennt: sie meldet auf
+    # beiden Seiten "gleich".
+    #
+    # DIE VORLAGE TRAEGT DENSELBEN DEFEKT an derselben Zeile
+    # (qiblanco-storefront Awake.jsx:251 / Create.jsx:243). Der Befund ist
+    # dorthin gemeldet; faellt er dort, sind diese vier Zeilen wieder zu
+    # entfernen — dann ist die Naht von selbst wieder geschlossen.
+    {
+        'id': 'struktur-hydration-p-traeger-vorlage',
+        'achse': 'struktur',
+        'richtung': 'nur_vorlage',
+        'seiten': ['/products/crystal-cacao-awake', '/products/crystal-cacao-create'],
+        'muster': None,
+        'folge': ['p|leading-relaxed text-gray-800 text-sm|'],
+        'anzahl_max': 3,
+        'grund': 'Der ungueltige <p>-Traeger der Herkunfts-Absaetze. In der '
+                 'Vorlage ein <p> in einem <p>, was die React-Hydration '
+                 'abbrechen laesst (s06, gemessen).',
+    },
+    {
+        'id': 'struktur-hydration-div-traeger-crystal',
+        'achse': 'struktur',
+        'richtung': 'nur_crystal',
+        'seiten': ['/products/crystal-cacao-awake', '/products/crystal-cacao-create'],
+        'muster': None,
+        'folge': ['div|leading-relaxed text-gray-800 text-sm|'],
+        'anzahl_max': 3,
+        'grund': 'Derselbe Traeger als <div>: gleiche Klassen, gleicher Text, '
+                 'gueltiges HTML. Ersatz zu struktur-hydration-p-traeger-vorlage.',
+    },
+    {
+        'id': 'struktur-hydration-parser-reparatur-vorlage',
+        'achse': 'struktur',
+        'richtung': 'nur_vorlage',
+        'seiten': ['/products/crystal-cacao-awake'],
+        'muster': None,
+        'folge': ['p||', 'p|mt-3|', 'b||'],
+        'anzahl_max': 1,
+        'grund': 'Die inneren Absaetze, die der Browser in der Vorlage aus dem '
+                 'kaputten <p> herausreisst und als Geschwister danebenhaengt. '
+                 'Sie stehen in crystal weiterhin, nur korrekt im <div> '
+                 'verschachtelt — der Diff meldet sie deshalb an anderer '
+                 'Stelle, siehe Gegenstueck nur_crystal.',
+    },
+    {
+        'id': 'struktur-hydration-parser-reparatur-crystal',
+        'achse': 'struktur',
+        'richtung': 'nur_crystal',
+        'seiten': ['/products/crystal-cacao-awake'],
+        'muster': None,
+        'folge': ['p||', 'b||', 'p|mt-3|'],
+        'anzahl_max': 1,
+        'grund': 'Dieselben Absaetze an ihrer korrekten Stelle im <div>. '
+                 'Gegenstueck zu struktur-hydration-parser-reparatur-vorlage.',
+    },
+
     # --- Die STRUKTUR-Spuren derselben Tilgungen ------------------------------
     # Ein geloeschter Absatz laesst nicht nur Text fehlen, sondern auch die
     # Elemente, die ihn getragen haben. Die Textachse allein wuerde das nicht

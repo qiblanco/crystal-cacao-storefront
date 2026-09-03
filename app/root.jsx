@@ -16,6 +16,16 @@ import {HEADER_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import kakaoStyles from '~/styles/kakao-seiten.css?url';
+/* DER CSS-VERTRAG DER SWIPE-TABELLE — nachgezogen 2026-09-03 (s06).
+ * app/components/reusables/SwipeTable.jsx kam als K1-Datei byte-gleich aus
+ * der Vorlage herueber, ihr Stylesheet NICHT: app/styles/ fuehrte nur
+ * reset/app/kakao-seiten. Ohne den Vertrag klippt `.qb-swipetab__vp` nicht,
+ * und die 536 px breite Vergleichstabelle der Uebersichtsseite schob das
+ * Dokument auf 569 px — gemessen bei 390 px UND 360 px Viewport, also
+ * horizontaler Ueberlauf auf jedem Handy. Die Datei ist byte-gleich zur
+ * DACH-Ausfertigung der Vorlage (sha256 d87e4046…), passend zur ebenfalls
+ * byte-gleichen Komponente. */
+import swipetabStyles from '~/styles/qb-swipetab.css?url';
 import {PageLayout} from './components/PageLayout';
 import {MetaPixel} from './components/MetaPixel';
 import {UpPromoteTracking} from './components/UpPromoteTracking';
@@ -216,6 +226,7 @@ export function Layout({children}) {
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <link rel="stylesheet" href={kakaoStyles}></link>
+        <link rel="stylesheet" href={swipetabStyles}></link>
         {shouldLoadThirdPartyScripts && data?.cookiebotId ? (
           <script
             id="Cookiebot"

@@ -3,7 +3,7 @@ import {Suspense} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
 import {MockShopNotice} from '~/components/MockShopNotice';
-import {ABSENDER_MARKE, KAKAO_KOLLEKTION} from '~/lib/kakao-zone';
+import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
@@ -52,7 +52,9 @@ async function loadCriticalData({context}) {
  */
 function loadDeferredData({context}) {
   const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY, {variables: {handle: KAKAO_KOLLEKTION}})
+    .query(SORTEN_QUERY, {
+      variables: {awake: SORTEN_HANDLES.awake, create: SORTEN_HANDLES.create},
+    })
     .catch((error) => {
       // Log query errors, but don't throw them so the page can still render
       console.error(error);
@@ -63,6 +65,38 @@ function loadDeferredData({context}) {
     recommendedProducts,
   };
 }
+
+/**
+ * DIE ZWEI SORTEN-HANDLES — abgeleitet, nicht danebengeschrieben.
+ *
+ * `SORTEN_PFADE` in app/lib/kakao-zone.js ist seit s03 die SSoT dafuer, WELCHE
+ * Seiten eine Sorte sind: sie steuert ueber `sorteZuPfad()` das Attribut
+ * `data-cc-sorte` und damit den Farb-Akzent je Sorte. Wer eine dritte Sorte
+ * anlegt, muss sie dort ohnehin eintragen, sonst bleibt sie farblos. Genau
+ * deshalb wird hier daraus abgeleitet statt eine zweite Liste zu fuehren —
+ * eine zweite Liste waere die naechste Stelle, die auseinanderlaeuft.
+ */
+const SORTEN_HANDLES = Object.freeze(
+  Object.fromEntries(
+    Object.entries(SORTEN_PFADE).map(([pfad, sorte]) => [
+      sorte,
+      pfad.split('/').pop(),
+    ]),
+  ),
+);
+
+/**
+ * WAS DER KUNDE UNTER DER SORTE LIEST. Kein Versprechen, keine Wirkzusage,
+ * keine Zahl — es ist woertlich die Unterscheidung, die schon im Aufmacher
+ * derselben Seite steht ("Awake fuer den Start in den Tag, Create fuer den
+ * klaren Kopf"). Sie beantwortet die einzige Frage, die der Kunde an dieser
+ * Stelle hat: welche der zwei nehme ich. Der Beweis ist ein Closer und steht
+ * auf der Kaufseite, nicht hier.
+ */
+const SORTEN_ORIENTIERUNG = Object.freeze({
+  awake: 'Für den Start in den Tag.',
+  create: 'Für den klaren Kopf.',
+});
 
 export default function Homepage() {
   /** @type {LoaderReturnData} */
@@ -172,6 +206,38 @@ function FeaturedCollection({collection}) {
  *   products: Promise<RecommendedProductsQuery | null>;
  * }}
  */
+/**
+ * DIE SORTEN-SEKTION — 2026-09-03 (s06), und der Grund ist ein Screenshot.
+ *
+ * WAS HIER VORHER STAND, selbst gemessen am gerenderten HTML: die Ueberschrift
+ * "Unsere Sorten" und darunter `collection.products(first: 4)` der Kollektion
+ * `zeremonie-kakao`. Diese Kollektion fuehrt gemessen ACHT Produkte, und die
+ * ersten vier davon ergaben ein Raster aus "Create – Bio", "Awake – Bio",
+ * "Create - Bio" und "Create & Awake – Bio" — also CREATE ZWEIMAL, dazu ein
+ * Buendel, unter einer Ueberschrift, die zwei Sorten verspricht. Der dritte
+ * Eintrag war der Muell-Handle `crystal-cacao-adfiefiale`; in derselben
+ * Kollektion liegt ausserdem ein Produkt mit dem woertlichen Titel
+ * "Test Page - Crystal Cacao(R) Create spaeter wieder loeschen".
+ *
+ * WARUM DAS KEIN SCORE GEFANGEN HAT: die Rubrik gab dieser Startseite
+ * 100 von 100. Sie misst Tokens, Rhythmus, Kontrast und Weissraum — sie kann
+ * nicht wissen, dass zwei der vier Kacheln dasselbe Produkt zeigen. Ein Score
+ * ist eine Diagnose ueber die Form, kein Urteil ueber die Wahrheit.
+ *
+ * WARUM DER FIX HIER SITZT UND NICHT IN DER KOLLEKTION: die Kollektion ist
+ * als Sortiments-Zaun (s02) richtig — sie soll alles Kaufbare enthalten,
+ * auch Buendel und Mengenrabatte, und die Kollektionsseite listet das zu
+ * Recht. Falsch war die FRAGE dieser Sektion: sie fragte nach "den ersten
+ * vier Produkten" und beschriftete die Antwort mit "Sorten". Es gibt genau
+ * zwei Sorten, und die stehen in SORTEN_PFADE. Die Muell- und Testprodukte
+ * bleiben davon unberuehrt und weiterhin erreichbar — das ist ein
+ * Datenbefund fuer den Shopify-Admin und wird als solcher gemeldet, nicht
+ * hier weggerendert.
+ *
+ * @param {{
+ *   products: Promise<SortenQuery | null>;
+ * }}
+ */
 function RecommendedProducts({products}) {
   return (
     <section
@@ -183,16 +249,21 @@ function RecommendedProducts({products}) {
         <Await resolve={products}>
           {(response) => (
             <div className="recommended-products-grid">
-              {response?.collection
-                ? response.collection.products.nodes.map((product) => (
-                    <ProductItem key={product.id} product={product} />
-                  ))
-                : null}
+              {['awake', 'create']
+                .map((sorte) => [sorte, response?.[sorte]])
+                .filter(([, produkt]) => Boolean(produkt))
+                .map(([sorte, produkt]) => (
+                  <div className="cc-sortenkachel" key={produkt.id}>
+                    <ProductItem product={produkt} loading="eager" />
+                    <p className="cc-sorten-orientierung">
+                      {SORTEN_ORIENTIERUNG[sorte]}
+                    </p>
+                  </div>
+                ))}
             </div>
           )}
         </Await>
       </Suspense>
-      <br />
     </section>
   );
 }
@@ -230,8 +301,8 @@ const FEATURED_COLLECTION_QUERY = `#graphql
   }
 `;
 
-const RECOMMENDED_PRODUCTS_QUERY = `#graphql
-  fragment RecommendedProduct on Product {
+const SORTEN_QUERY = `#graphql
+  fragment SortenProdukt on Product {
     id
     title
     handle
@@ -249,19 +320,18 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       height
     }
   }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode, $handle: String!)
+  query Sorten ($country: CountryCode, $language: LanguageCode, $awake: String!, $create: String!)
     @inContext(country: $country, language: $language) {
-    collection(handle: $handle) {
-      products(first: 4) {
-        nodes {
-          ...RecommendedProduct
-        }
-      }
+    awake: product(handle: $awake) {
+      ...SortenProdukt
+    }
+    create: product(handle: $create) {
+      ...SortenProdukt
     }
   }
 `;
 
 /** @typedef {import('./+types/_index').Route} Route */
 /** @typedef {import('storefrontapi.generated').FeaturedCollectionFragment} FeaturedCollectionFragment */
-/** @typedef {import('storefrontapi.generated').RecommendedProductsQuery} RecommendedProductsQuery */
+/** @typedef {import('storefrontapi.generated').SortenQuery} SortenQuery */
 /** @typedef {ReturnType<typeof useLoaderData<typeof loader>>} LoaderReturnData */

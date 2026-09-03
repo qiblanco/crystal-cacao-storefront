@@ -667,13 +667,41 @@ aside .cart-details {
   object-fit: cover;
 }
 
+/* DAS SORTEN-RASTER — 2026-09-03 (s06).
+ *
+ * Es traegt seit s06 genau ZWEI Kacheln (die zwei Sorten), nicht mehr die
+ * ersten vier Produkte der Kollektion. Vier Spalten auf dem Desktop haetten
+ * die zwei Kacheln auf ein Viertel der Breite gequetscht und rechts zwei
+ * Luecken gelassen; `repeat(auto-fit, minmax(...))` haelt sie stattdessen in
+ * lesbarer Breite und mittig, und traegt eine spaetere dritte Sorte ohne
+ * Aenderung mit. Die Deckelung auf 760 px verhindert die Gegenrichtung: zwei
+ * bildschirmbreite Kacheln auf einem 1440er Monitor.
+ */
 .recommended-products-grid {
   display: grid;
-  grid-gap: 1.5rem;
-  grid-template-columns: repeat(2, 1fr);
+  grid-gap: var(--cc-space-3, 1.5rem);
+  grid-template-columns: 1fr;
+  margin-inline: auto;
+  max-width: 760px;
   @media (min-width: 45em) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
+}
+
+/* Die Kachel umfasst Karte + Orientierungszeile. Die Zeile steht bewusst
+ * AUSSERHALB des Links: sie ist Orientierung, kein zweites Klickziel. */
+.cc-sortenkachel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-1, 0.5rem);
+}
+
+.cc-sorten-orientierung {
+  color: var(--cc-muted, #6b665d);
+  font-size: var(--cc-fs-1, 0.875rem);
+  line-height: 1.5;
+  margin: 0;
+  padding-inline: var(--cc-space-1, 0.5rem);
 }
 
 .recommended-product img {
@@ -923,7 +951,13 @@ aside .cart-details {
 }
 .Header-AnnouncementBanner a p {
   color: var(--color-light);
-  font-size: 0.9rem;
+  /* 0.9rem = 14.4px war der einzige freie Zwischenwert der ganzen Seite und
+   * lag auf keiner Stufe der modularen Skala (12.8 / 16 / 20 / 25 / 31.25 /
+   * 39.06 / 48.83). Die Rubrik meldete deshalb auf jeder Seite "Schrift-
+   * groessen folgen keiner modularen Skala"; der Balken steht ueber jeder
+   * Seite und trug den Befund damit ueberallhin. --cc-fs-1 ist die Stufe fuer
+   * Feindruck und Labels und damit die sachlich richtige. */
+  font-size: var(--cc-fs-1, 0.8rem);
   font-weight: 600;
   margin: 0;
 }
@@ -941,7 +975,8 @@ aside .cart-details {
      textual " - " separator is desktop-only; column-gap spaces the units
      when they still share one line. */
   .Header-AnnouncementBanner a p {
-    font-size: 0.75rem;
+    /* war 0.75rem (12px) — auf die Skalenstufe --cc-fs-1 (12.8px). */
+    font-size: var(--cc-fs-1, 0.8rem);
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -958,9 +993,27 @@ aside .cart-details {
   }
 }
 @media (max-width: 374px) {
-  /* very narrow devices: line 1 must fit without overflow */
+  /* SEHR SCHMALE GERAETE — 2026-09-03 (s06) korrigiert.
+   *
+   * VORHER: font-size 0.7rem = 11.2px, damit Zeile 1 ohne Ueberlauf in eine
+   * Zeile passt. Gemessen bei 360 px Viewport waren das 11.2 px und damit
+   * UNTER dem Lesbarkeitsboden, den web-soll.yaml als mobile_font_px_min 12
+   * fuehrt — auf jeder Seite, weil der Balken ueber jeder Seite steht.
+   * (Der Wert ist AELTER als dieses Segment; meine Aenderung der
+   * Grundgroesse hat ihn nicht verursacht — diese Regel ueberschreibt sie.)
+   *
+   * DIE ABWAEGUNG: die Zeile passt bei 12.8 px nicht mehr in eine Zeile.
+   * Statt die Schrift unter den Boden zu druecken, darf sie jetzt umbrechen —
+   * `.banner-line` gibt sein `nowrap` hier auf. Zwei kurze Zeilen sind
+   * lesbar, eine unlesbare ist es nicht. Der Umbruch faellt weiterhin
+   * zwischen die Sinneinheiten, weil `banner-offer-sep` schon ab 749 px
+   * ausgeblendet ist und die Einheiten Flex-Kinder sind. */
   .Header-AnnouncementBanner a p {
-    font-size: 0.7rem;
+    font-size: var(--cc-fs-1, 0.8rem);
+  }
+
+  .Header-AnnouncementBanner .banner-line {
+    white-space: normal;
   }
 }
 
@@ -1325,6 +1378,56 @@ aside .cc-leerzustand .cc-knopf {
 .header-ctas a,
 .header-ctas button.reset {
   font-size: var(--cc-fs-2, 1rem);
+}
+
+/* TREFFERFLAECHEN DER KOPFZEILEN-SCHALTER — 2026-09-03 (s06).
+ *
+ * DER BEFUND, selbst gemessen mit Playwright bei 360 px und 390 px auf allen
+ * acht geprueften Seiten: der Menue-Schalter `☰` misst 11 x 19 px (360) bzw.
+ * 14 x 24 px (390), der Schalter "Suchen" 44 x 24 bzw. 56 x 24. Die Regel des
+ * parallel laufenden Auftrags 20260901-…-schliesskreuz-erreichbar verlangt als
+ * Bedingung B2 mindestens 44 x 44 an der Border-Box. Beide reissen sie auf
+ * JEDEM geprueften Geraet — der Menue-Schalter um mehr als das Doppelte.
+ *
+ * WARUM DAS NICHT SCHON s05 GEFANGEN HAT: s05 hat die drei SCHLIESSKREUZE in
+ * den Schubladen gemessen und von 20 x 24 auf 44 x 44 gebracht. Gemessen
+ * wurde, was die Schublade schliesst — nicht, was sie OEFFNET. Die Kante lag
+ * genau zwischen den beiden Richtungen desselben Bedienvorgangs.
+ *
+ * Die Flaeche waechst nach innen (Innenabstand + Mindestmass), das Aussehen
+ * bleibt: `☰` und "Suchen" behalten Groesse und Farbe. */
+.header-menu-mobile-toggle,
+.header-ctas button.reset,
+.header-ctas a {
+  align-items: center;
+  justify-content: center;
+  min-height: var(--cc-treffer-min, 44px);
+  min-width: var(--cc-treffer-min, 44px);
+}
+
+/* `display` steht BEWUSST nicht im Block darueber, und das ist die zweite
+ * Lektion dieses Segments: ein pauschales `display: inline-flex` dort hat den
+ * Menue-Schalter auf dem DESKTOP wieder eingeblendet. Er wird oben (Zeile 331)
+ * per `@media (min-width: 48em) { display: none }` versteckt. Der Schalter
+ * liegt IN `.header-ctas` (Header.jsx: HeaderCtas rendert ihn als erstes
+ * Kind), wurde also von `.header-ctas button.reset` mitgetroffen — gleiche
+ * Spezifitaet, meine Regel stand spaeter in der Datei, also gewann sie.
+ * Darum `:not(.header-menu-mobile-toggle)`: die Trefferflaeche gilt weiter,
+ * das Sichtbarkeits-Regime bleibt beim Bestand.
+ * Gefunden hat es der Screenshot nach dem Bau, nicht der Score: alle acht
+ * Seiten blieben bei 94 bis 100 Punkten, waehrend auf jeder ein zweites,
+ * ueberfluessiges Bedienelement in der Kopfzeile stand.
+ * Das Flex-Verhalten kommt deshalb nur dort, wo das Element ohnehin
+ * sichtbar ist. */
+.header-ctas button.reset:not(.header-menu-mobile-toggle),
+.header-ctas a {
+  display: inline-flex;
+}
+
+.header-menu-mobile-toggle > h3 {
+  font-size: inherit;
+  line-height: 1;
+  margin: 0;
 }
 
 /* KEIN EIGENER BLOCK FUER DEN WARENKORB-ZAEHLER (P10, 2026-09-02).

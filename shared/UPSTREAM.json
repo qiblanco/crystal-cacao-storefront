@@ -50,27 +50,6 @@
       "sha256": "b1fea10cf0cfc52a01201fecfb8b4faa852d0b5e45b6d98580a16683a8bb25fd"
     },
     {
-      "upstream": "app/components/product-pages/Awake.jsx",
-      "klasse": "K2",
-      "sha256_upstream": "69d298af4ee122f934122295dd7a38457260c5de4d4146f13116c11bbca72876",
-      "sha256_lokal": "b81f907e7d67994d227ca2596c1404ffdad99dee597ccb908653190fa0c9a279",
-      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02). Die Vorlage schreibt die Reifephase der \"harmonisierenden QiHome(R) Air Atmosphaere\" und der \"GitterChip(TM)-Technologie\" zu — Werbung fuer Fremdprodukte auf einer Kakao-Kaufseite. Lokal bleibt die Aussage ueber das langsame Auskristallisieren erhalten, ohne die Fremdtechnik. Dieselbe Begruendung wie Kakao.jsx: in der Vorlage ist der Satz richtig, hier nicht."
-    },
-    {
-      "upstream": "app/components/product-pages/Create.jsx",
-      "klasse": "K2",
-      "sha256_upstream": "02ec973e6292073d5d95caf7ea70c6b56269e0e9b69838ad2e6a0e8412452667",
-      "sha256_lokal": "e162e161b9a9a52a55a98e1662baf262f36a4faeee373e2002fe7228e5b9c8e0",
-      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02). Die Vorlage setzt in der Reifephase \"das QiHome(R) Air\" ein. Lokal ersatzlos gestrichen; die umgebende Aussage ueber Kristallmuster und Ursprung bleibt unveraendert. Dieselbe Begruendung wie Kakao.jsx."
-    },
-    {
-      "upstream": "app/components/product-pages/Kakao.jsx",
-      "klasse": "K2",
-      "sha256_upstream": "e6624673e80b71a392aceaa87b8a32b7cb0c00898c28d7ca37b9c5a6cbdb3a14",
-      "sha256_lokal": "da5d184bbefad2e573fc7d813573284e0ab579b143f2465e856ccc99b8d11c3b",
-      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02, Christian: \"da ist auch noch QiHome-Werbung drauf\"). Die Vorlage bewirbt im Block \"Wusstest du?\" woertlich die QiHome(R) Air-Technologie und verweist auf QiOne(R) und QiBracelet(R); der alt-Text eines Video-Titelbilds lautete \"Bild von einer Frau mit QiOne und QiBracelet\". Auf einem Kakao-Shop ist das Werbung fuer ein fremdes Sortiment. Byte-Gleichheit ist hier baulich unmoeglich, weil die Vorlage in der Qi-Blanco-Welt steht, wo genau diese Saetze RICHTIG sind — die Abweichung ist der Zweck der Datei, nicht ihr Mangel. Ersetzt wurde durch eine kakao-eigene Prozessaussage (langsames Auskristallisieren) ohne neue Wirkzusage. ZUSAETZLICH seit Job 20260902-…-prio6-s03: die Tabellen-Ueberschrift 'Crystal Cacao(R)' trug den INLINE-Farbwert '#cab581' — einen ZWEITEN Goldton neben --cc-gold (dE 19,71) und mit 2,01:1 auf Weiss unter jeder WCAG-Schwelle. Sie zeigt jetzt auf den Token var(--cc-gold-text) (5,07:1). Auch das ist baulich nicht byte-gleich haltbar: der Token existiert nur in dieser Storefront (app/styles/kakao-seiten.css), die qiblanco-Vorlage kennt ihn nicht."
-    },
-    {
       "upstream": "app/components/reusables/ActiveCampaignForm.jsx",
       "klasse": "K1",
       "sha256": "9528e49a582ce876b5238398a1c696854090edec1b264495fd426b2401ef9798"
@@ -96,13 +75,6 @@
       "sha256": "85000e847bf342a8d3c34e57ee05cd183dafdb8daa52741b5cd4eeee22fd5314"
     },
     {
-      "upstream": "app/data/product-faqs.js",
-      "klasse": "K2",
-      "sha256_upstream": "871523994923fe0e31e25c34e9f06110dab33cc475e41f580b904aa03dc253cb",
-      "sha256_lokal": "fa85fcd51b5ab49840ae757bc5a637afebec66f9db4550c8f1629009e07772b9",
-      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02), zwei verschiedene Faelle in einer Datei. (1) Die vier Konstanten FAQ_QIONE_2_PRO, FAQ_QIBRACELET, FAQ_QIHOME_AIR und FAQ_QIONE_KETTE waren in crystal TOTER CODE — gemessen 2026-09-02 importierte sie keine Datei, die einzigen Importeure holen nur FAQ_CACAO. (2) In FAQ_CACAO stand dagegen ein LIVE gerenderter Eintrag \"Welche Effekte entstehen durch die Kombination von Qi Blanco(R)-Produkten und zeremoniellem Kakao?\" mit Gitterchip- und Kohaerenz-Aussage; er stand ueber FAQ_CACAO auf beiden Kakao-Kaufseiten. Beides in der Qi-Blanco-Vorlage sachgerecht, im Kakao-Laden nicht."
-    },
-    {
       "upstream": "app/lib/cart-display-pricing.js",
       "klasse": "K1",
       "sha256": "d91cd0909e1f795083dc9ff55a47f452973882c2e452d3d1429b50d50ca71565"
@@ -116,13 +88,6 @@
       "upstream": "app/lib/faq-schema.js",
       "klasse": "K1",
       "sha256": "26247917461426e3d6dd63603456aa748236560bd92f2035205d9f882b3e00b5"
-    },
-    {
-      "upstream": "app/lib/kakao-zone.js",
-      "klasse": "K2",
-      "sha256_upstream": "6cff87887abedcefcd5d1d6320b0253a98b9626f2619c0bef7f384d646e71c21",
-      "sha256_lokal": "ddae328ae164943f162b3f9735732fb2b81f06763a42ea7703bae7ba67c6a8bd",
-      "abweichung_grund": "Traegt seit Job 20260902-…-prio6-s02 zusaetzlich den SORTIMENTS-ZAUN dieser Storefront: KAKAO_KOLLEKTION/KAKAO_KOLLEKTIONEN/KAKAO_SEITEN, die Praedikate istKakaoProdukt/istKakaoKollektion/istKakaoSeite, die Absender-Marke ABSENDER_MARKE sowie KAKAO_MENUE sowie KAKAO_FUSSMENUE. Grund: die Hydrogen-Catch-all-Routen fragten den geteilten Shopify-Katalog ungefiltert ab, wodurch /products/qione-2-pro, /pages/studien und /collections/all auf crystal-cacao.com mit HTTP 200 und voll gerendertem Fremdinhalt antworteten. Diese Begriffe haben in der qiblanco-Vorlage keinen Gegenstand — dort IST das Sortiment das eigene. Byte-Gleichheit ist damit baulich unmoeglich. ZUSAETZLICH seit Job 20260902-…-prio6-s03: SORTEN_PFADE und sorteZuPfad() — die Zuordnung Pfad->Kakao-Sorte, aus der app/root.jsx das Attribut data-cc-sorte setzt und die Farbschicht ihre aus den Verpackungsbildern GEMESSENE Sortenfarbe waehlt. In der qiblanco-Vorlage gibt es keine Kakao-Sorten, der Begriff hat dort keinen Gegenstand. ZUSAETZLICH seit Job 20260902-…-prio6-s05: KAKAO_BLOGS und istKakaoBlog() (Blog-Allowlist, heute leer — /blogs/news und /blogs/e-smog lieferten HTTP 200 mit NULL Artikeln, /blogs/wissen vier Qi-Blanco-Artikel ohne Kakao-Bezug, die wortgleich auf qiblanco.com stehen und auf einer zweiten Domain Duplicate Content waeren), sowie RECHTSTEXT_TITEL und rechtstextTitel() (deutsche ANZEIGE-Titel der Shop-Policies; Shopify liefert 'Privacy Policy'/'Refund Policy' zu durchgehend deutschem Inhalt — geaendert wird ausschliesslich die Beschriftung, kein Zeichen des Rechtstextes). KAKAO_FUSSMENUE fuehrt seither die vier Pflichtseiten einzeln statt eines Sammel-Links. Alle drei Begriffe haben in der qiblanco-Vorlage keinen Gegenstand — dort gibt es keinen Zaun, weil dort das Sortiment das eigene ist."
     },
     {
       "upstream": "app/lib/markt-pricing.js",
@@ -140,20 +105,6 @@
       "sha256": "5e964de8f085b5a47e4b2bebe3d58d9fe801bff049d1ce205088c49604d3e8d9"
     },
     {
-      "upstream": "app/lib/redirect.js",
-      "klasse": "K2",
-      "sha256_upstream": "6fa1643ad84aa2f8625b1e3847a1b1247c29ad2690352dc3d91406583c009a62",
-      "sha256_lokal": "b926613a4c069e683df1a851f7e226fa3b0a524a5921a32fd368cc66d9d79d4b",
-      "abweichung_grund": "Byte-Gleichheit ist baulich unmoeglich: Zeile 1 importiert `redirect` aus @shopify/remix-oxygen; der Ziel-Major @shopify/hydrogen 2026.4 hat dieses Paket entfernt und crystal-cacao-storefront fuehrt es nicht in dependencies. Der Hersteller nennt den Ersatz woertlich (packages/hydrogen/CHANGELOG.md 2025.7.0): `redirect` ist aus 'react-router' zu importieren. Aufgehoben ist allein die Gleichheit der beiden Seiten -- beide Fassungen bleiben einzeln gepinnt."
-    },
-    {
-      "upstream": "app/lib/seo.js",
-      "klasse": "K2",
-      "sha256_upstream": "184d61b0c66350b82a0ff18cc2571e88120f477e6c9f97074ce8522f70b352e3",
-      "sha256_lokal": "bdd7a4312d4efe68185cf9ecf24679c8de3b09c60acf8224506a1ee670732651",
-      "abweichung_grund": "Byte-Gleichheit ist baulich unmoeglich: die Datei fuehrt `CANONICAL_ORIGIN` als Quelltext-Konstante mit der qiblanco-Domain. Byte-gleich uebernommen truege JEDE crystal-Seite einen Canonical auf qiblanco.com — und weil dort dieselbe geteilte Seite liegt, ist das Ziel gueltig: Google konsolidiert crystal-cacao.com auf qiblanco.com und der Kakao-Laden verschwindet aus dem Index, ohne Fehlermeldung. Die Konstante ist zugleich die Wurzel von og:url (produkt-seo.js) und der JSON-LD-Knoten-IDs ORG_ID/SITE_ID (entity-schema.js) — eine Adaption, drei Wirkungen. Aufgehoben ist allein die Gleichheit der beiden Seiten; beide Fassungen bleiben einzeln gepinnt, damit eine spaetere Bewegung auf BEIDEN Seiten sichtbar wird."
-    },
-    {
       "upstream": "app/routes/pages.crystal-cacao.jsx",
       "klasse": "K1",
       "sha256": "a21e428f9f43e31755d92876c4342d00cb8b606d49f8a071c5c0622c29720796"
@@ -167,6 +118,60 @@
       "upstream": "app/routes/products.crystal-cacao-create.jsx",
       "klasse": "K1",
       "sha256": "c79d1e6c26b01830e5957afeeae37a7f0c4aabda5f74b7c3b1b5226eeba032f6"
+    },
+    {
+      "upstream": "app/styles/qb-swipetab.css",
+      "klasse": "K1",
+      "sha256": "d87e40462701759b7146c3470a49d2fbd2a8d9b6fe1c2be46b9adc2c2ac395ef"
+    },
+    {
+      "upstream": "app/components/product-pages/Awake.jsx",
+      "klasse": "K2",
+      "sha256_upstream": "69d298af4ee122f934122295dd7a38457260c5de4d4146f13116c11bbca72876",
+      "sha256_lokal": "b81f907e7d67994d227ca2596c1404ffdad99dee597ccb908653190fa0c9a279",
+      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02). Die Vorlage schreibt die Reifephase der \"harmonisierenden QiHome(R) Air Atmosphaere\" und der \"GitterChip(TM)-Technologie\" zu — Werbung fuer Fremdprodukte auf einer Kakao-Kaufseite. Lokal bleibt die Aussage ueber das langsame Auskristallisieren erhalten, ohne die Fremdtechnik. Dieselbe Begruendung wie Kakao.jsx: in der Vorlage ist der Satz richtig, hier nicht. NACHTRAG s06 (2026-09-03): zusaetzlich <p>-in-<p> aufgeloest (row.text ist ein Fragment aus <p>-Elementen und stand in einem <p>) — ungueltiges HTML, das die React-Hydration abbrach (gemessen: 6 verschachtelte <p>, 8 Konsolenfehler). Die Vorlage traegt denselben Bau; der Befund ist dorthin gemeldet."
+    },
+    {
+      "upstream": "app/components/product-pages/Create.jsx",
+      "klasse": "K2",
+      "sha256_upstream": "02ec973e6292073d5d95caf7ea70c6b56269e0e9b69838ad2e6a0e8412452667",
+      "sha256_lokal": "e162e161b9a9a52a55a98e1662baf262f36a4faeee373e2002fe7228e5b9c8e0",
+      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02). Die Vorlage setzt in der Reifephase \"das QiHome(R) Air\" ein. Lokal ersatzlos gestrichen; die umgebende Aussage ueber Kristallmuster und Ursprung bleibt unveraendert. Dieselbe Begruendung wie Kakao.jsx. NACHTRAG s06 (2026-09-03): zusaetzlich <p>-in-<p> aufgeloest (row.text ist ein Fragment aus <p>-Elementen und stand in einem <p>) — ungueltiges HTML, das die React-Hydration abbrach (gemessen: 6 verschachtelte <p>, 8 Konsolenfehler). Die Vorlage traegt denselben Bau; der Befund ist dorthin gemeldet."
+    },
+    {
+      "upstream": "app/components/product-pages/Kakao.jsx",
+      "klasse": "K2",
+      "sha256_upstream": "e6624673e80b71a392aceaa87b8a32b7cb0c00898c28d7ca37b9c5a6cbdb3a14",
+      "sha256_lokal": "da5d184bbefad2e573fc7d813573284e0ab579b143f2465e856ccc99b8d11c3b",
+      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02, Christian: \"da ist auch noch QiHome-Werbung drauf\"). Die Vorlage bewirbt im Block \"Wusstest du?\" woertlich die QiHome(R) Air-Technologie und verweist auf QiOne(R) und QiBracelet(R); der alt-Text eines Video-Titelbilds lautete \"Bild von einer Frau mit QiOne und QiBracelet\". Auf einem Kakao-Shop ist das Werbung fuer ein fremdes Sortiment. Byte-Gleichheit ist hier baulich unmoeglich, weil die Vorlage in der Qi-Blanco-Welt steht, wo genau diese Saetze RICHTIG sind — die Abweichung ist der Zweck der Datei, nicht ihr Mangel. Ersetzt wurde durch eine kakao-eigene Prozessaussage (langsames Auskristallisieren) ohne neue Wirkzusage. ZUSAETZLICH seit Job 20260902-…-prio6-s03: die Tabellen-Ueberschrift 'Crystal Cacao(R)' trug den INLINE-Farbwert '#cab581' — einen ZWEITEN Goldton neben --cc-gold (dE 19,71) und mit 2,01:1 auf Weiss unter jeder WCAG-Schwelle. Sie zeigt jetzt auf den Token var(--cc-gold-text) (5,07:1). Auch das ist baulich nicht byte-gleich haltbar: der Token existiert nur in dieser Storefront (app/styles/kakao-seiten.css), die qiblanco-Vorlage kennt ihn nicht."
+    },
+    {
+      "upstream": "app/data/product-faqs.js",
+      "klasse": "K2",
+      "sha256_upstream": "871523994923fe0e31e25c34e9f06110dab33cc475e41f580b904aa03dc253cb",
+      "sha256_lokal": "fa85fcd51b5ab49840ae757bc5a637afebec66f9db4550c8f1629009e07772b9",
+      "abweichung_grund": "Fremdinhalts-Tilgung (Job 20260902-…-prio6-s02), zwei verschiedene Faelle in einer Datei. (1) Die vier Konstanten FAQ_QIONE_2_PRO, FAQ_QIBRACELET, FAQ_QIHOME_AIR und FAQ_QIONE_KETTE waren in crystal TOTER CODE — gemessen 2026-09-02 importierte sie keine Datei, die einzigen Importeure holen nur FAQ_CACAO. (2) In FAQ_CACAO stand dagegen ein LIVE gerenderter Eintrag \"Welche Effekte entstehen durch die Kombination von Qi Blanco(R)-Produkten und zeremoniellem Kakao?\" mit Gitterchip- und Kohaerenz-Aussage; er stand ueber FAQ_CACAO auf beiden Kakao-Kaufseiten. Beides in der Qi-Blanco-Vorlage sachgerecht, im Kakao-Laden nicht."
+    },
+    {
+      "upstream": "app/lib/kakao-zone.js",
+      "klasse": "K2",
+      "sha256_upstream": "6cff87887abedcefcd5d1d6320b0253a98b9626f2619c0bef7f384d646e71c21",
+      "sha256_lokal": "ddae328ae164943f162b3f9735732fb2b81f06763a42ea7703bae7ba67c6a8bd",
+      "abweichung_grund": "Traegt seit Job 20260902-…-prio6-s02 zusaetzlich den SORTIMENTS-ZAUN dieser Storefront: KAKAO_KOLLEKTION/KAKAO_KOLLEKTIONEN/KAKAO_SEITEN, die Praedikate istKakaoProdukt/istKakaoKollektion/istKakaoSeite, die Absender-Marke ABSENDER_MARKE sowie KAKAO_MENUE sowie KAKAO_FUSSMENUE. Grund: die Hydrogen-Catch-all-Routen fragten den geteilten Shopify-Katalog ungefiltert ab, wodurch /products/qione-2-pro, /pages/studien und /collections/all auf crystal-cacao.com mit HTTP 200 und voll gerendertem Fremdinhalt antworteten. Diese Begriffe haben in der qiblanco-Vorlage keinen Gegenstand — dort IST das Sortiment das eigene. Byte-Gleichheit ist damit baulich unmoeglich. ZUSAETZLICH seit Job 20260902-…-prio6-s03: SORTEN_PFADE und sorteZuPfad() — die Zuordnung Pfad->Kakao-Sorte, aus der app/root.jsx das Attribut data-cc-sorte setzt und die Farbschicht ihre aus den Verpackungsbildern GEMESSENE Sortenfarbe waehlt. In der qiblanco-Vorlage gibt es keine Kakao-Sorten, der Begriff hat dort keinen Gegenstand. ZUSAETZLICH seit Job 20260902-…-prio6-s05: KAKAO_BLOGS und istKakaoBlog() (Blog-Allowlist, heute leer — /blogs/news und /blogs/e-smog lieferten HTTP 200 mit NULL Artikeln, /blogs/wissen vier Qi-Blanco-Artikel ohne Kakao-Bezug, die wortgleich auf qiblanco.com stehen und auf einer zweiten Domain Duplicate Content waeren), sowie RECHTSTEXT_TITEL und rechtstextTitel() (deutsche ANZEIGE-Titel der Shop-Policies; Shopify liefert 'Privacy Policy'/'Refund Policy' zu durchgehend deutschem Inhalt — geaendert wird ausschliesslich die Beschriftung, kein Zeichen des Rechtstextes). KAKAO_FUSSMENUE fuehrt seither die vier Pflichtseiten einzeln statt eines Sammel-Links. Alle drei Begriffe haben in der qiblanco-Vorlage keinen Gegenstand — dort gibt es keinen Zaun, weil dort das Sortiment das eigene ist."
+    },
+    {
+      "upstream": "app/lib/redirect.js",
+      "klasse": "K2",
+      "sha256_upstream": "6fa1643ad84aa2f8625b1e3847a1b1247c29ad2690352dc3d91406583c009a62",
+      "sha256_lokal": "b926613a4c069e683df1a851f7e226fa3b0a524a5921a32fd368cc66d9d79d4b",
+      "abweichung_grund": "Byte-Gleichheit ist baulich unmoeglich: Zeile 1 importiert `redirect` aus @shopify/remix-oxygen; der Ziel-Major @shopify/hydrogen 2026.4 hat dieses Paket entfernt und crystal-cacao-storefront fuehrt es nicht in dependencies. Der Hersteller nennt den Ersatz woertlich (packages/hydrogen/CHANGELOG.md 2025.7.0): `redirect` ist aus 'react-router' zu importieren. Aufgehoben ist allein die Gleichheit der beiden Seiten -- beide Fassungen bleiben einzeln gepinnt."
+    },
+    {
+      "upstream": "app/lib/seo.js",
+      "klasse": "K2",
+      "sha256_upstream": "184d61b0c66350b82a0ff18cc2571e88120f477e6c9f97074ce8522f70b352e3",
+      "sha256_lokal": "bdd7a4312d4efe68185cf9ecf24679c8de3b09c60acf8224506a1ee670732651",
+      "abweichung_grund": "Byte-Gleichheit ist baulich unmoeglich: die Datei fuehrt `CANONICAL_ORIGIN` als Quelltext-Konstante mit der qiblanco-Domain. Byte-gleich uebernommen truege JEDE crystal-Seite einen Canonical auf qiblanco.com — und weil dort dieselbe geteilte Seite liegt, ist das Ziel gueltig: Google konsolidiert crystal-cacao.com auf qiblanco.com und der Kakao-Laden verschwindet aus dem Index, ohne Fehlermeldung. Die Konstante ist zugleich die Wurzel von og:url (produkt-seo.js) und der JSON-LD-Knoten-IDs ORG_ID/SITE_ID (entity-schema.js) — eine Adaption, drei Wirkungen. Aufgehoben ist allein die Gleichheit der beiden Seiten; beide Fassungen bleiben einzeln gepinnt, damit eine spaetere Bewegung auf BEIDEN Seiten sichtbar wird."
     },
     {
       "upstream": "app/components/MetaPixel.jsx",
