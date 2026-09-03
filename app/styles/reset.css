@@ -1,16 +1,25 @@
+/* SCHRIFTFAMILIE — 2026-09-03 (s06), und der Grund ist eine Messung.
+ *
+ * VORHER stand hier der Schablonen-Stapel `system-ui, -apple-system, ...`
+ * mit 'Open Sans' an NEUNTER Stelle. system-ui loest auf jedem Geraet auf,
+ * also wurde 'Open Sans' nie angefordert: gemessen am gerenderten DOM
+ * (computed style) rendern auf /pages/crystal-cacao 178 von 181
+ * Textelementen in system-ui und genau 3 in Open Sans Variable — die drei
+ * sind die Knopf-Regeln in kakao-seiten.css, die die Familie selbst setzen.
+ *
+ * DIE VORLAGE qiblanco.com fuehrt im selben Lauf gemessen
+ * `body { font-family: "Open Sans Variable", sans-serif }` und rendert 317
+ * von 322 Elementen darin. Der Auftrag verlangt, die Kakao-Seiten "sehr nah
+ * am Original" zu uebertragen, und web-soll.yaml nennt "Open Sans Variable"
+ * als SSoT-Familie — beides war gegen den Bestand messbar verletzt.
+ *
+ * DER FONT SELBST FEHLTE NIE: app/root.jsx importiert
+ * @fontsource-variable/open-sans, die woff2-Subsets liegen gebaut vor. Es
+ * fehlte allein die Anforderung. Der Stapel ist deshalb woertlich der der
+ * Vorlage — kein eigener dritter Stand.
+ */
 body {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Open Sans',
-    'Helvetica Neue',
-    sans-serif;
+  font-family: 'Open Sans Variable', sans-serif;
   margin: 0;
   padding: 0;
 }

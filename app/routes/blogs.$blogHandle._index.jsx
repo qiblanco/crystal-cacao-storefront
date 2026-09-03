@@ -2,12 +2,13 @@ import {Link, useLoaderData} from 'react-router';
 import {Image, getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {ABSENDER_MARKE, istKakaoBlog, fremdinhaltAbweisen} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `${data?.blog.title ?? 'Magazin'} | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `${data?.blog.title ?? 'Magazin'} | ${ABSENDER_MARKE}`}];
 };
 
 /**
@@ -33,8 +34,12 @@ async function loadCriticalData({context, request, params}) {
     pageBy: 4,
   });
 
-  if (!params.blogHandle) {
-    throw new Response(`Magazin nicht gefunden`, {status: 404});
+  // SORTIMENTS-ZAUN (app/lib/kakao-zone.js): gemessen 2026-09-02 lieferte
+  // /blogs/news und /blogs/e-smog je HTTP 200 mit NULL Artikeln und
+  // /blogs/wissen vier Qi-Blanco-Artikel ohne Kakao-Bezug, die wortgleich auf
+  // qiblanco.com stehen. KAKAO_BLOGS ist heute leer — Rückweg: ein Handle.
+  if (!params.blogHandle || !istKakaoBlog(params.blogHandle)) {
+    throw fremdinhaltAbweisen();
   }
 
   const [{blog}] = await Promise.all([

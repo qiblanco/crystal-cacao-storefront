@@ -48,8 +48,11 @@ export function Kakao() {
 
       <div className="my-[10vh]! NormalSectionSize">
         <h2>Wusstest du?</h2>
-        <p>Unser Kakao wird in einer strukturierten Umgebung mit der QiHome® Air-Technologie verarbeitet – einer innovativen Lösung, die ein harmonisches Feld erzeugt und die Qualität natürlicher Rohstoffe in ihrer feinen Struktur unterstützen kann.</p>
-        <p>👉 Erfahre mehr über unsere unterstützenden Tools – wie der QiOne® oder das QiBracelet® – und entdecke, wie du dein eigenes Umfeld energetisch stärken und bewusster gestalten kannst.</p>
+        <p>Nach dem Vermahlen bekommt unser Kakao Zeit statt Tempo: Er ruht,
+        bis er langsam auskristallisiert – daher das feine Kristallmuster, das
+        du im Bruch der Tafel siehst.</p>
+        <p>👉 Wie du ihn zubereitest und welche Sorte zu dir passt, findest du
+        bei AWAKE und CREATE.</p>
       </div>
     </div>
   );
@@ -68,7 +71,13 @@ function Hero() {
         <h2 className="text-2xl">Crystal Cacao® - Bio</h2>
         <div className="text-2xl font-bold">
           {KAKAO_KENNZAHLEN.bewertung}{' '}
-          <span className="qb-sterne">★★★★★</span>
+          {/* Klasse "d" = rein darstellend: die Zeile ZEIGT die Bewertung und
+              springt bewusst nirgendwohin — diese Seite hat keinen
+              Bewertungsbereich (Christians ausdrueckliche Cacao-No-Op-Vorgabe,
+              s. sterne-klick-scroll-wache). Marker-Vertrag: StarRating.jsx. */}
+          <span className="qb-sterne" data-qb-rating="d">
+            ★★★★★
+          </span>
         </div>
         <h3 className="text-2xl font-bold">
           Mehr als {KAKAO_KENNZAHLEN.nutzer}+ aktive Nutzer
@@ -244,7 +253,16 @@ function ComparisonTable() {
                     alt=""
                     className="mx-auto! mb-1"
                   />
-                  <h3 className="text-sm font-bold" style={{color: '#cab581'}}>
+                  {/* s03 2026-09-02: war der freie Wert '#cab581' — ein
+                      ZWEITER Goldton neben --cc-gold (dE 19,71) und auf
+                      Weiss nur 2,01:1 lesbar, an einer Tabellen-Ueberschrift.
+                      Jetzt derselbe eine Goldton in seiner lesbaren
+                      Ableitung (5,07:1). Der Wert wohnt in
+                      app/styles/kakao-seiten.css, hier steht keiner mehr. */}
+                  <h3
+                    className="text-sm font-bold"
+                    style={{color: 'var(--cc-gold-text)'}}
+                  >
                     Crystal Cacao®
                   </h3>
                   <h4 className="text-gray-500">15g</h4>
@@ -563,7 +581,7 @@ function KursRegistration() {
 const videos = [
   {
     src: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001190-Kopie-1024x589_jpg.webp?v=1666617198',
-    alt: 'Bild von einer Frau mit QiOne und QiBracelet',
+    alt: 'Titelbild zum Video „Intuition erfahren“',
     title:
       'Video 1: Intuition erfahren - Raus aus dem Kopf, rein ins Herz! – 9 min',
     items: [

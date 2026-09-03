@@ -1,11 +1,12 @@
 import {useLoaderData} from 'react-router';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {ABSENDER_MARKE, istKakaoSeite, fremdinhaltAbweisen} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `${data?.page.title ?? 'Seite'} | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `${data?.page.title ?? 'Seite'} | ${ABSENDER_MARKE}`}];
 };
 
 /**
@@ -29,6 +30,12 @@ export async function loader(args) {
 async function loadCriticalData({context, request, params}) {
   if (!params.handle) {
     throw new Error('Es wurde keine Seite angegeben');
+  }
+
+  // SORTIMENTS-ZAUN: /pages/studien lieferte hier 105308 Bytes Qi-Blanco-
+  // Studienseite mit 59 Fremdnennungen (gemessen 2026-09-02).
+  if (!istKakaoSeite(params.handle)) {
+    throw fremdinhaltAbweisen();
   }
 
   const [{page}] = await Promise.all([

@@ -1,12 +1,13 @@
-import {useLoaderData, Link} from 'react-router';
+import {useLoaderData, Link, redirect} from 'react-router';
 import {getPaginationVariables, Image} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {ABSENDER_MARKE, KAKAO_KOLLEKTION} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Kollektionen | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `Kollektionen | ${ABSENDER_MARKE}`}];
 };
 
 /**
@@ -28,6 +29,11 @@ export async function loader(args) {
  * @param {Route.LoaderArgs}
  */
 async function loadCriticalData({context, request}) {
+  // SORTIMENTS-ZAUN: diese Route listete den GESAMTEN Fremdkatalog
+  // (gemessen 2026-09-02: /collections fuehrte 4 Qi-Blanco-Kollektionen). Sie wird NICHT auf 404 gesetzt, sondern auf die
+  // Kakao-Kollektion umgeleitet: der leere Warenkorb verlinkt sichtbar
+  // "Weiter einkaufen" auf /collections, und ein 404 dort braeche den Kaufweg.
+  throw redirect(`/collections/${KAKAO_KOLLEKTION}`);
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 4,
   });

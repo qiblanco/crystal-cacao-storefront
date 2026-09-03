@@ -1,14 +1,38 @@
 import {useLoaderData} from 'react-router';
-import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
+import {Analytics} from '@shopify/hydrogen';
 import {SearchForm} from '~/components/SearchForm';
 import {SearchResults} from '~/components/SearchResults';
 import {getEmptyPredictiveSearchResult} from '~/lib/search';
+import {
+  ABSENDER_MARKE,
+  istKakaoProdukt,
+  istKakaoSeite,
+  istKakaoKollektion,
+  istKakaoBlog,
+} from '~/lib/kakao-zone';
+
+/**
+ * Wie viele Treffer je Gattung von Shopify geholt werden — OHNE Cursor.
+ *
+ * WARUM KEINE PAGINIERUNG MEHR (s05, 2026-09-02): der Zaun filtert NACH der
+ * Abfrage, weil die Storefront-Suche kein Kollektions-Prädikat kennt. Eine
+ * Cursor-Paginierung über einem nachgelagerten Filter erzeugt zwei Fehler
+ * zugleich: Seiten, die nach dem Filtern leer sind ("Mehr laden" lädt nichts),
+ * und eine Trefferzahl, deren Zähler aus dem gefilterten und deren Nenner aus
+ * dem ungefilterten Ergebnis stammt.
+ *
+ * Die Grundmenge trägt das: die Kakao-Welt ist EINE Kollektion (am 2026-09-02
+ * acht Produkte) plus zwei CMS-Seiten. 60 ist bewusst weit darüber, damit die
+ * Zahl nicht bei jedem neuen Produkt zur Hypothese wird — sie deckelt nur die
+ * Antwortgrösse, sie entscheidet nichts.
+ */
+const SUCHE_TREFFER_MAX = 60;
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Suche | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `Suche | ${ABSENDER_MARKE}`}];
 };
 
 /**
@@ -87,6 +111,13 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
     title
     trackingParameters
     vendor
+    # SORTIMENTS-ZAUN (app/lib/kakao-zone.js): mitgezogen, damit der Loader
+    # Fremdtreffer verwerfen kann, ohne eine zweite Query zu fahren.
+    collections(first: 50) {
+      nodes {
+        handle
+      }
+    }
     selectedOrFirstAvailableVariant(
       selectedOptions: []
       ignoreUnknownOptions: true
@@ -136,6 +167,14 @@ const SEARCH_ARTICLE_FRAGMENT = `#graphql
     id
     title
     trackingParameters
+    # SORTIMENTS-ZAUN (app/lib/kakao-zone.js): OHNE dieses Feld wäre
+    # istKakaoBlog(n?.blog?.handle) immer falsch und die Artikel-Liste immer
+    # leer — heute zufällig das richtige Ergebnis, morgen ein stiller Defekt,
+    # sobald ein Kakao-Blog in KAKAO_BLOGS steht. Der Filter soll MESSEN,
+    # nicht an einem fehlenden Feld hängenbleiben.
+    blog {
+      handle
+    }
   }
 `;
 
@@ -218,7 +257,7 @@ export const SEARCH_QUERY = `#graphql
 async function regularSearch({request, context}) {
   const {storefront} = context;
   const url = new URL(request.url);
-  const variables = getPaginationVariables(request, {pageBy: 8});
+  const variables = {first: SUCHE_TREFFER_MAX, last: null, startCursor: null, endCursor: null};
   const term = String(url.searchParams.get('q') || '');
 
   // Search articles, pages, and products for the `q` term
@@ -230,7 +269,13 @@ async function regularSearch({request, context}) {
     throw new Error('Die Suche lieferte keine Daten von Shopify zurück');
   }
 
-  const total = Object.values(items).reduce(
+  // SORTIMENTS-ZAUN: die Shopify-Suche durchsucht den GANZEN Katalog hinter
+  // dieser Storefront, also auch die Energieprodukte. Gemessen 2026-09-02 gab
+  // /search?q=qione hier 38 sichtbare Fremdnennungen. Gefiltert wird NACH der
+  // Abfrage, weil die Storefront-Suche kein Kollektions-Prädikat kennt.
+  const gefiltert = nurKakaoTreffer(items);
+
+  const total = Object.values(gefiltert).reduce(
     (acc, {nodes}) => acc + nodes.length,
     0,
   );
@@ -239,7 +284,43 @@ async function regularSearch({request, context}) {
     ? errors.map(({message}) => message).join(', ')
     : undefined;
 
-  return {type: 'regular', term, error, result: {total, items}};
+  return {type: 'regular', term, error, result: {total, items: gefiltert}};
+}
+
+/**
+ * Wirft aus einem Shopify-Suchergebnis alles heraus, was nicht zur Kakao-Welt
+ * gehört: Produkte über die Kollektions-Mitgliedschaft, Seiten und Blogs über
+ * ihre Allowlist.
+ *
+ * ARTIKEL, 2026-09-02 (s05) NACHGEZOGEN: s02 hat sie hier ausdrücklich offen
+ * gelassen ("das Magazin ist eine eigene Fläche und wird in diesem Segment
+ * bewusst nicht mitentschieden"). Diese Entscheidung ist jetzt gefallen —
+ * KAKAO_BLOGS ist leer, /blogs liefert 404, also darf auch die Suche keinen
+ * Artikel mehr zeigen. GEMESSEN, was ohne diesen Filter passierte:
+ * /search?q=qione lieferte "Schlafqualität und Hydration: Drei Studien unter
+ * der Lupe", /search?q=armband und /search?q=strahlung lieferten "Schlaf
+ * vermessen" — Qi-Blanco-Artikel im Kakao-Laden.
+ *
+ * Die Form des Ergebnisses ({nodes: [...]} je Gattung) bleibt erhalten, damit
+ * die Zähl- und Anzeigelogik unverändert weiterläuft.
+ */
+function nurKakaoTreffer(items) {
+  const raus = {};
+  for (const [gattung, wert] of Object.entries(items)) {
+    const nodes = wert?.nodes ?? [];
+    let behalten = nodes;
+    if (gattung === 'products') {
+      behalten = nodes.filter((n) =>
+        istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)),
+      );
+    } else if (gattung === 'pages') {
+      behalten = nodes.filter((n) => istKakaoSeite(n?.handle));
+    } else if (gattung === 'articles') {
+      behalten = nodes.filter((n) => istKakaoBlog(n?.blog?.handle));
+    }
+    raus[gattung] = {...wert, nodes: behalten};
+  }
+  return raus;
 }
 
 /**
@@ -298,6 +379,12 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
     title
     handle
     trackingParameters
+    # SORTIMENTS-ZAUN (app/lib/kakao-zone.js) — siehe SearchProduct.
+    collections(first: 50) {
+      nodes {
+        handle
+      }
+    }
     selectedOrFirstAvailableVariant(
       selectedOptions: []
       ignoreUnknownOptions: true
@@ -407,12 +494,36 @@ async function predictiveSearch({request, context}) {
     throw new Error('Die Sucheingabe lieferte keine Daten von Shopify zurück');
   }
 
-  const total = Object.values(items).reduce(
-    (acc, item) => acc + item.length,
+  // SORTIMENTS-ZAUN, auch hier: die Sucheingabe im Kopf ist derselbe Katalog.
+  // Die Vorschlagsliste liefert je Gattung ein ARRAY (nicht {nodes}), deshalb
+  // ein eigener Zweig statt nurKakaoTreffer().
+  const gefiltert = Object.fromEntries(
+    Object.entries(items).map(([gattung, liste]) => {
+      if (!Array.isArray(liste)) return [gattung, liste];
+      if (gattung === 'products') {
+        return [
+          gattung,
+          liste.filter((n) =>
+            istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)),
+          ),
+        ];
+      }
+      if (gattung === 'pages') {
+        return [gattung, liste.filter((n) => istKakaoSeite(n?.handle))];
+      }
+      if (gattung === 'collections') {
+        return [gattung, liste.filter((n) => istKakaoKollektion(n?.handle))];
+      }
+      return [gattung, liste];
+    }),
+  );
+
+  const total = Object.values(gefiltert).reduce(
+    (acc, item) => acc + (Array.isArray(item) ? item.length : 0),
     0,
   );
 
-  return {type, term, result: {items, total}};
+  return {type, term, result: {items: gefiltert, total}};
 }
 
 /** @typedef {import('./+types/search').Route} Route */

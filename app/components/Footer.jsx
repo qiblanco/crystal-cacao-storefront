@@ -1,5 +1,6 @@
 import {Suspense} from 'react';
 import {Await, NavLink} from 'react-router';
+import {KAKAO_FUSSMENUE} from '~/lib/kakao-zone';
 
 /**
  * @param {FooterProps}
@@ -10,13 +11,15 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
       <Await resolve={footerPromise}>
         {(footer) => (
           <footer className="footer">
-            {footer?.menu && header.shop.primaryDomain?.url && (
-              <FooterMenu
-                menu={footer.menu}
-                primaryDomainUrl={header.shop.primaryDomain.url}
-                publicStoreDomain={publicStoreDomain}
-              />
-            )}
+            {/* SORTIMENTS-ZAUN (app/lib/kakao-zone.js): das Shopify-Menue
+                `footer` gehoert dem Shop qi-blanco.myshopify.com und trug das
+                Fremdsortiment samt Links auf checkout.qiblanco.com in die
+                Fusszeile JEDER Seite. Es wird bewusst nicht mehr gelesen. */}
+            <FooterMenu
+              menu={KAKAO_FUSSMENUE}
+              primaryDomainUrl={header?.shop?.primaryDomain?.url ?? ''}
+              publicStoreDomain={publicStoreDomain}
+            />
           </footer>
         )}
       </Await>
@@ -34,7 +37,7 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
 function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
   return (
     <nav className="footer-menu" role="navigation">
-      {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
+      {(menu || KAKAO_FUSSMENUE).items.map((item) => {
         if (!item.url) return null;
         // if the url is internal, we strip the domain
         const url =

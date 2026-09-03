@@ -1,10 +1,14 @@
 import {Link, useLoaderData} from 'react-router';
+import {ABSENDER_MARKE, rechtstextTitel} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `${data?.policy.title ?? 'Rechtliches'} | Qi Blanco UG (haftungsbeschränkt)`}];
+  const titel = data?.policy
+    ? rechtstextTitel(data.policy.handle, data.policy.title)
+    : 'Rechtliches';
+  return [{title: `${titel} | ${ABSENDER_MARKE}`}];
 };
 
 /**
@@ -44,15 +48,20 @@ export default function Policy() {
   const {policy} = useLoaderData();
 
   return (
-    <div className="policy">
-      <br />
-      <br />
-      <div>
+    <div className="policy cc-seite cc-seite--text">
+      <p className="cc-zurueck">
         <Link to="/policies">← Zurück zur Übersicht</Link>
-      </div>
-      <br />
-      <h1>{policy.title}</h1>
-      <div dangerouslySetInnerHTML={{__html: policy.body}} />
+      </p>
+      {/* DEUTSCHER ANZEIGE-TITEL (app/lib/kakao-zone.js rechtstextTitel):
+          Shopify liefert die Rechtstexte mit englischem Titel ("Refund
+          Policy"), ihr Inhalt ist durchgehend deutsch. Geändert wird NUR die
+          Beschriftung — der Rechtstext selbst bleibt Zeichen für Zeichen so,
+          wie er aus Shopify kommt. */}
+      <h1>{rechtstextTitel(policy.handle, policy.title)}</h1>
+      <div
+        className="cc-rechtstext"
+        dangerouslySetInnerHTML={{__html: policy.body}}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import {Suspense, useId} from 'react';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
+import {KAKAO_MENUE} from '~/lib/kakao-zone';
 import {CartMain} from '~/components/CartMain';
 import {
   SEARCH_ENDPOINT,
@@ -129,7 +130,7 @@ function SearchAside() {
                     to={`${SEARCH_ENDPOINT}?q=${term.current}`}
                   >
                     <p>
-                      View all results for <q>{term.current}</q>
+                      Alle Treffer zu <q>{term.current}</q> ansehen
                       &nbsp; →
                     </p>
                   </Link>
@@ -151,17 +152,18 @@ function SearchAside() {
  */
 function MobileMenuAside({header, publicStoreDomain}) {
   return (
-    header.menu &&
-    header.shop.primaryDomain?.url && (
-      <Aside type="mobile" heading="Menü">
-        <HeaderMenu
-          menu={header.menu}
-          viewport="mobile"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
-        />
-      </Aside>
-    )
+    // SORTIMENTS-ZAUN (app/lib/kakao-zone.js): das mobile Menü bekommt dieselbe
+    // Kakao-Navigation wie die Kopfzeile. `header.menu` gehört dem Fremdshop
+    // und wird nicht mehr gelesen — damit hängt dieses Menü auch nicht mehr
+    // daran, ob der Fremdshop gerade eine primaryDomain liefert.
+    <Aside type="mobile" heading="Menü">
+      <HeaderMenu
+        menu={KAKAO_MENUE}
+        viewport="mobile"
+        primaryDomainUrl={header?.shop?.primaryDomain?.url ?? ''}
+        publicStoreDomain={publicStoreDomain}
+      />
+    </Aside>
   );
 }
 

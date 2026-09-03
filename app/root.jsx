@@ -8,17 +8,30 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteLoaderData,
+  useLocation,
+  Link,
 } from 'react-router';
 import favicon from '~/assets/favicon.svg';
-import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import {HEADER_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import kakaoStyles from '~/styles/kakao-seiten.css?url';
+/* DER CSS-VERTRAG DER SWIPE-TABELLE — nachgezogen 2026-09-03 (s06).
+ * app/components/reusables/SwipeTable.jsx kam als K1-Datei byte-gleich aus
+ * der Vorlage herueber, ihr Stylesheet NICHT: app/styles/ fuehrte nur
+ * reset/app/kakao-seiten. Ohne den Vertrag klippt `.qb-swipetab__vp` nicht,
+ * und die 536 px breite Vergleichstabelle der Uebersichtsseite schob das
+ * Dokument auf 569 px — gemessen bei 390 px UND 360 px Viewport, also
+ * horizontaler Ueberlauf auf jedem Handy. Die Datei ist byte-gleich zur
+ * DACH-Ausfertigung der Vorlage (sha256 d87e4046…), passend zur ebenfalls
+ * byte-gleichen Komponente. */
+import swipetabStyles from '~/styles/qb-swipetab.css?url';
 import {PageLayout} from './components/PageLayout';
 import {MetaPixel} from './components/MetaPixel';
 import {UpPromoteTracking} from './components/UpPromoteTracking';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
 import {strictRegions} from '~/lib/consent-policy';
+import {sorteZuPfad} from '~/lib/kakao-zone';
 import '@fontsource-variable/open-sans';
 
 /**
@@ -147,11 +160,10 @@ async function loadCriticalData({context}) {
   const {storefront} = context;
 
   const [header] = await Promise.all([
+    // SORTIMENTS-ZAUN: ohne headerMenuHandle — das Fremdmenü `main-menu` wird
+    // nicht mehr geholt (Begründung in app/lib/fragments.js).
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
-      variables: {
-        headerMenuHandle: 'main-menu', // Adjust to your header menu handle
-      },
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
@@ -168,23 +180,15 @@ async function loadCriticalData({context}) {
 function loadDeferredData({context}) {
   const {storefront, customerAccount, cart} = context;
 
-  // defer the footer query (below the fold)
-  const footer = storefront
-    .query(FOOTER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {
-        footerMenuHandle: 'footer', // Adjust to your footer menu handle
-      },
-    })
-    .catch((error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
+  // SORTIMENTS-ZAUN: die Fußzeilen-Abfrage entfällt vollständig. Sie holte das
+  // Shopify-Menü `footer` des Fremdshops samt Links auf checkout.qiblanco.com;
+  // die Fußzeile rendert jetzt KAKAO_FUSSMENUE aus app/lib/kakao-zone.js.
+  // `footer` bleibt als aufgelöstes null im Vertrag, damit PageLayout und
+  // Footer unverändert weiterlaufen (beide warten ohnehin auf ein Promise).
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
+    footer: Promise.resolve(null),
   };
 }
 
@@ -201,10 +205,17 @@ export function Layout({children}) {
     data?.isProductionHost || data?.enableTrackingInPreview;
   const isTrackingPreview =
     Boolean(data?.enableTrackingInPreview) && !data?.isProductionHost;
+  // Sorten-Kennung fuer die Farbschicht (Job …-prio6 s03). Die Zuordnung
+  // Pfad->Sorte steht in app/lib/kakao-zone.js, die Farbe in
+  // app/styles/kakao-seiten.css. Hier faellt nur zusammen, was beide wissen —
+  // ohne eine Zeile in den K1-geschuetzten Produktrouten anzufassen.
+  const {pathname} = useLocation();
+  const ccSorte = sorteZuPfad(pathname);
 
   return (
     <html
       lang="de"
+      data-cc-sorte={ccSorte || undefined}
       data-qiblanco-tracking-preview={isTrackingPreview ? 'true' : undefined}
       data-qb-region={data?.buyerCountry || undefined}
       data-qb-consent-strict={data?.consentStrictRegions || undefined}
@@ -215,6 +226,7 @@ export function Layout({children}) {
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <link rel="stylesheet" href={kakaoStyles}></link>
+        <link rel="stylesheet" href={swipetabStyles}></link>
         {shouldLoadThirdPartyScripts && data?.cookiebotId ? (
           <script
             id="Cookiebot"
@@ -323,18 +335,74 @@ export default function App() {
   );
 }
 
+/**
+ * DIE FEHLERSEITE — 2026-09-02 (s05) aus der Sackgasse geholt.
+ *
+ * DER BEFUND, gemessen am gerenderten HTML: /gibtesnicht-404 lieferte 69
+ * Zeichen sichtbaren Text, den rohen Pfad in Monospace, KEINE Kopfzeile, KEINE
+ * Fusszeile, KEINEN Link. Wer auf einem toten Link landete — und nach dem
+ * Sortiments-Zaun aus s02 tut das jeder, der einer alten Qi-Blanco-Adresse
+ * folgt —, hatte keinen Weg zurück in den Laden.
+ *
+ * WARUM DIE SCHABLONE DAS LAYOUT BEWUSST WEGLIESS, und warum das hier nicht
+ * mehr gilt: diese ErrorBoundary fängt AUCH Fehler des root-Loaders. Rendert
+ * sie dann ein Layout, das von genau diesem Loader lebt, kracht die
+ * Fehlerseite selbst — man tauscht eine hässliche Seite gegen gar keine. Hier
+ * ist die Gefahr entschärft, weil die Navigation seit s02 STATISCH im Code
+ * steht (KAKAO_MENUE, KAKAO_FUSSMENUE) und keinen Loader braucht.
+ *
+ * DIE RESTGEFAHR BLEIBT UND WIRD BEHANDELT, nicht weggeredet:
+ *   - `useRouteLoaderData('root')` ist in der ErrorBoundary `undefined`, wenn
+ *     der root-Loader derjenige war, der geworfen hat. Alles Weitergereichte
+ *     ist deshalb optional (`?.`) und darf fehlen.
+ *   - Der Layout-Weg gilt NUR für eine echte Route-Antwort (404/403/…). Ein
+ *     unerwarteter Ausnahmefehler behält den nackten Minimal-Render — dort ist
+ *     unbekannt, was noch trägt, und ein zweiter Absturz wäre teurer als eine
+ *     karge Seite.
+ */
 export function ErrorBoundary() {
   const error = useRouteError();
-  let errorMessage = 'Unbekannter Fehler';
-  let errorStatus = 500;
+  const rootData = useRouteLoaderData('root');
+  const istRouteFehler = isRouteErrorResponse(error);
+  const errorStatus = istRouteFehler ? error.status : 500;
 
-  if (isRouteErrorResponse(error)) {
-    errorMessage = error?.data?.message ?? error.data;
-    errorStatus = error.status;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
+  const inhalt = istRouteFehler ? (
+    <div className="route-error cc-leerzustand">
+      <p className="cc-fehler-code">Fehler {errorStatus}</p>
+      <h1>{errorStatus === 404 ? 'Diese Seite gibt es nicht' : 'Da ist etwas schiefgelaufen'}</h1>
+      <p>
+        {errorStatus === 404
+          ? 'Vielleicht hat sich die Adresse geändert, vielleicht ein Tippfehler. Unseren Kakao findest du hier:'
+          : 'Wir konnten die Seite gerade nicht laden. Versuch es gleich noch einmal — oder geh direkt zu unserem Kakao:'}
+      </p>
+      <div className="cc-knopfreihe">
+        <Link className="cc-knopf" to="/pages/crystal-cacao">
+          Unseren Kakao ansehen
+        </Link>
+        <Link className="cc-knopf cc-knopf--ruhig" to="/">
+          Zur Startseite
+        </Link>
+      </div>
+    </div>
+  ) : null;
+
+  if (istRouteFehler) {
+    return (
+      <PageLayout
+        cart={rootData?.cart}
+        footer={rootData?.footer}
+        header={rootData?.header}
+        isLoggedIn={rootData?.isLoggedIn}
+        publicStoreDomain={rootData?.publicStoreDomain ?? ''}
+      >
+        {inhalt}
+      </PageLayout>
+    );
   }
 
+  // Unerwarteter Ausnahmefehler: bewusst ohne Layout. Siehe Kopfkommentar.
+  const errorMessage =
+    error instanceof Error ? error.message : 'Unbekannter Fehler';
   return (
     <div className="route-error">
       <h1>Da ist etwas schiefgelaufen</h1>

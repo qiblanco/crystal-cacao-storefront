@@ -1,10 +1,11 @@
 import {useLoaderData, Link} from 'react-router';
+import {ABSENDER_MARKE, rechtstextTitel} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Rechtliche Hinweise | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `Rechtliche Hinweise | ${ABSENDER_MARKE}`}];
 };
 
 /**
@@ -34,15 +35,23 @@ export default function Policies() {
   const {policies} = useLoaderData();
 
   return (
-    <div className="policies">
+    <div className="policies cc-seite cc-seite--text">
       <h1>Rechtliche Hinweise</h1>
-      <div>
+      <p className="cc-lead">
+        Hier findest du alles, was du vor und nach einer Bestellung wissen
+        musst — Widerruf, Versand und Zahlung, AGB und Datenschutz.
+      </p>
+      {/* Deutscher Anzeige-Titel, siehe app/lib/kakao-zone.js: der Rechtstext
+          selbst wird nicht angefasst, nur seine Beschriftung. */}
+      <ul className="cc-linkliste">
         {policies.map((policy) => (
-          <fieldset key={policy.id}>
-            <Link to={`/policies/${policy.handle}`}>{policy.title}</Link>
-          </fieldset>
+          <li key={policy.id}>
+            <Link to={`/policies/${policy.handle}`}>
+              {rechtstextTitel(policy.handle, policy.title)}
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

@@ -119,6 +119,198 @@
 
   /* ---- Lesbarkeit: Zeilenlaenge (web-soll zeilenlaenge_ch_max 75) ---- */
   --cc-zeile-max: 70ch;
+
+  /* ======================================================================
+   * AB HIER: AUS DEN VERPACKUNGSBILDERN GEMESSEN (Segment s03, 2026-09-02)
+   * ======================================================================
+   * Christian: "Gerne darf die Seite einen passenden Farbton bekommen,
+   * ABGELEITET von den Verpackungsbildern. Achtung: Awake und Create haben
+   * zwei unterschiedliche Farbgebungen im Namen — blau und rot/rosa.
+   * Auswerten und dezent entsprechend nutzen."
+   *
+   * WERKZEUG UND NACHRECHENBARKEIT: pruefungen/farbmessung_verpackung.py.
+   * k-means in CIELAB mit festem Seed 42 — dieselbe Mechanik wie
+   * design-meister/src/bildsprache.py (dort wiederverwendet, nicht
+   * nachgebaut). Jeder Wert unten steht mit Hex, Flaechenanteil und Bild.
+   * Ein `python3 pruefungen/farbmessung_verpackung.py` rechnet alles nach.
+   *
+   * WELCHE BILDER — UND WELCHE AUSDRUECKLICH NICHT: gemessen wurde
+   * ausschliesslich an Bildern aus dem Shopify-PRODUKTDATENSATZ der beiden
+   * Sorten. Die Black-Friday-Kompositionen (2x-Awake.webp, 2x-Create-BF.webp,
+   * Create_Awake.png) sind BEWUSST ausgeschlossen: Schneeszene, rote
+   * Laserstrahlen, farbiges Licht auf der Tuete — eine Messung darauf misst
+   * die Kampagne, nicht die Verpackung. Der Studiogrund der benutzten Bilder
+   * ist als Farbstich-Kontrolle MITGEMESSEN: #DBD6D2, CIELAB L*85.91 a*1.00
+   * b*2.58, Chroma 2.77, Eckstreuung 0.00 RGB — neutral, kein Licht, das
+   * eine Farbe verschieben koennte.
+   * ---------------------------------------------------------------------- */
+
+  /* ---- Kraftpapier: der DOMINANTESTE Ton der Verpackung ----
+   * Gemessen an der freigestellten Tuete (Maske: CIELAB-Abstand > 10 zum
+   * Studiogrund; Tuete = 44,7 % der Bildflaeche). Beide Sorten liefern
+   * praktisch dieselben Werte — sie bestaetigen sich gegenseitig:
+   *   mittel  #BE9A74 (awake, 32,8 %) / #BD9B79 (create, 33,9 %)
+   *   hell    #D8C2A8 (19,1 %)        / #D6C4AB (17,4 %)
+   *   tief    #876444  (9,6 %)        / #815F41  (9,3 %)
+   * Die Token sind das CIELAB-Mittel beider Sorten — der Kakaobeutel ist
+   * derselbe, die Sorte steckt im Etikett, nicht im Papier.
+   * WARUM DAS UEBERHAUPT NEU IST: das warme Neutral-Kontinuum oben war
+   * richtig gewaehlt, aber es hatte fuer den dominantesten Ton der ganzen
+   * Verpackung KEINEN Token — Abstand --cc-flaeche zum Kraftpapier: dE 20,0.
+   * Genau hier fehlte die Ableitung. */
+  --cc-kraft: #BE9A77;        /* Lab(66.05, 8.49, 23.44) */
+  --cc-kraft-hell: #D7C3A9;   /* Lab(79.81, 2.93, 15.64) */
+  --cc-kraft-tief: #846142;   /* Lab(44.02, 10.15, 23.17) — NUR mit heller
+                               * Schrift: --cc-grund darauf 5,26:1;
+                               * --cc-text darauf nur 2,57:1. */
+
+  /* ---- Sortenfarbe: gemessen an der Wortmarke, je Sorte dreimal ----
+   * AWAKE = ROSA/MAGENTA, Farbton-Spanne ueber drei Messungen 1,0 Grad:
+   *   #D94076 HSL(338.8, 66.8%, 55.1%) Lab(51.53, 62.88, 4.34) — Rueckseiten-
+   *           Etikett, 27,5 % des Ausschnitts (der sauberste Fall: planar,
+   *           heller Grund)
+   *   #B53D66 HSL(339.5, 49.6%, 47.5%) — Vorderseite auf schwarzem Etikett
+   *   #CA4773 HSL(339.8, 55.3%, 53.5%) — freigestellte Tuete, 3,0 %
+   * CREATE = BLAU, Spanne 3,5 Grad:
+   *   #5BA3F8 HSL(212.5, 91.8%, 66.5%) Lab(65.90, 3.14, -49.08) — Rueckseite
+   *   #3792E7 HSL(209.0, 78.6%, 56.1%) — Vorderseite
+   *   #3E7EC3 HSL(211.1, 52.6%, 50.4%) — freigestellte Tuete, 2,9 %
+   * Die beiden Sorten liegen 128,5 Farbton-Grad auseinander.
+   *
+   * WIDERSPRUCH ZUR AUFTRAGS-VORGABE, OFFEN AUSGEWIESEN UND NICHT STILL
+   * UMGEDREHT: Christian gibt "Awake blau, Create rot/rosa" vor. Gemessen
+   * ist es umgekehrt — und zwar an vier sauberen Studiobildern, Vorder- wie
+   * Rueckseite beider Sorten, ohne farbige Beleuchtung. Ein Restwarmstich von
+   * b*=+2,6 kann 128 Farbton-Grad weder erzeugen noch umkehren; die Messung
+   * ist damit nicht interpretierbar. Die Token tragen die GEMESSENE Farbe,
+   * weil eine Seite, die Awake blau faerbt, waehrend die Tuete in der Hand
+   * des Kunden rosa ist, ihm am Regal widerspricht. Will Christian es
+   * anders, ist das ein Tausch DIESER ZWEI ZEILEN — deshalb steht jede
+   * Sortenfarbe genau einmal. Der Befund liegt in jobmem als offene Flanke
+   * und im RESULT von s03. */
+  --cc-sorte-awake: #D94076;
+  --cc-sorte-create: #5BA3F8;
+
+  /* ---- Dieselbe Farbe, lesbar gemacht ----
+   * DIE FALLE, UND SIE IST GEMESSEN: der rohe Messton traegt auf hellem
+   * Grund KEINEN Text. #D94076 erreicht auf --cc-grund 4,01:1 und auf
+   * --cc-flaeche 3,78:1 (AA verlangt 4,5:1); #5BA3F8 nur 2,47:1 bzw. 2,32:1
+   * und reisst damit sogar die 3:1-Schwelle fuer UI und grosse Schrift. Auch
+   * die Gegenrichtung faellt durch: helle Schrift auf roher Sorten-Fuellung
+   * gibt 4,01:1 (awake) bzw. 2,47:1 (create).
+   * WARUM DAS SO SEIN MUSS: auf der Tuete sitzt die Wortmarke auf dem
+   * SCHWARZEN Etikett, nie auf Papier. Dort traegt sie muehelos (awake
+   * 4,35:1, create 7,07:1 auf --cc-dunkel, beide ueber der 3:1-UI-Schwelle).
+   * Wer die Farbe von dort auf eine helle Seite umzieht, uebernimmt sie ohne
+   * ihren Grund.
+   * ABLEITUNGSREGEL: Farbton-Winkel bleibt, L* sinkt in CIELAB, bis 4,5:1
+   * auf BEIDEN hellen Grundtoenen haelt, Chroma wird leicht mitgefuehrt.
+   *   awake  L* 51,5 -> 46,7, Chroma x0,90 -> #C23C6B (Hue 339,0 statt 339,4)
+   *   create L* 65,9 -> 46,5, Chroma x0,95 -> #1771BD (Hue 207,5 statt 210,9)
+   * Ehrlich dazu: Create wandert um 3,4 Farbton-Grad — das liegt INNERHALB
+   * der Streuung, die die drei Messungen dieser Sorte selbst haben (3,5
+   * Grad). Es ist derselbe Ton im Rahmen seiner eigenen Messunsicherheit,
+   * kein neuer. */
+  --cc-sorte-awake-text: #C23C6B;    /* 4,78:1 / 4,50:1 auf grund/flaeche */
+  --cc-sorte-create-text: #1771BD;   /* 4,80:1 / 4,52:1 */
+  --cc-sorte-awake-flaeche: #FFF0F5; /* --cc-text darauf 12,98:1 */
+  --cc-sorte-create-flaeche: #F0F7FF;/* --cc-text darauf 13,27:1 */
+
+  /* ---- Dieselbe Ableitung fuer den Goldton ----
+   * BEIM MESSEN DER SORTENFARBE MIT AUFGEFALLEN, und es ist derselbe Fehler
+   * eine Etage hoeher: --cc-gold #F2BF72 ist ein FLAECHEN-Ton (auf
+   * --cc-dunkel 10,97:1, tadellos) und traegt auf HELLEM Grund keinen Text.
+   * Gemessen am gerenderten DOM mit design-meister/bin/kontrast-sweep: die
+   * Bewertungszahl "4,9" der Kaufseiten steht in genau diesem Gold auf Weiss
+   * und erreicht 1,68:1 — sie ist praktisch unsichtbar, obwohl sie eine
+   * Information traegt. Das ist kein zweiter Akzent, sondern DERSELBE Akzent
+   * in lesbar: gleicher Farbton-Winkel, L* gesenkt bis 4,5:1 auf Weiss UND
+   * auf beiden hellen Grundtoenen haelt (L* 80,4 -> 46,6, Chroma unveraendert,
+   * Hue 38,6 statt 36,1 Grad).
+   * ABGRENZUNG, damit hier niemand ueber eine fremde Entscheidung faehrt: die
+   * gefuellten Stern-GRAFIKEN behalten var(--cc-gold). Ihre Farbe ist eine
+   * ausdrueckliche Entscheidung des Sterne-Vertrags weiter unten in dieser
+   * Datei; sie sind Grafik, nicht Text, und ich drehe sie nicht im
+   * Vorbeigehen um. Der Befund dazu steht im RESULT von s03. */
+  --cc-gold-text: #90671D;    /* 5,07:1 auf Weiss · 4,79:1 auf --cc-grund */
+
+  /* GEMESSEN, ABER BEWUSST NICHT EINGEBAUT: das Gold der Art-Deco-Zeichnung
+   * auf der Tuete ist #D49529, Lab(66.26, 14.76, 61.84), 2,4 % der Flaeche —
+   * es unterscheidet sich vom Bestands-Token --cc-gold #F2BF72 um dE 22,3,
+   * ist also wirklich ein anderer Ton. Er kommt TROTZDEM nicht herein:
+   * web-soll.yaml setzt akzent_farben_max 1, und --cc-gold ist der bewusst
+   * gewaehlte Verwandtschafts-Anker zu qiblanco.com (dort real ausgeliefert).
+   * Ein zweiter Goldton haette die Design-Pflicht verletzt — durch den
+   * Versuch, sie zu erfuellen. Die Frage "Marken-Gold vs Web-Gold" ist als
+   * offene Frage gold-akzent-web-vs-marke gefuehrt (web-dach.yaml,
+   * zustaendig: Christian) und wird hier nicht entschieden. */
+}
+
+/* ==========================================================================
+ * SORTEN-SCHALTER — genau EINE Sortenfarbe je Seite
+ * ==========================================================================
+ * Gesetzt wird das Attribut in app/root.jsx aus sorteZuPfad() der SSoT
+ * app/lib/kakao-zone.js. Ohne Attribut faellt der Akzent auf den Goldton
+ * zurueck: eine Seite ohne Sorte (die Uebersicht /pages/crystal-cacao)
+ * bleibt bewusst neutral und zeigt beide Sorten gleichberechtigt.
+ *
+ * WAS "DEZENT" HIER KONKRET HEISST — und woran man es nachmisst:
+ * der Sortenakzent darf NUR an Handlung (Knopf, Link), Zustand
+ * (aktiv/ausgewaehlt) und Sortenkennung. Flaeche und Fliesstext bleiben
+ * ruhig; es gibt bewusst KEINE Regel, die --cc-sorte-* auf `background` einer
+ * grossen Flaeche legt. Damit bleibt der Flaechenanteil des Akzents strukturell
+ * klein — das ist die Groesse, an der der Design-Meister "dezent" misst
+ * (soll_signale saettigung_max 0.52).
+ *
+ * ZUR ZAHL DER AKZENTE, ehrlich: web-soll.yaml sagt akzent_farben_max 1.
+ * Eine gerenderte Seite traegt hier Gold PLUS eine Sortenfarbe, also zwei.
+ * Das ist eine bewusste, benannte Abweichung auf Christians ausdrueckliche
+ * Anweisung ("zwei unterschiedliche Farbgebungen … dezent entsprechend
+ * nutzen") — explizite Auftrags-Vorgabe sticht das Profil-Muster. Sie ist
+ * eng gefasst: die zwei Sortentoene sind NIE gleichzeitig aktiv (das
+ * Attribut traegt genau einen Wert), und der Sortenakzent uebernimmt nie die
+ * Rolle des Goldes am Kaufknopf. */
+:root {
+  --cc-sorte: var(--cc-gold);
+  --cc-sorte-text: var(--cc-gold-tief);
+  --cc-sorte-flaeche: var(--cc-flaeche);
+}
+[data-cc-sorte='awake'] {
+  --cc-sorte: var(--cc-sorte-awake);
+  --cc-sorte-text: var(--cc-sorte-awake-text);
+  --cc-sorte-flaeche: var(--cc-sorte-awake-flaeche);
+}
+[data-cc-sorte='create'] {
+  --cc-sorte: var(--cc-sorte-create);
+  --cc-sorte-text: var(--cc-sorte-create-text);
+  --cc-sorte-flaeche: var(--cc-sorte-create-flaeche);
+}
+
+/* DIE EINE ANWENDUNG, DIE s03 SELBST VORNIMMT — und warum es genau eine ist.
+ * Der Auftrag trennt sauber: s03 baut und BELEGT die Token, s04 uebertraegt
+ * die Kakao-Seiten, s05 gleicht die uebrigen an. Ein Token, der nirgends
+ * malt, ist aber kein Beleg, sondern eine leere Huelle — genau der Fall, an
+ * dem der Blog-Vorfall vom 2026-08-31 haengt (Erreichbarkeit ist nicht
+ * Inhalt). Also: GENAU EIN sichtbarer Einsatz, und zwar an dem Element, das
+ * seiner Natur nach die SORTENKENNUNG ist — die Claim-Zeile ueber dem
+ * Produktnamen ("Wach. Mutig. Kraftvoll." bzw. das Create-Gegenstueck).
+ * Die Flaeche bleibt unberuehrt, der Fliesstext bleibt --cc-text, der
+ * Kaufknopf behaelt sein Gold. Wie weit die Sortenfarbe darueber hinaus
+ * geht, entscheidet s04 — nicht diese Zeile.
+ *
+ * WARUM PER CSS UND NICHT IM MARKUP: die Claim-Zeile steht in
+ * app/routes/products.crystal-cacao-{awake,create}.jsx, und die sind K1
+ * (byte-gleich zur Vorlage). Ein Eingriff dort waere Vendoring-Drift und
+ * beim naechsten Nachzug still weg.
+ *
+ * WARUM DIESER SELEKTOR UND NICHT h2:first-of-type: `:first-of-type` gilt JE
+ * ELTERNKNOTEN — es haette jede erste h2 in jedem Container eingefaerbt, also
+ * quer ueber die ganze Seite. Der Anker `.items-center-justify-center` ist
+ * dagegen nachgemessen eindeutig: er kommt im ganzen Baum nur in den zwei
+ * Sortenrouten vor und im gerenderten HTML genau EINMAL je Seite. Die Probe
+ * pruefungen/probe_sortenfarbe.py zaehlt das nach, statt es zu glauben. */
+[data-cc-sorte] .items-center-justify-center > h2 {
+  color: var(--cc-sorte-text);
 }
 
 /* Tailwind-4-Theme: bindet die Utility-Klassen der uebertragenen Routen an
@@ -144,7 +336,14 @@
 .product .product-rating {
   font-size: var(--cc-fs-4);
   font-weight: 600;
-  color: var(--color-accent-primary);
+  /* s03, 2026-09-02: war var(--color-accent-primary) = --cc-gold #F2BF72 und
+   * damit 1,68:1 auf Weiss — die Bewertungszahl "4,9" war faktisch
+   * unsichtbar (gemessen mit design-meister/bin/kontrast-sweep am
+   * gerenderten DOM, Soll 3,0:1 fuer grosse Schrift, AA 4,5:1 fuer Text).
+   * Derselbe Goldton, nur lesbar: 5,07:1. Kein zweiter Akzent — der Farbton
+   * bleibt, nur die Helligkeit sinkt. Die Stern-GRAFIK daneben behaelt
+   * bewusst --cc-gold (Sterne-Vertrag, eigene Entscheidung, siehe dort). */
+  color: var(--cc-gold-text);
 }
 .product .product-rating span:nth-child(2) {
   font-size: var(--cc-fs-2);
@@ -385,7 +584,13 @@
   height: 100%;
   width: 100%;
   z-index: 1;
-  background: rgba(0, 0, 0, 0.5);
+  /* s03, 2026-09-02: war rgba(0,0,0,0.5). Ueber einem hellen Bild ergibt das
+   * effektiv #808080, und die weisse "+6"-Zahl darauf nur 3,95:1 — unter AA
+   * (gemessen mit kontrast-sweep). Der Schleier ist der einzige Grund, aus
+   * dem die Zahl ueberhaupt lesbar sein KANN; er muss dick genug sein, um
+   * auch das hellste Bild zu tragen. Bei 0,65 sind es 7,00:1 gegen einen
+   * rein weissen Untergrund, also der ungünstigste denkbare Fall. */
+  background: rgba(0, 0, 0, 0.65);
   color: #fff;
   display: flex;
   align-items: center;
@@ -614,7 +819,13 @@
   color: #e00!important;
 }
 .CacaoPriceCurrent.exclusive {
-  color: #b8943e!important; 
+  /* s03, 2026-09-02: war der freie Wert #b8943e — ein DRITTER Goldton neben
+   * --cc-gold (dE 18,45) und dem Inline-Gold in Kakao.jsx (#cab581, dE
+   * 19,71). Genau die Lage, die die Design-Pflicht als Ursache von
+   * "von AI gemacht" benennt: mehrere konkurrierende Goldtoene. Auf Weiss
+   * ergab er ausserdem nur 2,86:1 — an einem PREIS. Jetzt derselbe eine
+   * Goldton in seiner lesbaren Ableitung: 5,07:1. */
+  color: var(--cc-gold-text)!important;
 }
 .CacaoPriceCompare {
   font-size: var(--cc-fs-5)!important;
@@ -624,7 +835,11 @@
 .CacaoPricePer100g {
   width: 100%;
   font-size: var(--cc-fs-1);
-  color: #888;
+  /* s03, 2026-09-02: war der freie Wert #888 und damit 3,54:1 auf Weiss —
+   * unter AA, und ausgerechnet am Grundpreis, den der Kunde zum Vergleichen
+   * braucht. --cc-muted ist der Token fuer genau diese Rolle (zurueckhaltend,
+   * aber lesbar) und misst 5,70:1. Kein neuer Wert, ein Wert weniger. */
+  color: var(--cc-muted);
   margin-top: 2px;
 }
 /* ==== abgeleitet aus qiblanco-storefront app/styles/reset.css (1 Regeln) ==== */
@@ -745,7 +960,14 @@ main h3[style] {
 .header-ctas a[href='/cart'] span {
   position: absolute;
   top: -2px;
-  right: -10px;
+  /* NACHGEMESSEN 2026-09-02 (s05), Playwright am gerenderten DOM: bei -10px
+   * ragte das Abzeichen ueber den Kopf hinaus und erzeugte auf 320px und 360px
+   * genau 2px horizontalen Ueberlauf am DOKUMENT (scrollWidth 322 bei
+   * clientWidth 320) — ein absolut positioniertes Kind zaehlt zur scrollWidth
+   * seines Vorfahren, auch wenn es optisch nur "ein bisschen" heraussteht.
+   * Der Kopf hat auf den schmalsten Geraeten 8px Innenabstand; -6px bleibt
+   * darin und sieht unveraendert wie eine Ecken-Marke aus. */
+  right: -6px;
   min-width: 20px;
   height: 20px;
   display: flex;
@@ -862,4 +1084,155 @@ main h3[style] {
   left: 0;
   height: 100%;
   overflow: hidden;
+}
+
+/* ZWEITE ANWENDUNG DER SORTENFARBE — der Auftrag von s04, und bewusst die
+ * letzte. s03 hat die Token gebaut und EINE Anwendung gesetzt (die
+ * Claim-Zeile = Sortenkennung) und die Frage "wie weit geht die Sortenfarbe
+ * darueber hinaus" ausdruecklich an s04 uebergeben. Hier ist die Antwort,
+ * und sie faellt kleiner aus als erwartet — weil sie GEMESSEN ist:
+ *
+ * Der Korridor steht im Kopf dieses Blocks: Akzent nur an HANDLUNG (Knopf,
+ * Link), ZUSTAND (aktiv/ausgewaehlt) und SORTENKENNUNG. Am 2026-09-02 am
+ * gerenderten HTML beider Kaufseiten nachgezaehlt, was der Korridor auf
+ * diesen Seiten ueberhaupt an Flaeche hat:
+ *   - HANDLUNG/Link: `<main>` der beiden Sortenseiten traegt 0 (null)
+ *     `<a>`-Elemente — in der Vorlage qiblanco.com/products/crystal-cacao-awake
+ *     ebenfalls 0. Es gibt hier also keinen Link einzufaerben.
+ *   - HANDLUNG/Knopf: der Kaufknopf traegt Gold. Das bleibt so; zwei Akzente
+ *     an einem Element entwerten beide (s03).
+ *   - ZUSTAND: die Mengenstaffel ist ein natives <select>, dessen
+ *     ausgewaehlter Eintrag sich nicht gestalten laesst, ohne das Markup zu
+ *     aendern — und das Markup ist K1 (byte-gleich zur Vorlage). Was BLEIBT
+ *     und ohne eine einzige Markup-Zeile geht, ist der Tastatur-Zustand.
+ *   - SORTENKENNUNG: die Claim-Zeile, s03, erledigt.
+ *
+ * ALSO GENAU DIESE EINE REGEL. Sie ist die dezenteste denkbare Anwendung:
+ * sie ist im Ruhezustand UNSICHTBAR und erscheint erst, wenn der Besucher
+ * tatsaechlich handelt. Damit kann sie das statische Aussehen der Seite
+ * gegenueber der Vorlage baulich nicht veraendern — genau die Bedingung, die
+ * Christians "sehr nah am Original uebertragen" an dieses Segment stellt.
+ *
+ * WARUM :focus-visible UND NICHT :focus — :focus feuert auch beim Mausklick
+ * und wuerde einen Ring zeigen, den niemand angefordert hat. :focus-visible
+ * ist die vom Browser getroffene Unterscheidung "Tastatur ja, Maus nein".
+ *
+ * SICHTBARKEIT DES RINGS NACHGEMESSEN, nicht angenommen: --cc-sorte-text
+ * ist per Bau >= 4,5:1 auf beiden hellen Gruenden (s03), also weit ueber der
+ * 3:1-Schwelle, die WCAG 1.4.11 fuer ein Bedien-Element verlangt. Auf Seiten
+ * OHNE Sortenzuordnung (die Uebersicht) loest --cc-sorte-text auf den
+ * Gold-Ton --cc-gold-tief auf (:root-Vorgabe oben) — die Regel ist dort also
+ * nicht wirkungslos, sondern neutral. Das ist Absicht: die Uebersicht zeigt
+ * beide Sorten gleichberechtigt. */
+[data-cc-sorte] a:focus-visible,
+[data-cc-sorte] button:focus-visible,
+[data-cc-sorte] select:focus-visible,
+[data-cc-sorte] summary:focus-visible,
+[data-cc-sorte] [tabindex]:focus-visible {
+  outline: 2px solid var(--cc-sorte-text);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+ * ZEILENLAENGE AUF DEN KAUFSEITEN — 2026-09-03 (Segment s06)
+ *
+ * DER BEFUND, selbst gemessen am gerenderten DOM mit der Formel, die die
+ * Rubrik selbst benutzt (breite / (schriftgroesse * 0.52), Grenze 90):
+ * auf /products/crystal-cacao-awake lagen 19 von 41 Textbloecken (46 %)
+ * darueber, auf -create 49 %. Die drei teuersten waren keine Grenzfaelle:
+ * drei <p> mit 16 px Schrift standen 1318 px breit, also rund 158 Zeichen
+ * je Zeile — mehr als doppelt so lang wie die 70 ch, die web-soll.yaml als
+ * Obergrenze fuehrt und die als --cc-zeile-max seit s03 als Token bereitsteht.
+ * Der Rest waren Aufzaehlungen mit 12.8 px Schrift bei 623 bis 672 px.
+ *
+ * WARUM DAS TOKEN DA WAR UND TROTZDEM NICHTS TAT: --cc-zeile-max wurde von
+ * s03 definiert, aber von keiner Regel angewandt. Ein Token ohne Benutzer ist
+ * wie ein Regelwerk ohne Aufrufer — vorhanden und wirkungslos.
+ *
+ * WARUM DER ZAUN AN DER EIGENSCHAFT HAENGT UND NICHT AN KLASSENNAMEN: die
+ * Vorlage bringt Tailwind-Klassen wie `NormalSectionSize` oder
+ * `space-y-1 text-sm text-gray-800` mit. Ein Zaun aus diesen Literalen
+ * erreicht die naechste Sektion nicht, die anders heisst. Gemessen wird
+ * deshalb "Fliesstext im Hauptteil einer Sortenseite", nicht ein Klassenname.
+ *
+ * WAS BEWUSST AUSGENOMMEN BLEIBT: Tabellenzellen (die Vergleichstabelle
+ * braucht ihre Spaltenbreite), Knopf- und Preisflaechen (dort ist die Breite
+ * die Trefferflaeche, nicht der Lesefluss) und alles innerhalb der Schubladen.
+ * ========================================================================== */
+html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
+  table *, .btn--primary *, .btn--secondary *, aside *,
+  .qb-swipetab *, [class*='price'] *, [class*='Price'] *
+)) {
+  max-width: var(--cc-zeile-max);
+}
+
+/* ==========================================================================
+ * SCHLEIER UNTER DEN BANNER-UEBERSCHRIFTEN — 2026-09-03 (Segment s06)
+ *
+ * DER AUFTRAG KAM AUS s03 und lag seither offen: dessen RESULT uebergab
+ * woertlich "Adressat: s04, mit dem fertigen Rezept" — s04 hat ihn nicht
+ * ausgefuehrt, hier wird er eingeloest.
+ *
+ * DER BEFUND, und er ist mit dem AUGE belegt, nicht nur mit einer Zahl:
+ * `HerobannerWithText` (Kakao.jsx) legt eine weisse <h2> absolut ueber ein
+ * Foto, ohne jede Absicherung. Auf dem zweiten Banner steht "100% naturrein"
+ * in Weiss direkt auf einer hellgelben Kakaofrucht vor hellem Blattwerk —
+ * der Screenshot zeigt Buchstaben, die im Motiv verschwinden. Das ist keine
+ * Messgrenze, das ist schlecht lesbar.
+ *
+ * WARUM EIN VERLAUF UND NICHT DER FLAECHIGE SCHLEIER AUS DEM REZEPT:
+ * rgba(0,0,0,0.65) ueber das GANZE Bild traegt die Schrift zwar sicher, macht
+ * aber aus einem hellen, freundlichen Foto eine dunkle Flaeche — der Preis
+ * waere das Bild. Der Verlauf sichert genau das obere Drittel, in dem die
+ * Schrift steht, und laesst den Rest unberuehrt. Der dunkle Ton ist
+ * --cc-dunkel, also KEINE neue Farbe.
+ *
+ * WAS DIESER FIX NICHT TUT, und das gehoert dazu: kontrast-sweep wird die
+ * beiden <h2> WEITERHIN als Riss melden. Das Werkzeug liest weder Bilder noch
+ * Pseudo-Elemente und faellt auf den hellen Elterngrund zurueck; der Schleier
+ * ist ein ::after und damit fuer es unsichtbar. Der Nachweis dieses Fixes ist
+ * deshalb der Screenshot, NICHT der Exit-Code — wer hier auf Gruen wartet,
+ * wartet auf etwas, das das Werkzeug baulich nicht liefern kann.
+ *
+ * ZAUN AN DER EIGENSCHAFT, nicht am Klassennamen: getroffen wird "ein
+ * Container, dessen Bild unmittelbar eine Ueberschrift folgt" — die
+ * Tailwind-Literale `my-[10vh]!` und `top-10` der Vorlage kommen nicht vor,
+ * sie wuerden den naechsten gleichgebauten Banner verfehlen.
+ * ========================================================================== */
+.ProductPageKakao div:has(> img + h2) {
+  position: relative;
+}
+
+.ProductPageKakao div:has(> img + h2)::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 45%;
+  border-radius: var(--cc-radius-bild) var(--cc-radius-bild) 0 0;
+  background: linear-gradient(
+    to bottom,
+    rgb(23 19 16 / 72%) 0%,
+    rgb(23 19 16 / 52%) 45%,
+    rgb(23 19 16 / 18%) 75%,
+    rgb(23 19 16 / 0%) 100%
+  );
+  pointer-events: none;
+}
+
+/* Der Schleier ist das LETZTE Kind und laege ohne diese Zeile ueber der
+ * Schrift statt darunter — beide sind positioniert und ohne z-index
+ * entscheidet die Baumreihenfolge.
+ *
+ * HIER STAND ZUERST `position: relative` DAZU, UND DAS WAR EIN FEHLER, DEN
+ * KEIN SCORE GEFANGEN HAETTE: die Ueberschrift traegt ihre Positionierung aus
+ * Tailwinds `.absolute`, diese Regel ist spezifischer und hat sie auf
+ * `relative` zurueckgeholt — die Ueberschrift fiel damit AUS dem Bild heraus
+ * in den normalen Fluss darunter, der Banner wurde 87 px hoeher und die
+ * Schrift war schlicht weg. Gefunden hat es der Screenshot nach dem Bau,
+ * nicht die Rubrik. z-index allein genuegt: das Element IST bereits absolut
+ * positioniert, und nur darauf wirkt z-index ohnehin. */
+.ProductPageKakao div:has(> img + h2) > h2 {
+  z-index: 1;
 }

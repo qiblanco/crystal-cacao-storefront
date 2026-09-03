@@ -3,12 +3,13 @@ import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ProductItem} from '~/components/ProductItem';
+import {ABSENDER_MARKE, istKakaoKollektion, fremdinhaltAbweisen} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `${data?.collection.title ?? 'Kollektion'} | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `${data?.collection.title ?? 'Kollektion'} | ${ABSENDER_MARKE}`}];
 };
 
 /**
@@ -31,6 +32,12 @@ export async function loader(args) {
  */
 async function loadCriticalData({context, params, request}) {
   const {handle} = params;
+
+  // SORTIMENTS-ZAUN: unter /collections standen die vier Qi-Blanco-
+  // Kollektionen frontpage, products, digitale-kurse, digital-goods-vat-tax.
+  if (!istKakaoKollektion(handle)) {
+    throw fremdinhaltAbweisen();
+  }
   const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,

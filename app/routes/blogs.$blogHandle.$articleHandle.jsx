@@ -1,12 +1,13 @@
 import {useLoaderData} from 'react-router';
 import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {ABSENDER_MARKE, istKakaoBlog, fremdinhaltAbweisen} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `${data?.article.title ?? 'Beitrag'} | Qi Blanco UG (haftungsbeschränkt)`}];
+  return [{title: `${data?.article.title ?? 'Beitrag'} | ${ABSENDER_MARKE}`}];
 };
 
 /**
@@ -30,8 +31,12 @@ export async function loader(args) {
 async function loadCriticalData({context, request, params}) {
   const {blogHandle, articleHandle} = params;
 
-  if (!articleHandle || !blogHandle) {
-    throw new Response('Beitrag nicht gefunden', {status: 404});
+  // SORTIMENTS-ZAUN (app/lib/kakao-zone.js): dieselbe Allowlist wie die
+  // Blog-Uebersicht. Ohne sie waere jeder Qi-Blanco-Artikel unter seiner
+  // crystal-Adresse weiterhin einzeln erreichbar — die Uebersicht zu sperren
+  // und die Artikel offen zu lassen waere ein Zaun mit Tuer daneben.
+  if (!articleHandle || !blogHandle || !istKakaoBlog(blogHandle)) {
+    throw fremdinhaltAbweisen();
   }
 
   const [{blog}] = await Promise.all([

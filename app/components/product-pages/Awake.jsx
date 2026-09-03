@@ -205,10 +205,9 @@ const herkunftRows = [
           Block <b>Bio Kristall Kakao®.</b>
         </p>
         <p className="mt-3">
-          Nach der Formung geben wir dem Kakao die Zeit, die er braucht: In der
-          harmonisierenden <b>QiHome® Air</b> Atmosphäre – unterstützt durch
-          die <b>GitterChip™-Technologie</b> – kristallisiert er langsam aus
-          und entfaltet dabei sein charakteristisches Kristallmuster.
+          Nach der Formung geben wir dem Kakao die Zeit, die er braucht: In
+          Ruhe kristallisiert er langsam aus und entfaltet dabei sein
+          charakteristisches Kristallmuster.
         </p>
       </>
     ),
@@ -248,7 +247,22 @@ function Herkunft() {
             key={i}
             className="grid grid-cols-1 sm:grid-cols-2 gap-8 items-center"
           >
-            <p className="text-sm text-gray-800 leading-relaxed">{row.text}</p>
+            {/* <div> statt <p>: `row.text` ist ein Fragment aus mehreren
+                <p>-Elementen. Ein <p> in einem <p> ist ungueltiges HTML —
+                der Parser schliesst das aeussere vorzeitig, Server- und
+                Client-Baum laufen auseinander, und React bricht die
+                Hydration ab. Gemessen 2026-09-03 auf der Kaufseite:
+                6 verschachtelte <p> und 8 Konsolenfehler, darunter
+                zweimal "Hydration failed because the initial UI does not
+                match what was rendered on the server". Die Klassen bleiben
+                unveraendert, das Aussehen also auch. DIE VORLAGE TRAEGT
+                DENSELBEN BAU (qiblanco-storefront, gleiche Zeile) — der
+                Befund ist dorthin gemeldet; hier divergiert die K2-Datei
+                bewusst, weil ein gebrochenes Hydrat kein Original ist,
+                das man treu uebertraegt. */}
+            <div className="text-sm text-gray-800 leading-relaxed">
+              {row.text}
+            </div>
             <img className="w-full rounded-xl" src={row.img} alt="" />
           </div>
         ))}
