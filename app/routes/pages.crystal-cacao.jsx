@@ -2,13 +2,29 @@ import {useLoaderData} from 'react-router';
 import {Kakao} from '~/components/product-pages/Kakao';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {canonicalLink} from '~/lib/seo';
+import {ABSENDER_MARKE} from '~/lib/kakao-zone';
 
 /**
  * @type {MetaFunction<typeof loader>}
  */
 export const meta = ({data}) => {
   return [
-    {title: `Crystal Cacao® | Qi Blanco`},
+    // ABSENDER_MARKE statt eines Literals: "Qi Blanco" ist auf einem
+    // Kakao-Laden die fremde Absender-Marke (Segment s02, "Eine Marke, eine
+    // Stelle"). Diese Route trug den Titel als einzige noch woertlich —
+    // gemessen 2026-09-04 am gerenderten dev-Server: "Crystal Cacao® |
+    // Qi Blanco". Das ist Browser-Tab UND SERP-Zeile der meistgesehenen
+    // Kakao-Flaeche. Die Rechtsperson (Qi Blanco UG) bleibt davon unberuehrt;
+    // sie steht in den Rechtstexten und im legalName, nicht im Seitentitel.
+    //
+    // WARUM DER SEITENNAME MITWANDERT: der alte Titel war
+    // "<Seitenname> | <Absender>" = "Crystal Cacao® | Qi Blanco". Tauscht man
+    // nur den Absender, steht dort "Crystal Cacao® | Crystal Cacao®" — die
+    // Marke zweimal und die Seite ohne Aussage. Der Seitenname nimmt deshalb
+    // die Worte auf, die auf DIESER Seite ohnehin stehen: "zeremoniell" (so
+    // nennt die Startseite die Ernte) und "aus Peru" (Zeile 'description'
+    // direkt darunter). Es ist keine neue Behauptung, sondern die vorhandene.
+    {title: `Zeremonie-Kakao aus Peru | ${ABSENDER_MARKE}`},
     {
       name: 'description',
       content:

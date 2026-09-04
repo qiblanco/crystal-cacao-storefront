@@ -21,6 +21,37 @@ DREI ARME, weil ein einziger jeweils blind waere:
      Fremdmarke, waere also nach A und B gruen und trotzdem kaputt. Genau der
      Fehler, den die Blog-Lehre vom 2026-08-31 beschreibt: Erreichbarkeit ist
      nicht Inhalt.)
+  D  Der ABSENDER im Seitentitel und in den og-Absenderfeldern ist die eigene
+     Marke. (Nachgetragen 2026-09-04 -- siehe unten. Ohne D ist der Nadelsatz
+     dieser Probe von der groessten Fremdnennung strukturell blind.)
+
+WARUM ES ARM D GIBT, UND WARUM ER EINEN EIGENEN NADELSATZ BRAUCHT
+------------------------------------------------------------------
+Der Nadelsatz FREMD_MARKEN fuehrte QiOne|QiHome|QiBracelet|Gitterchip. "Qi
+Blanco" stand nicht darin. Die Zusage "0 Fremdtreffer" war fuer IHREN Nadelsatz
+wahr und mass die Absender-Marke strukturell nicht mit -- der Zaehler stimmte,
+der Nenner war enger als die Zusage darueber. Gemessen 2026-09-04 trugen
+dadurch die DREI meistgesehenen Kakao-Flaechen unbemerkt "| Qi Blanco" im
+Titel, waehrend diese Probe gruen lief.
+
+"Qi Blanco" EINFACH IN FREMD_MARKEN ZU SCHREIBEN WAERE FALSCH GEWESEN, und das
+ist der eigentliche Inhalt dieses Arms. Der Name hat auf dieser Storefront ZWEI
+Rollen:
+  ANZEIGE-MARKE  der Absender im Seitentitel. Hier ist "Qi Blanco" falsch.
+  RECHTSPERSON   die Betreiberin "Qi Blanco UG (haftungsbeschraenkt)" in
+                 Impressum, AGB, Datenschutz und im legalName des
+                 Organization-JSON-LD. Hier ist sie RICHTIG und PFLICHT.
+Gemessen 2026-09-04 am ausgelieferten HTML: 9 Nennungen der Rechtsperson allein
+in /policies/terms-of-service, 2 in /policies/privacy-policy, dazu der
+legalName im JSON-LD JEDER Seite. Ein Nadelsatz ueber den ganzen sichtbaren
+Text haette also zwoelf-plus Befunde an voellig korrektem Pflichttext gemeldet
+-- und damit entweder zum Wegklicken erzogen oder, schlimmer, dazu verleitet,
+die Betreiberin zu tilgen, um gruen zu werden.
+Arm D misst deshalb ausschliesslich den <title> und die og-ABSENDERFELDER.
+Dort gehoert die fremde Marke in KEINER Form hin, auch nicht mit Rechtsform:
+der Ausgangsbefund aus s02 war woertlich "| Qi Blanco UG (haftungsbeschraenkt)"
+in 13 Titeln. Und dort steht die Rechtsperson umgekehrt NIE -- die Trennung
+laeuft also entlang der FLAECHE, nicht entlang der Schreibweise.
 
 ZUSAGE, bewusst OHNE Zaehler-Pin: "0 Fremdtreffer". Die Zahl der geprueften
 Routen darf wachsen, ohne diese Probe rot zu faerben.
@@ -46,6 +77,44 @@ import urllib.request
 # Die Marken des Fremdsortiments. Absichtlich die MARKEN und nicht die Handles:
 # ein Handle kann sich aendern, die Marke steht im Text.
 FREMD_MARKEN = re.compile(r"QiOne|QiHome|QiBracelet|Gitterchip", re.I)
+
+# Die fremde ABSENDER-Marke. BEWUSST EIN ZWEITER NADELSATZ und nicht eine
+# Erweiterung des ersten: dieser hier wird nur gegen den Titel und die
+# og-Absenderfelder gehalten, nie gegen den Seitentext -- Begruendung im Kopf.
+# Die Rechtsform ist eingeschlossen, weil genau sie der Ausgangsbefund war.
+FREMDER_ABSENDER = re.compile(r"Qi[\s \-]*Blanco", re.I)
+
+# Die eigene Absender-Marke (app/lib/kakao-zone.js: ABSENDER_MARKE). Ohne das
+# (R) geprueft, damit die Probe nicht an einer Zeichen-Kodierung scheitert.
+EIGENER_ABSENDER = "Crystal Cacao"
+
+TITEL_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.S | re.I)
+# react-router rendert die Attribute je nach Fassung in beiden Reihenfolgen --
+# eine Regex, die nur eine kennt, findet auf der falschen Fassung nichts und
+# meldet das als Sauberkeit.
+OG_RE = re.compile(
+    r"""<meta[^>]*?(?:property|name)=["'](og:site_name|og:title)["'][^>]*?"""
+    r"""content=["']([^"']*)["']""",
+    re.I,
+)
+OG_RE_UMGEKEHRT = re.compile(
+    r"""<meta[^>]*?content=["']([^"']*)["'][^>]*?"""
+    r"""(?:property|name)=["'](og:site_name|og:title)["']""",
+    re.I,
+)
+
+
+def absender_felder(html):
+    """[(feldname, inhalt)] -- Titel und og-Absenderfelder, sonst nichts."""
+    felder = []
+    m = TITEL_RE.search(html)
+    if m:
+        felder.append(("<title>", re.sub(r"\s+", " ", m.group(1)).strip()))
+    for feld, inhalt in OG_RE.findall(html):
+        felder.append((feld.lower(), inhalt))
+    for inhalt, feld in OG_RE_UMGEKEHRT.findall(html):
+        felder.append((feld.lower(), inhalt))
+    return felder
 
 # Routen, die es geben MUSS — mit dem Inhalt, den ein Mensch dort sehen soll.
 # Der zweite Eintrag ist der Riegel gegen die leere Huelle: er nennt einen
@@ -176,6 +245,28 @@ def main() -> int:
                 "Sichtbarkeit entfernt)"
             )
 
+        # --- Arm D: der Absender ---------------------------------------
+        # Gemessen wird NUR der Titel und die og-Absenderfelder. Der
+        # Seitentext bleibt ausdruecklich aussen vor, damit die Rechtsperson
+        # in AGB/Datenschutz/Impressum nicht als Befund erscheint.
+        felder = absender_felder(html)
+        for feld, inhalt in felder:
+            if FREMDER_ABSENDER.search(inhalt):
+                befunde.append(
+                    f"[D] {pfad}: {feld} traegt die fremde Absender-Marke: "
+                    f"{inhalt!r}"
+                )
+        titel = next((i for f, i in felder if f == "<title>"), None)
+        if titel is None:
+            befunde.append(f"[D] {pfad}: die Antwort traegt gar keinen <title>")
+        elif EIGENER_ABSENDER.lower() not in titel.lower():
+            # Kein Absender ist nicht besser als der falsche: ein leerer oder
+            # markenloser Titel waere sonst gruen.
+            befunde.append(
+                f"[D] {pfad}: der Titel {titel!r} nennt die eigene "
+                f"Absender-Marke {EIGENER_ABSENDER!r} nicht."
+            )
+
         if muss_enthalten and muss_enthalten.lower() not in vis.lower():
             befunde.append(
                 f"[C] {pfad}: antwortet mit 200, aber ohne den erwarteten "
@@ -216,7 +307,8 @@ def main() -> int:
         return 1
 
     print(f"OK: 0 Fremdtreffer auf {gemessen} gemessenen Routen ({basis})")
-    print("     Arm A sichtbarer Text · Arm B Fremd-Handles 404 · Arm C Kakao-Inhalt da")
+    print("     Arm A sichtbarer Text · Arm B Fremd-Handles 404 · Arm C Kakao-Inhalt da"
+          " · Arm D Absender-Marke in Titel und og-Feldern")
     return 0
 
 
