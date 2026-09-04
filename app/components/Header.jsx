@@ -303,7 +303,20 @@ const FALLBACK_HEADER_MENU = {
 function activeLinkStyle({isActive, isPending}) {
   return {
     fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'black',
+    // s03, 2026-09-04: hier standen die Literale 'black' und 'grey' — die
+    // letzten zwei freien Farbwerte des Ladens, und die hartnaeckigsten.
+    // GEMESSEN: nach der Umstellung aller Stylesheets auf --cc-dunkel trugen
+    // auf JEDER der fuenf Routen immer noch 13 Elemente exakt rgb(0,0,0);
+    // alle 13 waren Kopfzeilen-Links. Der Grund ist die Bauform, nicht die
+    // Farbe: dies ist ein INLINE-Style, und ein Inline-Style schlaegt jede
+    // Regel aus jedem Stylesheet. Ein Fix in der CSS-Datei waere gruen
+    // gewesen (die Regel steht ja da) und haette nichts geaendert — genau die
+    // Sorte Falsch-Gruen, die man nur am gerenderten DOM sieht.
+    // Beide Werte zeigen jetzt auf die Token-Schicht; der Fallback haelt die
+    // Komponente ohne kakao-seiten.css unveraendert lauffaehig.
+    color: isPending
+      ? 'var(--cc-muted, grey)'
+      : 'var(--cc-dunkel, black)',
   };
 }
 

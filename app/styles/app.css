@@ -963,7 +963,10 @@ aside .cart-details {
 }
 .Header-AnnouncementBanner a:hover {
   text-decoration: none;
-  background: #000000;
+  /* s03, 2026-09-04: war #000000 — der Zeigezustand sprang vom warmen
+   * --cc-dunkel auf rohes Schwarz. Auf dem Standbild unsichtbar, unter dem
+   * Zeiger ein zweiter dunkler Ton. Jetzt eine Aufhellung DESSELBEN Tons. */
+  background: color-mix(in srgb, var(--cc-dunkel) 82%, #ffffff);
 }
 /* Two meaning units (line 1 proof, line 2 offer): each stays unbroken, so any
    wrap happens cleanly between them, never mid-phrase. */

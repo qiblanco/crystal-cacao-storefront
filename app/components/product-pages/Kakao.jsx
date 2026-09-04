@@ -82,7 +82,13 @@ function Hero() {
         <h3 className="text-2xl font-bold">
           Mehr als {KAKAO_KENNZAHLEN.nutzer}+ aktive Nutzer
         </h3>
-        <div className="text-lg text-[#4A4741]">
+        {/* s03, 2026-09-04: war die Tailwind-Freiwert-Klasse text-[#4A4741] —
+            der letzte systemfremde Farbwert des ganzen Ladens (gemessen: nach
+            allen anderen Fixes genau EIN Element auf genau EINER Route). Der
+            Wert liegt dem Haus-Ton --cc-text #2C2A26 nahe, ist aber ein
+            eigener; eine Freiwert-Klasse haengt an keinem Token und zieht bei
+            einer Aenderung der Skala nicht mit. */}
+        <div className="text-lg text-gray-800">
           Erfahre jetzt die Vorteile von Kristall Kakao
         </div>
         <div>
@@ -274,7 +280,27 @@ function ComparisonTable() {
                     alt=""
                     className="mx-auto! mb-1"
                   />
-                  <h3 className="text-sm font-bold" style={{color: '#5b3b26'}}>
+                  {/* s03, 2026-09-04: war das Literal #5b3b26. Die dritte
+                      Spaltenueberschrift dieser Tabelle stand damit als
+                      einzige noch auf einem freien Wert — der Goldton daneben
+                      war schon umgestellt, dieser und der Energydrink daneben
+                      nicht. GEMESSEN am gerenderten DOM: nachdem die kuehlen
+                      Tailwind-Graustufen gefallen waren, blieben auf
+                      /pages/crystal-cacao genau ZWEI systemfremde Textfarben
+                      uebrig, und das hier war eine davon. Ein Inline-Style
+                      schlaegt jedes Stylesheet — er ist nur an der Quelle
+                      erreichbar.
+                      DIE DREI SPALTEN BLEIBEN UNTERSCHEIDBAR, das ist der
+                      Zweck der Farbe: unser Kakao traegt den einen Goldton,
+                      Kaffee das Kraftpapier-Braun der Verpackung
+                      (--cc-kraft-tief, 5,26:1 auf hellem Grund), der
+                      Energydrink das ruhige Grau (--cc-muted, 5,38:1). Die
+                      Reihenfolge ist Absicht: warm zu neutral, unser Produkt
+                      vorn. Kein vierter und fuenfter Ton. */}
+                  <h3
+                    className="text-sm font-bold"
+                    style={{color: 'var(--cc-kraft-tief)'}}
+                  >
                     Kaffee
                   </h3>
                   <h4 className="text-gray-500">200ml</h4>
@@ -286,7 +312,10 @@ function ComparisonTable() {
                     alt=""
                     className="mx-auto! mb-1"
                   />
-                  <h3 className="text-sm font-bold" style={{color: '#c04718'}}>
+                  <h3
+                    className="text-sm font-bold"
+                    style={{color: 'var(--cc-muted)'}}
+                  >
                     Energydrink
                   </h3>
                   <h4 className="text-gray-500">250ml</h4>
