@@ -46,6 +46,7 @@
 // aufgelöst, nicht von Node. Der hermetische Test (node --test, ohne Bundler)
 // könnte diese Datei sonst gar nicht laden.
 import {absoluteCanonical} from './seo.js';
+import {ABSENDER_MARKE} from './kakao-zone.js';
 import {produktSchema} from './produkt-schema.js';
 
 /**
@@ -70,7 +71,35 @@ import {produktSchema} from './produkt-schema.js';
  * pages.support/impressum/agb/… importiert und zöge diese unbeteiligten
  * Seiten in die Gate-12-Prüfmenge.
  */
-export const MARKE = 'Qi Blanco';
+/*
+ * CRYSTAL-ABWEICHUNG (Job 20260904-…-absender-marke-seitentitel-…-prio14,
+ * am gerenderten dev-Server gemessen). Der Absatz darüber beschreibt die
+ * qiblanco-Vorlage und bleibt wörtlich stehen, weil er DORT richtig ist —
+ * hier ist er der Grund für die Abweichung, nicht ihr Widerspruch.
+ *
+ * Auf crystal-cacao.com ist "Qi Blanco" die FREMDE Absender-Marke. Segment
+ * s02 des Grossjobs hat dafür ABSENDER_MARKE in app/lib/kakao-zone.js
+ * eingeführt ("Eine Marke, eine Stelle") und in 13 Route-Dateien umgesetzt —
+ * diese Datei blieb übrig, und mit ihr ausgerechnet die beiden Kaufseiten:
+ *   /products/crystal-cacao-awake   "Crystal Cacao® Awake – Bio | Qi Blanco"
+ *   /products/crystal-cacao-create  "Crystal Cacao® Create – Bio | Qi Blanco"
+ *
+ * WARUM DIE KORREKTUR HIER STEHT UND NICHT IN DEN ZWEI ROUTEN: die Routen
+ * sind K1, also byte-gleich zur Vorlage. Zöge man sie einzeln um, wären das
+ * zwei weitere Abweichungen an genau den Dateien, die sich mit der Vorlage
+ * am ehesten mitbewegen. Hier ist es EINE Zeile an der Wurzel, und beide
+ * Routen bleiben unverändert und synchron.
+ *
+ * ABGRENZUNG, die tragend ist (gleiche Grenze wie in kakao-zone.js): das ist
+ * die ANZEIGE-Marke, NICHT die Rechtsperson. Betreiberin bleibt die Qi Blanco
+ * UG (haftungsbeschränkt); sie steht unverändert in app/lib/entity-schema.js
+ * (legalName) und in den Rechtstexten — gemessen 2026-09-04 neunmal allein in
+ * /policies/terms-of-service. An dieser Datei ändert sich davon kein Zeichen.
+ *
+ * kakao-zone.js ist importfrei; die im Dateikopf zugesagte Node-Testbarkeit
+ * ohne Bundler bleibt damit erhalten.
+ */
+export const MARKE = ABSENDER_MARKE;
 
 /**
  * Beschreibung je Produktpfad.
@@ -152,6 +181,33 @@ export const PRODUKT_TITEL = {
 };
 
 /**
+ * Entfernt einen Marken-Suffix, den der Produktname schon selbst trägt.
+ *
+ * WARUM ES DIESE FUNKTION GIBT (gemessen 2026-09-04 am gerenderten
+ * dev-Server, Job …-absender-marke-seitentitel-…-prio14): die Routen bauen
+ * ihren Titel als `${product.title} | ${MARKE}`. In der qiblanco-Vorlage geht
+ * das auf — "QiOne® 2 Pro | Qi Blanco" nennt Produkt und Absender. Auf
+ * crystal-cacao.com heißt der Absender aber "Crystal Cacao®", und genau so
+ * heißen die Produkte auch: aus dem Fix gegen die fremde Marke wurde im
+ * ersten Anlauf "Crystal Cacao® Awake – Bio | Crystal Cacao®" — die Marke
+ * zweimal in 44 Zeichen, auf der Kaufseite.
+ *
+ * Die Regel ist bewusst eng: sie greift NUR, wenn der Titel exakt auf
+ * ` | <MARKE>` endet UND der Rest die Marke bereits enthält. Ein Titel, der
+ * die Marke nur einmal trägt, bleibt unangetastet — in der Vorlage ist diese
+ * Funktion damit wirkungslos, und das ist Absicht: sie korrigiert eine
+ * Doppelung, sie kürzt keine Titel.
+ * @param {string} titel
+ * @returns {string}
+ */
+export function ohneDoppelteMarke(titel) {
+  const suffix = ` | ${MARKE}`;
+  if (typeof titel !== 'string' || !titel.endsWith(suffix)) return titel;
+  const stamm = titel.slice(0, -suffix.length).trim();
+  return stamm.includes(MARKE) ? stamm : titel;
+}
+
+/**
  * Der Titel eines Produktpfads, falls überschrieben.
  * @param {string} pfad
  * @returns {string|undefined}
@@ -190,7 +246,7 @@ export function produktMeta({pfad, titel, bildUrl, produkt}) {
   // beim Titel der Route. Bewusst hier und nicht in der Route: sonst trägt
   // jede der sechs Flaggschiff-Routen ihre eigene Titel-Logik, und genau
   // diese Drift war der Ausgangsbefund dieser Datei.
-  const titelEffektiv = produktTitel(pfad) ?? titel;
+  const titelEffektiv = ohneDoppelteMarke(produktTitel(pfad) ?? titel);
   const url = absoluteCanonical(pfad);
   const descriptoren = [
     {title: titelEffektiv},
@@ -200,7 +256,12 @@ export function produktMeta({pfad, titel, bildUrl, produkt}) {
     // getrennte Aufrufe auseinanderlaufen könnten.
     {tagName: 'link', rel: 'canonical', href: url},
     {property: 'og:type', content: 'product'},
-    {property: 'og:site_name', content: 'Qi Blanco'},
+    // Dieselbe Abweichung wie bei MARKE, und sie war der stillere Teil des
+    // Befundes: og:site_name ist der Absender, den JEDES soziale Netzwerk
+    // beim Teilen über der Vorschau zeigt. Gemessen 2026-09-04 stand hier
+    // "Qi Blanco" auf beiden Kakao-Kaufseiten — der Titel wurde gemeldet,
+    // dieses Feld stand daneben und wurde von keiner Probe gelesen.
+    {property: 'og:site_name', content: ABSENDER_MARKE},
     {property: 'og:locale', content: 'de_DE'},
     // Muss dem <title> folgen, nicht dem Routen-Rohwert: sonst zeigt ein
     // geteilter Link etwas anderes als das Suchergebnis — dieselbe
