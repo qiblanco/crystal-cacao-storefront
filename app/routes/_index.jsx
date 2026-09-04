@@ -253,7 +253,31 @@ function RecommendedProducts({products}) {
                 .map((sorte) => [sorte, response?.[sorte]])
                 .filter(([, produkt]) => Boolean(produkt))
                 .map(([sorte, produkt]) => (
-                  <div className="cc-sortenkachel" key={produkt.id}>
+                  <div
+                    className="cc-sortenkachel"
+                    // DIE EINE ZEILE, DIE ROSA UND BLAU AUF EINE FLAECHE
+                    // BRINGT — s03, 2026-09-04.
+                    //
+                    // `data-cc-sorte` ist KEIN neues Merkmal: es ist genau der
+                    // Schalter, den app/styles/kakao-seiten.css seit dem
+                    // 2026-09-02 fuehrt ([data-cc-sorte='awake'|'create']
+                    // setzen --cc-sorte / --cc-sorte-text / --cc-sorte-flaeche
+                    // um). Bisher stand er nur an <html>, gesetzt aus
+                    // sorteZuPfad() in root.jsx — und weil eine ROUTE immer nur
+                    // EINE Sorte sein kann, konnten sich die beiden Sortenfarben
+                    // bauartbedingt nie begegnen. Gemessen (s01): jede Farbe kam
+                    // auf genau EINER Seite genau EINMAL vor.
+                    //
+                    // Hier steht der Schalter zum ersten Mal an einem TEILBAUM
+                    // statt an der Seite. Damit tragen die zwei Kacheln
+                    // nebeneinander ihre eigene Sortenfarbe, ohne dass eine
+                    // zweite Mechanik, eine zweite Farbe oder eine Aenderung an
+                    // den (K1-)Sortenrouten noetig waere. Die Startseite ist die
+                    // einzige Flaeche des Ladens, auf der beide Sorten
+                    // gleichberechtigt stehen — deshalb hier und nirgends sonst.
+                    data-cc-sorte={sorte}
+                    key={produkt.id}
+                  >
                     <ProductItem product={produkt} loading="eager" />
                     <p className="cc-sorten-orientierung">
                       {SORTEN_ORIENTIERUNG[sorte]}

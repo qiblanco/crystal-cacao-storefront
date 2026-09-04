@@ -234,6 +234,58 @@
    * Vorbeigehen um. Der Befund dazu steht im RESULT von s03. */
   --cc-gold-text: #90671D;    /* 5,07:1 auf Weiss · 4,79:1 auf --cc-grund */
 
+  /* ---- DER GOLDBRAUNE TON: ZWEI FASSUNGEN, GENAU EINE AKTIV ----
+   * s03, 2026-09-04. Christian woertlich: "die Farben etwas individueller,
+   * vielleicht in einem goldbraunen Ton" — und, als Massstab davor:
+   * "DIE VERPACKUNG IST DER MASSSTAB — die Farben stammen von dort und nicht
+   * aus einer Palette."
+   *
+   * DESHALB IST HIER KEINE NEUE FARBE ENTSTANDEN. Beide Fassungen sind
+   * BEREITS GEMESSENE Kraftpapier-Toene der Tuete (k-means in CIELAB,
+   * Seed 42, pruefungen/farbmessung_verpackung.py, 44,7 % der Bildflaeche) —
+   * sie stehen seit dem 2026-09-02 weiter oben als --cc-kraft* und haben bis
+   * heute NIRGENDS gemalt. Der Befund von s01 ("Goldbraun fehlt") war also
+   * nicht "Token fehlt", sondern "Token ohne Aufrufer". Ein dritter, frei
+   * erfundener Goldbraun-Ton haette zugleich akzent_farben_max UND die
+   * Verpackungs-Vorgabe verletzt — durch den Versuch, sie zu erfuellen.
+   *
+   * DIE WAHL IST EINE ZEILE. Aktiv ist genau eine der beiden Zuweisungen;
+   * die andere steht auskommentiert daneben. Es gibt zu keinem Zeitpunkt
+   * zwei goldbraune Toene gleichzeitig live.
+   *
+   *   FASSUNG A "Kraftpapier"  #BE9A77  waermer/heller
+   *     Lab(66.05, 8.49, 23.44) · der DOMINANTESTE Ton der Verpackung
+   *     (32,8 % awake / 33,9 % create). Flaechenkontrast zu --cc-grund
+   *     2,46:1 — ein ruhiges Band, das das Papier-Kontinuum nicht bricht.
+   *     Schrift darauf: --cc-dunkel, 7,10:1.
+   *
+   *   FASSUNG B "Kakaoschale"  #846142  dunkler/erdiger
+   *     Lab(44.02, 10.15, 23.17) · derselbe Farbton-Winkel, tiefer.
+   *     Flaechenkontrast zu --cc-grund 5,26:1 — ein deutlich gesetztes Band.
+   *     Schrift darauf: --cc-grund, 5,26:1 (--cc-dunkel traegt dort nur
+   *     3,32:1 und ist deshalb NICHT die Paarung).
+   *
+   * WARUM DER PARTNER-TOKEN --cc-goldbraun-auf DAZUGEHOERT und nicht
+   * weggelassen werden kann: die beiden Fassungen kippen die Textrichtung.
+   * Auf A traegt nur DUNKLE Schrift, auf B nur HELLE. Wer nur die Flaeche
+   * tauscht, tauscht ein lesbares Band gegen ein unlesbares — die zwei
+   * Zeilen werden IMMER gemeinsam gewechselt.
+   *
+   * WAS DIE SORTENFARBE HIER NICHT DARF, nachgerechnet statt gefuehlt: auf
+   * einer goldbraunen FUELLUNG traegt keiner der beiden Sortentoene Text
+   * (awake 1,95:1 auf A / 1,10:1 auf B; create ebenso). Rosa und Blau
+   * begegnen dem Goldbraun deshalb NEBENEINANDER auf derselben Flaeche,
+   * nie UEBEREINANDER — die Kacheln stehen auf hellem Papier IM Band, wo
+   * beide Sortentoene 4,78:1 bzw. 4,80:1 erreichen. Siehe Abschnitt
+   * "DAS SORTENBAND DER STARTSEITE" am Ende dieser Datei. */
+  --cc-goldbraun: #BE9A77;          /* FASSUNG A — aktiv */
+  --cc-goldbraun-auf: var(--cc-dunkel);
+  /* FASSUNG B — den Bau auf sie umstellen heisst: die zwei Zeilen oben durch
+   * die zwei Zeilen hier ersetzen. Sonst aendert sich nichts.
+   *   --cc-goldbraun: #846142;
+   *   --cc-goldbraun-auf: var(--cc-grund);
+   */
+
   /* GEMESSEN, ABER BEWUSST NICHT EINGEBAUT: das Gold der Art-Deco-Zeichnung
    * auf der Tuete ist #D49529, Lab(66.26, 14.76, 61.84), 2,4 % der Flaeche —
    * es unterscheidet sich vom Bestands-Token --cc-gold #F2BF72 um dE 22,3,
@@ -330,6 +382,56 @@
   --text-5xl: var(--cc-fs-6);
   --text-6xl: var(--cc-fs-7);
   --text-7xl: var(--cc-fs-7);
+
+  /* ---- DIE GRAU-RAMPE: Tailwinds KUEHLES Grau auf unser WARMES Kontinuum ----
+   * s03, 2026-09-04, und das ist der GROESSTE der von s01 gemeldeten Brueche —
+   * der einzige, den man nicht benennen kann, ohne ihn gemessen zu haben.
+   *
+   * GEMESSEN am gerenderten DOM (getComputedStyle, alle sichtbaren Elemente,
+   * Renderstand 1eca258): auf der Awake-Seite tragen 95 Elemente die Farbe
+   * oklch(0.278 0.033 256.848) und nur 99 das warme --cc-text #2C2A26 — die
+   * MEHRHEIT des Fliesstextes stand also in einem Grau mit Farbton 256 Grad,
+   * also BLAU-stichig, auf einer Seite, deren ganzer Grund warm ist. Das ist
+   * der unsichtbare Grund fuer den Eindruck "generisch": man sieht keine
+   * falsche Farbe, man sieht ein Papier, dessen Schrift nicht dazugehoert.
+   *
+   * WOHER ES KOMMT: die zwei Sortenrouten sind K1 (byte-gleich zur Vorlage,
+   * shared/UPSTREAM.json) und tragen Tailwind-Utilities text-gray-800,
+   * text-gray-600, text-gray-500, text-gray-400 im Markup. Der Fix DARF
+   * deshalb nicht im Markup sitzen — er waere Vendoring-Drift und beim
+   * naechsten Nachzug still weg. Er sitzt hier, wo die Skala ohnehin schon
+   * gebunden wird: dieselbe Mechanik, mit der --text-* oben an --cc-fs-*
+   * haengen. Kein zweites Token-System, keine neue Farbe.
+   *
+   * DIE WERTE sind keine freie Erfindung, sondern die vorhandenen Anker
+   * --cc-text (800), --cc-muted (500) und --cc-dunkel (900); die drei Stufen
+   * dazwischen sind auf derselben Achse interpoliert. Kontrast auf
+   * --cc-grund: 400 2,87:1 · 500 5,38:1 · 600 7,23:1 · 700 9,91:1 ·
+   * 800 13,53:1 · 900 17,44:1. Der Ersatz fuer gray-800 liegt damit bei
+   * 13,53:1 gegen 13,86:1 im Original — die Lesbarkeit bleibt, nur der
+   * Farbton dreht von 256 Grad (blau) auf die warme Achse.
+   * EHRLICH ZU 400: 2,87:1 traegt keinen Fliesstext. Das gilt fuer Tailwinds
+   * eigenes gray-400 genauso (dort 2,74:1 auf demselben Grund) — der Ersatz
+   * verschlechtert nichts, er erbt eine Schwaeche der Vorlage. Die neun
+   * Elemente, die es auf /pages/crystal-cacao benutzen, sind Trennzeichen
+   * einer Tabellenzeile, kein Text.
+   *
+   * ORANGE: text-orange-500 steht genau EINMAL (Uebersichtsseite) und war
+   * damit eine fuenfte Akzentfarbe auf einem einzigen Element. Es faellt auf
+   * denselben einen Goldton in seiner lesbaren Ableitung — kein neuer Ton,
+   * 4,79:1 statt vorher gemessener Fremdfarbe. */
+  --color-gray-50: var(--cc-grund);
+  --color-gray-100: var(--cc-flaeche);
+  --color-gray-200: var(--cc-linie);
+  --color-gray-300: #cfc7bb;
+  --color-gray-400: #9a938a;
+  --color-gray-500: var(--cc-muted);
+  --color-gray-600: #57534b;
+  --color-gray-700: #423f39;
+  --color-gray-800: var(--cc-text);
+  --color-gray-900: var(--cc-dunkel);
+  --color-gray-950: var(--cc-dunkel);
+  --color-orange-500: var(--cc-gold-text);
 }
 
 /* ==== abgeleitet aus qiblanco-storefront app/styles/app.css (62 Regeln) ==== */
@@ -347,7 +449,7 @@
 }
 .product .product-rating span:nth-child(2) {
   font-size: var(--cc-fs-2);
-  color: #000;
+  color: var(--cc-dunkel);   /* s03: war #000 — EIN dunkler Ton, nicht zwei */
   font-weight: 500;
 }
 .btn--primary {
@@ -479,27 +581,33 @@
   font-size: var(--cc-fs-2);
   font-family: inherit;
   font-weight: 600;
-  color: #3a3a3a;
-  background-color: #f5f0e8;
-  border: 1px solid #d4c9b5;
+  /* s03, 2026-09-04: hier stand mit #3a3a3a / #f5f0e8 / #d4c9b5 / #b8a88a ein
+   * VOLLSTAENDIGES ZWEITES Neutral-Set neben dem Haus-Kontinuum — vier freie
+   * Werte an einem einzigen Bedienelement, das auf beiden Kaufseiten direkt
+   * ueber dem Kaufknopf sitzt. #3a3a3a ist dabei ein NEUTRALES Grau (R=G=B)
+   * auf warmem Papier, also derselbe Fehler wie beim Tailwind-Grau, nur von
+   * Hand. Alle vier fallen auf vorhandene Token; kein neuer Wert. */
+  color: var(--cc-text);
+  background-color: var(--cc-flaeche);
+  border: 1px solid var(--cc-linie);
   border-radius: var(--cc-radius-bild);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%233a3a3a' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232c2a26' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 12px;
 }
 .CacaoVariantSelect:focus {
-  outline: 2px solid #b8a88a;
+  outline: 2px solid var(--cc-kraft);
   outline-offset: 1px;
 }
 .CacaoVariantSelect option {
   font-weight: 600;
   padding: 0.5rem;
-  background-color: #f5f0e8;
-  color: #3a3a3a;
+  background-color: var(--cc-flaeche);
+  color: var(--cc-text);
 }
 .CacaoBenefitList {
   margin-top: 1.5rem; 
@@ -780,11 +888,21 @@
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  background: linear-gradient(90deg,#f30,#ff6f82);
+  /* s03, 2026-09-04: war `linear-gradient(90deg,#f30,#ff6f82)` — ZWEI weitere
+   * freie Rottoene, und zwar direkt neben dem Preis, den derselbe Bau gerade
+   * aus dem Rot geholt hat. Ein Verlauf aus zwei Signalfarben ist die
+   * lauteste Flaeche der ganzen Kaufspalte; sie zog das Auge vom goldenen
+   * Kaufknopf weg auf ein Etikett.
+   * JETZT DIE UMKEHRUNG DES KAUFKNOPFES, mit denselben zwei Token und keinem
+   * dritten: der Knopf ist Gold auf Dunkel-Schrift, das Etikett ist Dunkel
+   * mit Gold-Schrift. Es bleibt deutlich sichtbar, ordnet sich dem Knopf
+   * aber unter, statt mit ihm zu konkurrieren. Kontrast --cc-gold auf
+   * --cc-dunkel: 10,97:1 (schon beim Token oben gemessen). */
+  background: var(--cc-dunkel);
   padding: 5px 10px;
   border-radius: var(--cc-radius-knopf);
   font-weight: 600;
-  color: #fff;
+  color: var(--cc-gold);
 }
 @media screen and (min-width: 750px) {
   .Bestseller-Price {
@@ -816,7 +934,18 @@
   line-height: 1!important;
 }
 .CacaoPriceCurrent.sale {
-  color: #e00!important;
+  /* s03, 2026-09-04: war #e00 — ein grelles Rot als VIERTE Akzentfarbe, und
+   * zwar an der prominentesten Stelle der Kaufspalte. Gemessen am gerenderten
+   * DOM steht es je Sortenseite auf GENAU EINEM Element (".CacaoPriceCurrent
+   * sale", Text "53,- €"); es ist also kein durchgaengiges Signalsystem,
+   * sondern ein einzelner Fremdkoerper, der sich mit dem Gold daneben schlaegt.
+   * Jetzt derselbe eine Akzent in seiner lesbaren Ableitung — wie schon bei
+   * `.exclusive` daneben und bei der Bewertungszahl. Nebenbei besser lesbar:
+   * #e00 erreicht auf Weiss 3,99:1, --cc-gold-text 5,07:1.
+   * DAS REDUKTIONS-SIGNAL GEHT NICHT VERLOREN: es steht im durchgestrichenen
+   * `.CacaoPriceCompare` direkt daneben, das ist die Information. Die Farbe
+   * war die Verdopplung, nicht der Traeger. */
+  color: var(--cc-gold-text)!important;
 }
 .CacaoPriceCurrent.exclusive {
   /* s03, 2026-09-02: war der freie Wert #b8943e — ein DRITTER Goldton neben
@@ -1049,7 +1178,7 @@ main h3[style] {
  * wirkungslos: das SVG traegt eigene Masse, und `color` faerbt kein `fill`. */
 .product .sterne-sprung.product-rating span:last-child {
   font-size: var(--cc-fs-2);
-  color: #000;
+  color: var(--cc-dunkel);   /* s03: war #000 — EIN dunkler Ton, nicht zwei */
   font-weight: 500;
 }
 
@@ -1235,4 +1364,93 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
  * positioniert, und nur darauf wirkt z-index ohnehin. */
 .ProductPageKakao div:has(> img + h2) > h2 {
   z-index: 1;
+}
+
+/* ==========================================================================
+ * DAS SORTENBAND DER STARTSEITE — s03, 2026-09-04
+ * ==========================================================================
+ * DIE AUFGABE, woertlich von Christian: "dass die zwei Kakaosorten, einmal
+ * rosa, einmal blau, insgesamt sehr stimmig werden" — zusammen mit dem
+ * goldbraunen Ton. Das ist EINE Aufgabe, nicht zwei: die drei Farben duerfen
+ * sich nicht schlagen, also muessen sie sich zuerst ueberhaupt BEGEGNEN.
+ *
+ * DER BEFUND, DER DAS NOETIG MACHT (s01, gemessen ueber alle sichtbaren
+ * Elemente von fuenf Routen): --cc-sorte-awake-text kam auf der ganzen
+ * Storefront genau EINMAL vor, --cc-sorte-create-text genau EINMAL — je auf
+ * der Claim-Zeile ihrer eigenen Seite. Die Startseite war farblos-neutral.
+ * Zwei Farben, die sich nie treffen, koennen weder stimmig noch unstimmig
+ * sein; die Frage war baulich nicht gestellt.
+ *
+ * WARUM DIE STARTSEITE UND NICHT EINE NEUE FLAECHE: sie ist die einzige
+ * Seite des Ladens, auf der beide Sorten gleichberechtigt stehen (die
+ * Sortenrouten sind je EINE Sorte, die Uebersicht ist bewusst neutral). Eine
+ * eigens gebaute "Farbwelt-Seite" waere eine Flaeche fuer uns, nicht fuer den
+ * Kunden — und der Kunde interessiert sich immer nur fuer sich selbst.
+ *
+ * DIE SCHICHTUNG, und sie ist nachgerechnet, nicht geschmeckt:
+ *   BAND      goldbraun (--cc-goldbraun), traegt die Sektion
+ *   KACHEL    helles Papier (--cc-flaeche) IM Band
+ *   SORTE     rosa bzw. blau auf der Kachel, nie auf dem Band
+ * Der Grund fuer genau diese Reihenfolge steht beim Token oben: auf
+ * goldbrauner FUELLUNG traegt kein Sortenton Text (1,10-1,95:1). Auf der
+ * hellen Kachel tragen beide (4,50:1 awake / 4,52:1 create auf --cc-flaeche,
+ * beide ueber AA). Rosa und Blau begegnen dem Goldbraun deshalb
+ * NEBENEINANDER, nicht uebereinander — das ist keine Vorsichtsmassnahme,
+ * das ist die Gestaltung.
+ *
+ * WAS BEWUSST NICHT PASSIERT: der Kaufknopf des Aufmachers behaelt sein Gold
+ * (--cc-gold), die Sortenfarbe uebernimmt seine Rolle nicht. Es gibt keine
+ * grosse Flaeche in einer Sortenfarbe. Der Flaechenanteil der Sortentoene
+ * bleibt damit strukturell klein — die Groesse, an der der Design-Meister
+ * "dezent" misst (soll_signale saettigung_max 0.52). */
+
+.home .recommended-products {
+  background: var(--cc-goldbraun);
+  border-radius: var(--cc-radius-bild);
+  color: var(--cc-goldbraun-auf);
+  margin-top: var(--cc-space-6);
+  padding: var(--cc-space-6) var(--cc-space-3);
+}
+
+@media (min-width: 45em) {
+  .home .recommended-products {
+    padding: var(--cc-space-7) var(--cc-space-4);
+  }
+}
+
+/* Sektionstitel und Orientierungszeile stehen auf dem Band und folgen
+ * deshalb dem Partner-Token, nicht --cc-text. Beim Wechsel A->B kippt die
+ * Schrift damit automatisch von dunkel auf hell mit. */
+.home .recommended-products h2,
+.home .recommended-products .cc-sorten-orientierung {
+  color: var(--cc-goldbraun-auf);
+}
+
+/* Die Kachel im Band: helles Papier, damit die Sortenfarbe darauf traegt.
+ * Der Rahmen wird auf dem Goldbraun unsichtbar (--cc-linie ist selbst hell),
+ * also uebernimmt ihn die Flaeche selbst — kein zusaetzlicher Ton. */
+.cc-sortenkachel[data-cc-sorte] .product-item {
+  background: var(--cc-flaeche);
+  border-color: transparent;
+  /* DIE SORTENKENNUNG — 3 px, genau eine Kante, und der ROHE Messton der
+   * Verpackung (nicht die abgedunkelte Textableitung): hier ist die Farbe
+   * Grafik, kein Text, und die Tuete in der Hand des Kunden traegt exakt
+   * diesen Ton. */
+  border-top: 3px solid var(--cc-sorte);
+}
+
+/* Der Sortenname in seiner eigenen Farbe. Das ist der Fall, den der
+ * Sorten-Vertrag oben ausdruecklich erlaubt ("Sortenkennung") — und der
+ * einzige Ort, an dem beide Toene gleichzeitig sichtbar sind. Auf
+ * --cc-flaeche: awake 4,50:1, create 4,52:1. */
+.cc-sortenkachel[data-cc-sorte] .product-item h4 {
+  color: var(--cc-sorte-text);
+}
+
+/* Zustand/Handlung: die Kachel ist ein Link. Beim Zeigen faerbt sich die
+ * Kante ihrer Sorte statt des allgemeinen Kraftpapiertons. */
+.cc-sortenkachel[data-cc-sorte] .product-item:hover {
+  border-color: transparent;
+  border-top-color: var(--cc-sorte);
+  outline: 1px solid var(--cc-sorte);
 }
