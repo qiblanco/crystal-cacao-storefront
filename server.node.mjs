@@ -12,6 +12,15 @@
  *   1. `caches`    -> globalThis-Polyfill ueber InMemoryCache aus @shopify/hydrogen
  *   2. `waitUntil` -> ein executionContext mit echter Funktion
  *   3. `env`       -> process.env via dotenv
+ *   4. `oxygen-buyer-country` -> aus einer lokalen IP-Land-Tabelle (2026-09-04)
+ *
+ * Zulieferung 4 kam spaeter dazu und ist die einzige mit direkter
+ * Umsatzwirkung: `app/lib/markt-pricing.js` liest den Laendercode aus genau
+ * dieser Kopfzeile und faellt ohne sie fail-closed auf `DE` zurueck. Der
+ * Laden fuehrt AT/CH/US frei; ein Schweizer Besucher saehe also EUR statt
+ * CHF, ein US-Besucher EUR statt USD. Gemessen an den Kakao-Seiten der
+ * DACH-Storefront (2026-07-09..2026-09-04) betrifft das 20,0 % der
+ * Seitenaufrufe und 40,3 % der unterscheidbaren Besucher.
  *
  * WAS ER BEWUSST NICHT IST: ein Umbau der Anwendung. Keine Datei unter `app/`
  * wird angefasst. `app/lib/context.js` ist im shared/UPSTREAM.json als K3
@@ -54,6 +63,7 @@ import {Readable} from 'node:stream';
 import path from 'node:path';
 import fs from 'node:fs';
 import {fileURLToPath, pathToFileURL} from 'node:url';
+import {ladeTabelle, kundenAdresse, istNichtOeffentlicheSchreibweise} from '../geo/laendererkennung.mjs';
 
 const WURZEL = path.dirname(fileURLToPath(import.meta.url));
 
@@ -133,6 +143,131 @@ if (typeof handler?.fetch !== 'function') {
 }
 
 // ---------------------------------------------------------------------------
+// 4. oxygen-buyer-country — die Laender-Zulieferung des Netzrands
+// ---------------------------------------------------------------------------
+// DREI EIGENSCHAFTEN, UND JEDE EINZELNE IST TRAGEND:
+//
+// (a) DIE EINGEHENDE KOPFZEILE WIRD IMMER ENTFERNT, auch wenn die Erkennung
+//     abgeschaltet ist oder nichts findet. Ohne diesen Griff koennte ein
+//     Besucher seinen eigenen `oxygen-buyer-country`-Kopf mitschicken und sich
+//     den Waehrungskontext selbst aussuchen — auf Oxygen unmoeglich (der
+//     Netzrand setzt ihn), hier ohne Weiteres. Der Adapter stellt Oxygen
+//     nach, und dazu gehoert, dass diese Kopfzeile NICHT vom Kunden kommt.
+//
+// (b) FAIL-CLOSED HEISST: KEINE KOPFZEILE. Kennt die Tabelle die Adresse
+//     nicht, fehlt die Tabelle, oder ist die Erkennung per Schalter aus, dann
+//     wird schlicht nichts gesetzt — und `resolveCountry()` in der Anwendung
+//     macht daraus ihren DE-Default. Der Adapter raet nie ein Land. Ein
+//     falscher Waehrungskontext ist teurer als ein konservativer.
+//
+// (c) DIE ADRESSE KOMMT AUS DEM LETZTEN `x-forwarded-for`-EINTRAG, nicht aus
+//     dem ersten. Caddy setzt `header_up X-Forwarded-For {remote_host}`; ob
+//     er den Wert dabei ersetzt oder anhaengt, ist eine Konfigurationsfrage,
+//     die sich aendern kann. Der LETZTE Eintrag stammt in beiden Faellen von
+//     unserem eigenen Netzrand — ein selbst mitgeschickter Wert des Kunden
+//     stuende davor und kann die Auskunft damit nicht kapern.
+const GEO_KOPF = 'oxygen-buyer-country';
+const GEO_AN = (process.env.CRYSTAL_GEO ?? 'on').toLowerCase() !== 'off';
+const ZAEHLER_DATEI = path.resolve(WURZEL, '../state/geo-zaehler.json');
+
+let geoTabelle = null;
+if (GEO_AN) {
+  try {
+    geoTabelle = ladeTabelle();
+    const m = geoTabelle.meta ?? {};
+    console.log(
+      `[geo] Laendererkennung AN — Tabelle ${m.quelle_stand ?? '?'} ` +
+        `(${geoTabelle.n4} IPv4- + ${geoTabelle.n6} IPv6-Bereiche, ${geoTabelle.nCc} Laender)`,
+    );
+  } catch (fehler) {
+    // Laut, aber nicht toedlich: der Laden laeuft weiter und zeigt DE — das
+    // ist der konservative Zustand, nicht der kaputte. Ein Absturz hier
+    // waere die teurere Antwort auf ein Problem, das den Verkauf nicht
+    // blockiert.
+    console.error(
+      `[geo] KEINE LAENDERERKENNUNG — Tabelle nicht ladbar: ${fehler.message}\n` +
+        `      Alle Besucher sehen den DE-Kontext. Beheben mit:\n` +
+        `      node geo/bin/tabelle-bauen.mjs --holen`,
+    );
+  }
+} else {
+  console.log('[geo] Laendererkennung AUS (CRYSTAL_GEO=off) — alle Besucher sehen den DE-Kontext.');
+}
+
+// Messlog statt blossem Urteil: die WERTE werden gefuehrt, damit ein
+// Fehlerfall von einer echten Null unterscheidbar bleibt. Eine Wache, die nur
+// "0 Treffer" meldet, ist von einer abgeschalteten nicht zu unterscheiden.
+const zaehler = {
+  seit_utc: new Date().toISOString().replace(/\.\d+Z$/, 'Z'),
+  tabelle_stand: geoTabelle?.meta?.quelle_stand ?? null,
+  erkennung_an: GEO_AN && geoTabelle !== null,
+  anfragen: 0,
+  ohne_adresse: 0,
+  nicht_oeffentlich: 0,
+  unbekannt: 0,
+  erkannt: 0,
+  kopf_verworfen: 0, // eingehende Faelschungsversuche bzw. Altlasten
+  je_land: {},
+};
+let zaehlerSchmutzig = false;
+
+function zaehlerSchreiben() {
+  if (!zaehlerSchmutzig) return;
+  zaehlerSchmutzig = false;
+  try {
+    fs.mkdirSync(path.dirname(ZAEHLER_DATEI), {recursive: true});
+    fs.writeFileSync(
+      ZAEHLER_DATEI,
+      JSON.stringify({...zaehler, stand_utc: new Date().toISOString().replace(/\.\d+Z$/, 'Z')}, null, 2) + '\n',
+    );
+  } catch (e) {
+    console.error('[geo] Zaehler nicht schreibbar:', e.message);
+  }
+}
+const zaehlerUhr = setInterval(zaehlerSchreiben, 60_000);
+zaehlerUhr.unref();
+for (const signal of ['SIGTERM', 'SIGINT']) {
+  process.on(signal, () => {
+    zaehlerSchreiben();
+    process.exit(0);
+  });
+}
+
+/**
+ * Setzt die Laender-Kopfzeile — oder entfernt sie ersatzlos.
+ * @param {Headers} headers bereits aus der Node-Anfrage gefuellt
+ * @param {import('node:http').IncomingMessage} req
+ */
+function laenderKopfStellen(headers, req) {
+  zaehler.anfragen++;
+  zaehlerSchmutzig = true;
+
+  if (headers.has(GEO_KOPF)) {
+    headers.delete(GEO_KOPF); // (a) — ausnahmslos, vor jeder Fallunterscheidung
+    zaehler.kopf_verworfen++;
+  }
+  if (!geoTabelle) return;
+
+  const adresse = kundenAdresse(req);
+  if (!adresse) {
+    zaehler.ohne_adresse++;
+    return;
+  }
+  const land = geoTabelle.land(adresse);
+  if (!land) {
+    // `land()` gibt fuer nicht-oeffentliche Adressen dasselbe `null` wie fuer
+    // eine unbekannte — fuer die Zaehlung sind das zwei verschiedene Dinge:
+    // eigener Proben-Verkehr darf die Trefferquote der Wache nicht faerben.
+    if (istNichtOeffentlicheSchreibweise(adresse)) zaehler.nicht_oeffentlich++;
+    else zaehler.unbekannt++;
+    return;
+  }
+  headers.set(GEO_KOPF, land);
+  zaehler.erkannt++;
+  zaehler.je_land[land] = (zaehler.je_land[land] ?? 0) + 1;
+}
+
+// ---------------------------------------------------------------------------
 // Der echte Ursprung — siehe Kopf. Faellt NIE auf localhost zurueck.
 // ---------------------------------------------------------------------------
 function ersterWert(kopf) {
@@ -162,6 +297,8 @@ function nodeAnfrageZuRequest(req, url) {
     if (Array.isArray(wert)) wert.forEach((w) => headers.append(name, w));
     else headers.set(name, wert);
   }
+
+  laenderKopfStellen(headers, req);
 
   const hatKoerper = req.method !== 'GET' && req.method !== 'HEAD';
   return new Request(url, {
