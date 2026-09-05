@@ -26,7 +26,9 @@ import kakaoStyles from '~/styles/kakao-seiten.css?url';
  * DACH-Ausfertigung der Vorlage (sha256 d87e4046…), passend zur ebenfalls
  * byte-gleichen Komponente. */
 import swipetabStyles from '~/styles/qb-swipetab.css?url';
+import euGewaehrleistungStyles from '~/styles/eu-gewaehrleistung.css?url';
 import {PageLayout} from './components/PageLayout';
+import {EuLabelProvider} from './components/EuGewaehrleistungsLabel';
 import {MetaPixel} from './components/MetaPixel';
 import {UpPromoteTracking} from './components/UpPromoteTracking';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
@@ -227,6 +229,7 @@ export function Layout({children}) {
         <link rel="stylesheet" href={appStyles}></link>
         <link rel="stylesheet" href={kakaoStyles}></link>
         <link rel="stylesheet" href={swipetabStyles}></link>
+        <link rel="stylesheet" href={euGewaehrleistungStyles}></link>
         {shouldLoadThirdPartyScripts && data?.cookiebotId ? (
           <script
             id="Cookiebot"
@@ -317,9 +320,24 @@ export default function App() {
       shop={data.shop}
       consent={data.consent}
     >
-      <PageLayout {...data}>
-        <Outlet />
-      </PageLayout>
+      {/*
+        EU-Gewaehrleistungs-Mitteilung (VO (EU) 2025/1960, anwendbar ab
+        27.09.2026). Der Provider haelt GENAU EIN <dialog>-Overlay je Seite;
+        Kaufseite und Footer loesen dasselbe aus. Er steht deshalb hier und
+        nicht in den einzelnen Bausteinen.
+
+        WARUM DIESE ZEILEN LOKAL GESETZT SIND UND root.jsx NICHT BYTE-GLEICH
+        AUS DER VORLAGE UEBERNOMMEN WURDE: root.jsx ist K3 nach ADR 0056
+        (Festlegung 3). crystal fuehrt hier eine EIGENE Fassung mit eigener
+        Hostliste; eine byte-gleiche Uebernahme schaltet das Tracking auf
+        crystal-cacao.com still aus. Nachgezogen wird deshalb die NAHT
+        (Provider + Stylesheet), nicht die Datei.
+      */}
+      <EuLabelProvider>
+        <PageLayout {...data}>
+          <Outlet />
+        </PageLayout>
+      </EuLabelProvider>
       {(data.isProductionHost || data.enableTrackingInPreview) && (
         <>
           <MetaPixel metaPixelId={data.metaPixelId} />

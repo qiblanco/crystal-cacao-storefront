@@ -1,4 +1,5 @@
 import {AddToCartButton} from './AddToCartButton';
+import {EuGewaehrleistungsHinweis} from './EuGewaehrleistungsLabel';
 import {useAside} from './Aside';
 import {anzeigeSatz, formatPreis} from '~/lib/markt-pricing';
 
@@ -147,6 +148,21 @@ export function CacaoProductForm({selectedVariant, handle, quantity, onQuantityC
             : 'Ausverkauft'}
         </AddToCartButton>
       </div>
+      {/*
+        Sichtbarer Text-Link zur Pflichtmitteilung, unmittelbar unter dem
+        Kauf-Button (Art. 6 Abs. 1 lit. l RL 2011/83/EU: "in hervorgehobener
+        Weise", BEVOR der Verbraucher gebunden ist). Die amtliche Grafik
+        selbst erscheint erst im Overlay nach Klick -- so beschreiben es die
+        Praxisleitlinien der Kommission (April 2026, Abschnitt 2.3) für die
+        Mitteilung.
+
+        Die Naht sitzt bewusst HIER und nicht in den einzelnen
+        Produktseiten-Komponenten: die Kaufflaechen entstehen über
+        veroeffentlichte Shopify-Produkte, von denen ein Grossteil ohne
+        eigene Route-Datei über den Catch-all läuft. Eine Naht je Seite
+        würde genau die stillschweigend auslassen.
+      */}
+      <EuGewaehrleistungsHinweis />
     </div>
   );
 }
