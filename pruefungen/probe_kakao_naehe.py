@@ -53,13 +53,25 @@ import sys
 import urllib.error
 import urllib.request
 
+# Shop-Landkarte statt Domain-Literal (Job 20260821-storefront-messung-
+# adoption-restproben-prio15): qiblanco.com und qi-blanco.com trennt EIN
+# Bindestrich, beide antworten 200 - ein Vertipper waere hier kein 404,
+# sondern ein stiller Shop-Wechsel. Domain aufloesen, nicht tippen.
+sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+# Alias BEWUSST nicht 'sm': Zeile 555 bindet 'sm' lokal an einen
+# difflib.SequenceMatcher. Zwei Bedeutungen fuer einen Namen in einer
+# Datei haelt nur, solange die Stellen in verschiedenen Funktionen
+# liegen - das ist eine Falle fuer den naechsten, der Code verschiebt.
+import storefront_messung as smessung  # noqa: E402
+
 SEITEN = [
     '/pages/crystal-cacao',
     '/products/crystal-cacao-awake',
     '/products/crystal-cacao-create',
 ]
 
-VORLAGE_BASIS = 'https://qiblanco.com'
+VORLAGE_SHOP = 'dach'
+VORLAGE_BASIS = f"https://{smessung.shop(VORLAGE_SHOP).domain}"
 CRYSTAL_BASIS_VORGABE = 'http://localhost:3399'
 
 # Der Pin. Siehe Kopf: ohne ihn misst man zwei Maerkte und nennt es Drift.
@@ -607,6 +619,12 @@ def main() -> int:
     for seite in seiten:
         try:
             dv = hole(args.vorlage_basis + seite)
+            _erk = smessung.identitaet_von_text(dv)
+            if _erk is None or _erk.schluessel != VORLAGE_SHOP:
+                raise Messausfall(
+                    f"{args.vorlage_basis + seite} gehoert nicht zu "
+                    f"{VORLAGE_SHOP} (erkannt: "
+                    f"{_erk.schluessel if _erk else 'keinem Shop'})")
             dc = hole(args.crystal_basis + seite)
             mv = haupt(dv, args.vorlage_basis + seite)
             mc = haupt(dc, args.crystal_basis + seite)
