@@ -88,28 +88,44 @@ export function Aufmacher() {
  *   843 mg Polyphenole & Flavanole, 158 mg Theobromin, 21 mg Coffein:
  *     ComparisonTable in app/components/product-pages/Kakao.jsx.
  */
+/**
+ * DIE UEBERSCHRIFTEN SIND SEINE SICHT, DIE ZAHLEN SIND UNSERE — und das ist ein
+ * bewusster Kompromiss zwischen zwei Regeln, die hier gegeneinander ziehen.
+ * KWD-0001 verlangt, jede Aussage als SEINEN Zustand zu formulieren statt als
+ * Produkt-Merkmal. Der Auftrag verlangt zugleich: keine Gesundheitsaussage,
+ * keine Wirkungsbehauptung ueber das Belegte hinaus. Bei einem Lebensmittel
+ * wird aus "sein Zustand" fast zwangslaeufig eine Wirkzusage ("damit du wach
+ * wirst") — genau das, was hier nicht stehen darf.
+ * AUFGELOEST WIRD DAS UEBER DIE ARBEITSTEILUNG: die Ueberschrift nimmt seine
+ * Sicht ein, ohne ihm etwas zu versprechen ("Du weisst, was drin ist"), der
+ * Rumpf traegt die nachpruefbare Zahl. Und der Zustand, den er davon hat, wird
+ * nicht von uns behauptet, sondern eine Sektion tiefer von drei echten
+ * Kundinnen und Kunden erzaehlt. Das ist die einzige Stelle, an der er in
+ * diesem Laden stehen darf.
+ */
 const VORTEILE = Object.freeze([
   {
-    titel: 'Ganze Bohne, sonst nichts',
+    titel: 'Du weißt, was drin ist',
     text:
       '100 % reiner Premium-Naturkakao. Kein Zucker, keine Zusätze, keine Aromen — ' +
       'das ganze Aroma kommt aus der Bohne.',
   },
   {
-    titel: '21 mg Koffein statt 80 bis 100',
+    titel: 'Weniger Koffein als dein Kaffee',
     text:
       'Eine Tasse Crystal Cacao® bringt 21 mg Coffein mit, eine Tasse Kaffee 80 bis 100. ' +
       'Dazu 158 mg Theobromin — das enthält Kaffee gar nicht.',
   },
   {
-    titel: '24 Mineralstoffe & Spurenelemente',
-    text: 'Natürlich in der Bohne enthalten, nicht nachträglich zugesetzt.',
+    titel: 'Nicht angereichert, sondern enthalten',
+    text:
+      '24 Mineralstoffe und Spurenelemente stecken natürlich in der Bohne, sie ' +
+      'werden nicht nachträglich zugesetzt.',
   },
   {
-    titel: '11× mehr Antioxidantien',
+    titel: 'Elfmal mehr Antioxidantien als im Supermarkt-Kakao',
     text:
-      '843 mg Polyphenole und Flavanole je Tasse, gemessen gegen 300 mg im Kaffee — ' +
-      'und elfmal so viel wie in industriellem Kakao.',
+      '843 mg Polyphenole und Flavanole je Tasse, gemessen gegen 300 mg im Kaffee.',
   },
 ]);
 
