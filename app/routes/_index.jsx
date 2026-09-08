@@ -10,7 +10,9 @@ import {
   Stimmen as VaStimmen,
   Abschluss as VaAbschluss,
 } from '~/components/startseite/Verkaufsauftritt';
-import {zeigeVerkaufsauftritt} from '~/lib/startseite-fassung';
+import {Kakao} from '~/components/product-pages/Kakao';
+import {waehleFassung} from '~/lib/startseite-fassung';
+import {canonicalLink} from '~/lib/seo';
 import {MockShopNotice} from '~/components/MockShopNotice';
 import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
 
@@ -18,7 +20,26 @@ import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `${ABSENDER_MARKE} – Bio-Kakao aus zeremonieller Ernte`}];
+  return [
+    // DER TITEL BLEIBT WOERTLICH STEHEN, obwohl die Seite darunter eine
+    // andere geworden ist — und das ist keine Nachlaessigkeit, sondern eine
+    // Naht: `bin/scharfschalten` prueft vor Christians DNS-Klick den Marker
+    // MARKER_START = 'Bio-Kakao aus zeremonieller Ernte' gegen `/`, um den
+    // richtigen Bau vom Prototyp zu unterscheiden. Wer den Titel im selben
+    // Zug austauscht, macht die Scharfschalt-Kette blind, ohne dass eine
+    // Fehlermeldung entsteht.
+    {title: `${ABSENDER_MARKE} – Bio-Kakao aus zeremonieller Ernte`},
+    // Beschreibung und Canonical wandern von /pages/crystal-cacao hierher
+    // mit: die Seite ist dieselbe, ihre Adresse ist jetzt `/`. Ohne den
+    // Canonical zeigte die Startseite weiter auf die Adresse, die sie
+    // gerade an sich gezogen hat.
+    {
+      name: 'description',
+      content:
+        'Crystal Cacao® – High Performance Cacao. Wach. Klar. Mineralisiert. 100 % reiner Premium-Naturkakao aus Peru.',
+    },
+    canonicalLink('/'),
+  ];
 };
 
 /**
@@ -53,7 +74,7 @@ async function loadCriticalData({context, request}) {
     // Die Fassung wird SERVERSEITIG entschieden, nicht im Browser: sonst
     // rendert der Server das eine und der Browser das andere, und React
     // wirft einen Hydration-Fehler statt einer Seite.
-    verkaufsauftritt: zeigeVerkaufsauftritt(request),
+    fassung: waehleFassung(request),
   };
 }
 
@@ -162,10 +183,68 @@ function KachelPreis({produkt}) {
   );
 }
 
+/**
+ * DIE STARTSEITE IST SEIT DEM 2026-09-08 „UNSER KAKAO".
+ *
+ * Christian, woertlich: „Oder andere Frage: ist ‚Unser Kakao' nicht die
+ * bessere Frontseite — ich wuerde sagen schon. Also das ist redundant.
+ * Einfach diese Version uebernehmen, ‚Unser Kakao', und die andere
+ * Frontseite loeschen."
+ *
+ * DAS IST EINE UEBERNAHME, KEIN NEUBAU — und das ist der ganze Punkt. Der
+ * Vorgaengerbau hatte am selben Tag eine dritte Startseite als ENTWURF
+ * gebaut (Verkaufsauftritt, unten). Christians Antwort darauf war nicht „so
+ * nicht", sondern „das gibt es schon": die Seite /pages/crystal-cacao
+ * beantwortet die Funnel-Fragen (warum dieser Kakao, was ist drin, wer hat
+ * es geprueft, 20 Tage risikofrei) seit Wochen und steht live. Sie wird
+ * uebernommen, statt ein zweites Mal gebaut zu werden.
+ *
+ * WAS AUS DEM ENTWURF MITKOMMT — und was ausdruecklich NICHT:
+ *   MIT: die drei echten Google-Bewertungen (<VaStimmen/>) und die zwei
+ *        Sortenkacheln mit dem korrigierten Preis. Beides fehlte der
+ *        Kakao-Seite: sozialer Beweis und der Kaufweg mit Preis.
+ *   OHNE: Aufmacher, „Warum unser Kakao" (4 Vorteile), „Woher er kommt",
+ *        „20 Tage testen". Jedes davon steht auf dieser Seite bereits —
+ *        Hero, Benefits (Wach/Klar/Mineralisiert/Antioxidantien/100 %
+ *        naturrein), ComparisonTable (843 mg / 158 mg / 21 mg) und „Unser
+ *        Versprechen an dich" (20 Tage, Geld zurueck). Sie ein zweites Mal
+ *        einzuhaengen waere genau die Redundanz, die dieser Auftrag
+ *        abstellt.
+ *
+ * DIE ANDEREN ZWEI FASSUNGEN SIND NICHT WEG, sie sind abgelegt:
+ * `/?fassung=bestand` zeigt die alte Startseite, `/?fassung=entwurf` den
+ * Verkaufsauftritt. Loeschen ist Christians Perimeter; der Rueckweg dieses
+ * Baus ist eine Zeile in app/lib/startseite-fassung.js.
+ */
 export default function Homepage() {
   /** @type {LoaderReturnData} */
   const data = useLoaderData();
-  if (data.verkaufsauftritt) return <Verkaufsauftritt data={data} />;
+  if (data.fassung === 'entwurf') return <Verkaufsauftritt data={data} />;
+  if (data.fassung === 'bestand') return <Bestandsfassung data={data} />;
+  return (
+    <div className="home home--kakao">
+      {data.isShopLinked ? null : <MockShopNotice />}
+      <Kakao
+        stimmen={<VaStimmen />}
+        sorten={<RecommendedProducts products={data.recommendedProducts} />}
+      />
+    </div>
+  );
+}
+
+/**
+ * DIE ALTE STARTSEITE — ersetzt, nicht vernichtet.
+ *
+ * Der Auftrag sagt woertlich: „Inhalt und Fassung bleiben lesbar abgelegt",
+ * und „endgueltiges Loeschen ist Christians Perimeter". Sie ist unter
+ * `/?fassung=bestand` abrufbar und unveraendert — inklusive der zwei
+ * Kopf-Schaltflaechen, an denen Achse (6b) von proben/probe_sofortfehler.py
+ * ihren Rot-Nachweis vom 2026-09-08 haengen hat. Ohne diese Ablage waere
+ * jener Nachweis mit dem Umbau lautlos verfallen: der Anker verschwindet
+ * durch legitimen Umbau, der Mutant wird gar nicht mehr gebaut, und die
+ * Probe meldet statt eines Befunds eine leere Menge.
+ */
+function Bestandsfassung({data}) {
   return (
     <div className="home">
       {data.isShopLinked ? null : <MockShopNotice />}
@@ -177,9 +256,18 @@ export default function Homepage() {
 }
 
 /**
- * DIE STARTSEITE ALS VERKAUFSAUFTRITT — Teil 2 des Auftrags vom 2026-09-08,
- * ENTWURF. Sie ist heute nur unter `?entwurf=1` zu sehen; der Schalter und
- * seine Begruendung stehen in app/lib/startseite-fassung.js.
+ * DIE STARTSEITE ALS VERKAUFSAUFTRITT — Teil 2 des Auftrags vom 2026-09-08.
+ *
+ * UEBERHOLT AM SELBEN TAG, und deshalb steht sie noch hier: Christian hat
+ * die Frage, die dieser Entwurf beantworten sollte, anders entschieden —
+ * „Unser Kakao" IST die bessere Frontseite, und die gab es schon. Der
+ * Entwurf ist damit nicht verworfen worden, weil er schlecht war, sondern
+ * weil die Antwort im Bestand lag (P10). Was er BEIGETRAGEN hat, steht
+ * jetzt auf der Startseite: die drei echten Bewertungen.
+ *
+ * Er bleibt unter `/?fassung=entwurf` (und weiter unter `?entwurf=1`)
+ * abrufbar; der Schalter und seine Begruendung stehen in
+ * app/lib/startseite-fassung.js.
  *
  * DIE REIHENFOLGE IST DER GANZE UNTERSCHIED und sie ist nicht Geschmack:
  * Aufmacher (worum geht es) -> Nutzen (warum dieser Kakao) -> Beleg (Herkunft
@@ -235,7 +323,7 @@ function Aufmacher() {
         klaren Kopf. Welche zu dir passt, siehst du in einer Minute.
       </p>
       <div className="cc-knopfreihe">
-        <Link className="cc-knopf" to="/pages/crystal-cacao">
+        <Link className="cc-knopf" to="/">
           Unseren Kakao ansehen
         </Link>
         <Link

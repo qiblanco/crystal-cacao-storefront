@@ -406,7 +406,7 @@ export function ErrorBoundary() {
           : 'Wir konnten die Seite gerade nicht laden. Versuch es gleich noch einmal — oder geh direkt zu unserem Kakao:'}
       </p>
       <div className="cc-knopfreihe">
-        <Link className="cc-knopf" to="/pages/crystal-cacao">
+        <Link className="cc-knopf" to="/">
           Unseren Kakao ansehen
         </Link>
         <Link className="cc-knopf cc-knopf--ruhig" to="/">

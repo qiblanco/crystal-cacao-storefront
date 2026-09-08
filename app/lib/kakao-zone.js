@@ -41,6 +41,17 @@
 
 /** Pfade, die zur Kakao-Produktwelt gehören. */
 export const KAKAO_PFADE = Object.freeze([
+  // DIE STARTSEITE STEHT SEIT DEM 2026-09-08 HIER, und das ist keine
+  // Formalie: `/` rendert seither die Seite „Unser Kakao" selbst. Ohne
+  // diesen Eintrag verlöre ausgerechnet die meistbesuchte Fläche des Ladens
+  // die Kakao-Zone — Vertrauensleiste, Sterne und Nutzerzahl hängen an
+  // istKakaoPfad(). Der Fehler wäre lautlos: die Seite lädt, nichts bricht,
+  // nur die Leiste ist weg.
+  '/',
+  // Bleibt stehen, obwohl die Adresse seit dem 2026-09-08 dauerhaft auf `/`
+  // umleitet: der Eintrag kostet nichts und deckt den Weg ab, falls jemand
+  // die Umleitung je zurücknimmt. Was er NICHT mehr tut, ist die Sitemap
+  // füttern — dafür sorgt UMGELEITETE_SEITEN weiter unten.
   '/pages/crystal-cacao',
   '/pages/kristall-kakao',
   '/products/crystal-cacao-create',
@@ -115,6 +126,36 @@ export const KAKAO_KOLLEKTIONEN = Object.freeze([KAKAO_KOLLEKTION]);
  * (105 KB, 59 Fremdnennungen), nicht Kakao.
  */
 export const KAKAO_SEITEN = Object.freeze(['crystal-cacao', 'kristall-kakao']);
+
+/**
+ * SEITEN, DIE DAUERHAFT WOANDERS HIN ZEIGEN — Handle -> Ziel.
+ *
+ * ANLASS 2026-09-08: „Unser Kakao" (/pages/crystal-cacao) ist die Startseite
+ * geworden. Damit gibt es denselben Inhalt an zwei Adressen, und genau das
+ * hat Christian „redundant" genannt. Die alte Adresse leitet deshalb
+ * dauerhaft (301) auf die neue.
+ *
+ * WARUM DIE LISTE HIER WOHNT UND NICHT IN DER ROUTE: sie hat ZWEI Leser,
+ * und die dürfen nicht auseinanderlaufen —
+ *   1. app/routes/pages.crystal-cacao.jsx schickt die Weiterleitung,
+ *   2. app/lib/sitemap-zaun.js lässt die Adresse aus der Sitemap weg.
+ * Stünde das Ziel in der Route und die Ausnahme in der Sitemap, führten zwei
+ * Stellen denselben Zustand — und die falsche gewinnt still: die Sitemap
+ * meldete eine Adresse an, die nur noch weiterleitet.
+ */
+export const UMGELEITETE_SEITEN = Object.freeze({
+  'crystal-cacao': '/',
+  // ZWEITE ADRESSE DERSELBEN SEITE, gefunden bei der Redundanz-Suche am
+  // 2026-09-08 („Zwei Seiten mit derselben Aufgabe sind selten die einzigen
+  // zwei"). /pages/kristall-kakao antwortete mit 301 auf
+  // /pages/crystal-cacao — das ist eine Weiterleitung im Shopify-Admin, die
+  // seit dem Umbau auf eine ZWEITE Weiterleitung zeigt. Gemessen:
+  //   /pages/kristall-kakao -> 301 -> /pages/crystal-cacao -> 301 -> /
+  // Eine Kette aus zwei Sprüngen ist nicht kaputt, aber sie kostet den
+  // Besucher einen Umweg und verteilt das Ranking-Signal auf drei Adressen.
+  // Hier steht deshalb das ENDZIEL, nicht der nächste Schritt.
+  'kristall-kakao': '/',
+});
 
 /**
  * Blog-Handles, die diese Storefront ausliefern darf. HEUTE BEWUSST LEER.
@@ -197,13 +238,13 @@ export function istKakaoBlog(handle) {
 export const KAKAO_MENUE = Object.freeze({
   id: 'kakao-menue',
   items: Object.freeze([
-    {id: 'kakao-start', title: 'Start', url: '/', items: []},
-    {
-      id: 'kakao-ueber',
-      title: 'Unser Kakao',
-      url: '/pages/crystal-cacao',
-      items: [],
-    },
+    // EIN EINTRAG STATT ZWEI — 2026-09-08. Bis dahin standen hier „Start"
+    // (auf `/`) und „Unser Kakao" (auf /pages/crystal-cacao) nebeneinander.
+    // Seit `/` genau diese Seite rendert, zeigten beide auf denselben
+    // Inhalt: zwei Menüpunkte, ein Ziel. Christian nennt genau das
+    // „redundant". Der Name bleibt seiner — „Unser Kakao" ist das Wort, mit
+    // dem er die Seite meint, und es sagt einem Besucher mehr als „Start".
+    {id: 'kakao-ueber', title: 'Unser Kakao', url: '/', items: []},
     {
       id: 'kakao-awake',
       title: 'AWAKE',

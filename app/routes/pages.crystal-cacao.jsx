@@ -1,91 +1,66 @@
-import {useLoaderData} from 'react-router';
-import {Kakao} from '~/components/product-pages/Kakao';
-import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {canonicalLink} from '~/lib/seo';
-import {ABSENDER_MARKE} from '~/lib/kakao-zone';
+import {redirect} from 'react-router';
+import {UMGELEITETE_SEITEN} from '~/lib/kakao-zone';
 
 /**
- * @type {MetaFunction<typeof loader>}
+ * K2-ADAPTIERT (crystal-cacao-storefront) — NICHT byte-gleich zur Vorlage.
+ * Die Vorlage qiblanco-storefront rendert unter dieser Adresse weiter die
+ * Uebersichtsseite; auf DIESEM Laden ist sie die Startseite geworden.
+ *
+ * =====================================================================
+ * DIESE ROUTE RENDERT SEIT DEM 2026-09-08 NICHTS MEHR — SIE LEITET WEITER.
+ * =====================================================================
+ * Christian, woertlich: „ist ‚Unser Kakao' nicht die bessere Frontseite —
+ * ich wuerde sagen schon. Also das ist redundant. Einfach diese Version
+ * uebernehmen, ‚Unser Kakao', und die andere Frontseite loeschen."
+ *
+ * Der Inhalt dieser Seite (app/components/product-pages/Kakao.jsx) wird
+ * seither von `app/routes/_index.jsx` unter `/` gerendert. Bliebe diese
+ * Route bestehen, staende derselbe Inhalt unter ZWEI Adressen — genau die
+ * Redundanz, die der Auftrag abstellt, und fuer eine Suchmaschine
+ * Duplicate Content auf der eigenen Domain.
+ *
+ * WARUM 301 UND NICHT 302: die Verschiebung ist dauerhaft. Ein 302 laesst
+ * Suchmaschinen die alte Adresse als die massgebliche behalten; die
+ * Rankinghistorie dieser Seite — der meistbesuchten Kakao-Flaeche —
+ * wanderte dann nicht mit.
+ *
+ * WARUM DIE DATEI NICHT GELOESCHT WIRD, obwohl sie nichts mehr rendert:
+ *   1. „Endgueltiges Loeschen ist Christians Perimeter" (Auftrag, woertlich).
+ *   2. Ohne sie faengt die Catch-all-Route pages.$handle.jsx den Pfad ab und
+ *      liefert wieder eine Seite — die Weiterleitung waere still weg.
+ *      Eine geloeschte Datei ist hier also nicht „weniger Code", sondern
+ *      eine andere Wirkung.
+ *
+ * DAS ZIEL STEHT NICHT HIER, sondern in app/lib/kakao-zone.js
+ * (UMGELEITETE_SEITEN). Der zweite Leser ist die Sitemap: sie muss dieselbe
+ * Adresse auslassen, die diese Route wegleitet. Zwei Stellen, die denselben
+ * Zustand fuehren, laufen sonst auseinander — und die falsche gewinnt still.
  */
-export const meta = ({data}) => {
-  return [
-    // ABSENDER_MARKE statt eines Literals: "Qi Blanco" ist auf einem
-    // Kakao-Laden die fremde Absender-Marke (Segment s02, "Eine Marke, eine
-    // Stelle"). Diese Route trug den Titel als einzige noch woertlich —
-    // gemessen 2026-09-04 am gerenderten dev-Server: "Crystal Cacao® |
-    // Qi Blanco". Das ist Browser-Tab UND SERP-Zeile der meistgesehenen
-    // Kakao-Flaeche. Die Rechtsperson (Qi Blanco UG) bleibt davon unberuehrt;
-    // sie steht in den Rechtstexten und im legalName, nicht im Seitentitel.
-    //
-    // WARUM DER SEITENNAME MITWANDERT: der alte Titel war
-    // "<Seitenname> | <Absender>" = "Crystal Cacao® | Qi Blanco". Tauscht man
-    // nur den Absender, steht dort "Crystal Cacao® | Crystal Cacao®" — die
-    // Marke zweimal und die Seite ohne Aussage. Der Seitenname nimmt deshalb
-    // die Worte auf, die auf DIESER Seite ohnehin stehen: "zeremoniell" (so
-    // nennt die Startseite die Ernte) und "aus Peru" (Zeile 'description'
-    // direkt darunter). Es ist keine neue Behauptung, sondern die vorhandene.
-    {title: `Zeremonie-Kakao aus Peru | ${ABSENDER_MARKE}`},
-    {
-      name: 'description',
-      content:
-        'Crystal Cacao® – High Performance Cacao. Wach. Klar. Mineralisiert. 100 % reiner Premium-Naturkakao aus Peru.',
-    },
-    canonicalLink('/pages/crystal-cacao'),
-  ];
-};
+const ZIEL = UMGELEITETE_SEITEN['crystal-cacao'];
 
 /**
+ * Die Weiterleitung sitzt im LOADER, nicht in einer Komponente: sie muss
+ * schon beim ersten Byte greifen. Ein Redirect im Render waere ein
+ * Client-Sprung — die alte Adresse antwortete weiter mit HTTP 200, und
+ * genau daran erkennt eine Suchmaschine eine Verschiebung NICHT.
+ *
  * @param {LoaderFunctionArgs} args
  */
-export async function loader(args) {
-  const deferredData = loadDeferredData(args);
-  const criticalData = await loadCriticalData(args, 'crystal-cacao');
-  return {...deferredData, ...criticalData};
+export async function loader({request}) {
+  // Query-Parameter werden mitgenommen. Wer eine Kampagnen-Adresse mit
+  // ?utm_source=… auf die alte Seite geschaltet hat, verliert sie an der
+  // Weiterleitung sonst — und damit die Zuordnung des Besuchs.
+  const suche = new URL(request.url).search;
+  throw redirect(ZIEL + suche, 301);
 }
 
-async function loadCriticalData({context, request}, handle) {
-  const [{page}] = await Promise.all([
-    context.storefront.query(PAGE_QUERY, {
-      variables: {handle},
-    }),
-  ]);
-
-  // Graceful fallback — Shopify page optional; component is self-contained
-  if (page) {
-    redirectIfHandleIsLocalized(request, {handle, data: page});
-  }
-
-  return {page: page ?? null};
+/**
+ * Baulich unerreichbar: der Loader wirft immer. Die Komponente steht hier
+ * als Riegel — faellt die Weiterleitung je aus, soll der Besucher auf der
+ * Startseite landen und nicht auf einer leeren Seite mit HTTP 200.
+ */
+export default function CrystalCacaoUmgeleitet() {
+  return null;
 }
-
-function loadDeferredData() {
-  return {};
-}
-
-export default function CrystalCacaoPage() {
-  return <Kakao />;
-}
-
-const PAGE_QUERY = `#graphql
-  query Page(
-    $language: LanguageCode,
-    $country: CountryCode,
-    $handle: String!
-  )
-  @inContext(language: $language, country: $country) {
-    page(handle: $handle) {
-      handle
-      id
-      title
-      body
-      seo {
-        description
-        title
-      }
-    }
-  }
-`;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
-/** @template T @typedef {import('react-router').MetaFunction<T>} MetaFunction */
-/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */

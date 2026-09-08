@@ -1,43 +1,78 @@
 /**
- * startseite-fassung — der eine Schalter zwischen der heutigen Startseite und
- * dem Verkaufsauftritt-Entwurf.
+ * startseite-fassung — welche der drei Fassungen die Startseite `/` zeigt.
  *
- * WARUM ES IHN GIBT: Christian hat den Auftrag am 2026-09-08 ausdruecklich
- * zweigeteilt. Die sechs Sofortfehler waren „autonom bauen und live schalten";
- * fuer die neue Startseite steht woertlich da: „Diesen Teil legst du Christian
- * vor, bevor er live geht." Das ist der Ausnahmefall [A] der Autonomie-Policy
- * (ausdrueckliche Anweisung schlaegt den Voll-live-Default), und deshalb — und
- * NUR deshalb — steht hier ein Flag statt eines Deploys.
+ * STAND 2026-09-08 (Nachtrag-Auftrag). Christian:
+ *   „Oder andere Frage: ist ‚Unser Kakao' nicht die bessere Frontseite — ich
+ *    würde sagen schon. Also das ist redundant. Einfach diese Version
+ *    übernehmen, ‚Unser Kakao', und die andere Frontseite löschen."
  *
- * ES IST BEWUSST KEIN DAUERZUSTAND. Der Entwurf ist unter `?entwurf=1` auf der
- * echten Startseite anzusehen, also am fertigen Objekt und nicht auf einem
- * Bild. Sagt Christian ja, wird aus FASSUNG die Zeichenkette 'live' — eine
- * Zeile, ein Deploy, kein zweiter Bau. Sagt er nein, faellt der Entwurf mit
- * derselben Zeile weg.
+ * Damit ist die Vorlage-Frage des Vorgaengerbaus entschieden, und zwar GEGEN
+ * den dort gebauten Entwurf: nicht eine dritte Startseite, sondern die
+ * vorhandene, seit Wochen live stehende Seite `/pages/crystal-cacao` wird die
+ * Startseite. Der Default steht deshalb auf 'kakao'.
  *
- * VORSCHAU-PARAMETER, beide Richtungen:
- *   ?entwurf=1  zeigt den Entwurf, auch wenn FASSUNG auf 'bestand' steht
- *   ?entwurf=0  zeigt den Bestand, auch wenn FASSUNG schon auf 'live' steht
- * Die Gegenrichtung ist kein Luxus: nach dem Scharfschalten ist sie der
- * einzige Weg, die alte Fassung noch anzusehen, ohne zu deployen.
+ * WARUM DIE ANDEREN ZWEI FASSUNGEN BLEIBEN — und das ist kein Zoegern:
+ * „Die alte Startseite wird ERSETZT, NICHT VERNICHTET: Inhalt und Fassung
+ * bleiben lesbar abgelegt." Endgueltiges Loeschen ist ausdruecklich
+ * Christians Perimeter. 'bestand' und 'entwurf' sind deshalb weiter
+ * abrufbar — und 'bestand' ist zugleich der RUECKWEG dieses Baus: eine Zeile
+ * hier, kein zweiter Bau.
+ *
+ * DIE ABGELEGTE FASSUNG HAT EINEN LESER, sonst waere sie Dekoration:
+ *   - proben/probe_sofortfehler.py misst Achse (6b) — die Rangfolge der
+ *     zwei Kopf-Schaltflaechen — an ihr, seit die Schaltflaechen auf der
+ *     neuen Startseite nicht mehr stehen. Ohne die Ablage waere jener
+ *     Rot-Nachweis vom 2026-09-08 lautlos verfallen.
+ *   - proben/probe_startseite_ist_kakao.py ARM-E prueft, dass sie abrufbar
+ *     BLEIBT.
+ *
+ * PARAMETER (alle drei Richtungen, ohne Deploy):
+ *   ?fassung=kakao    die heutige Startseite („Unser Kakao")
+ *   ?fassung=bestand  die alte Startseite (Aufmacher + Sortenraster)
+ *   ?fassung=entwurf  der Verkaufsauftritt-Entwurf vom 2026-09-08
+ *
+ * RUECKWAERTS-VERTRAG: die Adressen `?entwurf=1` und `?entwurf=0` aus dem
+ * Vorgaengerbau bleiben gueltig. Sie stehen in dessen RESULT und auf
+ * Christians Vorlage; eine Adresse, die dort genannt ist, laeuft nicht ins
+ * Leere, nur weil hier ein Parameter dazugekommen ist.
  */
 
-/** 'bestand' = heutige Startseite · 'live' = Verkaufsauftritt fuer alle. */
-export const FASSUNG = 'bestand';
+/** 'kakao' = „Unser Kakao" · 'bestand' = alte Startseite · 'entwurf' = Verkaufsauftritt */
+export const FASSUNG = 'kakao';
+
+const ERLAUBT = ['kakao', 'bestand', 'entwurf'];
 
 /**
  * @param {Request} request
- * @returns {boolean} true = Verkaufsauftritt-Entwurf zeigen
+ * @returns {'kakao'|'bestand'|'entwurf'}
+ */
+export function waehleFassung(request) {
+  let p = null;
+  try {
+    p = new URL(request.url).searchParams;
+  } catch {
+    // FAIL-CLOSED: eine unlesbare URL zeigt die eingestellte Fassung, nie
+    // eine, die jemand ueber die Adresszeile erraten hat.
+    p = null;
+  }
+  if (p) {
+    const f = p.get('fassung');
+    if (ERLAUBT.includes(f)) return f;
+    const e = p.get('entwurf');
+    if (e === '1') return 'entwurf';
+    if (e === '0') return 'bestand';
+  }
+  return ERLAUBT.includes(FASSUNG) ? FASSUNG : 'kakao';
+}
+
+/**
+ * Beibehalten fuer den Vorgaengerbau und seine Probe: sie fragt genau diese
+ * eine Frage („zeigt `/` den Entwurf?"). Sie wird hier ABGELEITET statt
+ * danebengeschrieben — zwei Stellen, die denselben Zustand fuehren, laufen
+ * sonst auseinander, und die falsche gewinnt still.
+ * @param {Request} request
+ * @returns {boolean}
  */
 export function zeigeVerkaufsauftritt(request) {
-  let wahl = null;
-  try {
-    wahl = new URL(request.url).searchParams.get('entwurf');
-  } catch {
-    // FAIL-CLOSED: eine unlesbare URL zeigt den Bestand, nie den Entwurf.
-    wahl = null;
-  }
-  if (wahl === '1') return true;
-  if (wahl === '0') return false;
-  return FASSUNG === 'live';
+  return waehleFassung(request) === 'entwurf';
 }

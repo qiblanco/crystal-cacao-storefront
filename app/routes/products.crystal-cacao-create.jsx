@@ -10,6 +10,7 @@ import {
 } from '@shopify/hydrogen';
 import {ProductImage} from '~/components/ProductImage';
 import {CacaoProductForm} from '~/components/CacaoProductForm';
+import {EuGewaehrleistungsHinweis} from '~/components/EuGewaehrleistungsLabel';
 import {CacaoPriceDisplay} from '~/components/CacaoPriceDisplay';
 import {ProductImageList} from '~/components/ProductImageList';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
@@ -187,6 +188,23 @@ export default function Product() {
   );
 }
 
+/**
+ * DIE VERTRAUENSLISTE — seit dem 2026-09-08 mit einer sechsten Zeile.
+ *
+ * Christian: „Der Button gesetzliche Garantie ist mega gross und komisch.
+ * Das sollte einfach als weitere Zeile bei den Gimmicks aufgelistet werden."
+ *
+ * Die Mitteilung stand bis dahin als eigener Block unter dem Kauf-Button
+ * (in <CacaoProductForm/>). Sie ist NICHT verschwunden und ihr WORTLAUT ist
+ * unveraendert — sie ist eine Zeile geworden. Der Ausloeser bleibt derselbe
+ * Baustein (<EuGewaehrleistungsHinweis/>): er bringt sein Overlay selbst
+ * mit, die amtliche Grafik erscheint weiterhin auf den ersten Klick.
+ *
+ * SIE STEHT BEWUSST ALS LETZTE. Die fuenf Zeilen darueber sind Zusagen, die
+ * wir GEBEN; die sechste ist ein Recht, das der Kunde ohnehin HAT. Sie an
+ * die Spitze zu stellen hiesse, ein gesetzliches Minimum als unsere
+ * Leistung zu verkaufen.
+ */
 function CacaoBenefitList() {
   return (
     <div className="CacaoBenefitList">
@@ -196,6 +214,9 @@ function CacaoBenefitList() {
         <li>🔄 100 % Geld-zurück-Garantie bei Unzufriedenheit</li>
         <li>🔬 Laboranalytisch geprüft (Dartsch Institut)</li>
         <li>🌿 Bio-zertifiziert nach DE-ÖKO-006</li>
+        <li>
+          ⚖️ <EuGewaehrleistungsHinweis />
+        </li>
       </ul>
     </div>
   );

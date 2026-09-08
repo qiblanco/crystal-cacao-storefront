@@ -1,6 +1,11 @@
-import {useLoaderData} from 'react-router';
+import {redirect, useLoaderData} from 'react-router';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {ABSENDER_MARKE, istKakaoSeite, fremdinhaltAbweisen} from '~/lib/kakao-zone';
+import {
+  ABSENDER_MARKE,
+  istKakaoSeite,
+  fremdinhaltAbweisen,
+  UMGELEITETE_SEITEN,
+} from '~/lib/kakao-zone';
 
 /**
  * @type {Route.MetaFunction}
@@ -36,6 +41,17 @@ async function loadCriticalData({context, request, params}) {
   // Studienseite mit 59 Fremdnennungen (gemessen 2026-09-02).
   if (!istKakaoSeite(params.handle)) {
     throw fremdinhaltAbweisen();
+  }
+
+  // DAUERHAFT VERSCHOBENE SEITEN — vor der Abfrage, nicht danach.
+  // Der Zaun steht bewusst DAVOR: eine fremde Seite wird abgewiesen, bevor
+  // ueberhaupt gefragt wird, ob sie umgeleitet ist. Sonst waere die
+  // Umleitungsliste ein zweiter Weg an dem Zaun vorbei.
+  // Das Ziel kommt aus app/lib/kakao-zone.js, damit Route und Sitemap
+  // dieselbe Wahrheit lesen (siehe Kommentar dort).
+  const umleitung = UMGELEITETE_SEITEN[params.handle];
+  if (umleitung) {
+    throw redirect(umleitung + new URL(request.url).search, 301);
   }
 
   const [{page}] = await Promise.all([

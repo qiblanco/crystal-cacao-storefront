@@ -4,7 +4,37 @@ import {KAKAO_KENNZAHLEN} from '~/lib/kakao-zone';
 import {ActiveCampaignForm} from '../reusables/ActiveCampaignForm';
 import {SwipeTable} from '../reusables/SwipeTable';
 
-export function Kakao() {
+/**
+ * DIE UEBERSICHTSSEITE — und seit dem 2026-09-08 die STARTSEITE.
+ *
+ * Christian: „ist ‚Unser Kakao' nicht die bessere Frontseite — ich wuerde
+ * sagen schon. Also das ist redundant. Einfach diese Version uebernehmen."
+ * `/` rendert seither genau diese Komponente; `/pages/crystal-cacao` leitet
+ * dauerhaft (301) hierher.
+ *
+ * DIE ZWEI SLOTS, und warum es Slots sind und keine festen Sektionen:
+ * diese Datei ist K2 gegen die qiblanco-Vorlage (shared/UPSTREAM.json) und
+ * wird dort weiter als UNTERSEITE gerendert. Was nur die STARTSEITE braucht,
+ * darf ihr deshalb nicht fest eingebaut werden — sonst traegt die
+ * Unterseite es mit, und der naechste Vendoring-Nachzug hat eine Abweichung
+ * mehr zu erklaeren. Beide Slots sind optional; ohne sie rendert die Seite
+ * exakt wie zuvor.
+ *
+ *   stimmen  — die drei echten Google-Bewertungen. Sie stehen NACH dem
+ *              Beleg-Block und VOR dem Versprechen: erst was drin ist und
+ *              wer es geprueft hat, dann wer es getrunken hat, dann die
+ *              Risikoumkehr. Sozialer Beweis zieht, aber er zieht erst,
+ *              wenn der Leser weiss, worum es geht.
+ *   sorten   — die zwei Sortenkacheln mit Preis. Sie stehen direkt hinter
+ *              dem Versprechen, also an der Stelle, an der die Frage von
+ *              „will ich das" auf „welche nehme ich" kippt. Sie tragen
+ *              ausserdem den Preis-Fix des Vorgaengerbaus (Achse 1 von
+ *              probe_sofortfehler.py); ohne sie waere er auf der Startseite
+ *              nicht mehr messbar.
+ *
+ * @param {{stimmen?: import('react').ReactNode, sorten?: import('react').ReactNode}} props
+ */
+export function Kakao({stimmen = null, sorten = null} = {}) {
   return (
     <div className="ProductPageKakao">
       <h1 className="text-6xl! text-center mb-[0px]!">High Performance Cacao</h1>
@@ -14,6 +44,7 @@ export function Kakao() {
       <SideToSideWithTable />
       <ComparisonTable />
       <Belege id="cc-pruefdokumente" />
+      {stimmen}
       <HerobannerWithText
         text="Wach. Klar. Im Flow."
         src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06610.jpg?v=1763050714"
@@ -35,6 +66,7 @@ export function Kakao() {
           Nicht zufrieden? Einfach zurücksenden und wir erstatten dir alles.
         </p>
       </div>
+      {sorten}
       <HerobannerWithText
         text="100% naturrein"
         src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC00308_Kopie.webp?v=1763062180"
