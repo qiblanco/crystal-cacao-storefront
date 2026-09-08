@@ -109,6 +109,13 @@
   /* ---- Radius: EIN Bildradius, EIN Knopfradius ---- */
   --cc-radius-bild: 10px;
   --cc-radius-knopf: 10px;
+  /* Die Breite des Kaufblocks (Dropdown + Kaufknopf). Der Wert ist NICHT hier
+   * erfunden: er stand seit jeher in app/styles/reset.css als `form {
+   * @media (min-width: 768px) { max-width: 400px } }` und bestimmte damit
+   * still, wie breit der Kaufknopf ist. Hier bekommt er einen Namen, damit
+   * das Dropdown daneben denselben Wert LESEN kann statt ihn zu wiederholen
+   * (2026-09-08). */
+  --cc-kaufblock-max: 400px;
   --cc-radius-rund: 50%;
 
   /* ---- Knopf: Masse aus web-dach.yaml (Klasse `gebaut`) ---- */
@@ -575,8 +582,18 @@
   color: rgba(0,0,0,0.8);
 }
 /* ── Cacao Variant Dropdown ── */
+/* BREITE — Christian 2026-09-08: "Das Groessen-Dropdown ist so breit wie das
+ * Fenster. Es soll die Breite haben, die sein Inhalt braucht, und zum
+ * Kaufbutton passen."
+ * GEMESSEN, warum die beiden auseinanderliefen: der Kaufknopf steht in einem
+ * <form>, und app/styles/reset.css deckelt JEDES Formular ab 768px auf
+ * --cc-kaufblock-max (gemessen 400px). Das Dropdown steht AUSSERHALB des
+ * Formulars und erbte den Deckel nie — 672px gegen 400px auf 1440px Breite.
+ * Es bekommt hier denselben Deckel aus DERSELBEN Quelle; eine zweite 400
+ * danebenzuschreiben waere die naechste Stelle, die auseinanderlaeuft. */
 .CacaoVariantSelect {
   width: 100%;
+  max-width: var(--cc-kaufblock-max);
   padding: 0.85rem 1rem;
   font-size: var(--cc-fs-2);
   font-family: inherit;
@@ -1198,13 +1215,30 @@ main h3[style] {
   display: block;
 }
 
-/* Die beiden Sterntoene — hier und NUR hier. */
+/* Die beiden Sterntoene — hier und NUR hier.
+ *
+ * KORREKTUR 2026-09-08 (Christian: "man kann die Sterne nicht sehen, weil es
+ * Gold in der gleichen Farbe umrandet ist"). Der gefuellte Stern trug
+ * --cc-gold #F2BF72 und stand auf der goldenen Knopfflaeche, die die
+ * app.css-Basisregel dem <button> der Sterne-Zeile gab: KONTRAST 1,00:1,
+ * also derselbe Ton auf sich selbst — nicht schwach, sondern identisch.
+ * Behoben ist ZUERST die Flaeche (app.css, :where()); danach steht die Zeile
+ * wieder auf Papier --cc-grund #fbf8f4, und dort traegt --cc-gold nur 1,66:1.
+ *
+ * DER GEFUELLTE STERN NIMMT DESHALB --cc-gold-text (#90671D, 4,86:1 auf
+ * --cc-grund) — KEIN neuer Wert und kein zweiter Akzent: es ist genau der
+ * Token, den s03 am 2026-09-02 fuer die Bewertungszahl "4,9" unmittelbar
+ * daneben eingefuehrt hat, aus demselben Grund (1,68:1 war unlesbar). Zahl
+ * und Sterne tragen damit einen Ton statt zwei, und die Zeile liest sich als
+ * EINE Angabe. Der leere Stern bleibt --cc-linie: er soll ruhig sein, seine
+ * Aufgabe ist der Unterschied zum gefuellten, nicht die eigene Auffaelligkeit
+ * (gefuellt gegen leer: 4,45:1). */
 .star-rating__star > svg {
   fill: var(--cc-linie);
 }
 
 .star-rating__fill > svg {
-  fill: var(--cc-gold);
+  fill: var(--cc-gold-text);
 }
 
 .star-rating__fill {
@@ -1404,17 +1438,33 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
  * bleibt damit strukturell klein — die Groesse, an der der Design-Meister
  * "dezent" misst (soll_signale saettigung_max 0.52). */
 
+/* KORREKTUR 2026-09-08 — Christian: "Der braune Kasten auf der Startseite
+ * verschluckt die Produktkacheln und wirkt wie ein Platzhalter."
+ *
+ * WAS HIER STAND: `background: var(--cc-goldbraun)` (#BE9A77) als DECKENDE
+ * Flaeche ueber die ganze Sektion. Der Gedanke dahinter war richtig — die
+ * Verpackung ist goldbraun, und die zwei Sortentoene sollten sich auf einer
+ * gemeinsamen Flaeche begegnen. Gemessen an der fertigen Seite ist das
+ * Ergebnis ein anderes: die Kachel ist --cc-flaeche (#f6f1ea) auf #BE9A77,
+ * also ein HELLER Fleck in einem grossen dunklen Rechteck, und die Kachel
+ * hatte ihren Rahmen dafuer eigens abgegeben (`border-color: transparent`).
+ * Der Kasten traegt damit mehr Flaeche als der Inhalt, den er rahmt.
+ *
+ * DER GOLDBRAUNE TON BLEIBT DEM LADEN ERHALTEN — er wird nur nicht mehr als
+ * Flaeche unter die Ware gelegt, sondern als KANTE ueber die Sektion gesetzt.
+ * Damit bleibt die Verwandtschaft zur Verpackung sichtbar, ohne dass die
+ * Ware in ihr verschwindet, und die Sortenkanten (rosa/blau) stehen wieder
+ * auf Papier statt auf einem dritten Ton. */
 .home .recommended-products {
-  background: var(--cc-goldbraun);
-  border-radius: var(--cc-radius-bild);
+  border-top: 3px solid var(--cc-goldbraun);
   color: var(--cc-goldbraun-auf);
   margin-top: var(--cc-space-6);
-  padding: var(--cc-space-6) var(--cc-space-3);
+  padding: var(--cc-space-5) 0 0;
 }
 
 @media (min-width: 45em) {
   .home .recommended-products {
-    padding: var(--cc-space-7) var(--cc-space-4);
+    padding: var(--cc-space-6) 0 0;
   }
 }
 
@@ -1426,17 +1476,51 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   color: var(--cc-goldbraun-auf);
 }
 
-/* Die Kachel im Band: helles Papier, damit die Sortenfarbe darauf traegt.
- * Der Rahmen wird auf dem Goldbraun unsichtbar (--cc-linie ist selbst hell),
- * also uebernimmt ihn die Flaeche selbst — kein zusaetzlicher Ton. */
+/* Die Kachel: helles Papier, damit die Sortenfarbe darauf traegt.
+ * NACHZUG 2026-09-08: solange die Sektion goldbraun GEFUELLT war, musste die
+ * Kachel ihren Rahmen abgeben (`border-color: transparent`) — auf #BE9A77 war
+ * die helle Linie --cc-linie ohnehin unsichtbar. Ohne den Kasten steht die
+ * Kachel wieder auf Papier und braucht ihre Kante zurueck, sonst zerfliesst
+ * sie mit dem Seitengrund (--cc-flaeche #f6f1ea auf --cc-grund #fbf8f4). */
 .cc-sortenkachel[data-cc-sorte] .product-item {
   background: var(--cc-flaeche);
-  border-color: transparent;
+  border-color: var(--cc-linie);
   /* DIE SORTENKENNUNG — 3 px, genau eine Kante, und der ROHE Messton der
    * Verpackung (nicht die abgedunkelte Textableitung): hier ist die Farbe
    * Grafik, kein Text, und die Tuete in der Hand des Kunden traegt exakt
    * diesen Ton. */
   border-top: 3px solid var(--cc-sorte);
+}
+
+/* DER PREIS AUF DER KACHEL — 2026-09-08.
+ * Er traegt dieselbe Rangfolge wie auf der Kaufseite: der zu zahlende Betrag
+ * gross und dunkel, der gestrichene daneben leise, und darunter die eine
+ * Zeile, die sagt, WOFUER der Betrag gilt. Kein Akzentgold: Gold traegt in
+ * diesem Laden Handlung, und ein Preis ist keine Handlung. */
+.cc-kachel-preis {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 var(--cc-space-1);
+  margin: 0 var(--cc-space-2);
+}
+
+.cc-kachel-preis-jetzt {
+  color: var(--cc-dunkel);
+  font-size: var(--cc-fs-3);
+  font-weight: 700;
+}
+
+.cc-kachel-preis-vorher {
+  color: var(--cc-muted);
+  font-size: var(--cc-fs-2);
+}
+
+.cc-kachel-preis-hinweis {
+  color: var(--cc-muted);
+  flex-basis: 100%;
+  font-size: var(--cc-fs-1);
+  line-height: 1.4;
 }
 
 /* Der Sortenname in seiner eigenen Farbe. Das ist der Fall, den der
@@ -1450,7 +1534,7 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 /* Zustand/Handlung: die Kachel ist ein Link. Beim Zeigen faerbt sich die
  * Kante ihrer Sorte statt des allgemeinen Kraftpapiertons. */
 .cc-sortenkachel[data-cc-sorte] .product-item:hover {
-  border-color: transparent;
+  border-color: var(--cc-linie);
   border-top-color: var(--cc-sorte);
   outline: 1px solid var(--cc-sorte);
 }

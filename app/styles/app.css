@@ -1154,16 +1154,39 @@ main p {
   text-decoration: none;
 }
 
-/* Die zweite Rolle ist bewusst KEIN zweiter Akzent, sondern derselbe Knopf
- * ohne Fuellung — sonst konkurrieren zwei Farben um dieselbe Aufmerksamkeit. */
+/* Die zweite Rolle — KORREKTUR 2026-09-08, Christian: "die zwei Schaltflaechen
+ * oben stehen gleichwertig nebeneinander, ohne dass klar waere, welche die
+ * Hauptsache ist."
+ *
+ * WAS HIER STAND: derselbe Knopf ohne Fuellung, mit Rahmen. Der Gedanke war
+ * richtig (kein zweiter Akzent), das Ergebnis nicht: gleiche Hoehe, gleicher
+ * Radius, gleiche Schriftgroesse, gleicher Rahmen — zwei Kaesten
+ * nebeneinander, von denen einer gefuellt ist. Ein Rangunterschied entsteht
+ * so nicht, weil die FORM identisch bleibt und nur die Fuellung fehlt.
+ *
+ * DIE ZWEITE ROLLE IST JETZT EIN TEXTLINK. Sie behaelt Hoehe und
+ * Trefferflaeche (44px, sie ist auf dem Telefon bedienbar) und verliert
+ * Rahmen und Kasten: der Kunde sieht EINE Handlung und EINEN Weiterweg,
+ * nicht zwei gleich laute Angebote. */
 .cc-knopf--ruhig {
   background: transparent;
-  border-color: var(--cc-linie, #e6ded3);
+  /* `border: 0` statt bloss `border-color: transparent`: .cc-knopf setzt
+   * `border: 1px solid transparent`, und eine durchsichtige Linie ist immer
+   * noch eine Linie — sie traegt weiter ihre 1px Breite und damit die
+   * Knopf-Geometrie. Genau daran misst probe_sofortfehler Achse (6b). */
+  border: 0;
+  border-radius: 0;
   color: var(--cc-text, #2c2a26);
+  font-weight: 500;
+  padding: var(--cc-space-2, 1rem) var(--cc-space-1, 0.5rem);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .cc-knopf--ruhig:hover {
-  background: var(--cc-flaeche, #f6f1ea);
+  background: transparent;
+  color: var(--cc-dunkel, #171310);
+  text-decoration: underline;
 }
 
 .cc-knopfreihe {
@@ -1782,7 +1805,30 @@ main textarea {
   padding: var(--cc-space-1, 0.5rem) var(--cc-space-2, 1rem);
 }
 
-main button:not(.reset):not(.cc-knopf),
+/* WARUM :where() UND NICHT :not() DIREKT — 2026-09-08, und es ist die Wurzel
+ * von ZWEI Beanstandungen Christians auf einmal:
+ * `main button:not(.reset):not(.cc-knopf)` hat die Spezifitaet 0-2-2 und
+ * uebersticht damit JEDE Komponentenregel mit einer Klasse (0-1-0). Zwei
+ * Bauteile dieses Ladens sind Knoepfe, die ausdruecklich KEINE Knopf-Gestalt
+ * tragen sollen, und beide hatten ihre eigene, korrekt gebaute Regel:
+ *   .sterne-sprung  (kakao-seiten.css)  background: none  -> wurde uebersticht,
+ *      die Bewertungszeile bekam die goldene Flaeche --cc-gold, und die
+ *      GEFUELLTEN Sterne tragen denselben Ton: Kontrast 1,00:1, gemessen.
+ *      Christian: "man kann die Sterne nicht sehen, weil es Gold in der
+ *      gleichen Farbe umrandet ist".
+ *   .eu-gwl__link   (eu-gewaehrleistung.css) background: none -> wurde
+ *      uebersticht, der EU-Pflichthinweis sah aus wie ein zweiter Kaufknopf.
+ *      Christian: "sieht aus wie ein Kaufbutton".
+ *
+ * DIE REPARATUR IST BEWUSST KEINE LISTE. Ein `:not(.sterne-sprung):not(
+ * .eu-gwl__link)` waere ein Zaun aus LITERALEN — er erreicht das dritte Bauteil
+ * nicht, das morgen dasselbe braucht, und niemand merkt es. `:where()` traegt
+ * seine Bedingung, gibt aber 0 Spezifitaet ab: die Regel wird zur BASIS
+ * (0-0-2), die jedes Bauteil mit einer eigenen Klasse ueberschreiben DARF.
+ * Das ist die Eigenschaft, um die es geht — "wer sich selbst gestaltet,
+ * behaelt seine Gestalt" — statt einer Aufzaehlung derer, die es heute tun.
+ * Der Ausschluss von .reset und .cc-knopf bleibt woertlich erhalten. */
+main button:where(:not(.reset)):where(:not(.cc-knopf)),
 main input[type='submit'] {
   background: var(--cc-gold, rgb(242, 191, 114));
   border: 1px solid transparent;
@@ -1795,7 +1841,7 @@ main input[type='submit'] {
   padding: 0 var(--cc-space-3, 1.5rem);
 }
 
-main button:not(.reset):not(.cc-knopf):hover,
+main button:where(:not(.reset)):where(:not(.cc-knopf)):hover,
 main input[type='submit']:hover {
   background: var(--cc-gold-tief, rgb(200, 152, 90));
 }

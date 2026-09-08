@@ -113,10 +113,15 @@ fieldset {
   padding: 1rem;
 }
 
+/* Der Deckel, der still bestimmt, wie breit der Kaufknopf ist. Er heisst seit
+ * 2026-09-08 --cc-kaufblock-max (app/styles/kakao-seiten.css), damit das
+ * Groessen-Dropdown daneben denselben Wert lesen kann statt ihn zu
+ * wiederholen. Der Fallback haelt die Regel wirksam, falls dieses Stylesheet
+ * je ohne die Token-Schicht ausgeliefert wird. */
 form {
   max-width: 100%;
   @media (min-width: 768px) {
-    max-width: 400px;
+    max-width: var(--cc-kaufblock-max, 400px);
   }
 }
 
