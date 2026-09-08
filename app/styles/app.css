@@ -1648,6 +1648,112 @@ aside .cc-leerzustand .cc-knopf {
   padding: var(--cc-space-3, 1.5rem);
 }
 
+/*
+ * --- 15b. DER CODE-FALZ IM DRAWER-FUSS --- 2026-09-08
+ * (Job 20260908-crystal-warenkorb-scrollflaeche-37prozent-drift-prio30)
+ *
+ * DER BEFUND, GEMESSEN UND NICHT VERMUTET (390x844, zwei Artikel, A/B im
+ * selben Browser): die scrollende Mitte des Warenkorb-Drawers war auf 313 von
+ * 844 px = 37,1 % geschrumpft, gefordert sind 40 %, nach dem Drei-Zonen-Umbau
+ * am 2026-08-22 waren es 437 px = 51,8 %. Die fehlenden Pixel sassen
+ * VOLLSTAENDIG im Fuss (435 px), nicht im Kopf (in beiden Lagen unveraendert
+ * 64 px): padding 24+24 | h4 24 | Zwischensumme 24 | Rabattcode-Formular 132 |
+ * Gutschein-Formular 132 | Kasse 50.
+ *
+ * WER DIE 124 PX GENOMMEN HAT — und warum die Antwort NICHT lautet, das
+ * rueckgaengig zu machen: die Design-Token-Schicht setzt
+ * `main input:not([type='checkbox']):not([type='radio'])` und
+ * `main button:not(.reset):not(.cc-knopf)` auf
+ * `min-height: var(--cc-treffer-min, 44px)` — WCAG 2.5.5, bewusst gesetzt.
+ * Das sind DESZENDANTEN-Selektoren, und der Drawer-Fuss liegt in
+ * `<aside><main>`; sie treffen ihn also, ohne ihn zu nennen. Feld und Knopf
+ * wuchsen je von 26 auf 44 px und stapeln sich (Formular 70 -> 132 px).
+ * DIESE REGELN SIND NICHT DER FEHLER. Sie haben nur sichtbar gemacht, dass der
+ * Fuss zwei OPTIONALE Formulare permanent offen traegt, die er sich in 844 px
+ * nie leisten konnte. Sie zu verkleinern, um wieder gruen zu werden, waere
+ * eine Barrierefreiheits-Regression — und dasselbe Torpfosten-Verschieben wie
+ * das Senken von MINDEST_ANTEIL, das der Auftrag ausdruecklich verbietet.
+ * Behoben wird deshalb die URSACHE: der Fuss gibt den Platz her, den er nicht
+ * braucht, und die Trefferflaechen bleiben unangetastet.
+ *
+ * NUR DIE SCHUBLADE. `.cart-summary-page` (die /cart-Seite) hat die Hoehe und
+ * bleibt vollstaendig unveraendert — dort ist ein Falz unnoetig.
+ */
+.cart-summary-aside .cc-code-falz {
+  border-top: 1px solid var(--cc-linie, #e6ded3);
+  margin-top: var(--cc-space-2, 1rem);
+}
+
+/* Der Griff selbst traegt dieselbe Trefferflaeche wie jeder andere Knopf —
+ * `<summary>` ist weder `button` noch `input` und wird von den Token-Regeln
+ * oben NICHT erfasst, also steht sie hier ausdruecklich. */
+.cart-summary-aside .cc-code-falz > summary {
+  align-items: center;
+  color: var(--cc-dunkel, #171310);
+  cursor: pointer;
+  display: flex;
+  font-size: var(--cc-fs-2, 1rem);
+  min-height: var(--cc-treffer-min, 44px);
+  user-select: none;
+}
+
+.cart-summary-aside .cc-code-falz > summary:focus-visible {
+  outline: 2px solid var(--cc-gold-tief, rgb(200, 152, 90));
+  outline-offset: 2px;
+}
+
+/*
+ * DAS AUFKLAPP-ZEICHEN MUSS HIER SELBST GEBAUT WERDEN. `display: flex` auf dem
+ * <summary> nimmt ihm den `list-item`-Anzeigetyp — und damit das native
+ * Dreieck. Ohne Ersatz saehe der Griff aus wie ein Satz, nicht wie etwas zum
+ * Aufklappen; der Kunde mit einem Gutscheincode fände seine Felder nicht.
+ * Deshalb ein eigener Winkel, der beim Oeffnen kippt.
+ */
+.cart-summary-aside .cc-code-falz > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cart-summary-aside .cc-code-falz > summary::after {
+  border-bottom: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  content: '';
+  height: 7px;
+  margin-left: auto;
+  transform: rotate(45deg);
+  transition: transform 150ms ease-in-out;
+  width: 7px;
+}
+
+.cart-summary-aside .cc-code-falz[open] > summary::after {
+  transform: rotate(-135deg);
+}
+
+/*
+ * AUFGEKLAPPT LIEGEN FELD UND KNOPF NEBENEINANDER statt uebereinander. Das ist
+ * der zweite, kleinere Teil desselben Befunds: gestapelt kostet ein Formular
+ * 132 px, in einer Zeile rund 44. Die 44 px Trefferflaeche bleiben dabei
+ * erhalten — es wird nichts kleiner, nur nebeneinander gelegt.
+ * `min-width: 0` ist Pflicht, sonst weigert sich das Eingabefeld als
+ * Flex-Kind, unter seine Standardbreite zu schrumpfen, und die Zeile bricht
+ * doch wieder um.
+ */
+.cart-summary-aside .cc-code-falz form > div,
+.cart-summary-aside .cc-code-falz section > form > div {
+  align-items: center;
+  display: flex;
+  gap: var(--cc-space-1, 0.5rem);
+  margin-top: var(--cc-space-1, 0.5rem);
+}
+
+.cart-summary-aside .cc-code-falz input[type='text'] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cart-summary-aside .cc-code-falz button[type='submit'] {
+  flex: 0 0 auto;
+}
+
 /* --- 16. Fehlerseite --- */
 .cc-fehler-code {
   color: var(--cc-muted, #6b665d);
