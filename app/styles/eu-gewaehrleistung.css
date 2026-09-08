@@ -1,0 +1,191 @@
+/*
+ * Harmonisierte Mitteilung ueber das gesetzliche Gewaehrleistungsrecht.
+ * Global geladen in root.jsx -- NICHT per links() je Route.
+ *
+ * Grund (Hausmuster, vgl. qb-swipetab): ein Route-eigenes links() zoege jede
+ * nutzende Route in den Design-Gate-Diff. Alles hier ist auf .eu-gwl gescopt
+ * und trifft auf Seiten ohne Kaufpfad auf kein einziges Element.
+ *
+ * FARBE UND SCHRIFT sind bewusst NICHT hart gesetzt: die Linkfarbe kommt aus
+ * --color-accent-ink (der Gold-Ton des Shops in seiner text-tauglichen
+ * Fassung, WCAG AA >= 4.5:1 auf hellem Grund -- --color-accent-primary ist
+ * als Text auf Weiss zu hell), die Schrift erbt.
+ *
+ * AN DER GRAFIK SELBST DARF CSS NICHTS TUN (Anhang I Nr. 1 und Nr. 5):
+ * kein filter, kein mix-blend-mode, kein border-radius (der beschnitte die
+ * Ecken einer nicht editierbaren amtlichen Grafik), kein object-fit: cover
+ * (das verzerrt oder schneidet). Nur die BREITE wird gesteuert, das
+ * Seitenverhaeltnis laeuft ueber height: auto mit.
+ *
+ * DIE GRAFIK KOMMT IN DIESER FASSUNG NUR IM OVERLAY VOR. Auf der
+ * Produktseite steht ausschliesslich der Text-Link. Es gibt deshalb keinen
+ * .eu-gwl__bild-Block mehr -- wer ihn wieder einfuehrt, baut die offen
+ * sichtbare Grafik zurueck, die hier ausdruecklich nicht gewollt ist.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Produktseite: NUR der Text-Link, kein Bild                          */
+/* ------------------------------------------------------------------ */
+
+.eu-gwl--pdp {
+  margin: 1rem 0 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Der Textlink -- auf der Produktseite und im Footer derselbe          */
+/* ------------------------------------------------------------------ */
+
+.eu-gwl__link {
+  /* Ein <button>, der wie ein Link aussieht: tastaturbedienbar und
+     korrekt annonciert, ohne ein <a> ohne Ziel vorzutaeuschen. */
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-accent-ink, #856828);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.eu-gwl__link:hover,
+.eu-gwl__link:focus-visible {
+  text-decoration: underline;
+}
+
+.eu-gwl__link:focus-visible {
+  outline: 2px solid var(--color-accent-ink, #856828);
+  outline-offset: 2px;
+}
+
+/* Im Footer sitzt der Link in der Fussnotenreihe und muss deren
+   Schriftgroesse erben, statt eine 14. in den Shop einzufuehren. */
+.footer-disclaimer .eu-gwl__link {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* ------------------------------------------------------------------ */
+/* Overlay                                                             */
+/* ------------------------------------------------------------------ */
+
+.eu-gwl-dialog {
+  /* Der <dialog> selbst ist der zentrierte Kasten; ::backdrop ist der Rand. */
+  width: min(96vw, 760px);
+  max-height: 92vh;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  overflow: auto;
+
+  /*
+   * MINDESTBREITE DER AMTLICHEN GRAFIK IM OVERLAY -- die Zahl ist gerechnet,
+   * nicht geschaetzt. Seit die Grafik nur noch hier vorkommt, traegt allein
+   * dieses Overlay die Scanbarkeit des QR-Codes.
+   *
+   * Messung 2026-08-25 an 20 der 24 Sprachfassungen auf dem Shopify-CDN:
+   * der QR-Code belegt 18,24 % (fr, schmalster Fall) bis 20,23 % (pl) der
+   * Bildbreite. In vier Fassungen (et, fi, sl, sv) ist der QR-Code in der
+   * Quelldatei so beschaedigt, dass er sich nicht lokalisieren laesst -- sie
+   * gehen in diese Spanne NICHT ein. Nach einem Neu-Upload dieser vier ist
+   * der Anteil nachzumessen; sinkt er unter 18,24 %, muss die Mindestbreite
+   * unten mitwachsen.
+   *
+   * Zielgroesse: die Praxisleitlinien der Kommission (April 2026, Abschnitt
+   * 3.1.2) nennen 2 x 2 cm als Untergrenze fuer den QR-Code. Die Zahl ist
+   * dort fuer das GARAN-Label geschrieben; fuer den QR-Code der Mitteilung
+   * gibt es keine eigene, deshalb wird sie hier uebertragen.
+   *
+   * Rechnung (1 CSS-px = 1/96 Zoll = 0,26458 mm):
+   *   20 mm Untergrenze  = 75,6 CSS-px  -> Bildbreite >= 75,6 / 0,1824 = 414 px
+   *   gewaehlt: 480 px   -> QR 87,6 CSS-px = 23,2 mm im schmalsten Fall (fr)
+   *                      -> QR 92,5 CSS-px = 24,5 mm im ausgelieferten DE
+   *
+   * Die 480 px sind damit ~16 % ueber der Untergrenze, auch in der
+   * unguenstigsten Sprachfassung. `test/eu-gewaehrleistung.test.mjs`
+   * liest diesen Wert aus DIESER Datei und rechnet nach -- eine Aenderung
+   * hier ohne Nachrechnen faellt dort auf.
+   */
+  --eu-gwl-bild-mindestbreite: 480px;
+}
+
+.eu-gwl-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.eu-gwl-dialog__kasten {
+  position: relative;
+  padding: 1.25rem;
+}
+
+.eu-gwl-dialog__zu {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0.25rem 0.5rem;
+
+  font: inherit;
+  font-size: 1.75rem;
+  line-height: 1;
+  color: #2c2a26;
+  cursor: pointer;
+}
+
+.eu-gwl-dialog__zu:focus-visible {
+  outline: 2px solid var(--color-accent-ink, #856828);
+  outline-offset: 2px;
+}
+
+/*
+ * Die Buehne ist der einzige waagerecht scrollende Bereich.
+ *
+ * Warum ueberhaupt scrollen: auf einem 360-px-Telefon ist der Dialog rund
+ * 345 px breit. Wuerde die Grafik einfach mitschrumpfen, faellt der QR-Code
+ * auf ~63 CSS-px = 16,6 mm und damit unter die Untergrenze. Die
+ * Mindestbreite haelt ihn oben; die Buehne macht den Ueberstand
+ * erreichbar. Das ist KEIN Beschneiden -- die ganze Grafik bleibt
+ * zugaenglich, sie passt nur nicht gleichzeitig ins Bild.
+ *
+ * Ab etwa 512 px Viewport-Breite entsteht kein Ueberstand mehr; auf
+ * Desktop und Tablet scrollt hier nichts.
+ */
+.eu-gwl-dialog__buehne {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.eu-gwl-dialog__bild {
+  display: block;
+  width: 100%;
+  min-width: var(--eu-gwl-bild-mindestbreite, 480px);
+  height: auto;
+
+  /* Ausdruecklich: keine Nachbearbeitung der amtlichen Grafik. */
+  filter: none;
+  opacity: 1;
+  border-radius: 0;
+  object-fit: fill;
+}
+
+.eu-gwl-dialog__fuss {
+  margin: 0.75rem 0 0;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eu-gwl-dialog {
+    animation: none;
+  }
+}

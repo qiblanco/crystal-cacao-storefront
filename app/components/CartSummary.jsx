@@ -14,6 +14,13 @@ export function CartSummary({cart, layout}) {
   const giftCardHeadingId = useId();
   const giftCardInputId = useId();
 
+  // Ein BEREITS EINGELOESTER Code wird nie versteckt — sonst koennte der Kunde
+  // ihn weder sehen noch entfernen. Der Falz startet dann offen.
+  const codeEingeloest = Boolean(
+    cart?.discountCodes?.some((d) => d.applicable) ||
+      cart?.appliedGiftCards?.length,
+  );
+
   return (
     <div aria-labelledby={summaryId} className={className}>
       <h4 id={summaryId}>Summe</h4>
@@ -27,18 +34,54 @@ export function CartSummary({cart, layout}) {
           )}
         </dd>
       </dl>
-      <CartDiscounts
-        discountCodes={cart?.discountCodes}
-        discountsHeadingId={discountsHeadingId}
-        discountCodeInputId={discountCodeInputId}
-      />
-      <CartGiftCard
-        giftCardCodes={cart?.appliedGiftCards}
-        giftCardHeadingId={giftCardHeadingId}
-        giftCardInputId={giftCardInputId}
-      />
+      <CodeFalz layout={layout} offen={codeEingeloest}>
+        <CartDiscounts
+          discountCodes={cart?.discountCodes}
+          discountsHeadingId={discountsHeadingId}
+          discountCodeInputId={discountCodeInputId}
+        />
+        <CartGiftCard
+          giftCardCodes={cart?.appliedGiftCards}
+          giftCardHeadingId={giftCardHeadingId}
+          giftCardInputId={giftCardInputId}
+        />
+      </CodeFalz>
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
     </div>
+  );
+}
+
+/**
+ * DIE ZWEI CODE-FORMULARE KLAPPEN IN DER SCHUBLADE ZU — auf der /cart-SEITE
+ * bleibt alles unveraendert.
+ *
+ * GEMESSEN 2026-09-08 (390x844, zwei Artikel, Diagnose-A/B im selben Browser):
+ * der Drawer-Fuss war 435 px hoch, davon 264 px allein die beiden IMMER offenen
+ * Code-Formulare (Rabattcode + Geschenkgutschein, je 132 px). Die scrollende
+ * Mitte behielt 313 px = 37,1 % der Drawer-Hoehe; kalibriert und gefordert sind
+ * mindestens 40 %, gemessen waren es nach dem Drei-Zonen-Umbau am 2026-08-22
+ * noch 437 px = 51,8 %.
+ *
+ * WARUM NICHT DIE 44-px-TREFFERFLAECHEN ZURUECKNEHMEN, die den Fuss haben
+ * wachsen lassen: `main input`/`main button { min-height: var(--cc-treffer-min) }`
+ * ist WCAG 2.5.5 und am 2026-09-02 bewusst gesetzt worden. Diese Regeln sind
+ * NICHT der Fehler — sie haben nur sichtbar gemacht, dass der Fuss zwei
+ * optionale Formulare traegt, die er sich in 844 px nie leisten konnte. Sie zu
+ * verkleinern waere eine Barrierefreiheits-Regression und eine Verschiebung der
+ * eigenen Torpfosten. Aufgeklappt behalten die Felder ihre vollen 44 px.
+ *
+ * WARUM `<details>` UND KEIN EIGENER SCHALTER: nativ tastaturbedienbar, von
+ * Screenreadern als aufklappbare Gruppe angesagt, kein JavaScript, kein
+ * Hydration-Zustand. Und nichts wird ENTFERNT: wer einen Code hat, findet ihn
+ * mit einem Klick — wer keinen hat (der Regelfall), sieht seine Ware.
+ */
+function CodeFalz({layout, offen, children}) {
+  if (layout === 'page') return <>{children}</>;
+  return (
+    <details className="cc-code-falz" open={offen}>
+      <summary>Rabatt- oder Gutscheincode?</summary>
+      {children}
+    </details>
   );
 }
 

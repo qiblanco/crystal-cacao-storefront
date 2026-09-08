@@ -52,7 +52,7 @@
  * an `crystal-cacao-angebot`: der Kanon rechnet 71,03 x 1,07 = 76 EUR (der
  * Handle steht in CACAO_HANDLES, und der 7-%-Satz ist dort an 41 realen
  * Bestellpositionen belegt), die Buybox der Seite zeigt aber "85,- EUR",
- * also 71,03 x 1,19. Auf den Bundle-Seiten war ueberhaupt kein Preis-Element
+ * also 71,03 x 1,19. Auf den Bundle-Seiten war überhaupt kein Preis-Element
  * auffindbar, der angezeigte Wert also nicht messbar.
  *
  * Beides führt zur selben Entscheidung: Wo nicht BEWIESEN ist, dass der
@@ -326,4 +326,80 @@ export function produktSchema(produkt) {
   if (variante?.sku) knoten.sku = variante.sku;
 
   return knoten;
+}
+
+/**
+ * BreadcrumbList (schema.org) einer Produktseite.
+ *
+ * WARUM ES DIESE FUNKTION GIBT: PR #100 (GEO FJ1, 2026-07-23) sagte eine
+ * BreadcrumbList auf ALLEN indexierbaren Produktseiten zu. Der PR wurde am
+ * 2026-09-05 geschlossen, weil seine übrige Substanz auf anderem Weg live
+ * ging (#187/#189/#217) — diese Zusage ging dabei NICHT mit. Am 2026-09-05
+ * live nachgemessen: die PDPs tragen Product/Brand/Offer/MerchantReturnPolicy/
+ * OfferShippingDetails (vollzählig an allen 13 Sitemap-Produkten), aber
+ * `BreadcrumbList` kam auf der gesamten Storefront nur in der Studien-Familie
+ * vor (app/lib/studien-schema.js, Funktion `brotkrume`). Es fehlte also nicht
+ * die Fähigkeit, sondern ihre Reichweite.
+ *
+ * WARUM HIER UND NICHT ZWEIMAL IN DEN ROUTEN: die Produktseiten laufen über
+ * ZWEI Emitter — sechs Flaggschiff-Routen über `produktMeta()`
+ * (app/lib/produkt-seo.js) und der Rest über die Sammelroute
+ * `products.$handle.jsx`. Genau diese Zweiteilung hat bei der
+ * Product-Auszeichnung schon einmal dazu geführt, dass sie überall ankam,
+ * nur nicht auf den sechs wichtigsten Seiten (PR #217, siehe Kopf von
+ * produkt-seo.js). Ein Knoten, zwei Aufrufer.
+ *
+ * WARUM SIE AUCH FÜR `OHNE_PREIS_NACHWEIS`-HANDLES ENTSTEHT — die einzige
+ * Stelle, an der diese Funktion bewusst ANDERS urteilt als produktSchema():
+ * Die fünf dort geführten Handles (Bundles, Mengenrabatte, das
+ * Kakao-Angebot) tragen absichtlich KEIN Product-JSON-LD, weil ein
+ * Product-Knoten ohne belastbaren Preis schlechter ist als keiner. Eine
+ * Brotkrume trifft darüber gar keine Aussage: sie beschreibt den Weg zur
+ * Seite, nicht ihren Preis, und kann deshalb auch nicht falsch werden, wenn
+ * der Preis unklar ist. Alle fünf stehen ausserdem in
+ * sitemap/products/1.xml (live gezählt 2026-09-05, 13 Einträge) — sie sind
+ * genau die "indexierbaren Produktseiten", die die Zusage aus PR #100 nennt.
+ * Der Preis-Vorbehalt bleibt davon unberührt.
+ *
+ * AUSGENOMMEN sind allein die Handles aus `NICHT_INDEXIERBARE_PRODUKTE`
+ * (~/lib/seo). Das steht NICHT hier, sondern bei den Aufrufern: beide setzen
+ * für diese Handles `robots: noindex` und kehren VOR der Auszeichnung um.
+ * Strukturierte Daten auf einer Seite, die nicht in den Index soll, wären
+ * ein widersprüchliches Signal.
+ *
+ * DIE ZWEITE STUFE IST BELEGT, NICHT ERFUNDEN: `/collections/all` liefert
+ * live HTTP 200 und trägt den Titel „Alle Produkte | Qi Blanco"
+ * (gemessen 2026-09-05); der Name der Stufe ist genau dieser Seitentitel ohne
+ * Marken-Suffix. Eine erfundene Zwischenstufe („Shop", „Produkte") wäre eine
+ * Brotkrume auf eine URL, die es nicht gibt — Google prüft die `item`-URLs.
+ *
+ * @param {{handle?: string, title?: string}|undefined} produkt
+ * @returns {object|null} BreadcrumbList-Knoten oder null
+ */
+export function brotkrumeSchema(produkt) {
+  if (!produkt?.handle || !produkt?.title) return null;
+  const url = `${CANONICAL_ORIGIN}/products/${produkt.handle}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    // Eigene @id mit Fragment, damit der Knoten neben dem Product-Knoten
+    // (`#product`) eindeutig adressierbar bleibt und zwei Knoten derselben
+    // Seite sich nicht überschreiben.
+    '@id': `${url}#brotkrume`,
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Startseite',
+        item: `${CANONICAL_ORIGIN}/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Alle Produkte',
+        item: `${CANONICAL_ORIGIN}/collections/all`,
+      },
+      {'@type': 'ListItem', position: 3, name: produkt.title, item: url},
+    ],
+  };
 }

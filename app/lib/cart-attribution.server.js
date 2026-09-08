@@ -1,6 +1,7 @@
 import {
   appendTrackingToCheckoutUrl,
   buildAttributionCartAttributes,
+  buildOriginCartAttributes,
   getCheckoutTrackingSearchParams,
   isQiblancoProductionHost,
   mergeCartAttributes,
@@ -27,14 +28,31 @@ export async function persistAttributionOnCartResult({
   env,
   result,
 }) {
-  if (!result?.cart || !hasAttributionConsent(request, env)) return result;
+  if (!result?.cart) return result;
 
-  const attributionAttributes = getAttributionCartAttributes(request);
-  if (!attributionAttributes.length) return result;
+  // NAHT-NACHZUG 2026-09-08 aus der Vorlage (d3b0bbb, #326; Job
+  // 20260902-crystal-abnahme-...-prio45 s04). Hier stand
+  // `if (!result?.cart || !hasAttributionConsent(request, env)) return result;`
+  // -- ohne Consent lief `buildAttributionCartAttributes` GAR NICHT ERST AN,
+  // und die Order trug am Ende KEIN einziges note_attribute. Der Marker-Fix
+  // vom 2026-08-27 sitzt eine Ebene TIEFER und war von hier oben aus
+  // wirkungslos.
+  //
+  // Die consent-FREIEN Herkunfts-Marker werden deshalb IMMER geschrieben, die
+  // personenbezogenen NUR mit Consent. Warum diese Naht auf DIESER Storefront
+  // nachgezogen wird -- geteilter Shopify-Store, geteilter Order-Strom,
+  // geteilte Wache -- steht ausfuehrlich am Block HERKUNFTS-MARKER in
+  // app/lib/checkout-tracking.js.
+  const cartAttributes = [
+    ...getOriginCartAttributes(request),
+    ...(hasAttributionConsent(request, env)
+      ? getAttributionCartAttributes(request)
+      : []),
+  ];
 
   const {attributes, changed} = mergeCartAttributes(
     result.cart.attributes,
-    attributionAttributes,
+    cartAttributes,
   );
 
   if (!changed) return result;
@@ -61,6 +79,21 @@ export function hasAttributionConsent(request, env) {
     hasRegionAwareTrackingPermission(request, env) ||
     isPreviewTrackingAllowed(request, env)
   );
+}
+
+/**
+ * Consent-FREIE Herkunfts-Marker (attribution_source, consent_state, ua_class).
+ * Ausschliesslich Request-Metadaten: User-Agent-Header + Cookiebot-Cookie als
+ * ja/nein/unbekannt. Keine Klick-ID, kein _fbc/_fbp/_qpx_anon, kein
+ * landing_page, kein referrer.
+ *
+ * @param {Request} request
+ */
+export function getOriginCartAttributes(request) {
+  return buildOriginCartAttributes({
+    userAgent: request.headers.get('User-Agent'),
+    cookieHeader: request.headers.get('Cookie'),
+  });
 }
 
 /**

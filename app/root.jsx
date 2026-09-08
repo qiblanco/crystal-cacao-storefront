@@ -26,6 +26,7 @@ import kakaoStyles from '~/styles/kakao-seiten.css?url';
  * DACH-Ausfertigung der Vorlage (sha256 d87e4046…), passend zur ebenfalls
  * byte-gleichen Komponente. */
 import swipetabStyles from '~/styles/qb-swipetab.css?url';
+import euGewaehrleistungStyles from '~/styles/eu-gewaehrleistung.css?url';
 import {PageLayout} from './components/PageLayout';
 import {MetaPixel} from './components/MetaPixel';
 import {UpPromoteTracking} from './components/UpPromoteTracking';
@@ -227,6 +228,7 @@ export function Layout({children}) {
         <link rel="stylesheet" href={appStyles}></link>
         <link rel="stylesheet" href={kakaoStyles}></link>
         <link rel="stylesheet" href={swipetabStyles}></link>
+        <link rel="stylesheet" href={euGewaehrleistungStyles}></link>
         {shouldLoadThirdPartyScripts && data?.cookiebotId ? (
           <script
             id="Cookiebot"
@@ -317,6 +319,34 @@ export default function App() {
       shop={data.shop}
       consent={data.consent}
     >
+      {/*
+        EU-Gewaehrleistungs-Mitteilung (VO (EU) 2025/1960, anwendbar ab
+        27.09.2026): HIER STEHT SEIT DEM 2026-09-08 BEWUSST NICHTS MEHR.
+
+        Elina EL-20260901-3fb38a2a verbietet die Montage im globalen
+        Seitengeruest und in der Footer-Komponente ausdruecklich -- die
+        Mitteilung gehoert ausschliesslich dorthin, wo ein Produkt gekauft
+        werden kann. Der Overlay-Baustein bringt seinen Provider seither
+        SELBST mit (EuGewaehrleistungsHinweis in
+        app/components/EuGewaehrleistungsLabel.jsx, hier K1 und byte-gleich
+        zur Vorlage nachgezogen); auf dieser Storefront montiert ihn
+        app/components/CacaoProductForm.jsx. Es gibt darum keine Stelle mehr,
+        an der er global stehen muesste, und keine Route, die man vergessen
+        kann.
+
+        WARUM DIESE ZEILEN LOKAL ENTFERNT UND root.jsx NICHT BYTE-GLEICH AUS
+        DER VORLAGE UEBERNOMMEN WURDE: root.jsx ist K3 nach ADR 0056
+        (Festlegung 3). crystal fuehrt hier eine EIGENE Fassung mit eigener
+        Hostliste; eine byte-gleiche Uebernahme schaltet ueber
+        isQiblancoProductionHost das Tracking auf crystal-cacao.com still aus.
+        Nachgezogen wird deshalb die NAHT (die Abmontage), nicht die Datei --
+        genau wie am 2026-09-05 die Anmontage.
+
+        HAETTE MAN NUR DIE K1-DATEI NACHGEZOGEN, stuenden hier zwei
+        verschachtelte Provider und ein totes Overlay im Baum -- und die
+        Anweisung eines Menschen waere auf dieser Storefront weiter verletzt.
+        Die beiden Nachzuege sind EIN Vorgang, nicht zwei.
+      */}
       <PageLayout {...data}>
         <Outlet />
       </PageLayout>

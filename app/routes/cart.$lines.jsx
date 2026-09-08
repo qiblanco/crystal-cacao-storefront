@@ -1,6 +1,7 @@
 import {redirect} from 'react-router';
 import {
   getAttributionCartAttributes,
+  getOriginCartAttributes,
   getTrackedCheckoutUrl,
   hasAttributionConsent,
 } from '~/lib/cart-attribution.server';
@@ -50,11 +51,29 @@ export async function loader({request, context, params}) {
   // reisen auf ZWEI Wegen, weil ein Weg allein je einen Fall verliert:
   // als Cart-Attribut (wird zum Order-note_attribute, ueberlebt auch eine
   // spaetere Kasse) UND als Query-Parameter an der checkoutUrl.
-  // Beides consent-gegated -- ohne Einwilligung reist nichts.
+  // Der PERSONENBEZOGENE Teil ist consent-gegated -- ohne Einwilligung reist
+  // davon nichts.
   const hasMarketingConsent = hasAttributionConsent(request, env);
-  const attributionAttributes = hasMarketingConsent
-    ? getAttributionCartAttributes(request)
-    : [];
+  // NAHT-NACHZUG 2026-09-08 aus der Vorlage (d3b0bbb, #326; Job
+  // 20260902-crystal-abnahme-...-prio45 s04). Hier stand
+  // `hasMarketingConsent ? ... : []` fuer die GESAMTE Attributsliste -- ein
+  // Direkt-zur-Kasse-Link ohne Consent erzeugte einen Cart ganz OHNE Attribute,
+  // und die Order war spaeter nicht von einem Cart-Bypass zu unterscheiden.
+  //
+  // WARUM DIESE DATEI MITZIEHT, obwohl sie NICHT im Vendoring-Manifest steht:
+  // diese Storefront hat ZWEI Cart-Eintrittspunkte (cart.jsx ueber
+  // persistAttributionOnCartResult und diesen hier). Zoege nur der erste nach,
+  // truege der Direkt-zur-Kasse-Weg weiterhin keine Herkunfts-Marker -- die
+  // Wache tracking-linkage/proben/probe_herkunftsmarker_ankunft.py fiele
+  // trotzdem auf exit 1, und der halbe Fix saehe wie ein ganzer aus.
+  //
+  // Herkunfts-Marker jetzt IMMER (consent-frei, nur Request-Metadaten),
+  // personenbezogene Attribute weiterhin NUR mit Consent. Begruendung der
+  // ganzen Naht am Block HERKUNFTS-MARKER in app/lib/checkout-tracking.js.
+  const attributionAttributes = [
+    ...getOriginCartAttributes(request),
+    ...(hasMarketingConsent ? getAttributionCartAttributes(request) : []),
+  ];
 
   // create a cart
   const result = await cart.create({

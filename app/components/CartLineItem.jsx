@@ -99,8 +99,12 @@ function CartLineQuantity({line}) {
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
+    // Die Abstaende kommen aus `gap` in app.css Abschnitt 26, nicht mehr aus
+    // &nbsp;-Textknoten: ein geschuetztes Leerzeichen ist fuer Flexbox KEIN
+    // umbrechbarer Weissraum, sondern ein eigenes Flex-Kind — es zaehlte in die
+    // min-content-Breite der Zeile mit hinein und liess sich nicht umbrechen.
     <div className="cart-line-quantity">
-      <small>Menge: {quantity} &nbsp;&nbsp;</small>
+      <small>Menge: {quantity}</small>
       <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
         <button
           aria-label="Menge verringern"
@@ -108,10 +112,9 @@ function CartLineQuantity({line}) {
           name="decrease-quantity"
           value={prevQuantity}
         >
-          <span>&#8722; </span>
+          <span>&#8722;</span>
         </button>
       </CartLineUpdateButton>
-      &nbsp;
       <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
         <button
           aria-label="Menge erhöhen"
@@ -122,7 +125,6 @@ function CartLineQuantity({line}) {
           <span>&#43;</span>
         </button>
       </CartLineUpdateButton>
-      &nbsp;
       <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
     </div>
   );

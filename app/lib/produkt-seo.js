@@ -47,7 +47,7 @@
 // könnte diese Datei sonst gar nicht laden.
 import {absoluteCanonical} from './seo.js';
 import {ABSENDER_MARKE} from './kakao-zone.js';
-import {produktSchema} from './produkt-schema.js';
+import {brotkrumeSchema, produktSchema} from './produkt-schema.js';
 
 /**
  * Markenname für den Titel-Suffix im Suchergebnis.
@@ -131,6 +131,30 @@ export const PRODUKT_BESCHREIBUNGEN = {
   '/products/crystal-cacao-create':
     'Crystal Cacao® Create: Zeremonie-Kakao in Bio-Qualität (DE-ÖKO-006) mit dem ' +
     'kräftigsten Sortenprofil — intensiv und vollmundig im Geschmack.',
+  // DIE VIER BUNDLES, aus der Vorlage nachgezogen 2026-09-08 (a0ab2e8, #322).
+  // Sie laufen NICHT über produktMeta(), sondern über die Sammelroute
+  // products.$handle.jsx — die Karte ist trotzdem hier richtig und nicht in
+  // einem zweiten Modul: sie ist die eine Stelle, an der eine
+  // Produktbeschreibung je Pfad steht.
+  //
+  // EHRLICHE GRENZE AUF DIESER STOREFRONT: die Sammelroute liest diese Karte
+  // hier (anders als in der Vorlage) heute NICHT — crystals
+  // products.$handle.jsx importiert produkt-seo gar nicht. Die vier Einträge
+  // wirken hier also noch nicht; sie stehen trotzdem, weil es Kakao-Bundles
+  // sind und die Karte sonst beim nächsten Nachzug erneut auseinanderliefe.
+  // Kein toter Fremdinhalt: alle vier sind Produkte DIESES Sortiments.
+  '/products/bundle-2x-awake':
+    'Crystal Cacao® Awake – Bio im 2er-Bundle: Zeremonie-Kakao aus dem Piura-Tal ' +
+    'in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-3x-awake':
+    'Crystal Cacao® Awake – Bio im 3er-Bundle: Zeremonie-Kakao aus dem Piura-Tal ' +
+    'in Peru, schonend kalt verarbeitet.',
+  '/products/mengenrabatt-2x':
+    'Crystal Cacao® Create – Bio im 2er-Bundle: Zeremonie-Kakao aus dem Piura-Tal ' +
+    'in Peru, schonend kalt verarbeitet.',
+  '/products/mengenrabatt-3x-create':
+    'Crystal Cacao® Create – Bio im 3er-Bundle: Zeremonie-Kakao aus dem Piura-Tal ' +
+    'in Peru, schonend kalt verarbeitet.',
 };
 
 /**
@@ -278,6 +302,16 @@ export function produktMeta({pfad, titel, bildUrl, produkt}) {
   }
   if (bildUrl) {
     descriptoren.push({property: 'og:image', content: bildUrl});
+    // Twitter-Karte (Vorlage a0ab2e8, #322). Sie steht ABSICHTLICH in derselben
+    // Bedingung wie das og:image und nicht daneben: `summary_large_image` sagt
+    // einem Netzwerk zu, dass ein großes Bild folgt. Ohne og:image wäre das
+    // eine Zusage ohne Deckung, und die Karte fällt beim Teilen auf einen
+    // nackten Link zurück — schlechter als gar keine Kartenangabe.
+    //
+    // Titel, Beschreibung und Bild kommen über den og-Fallback; es entstehen
+    // bewusst KEINE eigenen `twitter:title`/`twitter:description`-Tags. Zwei
+    // Quellen für denselben Text driften auseinander.
+    descriptoren.push({name: 'twitter:card', content: 'summary_large_image'});
   }
   // react-router 7 rendert diesen Descriptor nativ als
   // <script type="application/ld+json"> und maskiert den Inhalt selbst.
@@ -287,6 +321,25 @@ export function produktMeta({pfad, titel, bildUrl, produkt}) {
   const schema = produkt ? produktSchema(produkt) : null;
   if (schema) {
     descriptoren.push({'script:ld+json': schema});
+  }
+  // Brotkrume als EIGENER ld+json-Knoten neben dem Product-Knoten (Vorlage
+  // a0ab2e8, #322). Bewusst NICHT in den Product-Knoten hineingefaltet:
+  // BreadcrumbList ist kein Produktfeld. Die Bedingung ist absichtlich
+  // `produkt` und nicht `schema` — Begründung an brotkrumeSchema().
+  //
+  // GEMESSENE EINSCHRÄNKUNG AUF DIESER STOREFRONT, offen benannt statt
+  // versteckt: brotkrumeSchema() setzt Stufe 2 fest auf
+  // `${CANONICAL_ORIGIN}/collections/all`. Hier ist CANONICAL_ORIGIN
+  // https://crystal-cacao.com, und /collections/all ist KEIN 404, sondern
+  // eine Weiterleitung auf /collections/zeremonie-kakao
+  // (app/routes/collections.all.jsx — bewusst so gebaut, weil ein 404 dort
+  // den Kaufweg bräche). Die item-URL löst also auf; sie zeigt nur auf eine
+  // Weiterleitung statt direkt aufs Ziel. Das hier zu begradigen köstete eine
+  // NEUE Abweichung an produkt-schema.js, das sonst byte-gleich zur Vorlage
+  // bleibt — gegen den Grundsatz "eine Abweichung statt dreier".
+  const brotkrume = produkt ? brotkrumeSchema(produkt) : null;
+  if (brotkrume) {
+    descriptoren.push({'script:ld+json': brotkrume});
   }
   return descriptoren;
 }
