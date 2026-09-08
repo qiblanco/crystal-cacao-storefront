@@ -1538,3 +1538,214 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   border-top-color: var(--cc-sorte);
   outline: 1px solid var(--cc-sorte);
 }
+
+/* ==========================================================================
+ * DIE STARTSEITE ALS VERKAUFSAUFTRITT — Entwurf, Teil 2 des Auftrags vom
+ * 2026-09-08. Nur wirksam unter `?entwurf=1` bzw. nach dem Umlegen von
+ * FASSUNG in app/lib/startseite-fassung.js.
+ *
+ * KEIN NEUER WERT: jede Farbe, jeder Abstand und jede Schriftgroesse hier
+ * kommt aus der Token-Schicht oben. Der Grund ist derselbe wie dort — eine
+ * Startseite, die sich ihre eigenen Zahlen nimmt, ist der Anfang des zweiten
+ * Design-Systems.
+ * ========================================================================== */
+
+.home--verkaufsauftritt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-6);
+}
+
+/* --- Aufmacher: Text und Bild nebeneinander, auf dem Telefon untereinander.
+ * Das Bild steht bewusst NICHT als Vollbild-Hintergrund mit Text darauf: auf
+ * einem Foto ist kein Kontrast garantiert, und die Kopfzeile traegt hier die
+ * einzige Zahl der Seite. */
+.cc-va-kopf {
+  align-items: center;
+  display: grid;
+  gap: var(--cc-space-4);
+  grid-template-columns: 1fr;
+  padding-top: var(--cc-space-4);
+}
+
+@media (min-width: 45em) {
+  .cc-va-kopf {
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--cc-space-5);
+  }
+}
+
+.cc-va-marke {
+  color: var(--cc-muted);
+  font-size: var(--cc-fs-2);
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--cc-space-1);
+  text-transform: uppercase;
+}
+
+.cc-va-kopf h1 {
+  margin: 0 0 var(--cc-space-2);
+}
+
+.cc-va-lead {
+  color: var(--cc-text);
+  font-size: var(--cc-fs-3);
+  line-height: 1.5;
+  margin: 0;
+  max-width: var(--cc-zeile-max, 70ch);
+}
+
+.cc-va-kopf-bild img {
+  border-radius: var(--cc-radius-bild);
+  display: block;
+  width: 100%;
+}
+
+/* --- Vier Vorteile: gleich gross, gleich laut. Keiner ist hervorgehoben,
+ * weil keiner wichtiger ist — der Kunde sucht seinen eigenen. */
+.cc-va-vorteile-gitter {
+  display: grid;
+  gap: var(--cc-space-3);
+  grid-template-columns: 1fr;
+  margin-top: var(--cc-space-3);
+}
+
+@media (min-width: 45em) {
+  .cc-va-vorteile-gitter {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cc-va-vorteil {
+  background: var(--cc-flaeche);
+  border: 1px solid var(--cc-linie);
+  border-radius: var(--cc-radius-bild);
+  padding: var(--cc-space-3);
+}
+
+.cc-va-vorteil h3 {
+  font-size: var(--cc-fs-3);
+  margin: 0 0 var(--cc-space-1);
+}
+
+.cc-va-vorteil p {
+  color: var(--cc-text);
+  margin: 0;
+}
+
+/* --- Herkunft: Bild links, Beleg rechts. Der Beleg-Link ist ein Link und
+ * kein Knopf — er fuehrt zu einem Dokument, nicht zu einer Handlung. */
+.cc-va-herkunft {
+  align-items: center;
+  display: grid;
+  gap: var(--cc-space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 45em) {
+  .cc-va-herkunft {
+    grid-template-columns: 1fr 1.1fr;
+  }
+}
+
+.cc-va-herkunft-bild img {
+  border-radius: var(--cc-radius-bild);
+  display: block;
+  width: 100%;
+}
+
+.cc-va-herkunft h2 {
+  margin-top: 0;
+}
+
+.cc-va-beleg-link {
+  color: var(--cc-gold-text);
+  font-weight: 600;
+  text-underline-offset: 4px;
+}
+
+/* --- Stimmen: drei Karten, ruhig, Zahlen und Zitate lesbar. Die Sterne sind
+ * hier `d` (darstellend) und tragen denselben lesbaren Goldton wie auf der
+ * Kaufseite. */
+.cc-va-stimmen-gitter {
+  display: grid;
+  gap: var(--cc-space-3);
+  grid-template-columns: 1fr;
+  margin-top: var(--cc-space-3);
+}
+
+@media (min-width: 45em) {
+  .cc-va-stimmen-gitter {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.cc-va-stimme {
+  background: var(--cc-flaeche);
+  border: 1px solid var(--cc-linie);
+  border-radius: var(--cc-radius-bild);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-2);
+  margin: 0;
+  padding: var(--cc-space-3);
+}
+
+.cc-va-stimme blockquote {
+  border: 0;
+  font-size: var(--cc-fs-2);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  quotes: none;
+}
+
+.cc-va-stimme figcaption {
+  color: var(--cc-muted);
+  font-size: var(--cc-fs-1);
+  margin-top: auto;
+}
+
+.cc-va-stimmen-quelle {
+  color: var(--cc-muted);
+  font-size: var(--cc-fs-1);
+  margin-top: var(--cc-space-2);
+}
+
+/* --- Abschluss: die einzige Stelle der Seite mit einer Flaeche. Sie traegt
+ * den Kaufweg, und Gold traegt in diesem Laden Handlung. */
+.cc-va-abschluss {
+  background: var(--cc-flaeche);
+  border: 1px solid var(--cc-linie);
+  border-radius: var(--cc-radius-bild);
+  padding: var(--cc-space-4) var(--cc-space-3);
+  text-align: center;
+}
+
+.cc-va-abschluss h2 {
+  margin-top: 0;
+}
+
+.cc-va-abschluss-lead {
+  margin: 0 auto var(--cc-space-3);
+  max-width: var(--cc-zeile-max, 70ch);
+}
+
+.cc-va-abschluss-liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-1) var(--cc-space-3);
+  justify-content: center;
+  list-style: none;
+  margin: 0 0 var(--cc-space-3);
+  padding: 0;
+}
+
+.cc-va-abschluss-liste li {
+  color: var(--cc-muted);
+  font-size: var(--cc-fs-1);
+}
+
+.cc-va-abschluss-knopf {
+  justify-content: center;
+}

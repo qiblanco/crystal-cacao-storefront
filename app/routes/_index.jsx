@@ -3,6 +3,14 @@ import {Suspense} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
 import {cacaoPricing} from '~/components/CacaoProductForm';
+import {
+  Aufmacher as VaAufmacher,
+  Vorteile as VaVorteile,
+  Herkunft as VaHerkunft,
+  Stimmen as VaStimmen,
+  Abschluss as VaAbschluss,
+} from '~/components/startseite/Verkaufsauftritt';
+import {zeigeVerkaufsauftritt} from '~/lib/startseite-fassung';
 import {MockShopNotice} from '~/components/MockShopNotice';
 import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
 
@@ -31,7 +39,7 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {Route.LoaderArgs}
  */
-async function loadCriticalData({context}) {
+async function loadCriticalData({context, request}) {
   const [{collection}] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY, {
       variables: {handle: KAKAO_KOLLEKTION},
@@ -42,6 +50,10 @@ async function loadCriticalData({context}) {
   return {
     isShopLinked: Boolean(context.env.PUBLIC_STORE_DOMAIN),
     featuredCollection: collection,
+    // Die Fassung wird SERVERSEITIG entschieden, nicht im Browser: sonst
+    // rendert der Server das eine und der Browser das andere, und React
+    // wirft einen Hydration-Fehler statt einer Seite.
+    verkaufsauftritt: zeigeVerkaufsauftritt(request),
   };
 }
 
@@ -153,12 +165,40 @@ function KachelPreis({produkt}) {
 export default function Homepage() {
   /** @type {LoaderReturnData} */
   const data = useLoaderData();
+  if (data.verkaufsauftritt) return <Verkaufsauftritt data={data} />;
   return (
     <div className="home">
       {data.isShopLinked ? null : <MockShopNotice />}
       <Aufmacher />
       <FeaturedCollection collection={data.featuredCollection} />
       <RecommendedProducts products={data.recommendedProducts} />
+    </div>
+  );
+}
+
+/**
+ * DIE STARTSEITE ALS VERKAUFSAUFTRITT — Teil 2 des Auftrags vom 2026-09-08,
+ * ENTWURF. Sie ist heute nur unter `?entwurf=1` zu sehen; der Schalter und
+ * seine Begruendung stehen in app/lib/startseite-fassung.js.
+ *
+ * DIE REIHENFOLGE IST DER GANZE UNTERSCHIED und sie ist nicht Geschmack:
+ * Aufmacher (worum geht es) -> Nutzen (warum dieser Kakao) -> Beleg (Herkunft
+ * und Laboranalyse) -> Menschen (drei echte Google-Bewertungen) -> Wahl
+ * (welche der zwei Sorten) -> Abschluss (Risikoumkehr, Versand, Kaufweg).
+ * Die Sortenkacheln bleiben, sie stehen nur nicht mehr allein und nicht mehr
+ * am Anfang: die Frage „welche nehme ich" kommt nach der Frage „will ich das
+ * ueberhaupt", nie davor.
+ */
+function Verkaufsauftritt({data}) {
+  return (
+    <div className="home home--verkaufsauftritt">
+      {data.isShopLinked ? null : <MockShopNotice />}
+      <VaAufmacher />
+      <VaVorteile />
+      <VaHerkunft />
+      <VaStimmen />
+      <RecommendedProducts products={data.recommendedProducts} />
+      <VaAbschluss />
     </div>
   );
 }
