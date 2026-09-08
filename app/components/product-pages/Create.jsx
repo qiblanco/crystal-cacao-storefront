@@ -1,4 +1,5 @@
 import LazyImage from '../reusables/LazyImage';
+import {Belege} from '../reusables/Belege';
 import {ProductFAQ} from '../ProductFAQ';
 import {FAQ_CACAO} from '~/data/product-faqs';
 
@@ -406,6 +407,7 @@ export default function CreateProductPage() {
         src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/bohne-create.jpg?v=1763083566"
         text=""
       />
+      <Belege sorte="crystal-cacao-create" />
       <ProductFAQ items={FAQ_CACAO} />
     </>
   );

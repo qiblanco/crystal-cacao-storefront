@@ -1,4 +1,5 @@
 import LazyImage from '../reusables/LazyImage';
+import {Belege} from '../reusables/Belege';
 import {KAKAO_KENNZAHLEN} from '~/lib/kakao-zone';
 import {ActiveCampaignForm} from '../reusables/ActiveCampaignForm';
 import {SwipeTable} from '../reusables/SwipeTable';
@@ -12,6 +13,7 @@ export function Kakao() {
       <Benefits />
       <SideToSideWithTable />
       <ComparisonTable />
+      <Belege id="cc-pruefdokumente" />
       <HerobannerWithText
         text="Wach. Klar. Im Flow."
         src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06610.jpg?v=1763050714"
@@ -109,8 +111,8 @@ function Hero() {
           <a href="/products/crystal-cacao-create" className="btn--primary">
             Jetzt kaufen
           </a>
-          <a target='_blank'
-            href="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/Test_report_Create_27.10.2025_english_language.pdf?v=1763061829"
+          <a
+            href="#cc-pruefdokumente"
             className="btn--secondary border-none! bg-[#00000025]"
           >
             Analyse anzeigen
@@ -339,11 +341,9 @@ function ComparisonTable() {
         </SwipeTable>
         <div className="text-center">
           <a
-            target="_blank"
-            href="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/Test_report_Create_27.10.2025_english_language.pdf?v=1763061829"
+            href="#cc-pruefdokumente"
             className="btn--secondary mx-auto! mt-2!"
-            rel="noreferrer"
-          >
+            >
             Analysedaten
           </a>
         </div>

@@ -1749,3 +1749,64 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 .cc-va-abschluss-knopf {
   justify-content: center;
 }
+
+/* ---------------------------------------------------------------------------
+   Prüfdokumente (Belege.jsx) — Auftragspunkt 6, Job 20260908-BAU-crystal-cacao-…
+   Christian am 2026-09-08: „Die Zertifikate sind nicht mehr herunterladbar …
+   das trifft genau die Besucher, die prüfen wollen."
+
+   BEWUSST KEINE KNOPF-GESTALT. Dieselbe Entscheidung wie beim
+   Gewährleistungshinweis im selben Auftrag: ein Pflicht- oder Belegelement
+   konkurriert nicht mit „In den Warenkorb legen". Die Zeilen sind Textlinks.
+   Sie brauchen deshalb auch keine :where()-Entschärfung — die globale
+   Knopf-Regel in app.css ist seit diesem Job eine Basis (0-0-2), die eine
+   eigene Klasse überschreiben darf.
+--------------------------------------------------------------------------- */
+.cc-belege {
+  max-width: var(--cc-kaufblock-max, 400px);
+  margin: 6vh auto;
+  padding: 0 1rem;
+}
+
+.cc-belege__titel {
+  font-size: 1.125rem !important;
+  margin-bottom: 0.75rem !important;
+  color: var(--cc-kraft-tief, #4a4741);
+}
+
+.cc-belege__liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cc-belege__liste li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.cc-belege__link {
+  color: var(--cc-gold-text, #90671D);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cc-belege__link:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Labor, Datum und Zertifikatsnummer stehen absichtlich VOR dem Klick da:
+   die Zeugnisse sind von 2025, und niemand soll Aktualität annehmen müssen. */
+.cc-belege__quelle {
+  font-size: 0.8125rem;
+  color: var(--cc-muted, #6b665d);
+}
+
+.cc-belege__grenze {
+  margin-top: 0.9rem;
+  font-size: 0.8125rem;
+  color: var(--cc-muted, #6b665d);
+}
