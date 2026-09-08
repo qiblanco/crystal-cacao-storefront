@@ -2064,3 +2064,120 @@ aside header h3 {
   font-size: var(--cc-fs-3, 1.25rem);
   color: var(--cc-dunkel, #171310);
 }
+
+/* --- 26. DIE WARENKORB-ZEILE PASST IN DIE SCHUBLADE --- 2026-09-08
+ * (Job 20260908-crystal-warenkorb-zeile-laeuft-34px-ueber-die-drawerkante-prio35)
+ *
+ * DER BEFUND, GEMESSEN UND NICHT VERMUTET (A/B im selben Browser, zwei
+ * Artikel, zwei Viewports): die Warenkorb-Zeile lief ueber die rechte Kante
+ * der Schublade hinaus — 20 Elemente bis x=424 bei einer 390 px breiten
+ * Schublade (34 px), und bei 360 px waren es 80 px, weil die Textspalte mit
+ * ihren 296 px min-content-Breite NICHT mit dem Viewport mitwanderte.
+ * Abgeschnitten waren Produkttitel, Preis, Variante — und der 126 px breite
+ * "Entfernen"-Knopf stand zur Haelfte draussen ("Entfern").
+ *
+ * DIE URSACHENKETTE, GLIED FUER GLIED BELEGT (Gegenproben im RESULT):
+ *   1. `.cart-line-quantity` ist eine Flex-Zeile OHNE Umbruch. Ihre
+ *      min-content-Breite ist damit die SUMME ihrer Kinder — sie kann gar
+ *      nicht schmaler werden, egal wie schmal das Geraet ist.
+ *   2. Die Textspalte daneben ist ein Flex-Kind und traegt per Default
+ *      `min-width: auto`. Ein Flex-Kind schrumpft NICHT unter seine
+ *      min-content-Breite. Die 296 px aus (1) waren damit eine Untergrenze.
+ *   3. Und die 296 px kamen aus Abschnitt 17: `main button:not(.reset)…`
+ *      gibt JEDEM Knopf `padding: 0 var(--cc-space-3)` = 48 px Luft. Fuer
+ *      einen Knopf mit EINEM Zeichen ("−", "+") ist das der halbe Knopf.
+ *      Gemeint war Seiteninhalt; getroffen wurde jede Schublade mit, denn
+ *      `Aside.jsx` baut `<aside><main>…</main></aside>`. Dieselbe Wurzel wie
+ *      der Fuss-Befund vom selben Tag, nur die andere Achse.
+ *
+ * WAS HIER AUSDRUECKLICH NICHT PASSIERT: die 44-px-Trefferflaechen werden
+ * NICHT angetastet (WCAG 2.5.5, bewusst gesetzt 2026-09-02). Die A/B-
+ * Gegenprobe "nur das Polster weg" heilt den Ueberlauf zwar auf 0 px, macht
+ * aus den Schrittknoepfen aber 11x44 px — eine Barrierefreiheits-Regression
+ * gegen einen Geometrie-Befund einzutauschen waere kein Fix. Die Zonenwache
+ * misst diesen Ausweg seit heute mit (Arm ZEILE-TREFFERFLAECHE) und faellt
+ * darauf durch.
+ *
+ * WARUM DIESER BLOCK AM ENDE STEHT und nicht bei Abschnitt 15: die
+ * Token-Regeln in Abschnitt 17 haben dieselbe Spezifitaet wie die Selektoren
+ * hier (`main button:not(.reset):not(.cc-knopf)` = 0-2-2). Bei Gleichstand
+ * gewinnt die spaetere Regel. Ein Block bei 15 haette verloren — gemessen:
+ * genau so ist die erste Fassung dieses Fix an den Schrittknoepfen
+ * wirkungslos geblieben, waehrend sie am Entfernen-Knopf (hoehere Spezifitaet)
+ * griff. Die Selektoren unten gewinnen zusaetzlich AUS EIGENER KRAFT; die
+ * Position ist der zweite Gurt, nicht der einzige.
+ *
+ * NICHT auf `aside` gescopt, und das ist Absicht: die /cart-SEITE rendert
+ * dieselbe Komponente. Umbruch und Mindestbreite koennen dort nichts
+ * verschlechtern (sie greifen nur, wenn der Platz fehlt), und ein zweites
+ * Aussehen fuer dieselbe Bedienung waere teurer als der geteilte Stand. */
+
+/* (1) Die Textspalte darf unter ihre min-content-Breite. OHNE das nuetzt der
+ *     Umbruch unten nichts — gemessen: mit Umbruch allein blieben 4 Elemente
+ *     und 17 px Ueberlauf uebrig. */
+.cart-line-inner > * {
+  min-width: 0;
+}
+
+/* (2) …das Produktbild aber NICHT. Es traegt `flex: 0 1 auto`; mit (1) allein
+ *     schrumpfte es gemessen von 100 auf 83 px (bei 360 auf 76). Der Kunde
+ *     erkennt seine Ware am Bild — es ist das Letzte, was schrumpfen darf. */
+.cart-line img {
+  flex-shrink: 0;
+}
+
+/* (3) DIE EIGENTLICHE HEILUNG: die Mengenzeile bricht um, statt hinauszulaufen.
+ *     Damit ist die min-content-Breite der Zeile nicht mehr die SUMME ihrer
+ *     Kinder, sondern nur noch ihr BREITESTES Kind ("Entfernen", 93 px) —
+ *     die Zeile passt damit bis hinunter zu rund 270 px Schubladenbreite.
+ *
+ *     EHRLICH NACHGEMESSEN, statt "auf breiten Geraeten bleibt es einzeilig"
+ *     zu behaupten: sie bleibt es NIRGENDS. Die Schublade ist per
+ *     `--aside-width` auf 400 px gedeckelt und die /cart-Seite auf `main`
+ *     400 px; gemessen bei Viewport 1280 ist die Mengenzeile ebenfalls 96 px
+ *     hoch, also zweizeilig. Die Zeile braucht 268 px und bekommt hoechstens
+ *     256 — es fehlen ueberall dieselben 12 px.
+ *     DAS IST KEIN KOMPROMISS, SONDERN DIE BESSERE LAGE, und der Grund steht
+ *     hier, damit ihn niemand spaeter "wegoptimiert": zweizeilig liegt
+ *     "Entfernen" NICHT 8 px neben "+". Auf einem Telefon ist ein
+ *     Fehlgriff auf die unwiderrufliche Handlung teurer als eine gesparte
+ *     Zeile. Wer die 12 px durch schmaleres Polster holen will, holt sich
+ *     genau diese Nachbarschaft zurueck. */
+.cart-line-quantity {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--cc-space-1, 0.5rem);
+}
+
+/* (4) Ein Knopf mit EINEM Zeichen braucht keine 24 px Polster je Seite. Die
+ *     Trefferflaeche wird dabei nicht kleiner, sondern QUADRATISCH: 44x44
+ *     statt 59x44 — genau das Mass, das das Token vorgibt. */
+main .cart-line-quantity button[name='decrease-quantity'],
+main .cart-line-quantity button[name='increase-quantity'] {
+  min-width: var(--cc-treffer-min, 44px);
+  padding: 0;
+}
+
+/* (5) "Entfernen" ist die GEGENHANDLUNG zum Kauf und traegt deshalb nicht den
+ *     einen Gold-Akzent. Die Designsprache dieses Shops sagt es selbst
+ *     (kakao-seiten.css): `--cc-gold` ist "der eine Akzent — nur
+ *     Handlung/Beweis", akzent_farben_max 1. Drei goldene Pillen je
+ *     Warenkorb-Zeile, davon die lauteste am Entfernen, stellen die Hierarchie
+ *     auf den Kopf: die Schublade wird am NAECHSTEN KLICK gemessen, und der
+ *     heisst "zur Kasse", nicht "Entfernen".
+ *     Ruhig heisst NICHT unsichtbar: Rahmen, Radius und die volle 44-px-Hoehe
+ *     bleiben, es ist weiter erkennbar ein Knopf und kein Wort. */
+main .cart-line-quantity form button[type='submit']:not([name]) {
+  background: transparent;
+  border-color: var(--cc-linie, #e6ded3);
+  color: var(--cc-muted, #6b665d);
+  font-size: var(--cc-fs-1, 0.8rem);
+  font-weight: 400;
+  padding: 0 var(--cc-space-2, 1rem);
+}
+
+main .cart-line-quantity form button[type='submit']:not([name]):hover {
+  background: var(--cc-flaeche, #f6f1ea);
+  border-color: var(--cc-muted, #6b665d);
+  color: var(--cc-dunkel, #171310);
+}
