@@ -60,7 +60,7 @@ export function Aufmacher() {
           Tasse Kaffee hat 80 bis 100.
         </p>
         <div className="cc-knopfreihe">
-          <Link className="cc-knopf" to="/pages/crystal-cacao">
+          <Link className="cc-knopf" to="/">
             Unseren Kakao ansehen
           </Link>
           <Link className="cc-knopf cc-knopf--ruhig" to="/collections/zeremonie-kakao">
@@ -245,7 +245,7 @@ export function Abschluss() {
         <li>Bio-zertifiziert nach DE-ÖKO-006</li>
       </ul>
       <div className="cc-knopfreihe cc-va-abschluss-knopf">
-        <Link className="cc-knopf" to="/pages/crystal-cacao">
+        <Link className="cc-knopf" to="/">
           Unseren Kakao ansehen
         </Link>
       </div>

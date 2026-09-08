@@ -31,8 +31,10 @@
     },
     {
       "upstream": "app/components/CacaoProductForm.jsx",
-      "klasse": "K1",
-      "sha256": "3b0c70bea5193b440de3ca053dc48a281054d987039dff259364aa59100c483c"
+      "klasse": "K2",
+      "sha256_upstream": "3b0c70bea5193b440de3ca053dc48a281054d987039dff259364aa59100c483c",
+      "sha256_lokal": "5181d1d6db8bafa0be360d522fad880d96c1884575fafd6783264b007eb67f43",
+      "abweichung_grund": "Gestalt der EU-Gewaehrleistungs-Mitteilung, Job 20260908-BAU-crystal-cacao-nachtrag-unser-kakao-wird-startseite-... Christian: 'Der Button gesetzliche Garantie ist mega gross und komisch. Das sollte einfach als weitere Zeile bei den Gimmicks aufgelistet werden.' Der Ausloeser <EuGewaehrleistungsHinweis/> ist aus CacaoProductForm in die Vertrauensliste CacaoBenefitList der beiden Kaufrouten gewandert. WORTLAUT, Overlay und Sichtbarkeit vor der Bindung sind UNVERAENDERT; geaendert ist allein die Gestalt. Die drei Dateien haengen zusammen und wurden deshalb gemeinsam K1->K2 gestuft: die Vertrauensliste steht hart in den beiden Routen, eine Ebene tiefer gibt es sie nicht. Die MENGE der Seiten mit Pflichthinweis aendert sich dadurch nicht (CacaoProductForm hat auf diesem Laden genau zwei Aufrufer, gemessen 2026-09-08); der Catch-all products.$handle benutzt ProductForm und bringt seinen Hinweis weiter selbst mit."
     },
     {
       "upstream": "app/components/ProductFAQ.jsx",
@@ -110,18 +112,22 @@
       "upstream": "app/routes/pages.crystal-cacao.jsx",
       "klasse": "K2",
       "sha256_upstream": "a21e428f9f43e31755d92876c4342d00cb8b606d49f8a071c5c0622c29720796",
-      "sha256_lokal": "2f9dc5442d31c311bdc60ba501eaacde27cff8ea2dbc6b8416d0ad10caa4a0da",
-      "abweichung_grund": "Fremde ANZEIGE-Marke im Absender (derselbe Job). Diese Route trug den Titel als einziges noch als LITERAL: `Crystal Cacao(R) | Qi Blanco`. Segment s02 hatte ABSENDER_MARKE in 13 Route-Dateien umgesetzt, diese blieb uebrig -- und es ist die meistgesehene Kakao-Flaeche (Browser-Tab UND SERP-Zeile). Lokal zieht der Titel jetzt ABSENDER_MARKE. DER SEITENNAME WANDERT MIT, und das ist kein Zusatzwunsch: der alte Titel war '<Seitenname> | <Absender>'. Tauscht man nur den Absender, steht dort 'Crystal Cacao(R) | Crystal Cacao(R)' -- die Marke zweimal, die Seite ohne Aussage. Der neue Seitenname 'Zeremonie-Kakao aus Peru' nimmt ausschliesslich Worte auf, die auf DIESER Route schon stehen (die description direkt darunter nennt 'Naturkakao aus Peru', die Startseite 'zeremonieller Ernte'). In der qiblanco-Vorlage waere derselbe Titel falsch: dort IST 'Qi Blanco' der richtige Absender. Byte-Gleichheit ist damit baulich unmoeglich. ABGRENZUNG wie bei produkt-seo.js: ANZEIGE-Marke, nicht Rechtsperson; Impressum, AGB und Datenschutz bleiben unberuehrt."
+      "sha256_lokal": "0f3470d24a81a36a81649842e4c055e4633eb757527f354de5ff2c68c169ab90",
+      "abweichung_grund": "Diese Route rendert seit dem 2026-09-08 nichts mehr, sie leitet dauerhaft (301) auf '/'. Christian: 'ist ‚Unser Kakao’ nicht die bessere Frontseite — ich wuerde sagen schon. Also das ist redundant. Einfach diese Version uebernehmen.' Der Inhalt (product-pages/Kakao.jsx) wird seither von app/routes/_index.jsx unter '/' gerendert. Die Vorlage qiblanco-storefront rendert unter dieser Adresse weiter die Uebersichtsseite — Byte-Gleichheit ist damit baulich ausgeschlossen. Ersetzt den frueheren Abweichungsgrund (fremde ANZEIGE-Marke im Absender), der mit dem Inhalt dieser Datei weggefallen ist."
     },
     {
       "upstream": "app/routes/products.crystal-cacao-awake.jsx",
-      "klasse": "K1",
-      "sha256": "b4a9bbb431c8198b94f10396af10aef10b3996157eb716c903ae7899d12a70a4"
+      "klasse": "K2",
+      "sha256_upstream": "b4a9bbb431c8198b94f10396af10aef10b3996157eb716c903ae7899d12a70a4",
+      "sha256_lokal": "63ffe4c3c534e66a0551d085b895a2ef8de7926104aa822e7effd5a12df0fe7e",
+      "abweichung_grund": "Gestalt der EU-Gewaehrleistungs-Mitteilung, Job 20260908-BAU-crystal-cacao-nachtrag-unser-kakao-wird-startseite-... Christian: 'Der Button gesetzliche Garantie ist mega gross und komisch. Das sollte einfach als weitere Zeile bei den Gimmicks aufgelistet werden.' Der Ausloeser <EuGewaehrleistungsHinweis/> ist aus CacaoProductForm in die Vertrauensliste CacaoBenefitList der beiden Kaufrouten gewandert. WORTLAUT, Overlay und Sichtbarkeit vor der Bindung sind UNVERAENDERT; geaendert ist allein die Gestalt. Die drei Dateien haengen zusammen und wurden deshalb gemeinsam K1->K2 gestuft: die Vertrauensliste steht hart in den beiden Routen, eine Ebene tiefer gibt es sie nicht. Die MENGE der Seiten mit Pflichthinweis aendert sich dadurch nicht (CacaoProductForm hat auf diesem Laden genau zwei Aufrufer, gemessen 2026-09-08); der Catch-all products.$handle benutzt ProductForm und bringt seinen Hinweis weiter selbst mit."
     },
     {
       "upstream": "app/routes/products.crystal-cacao-create.jsx",
-      "klasse": "K1",
-      "sha256": "c79d1e6c26b01830e5957afeeae37a7f0c4aabda5f74b7c3b1b5226eeba032f6"
+      "klasse": "K2",
+      "sha256_upstream": "c79d1e6c26b01830e5957afeeae37a7f0c4aabda5f74b7c3b1b5226eeba032f6",
+      "sha256_lokal": "7997a784cfe343692f5f552b4cf932ead056a42b201eec6ad3f55acbbd260c8f",
+      "abweichung_grund": "Gestalt der EU-Gewaehrleistungs-Mitteilung, Job 20260908-BAU-crystal-cacao-nachtrag-unser-kakao-wird-startseite-... Christian: 'Der Button gesetzliche Garantie ist mega gross und komisch. Das sollte einfach als weitere Zeile bei den Gimmicks aufgelistet werden.' Der Ausloeser <EuGewaehrleistungsHinweis/> ist aus CacaoProductForm in die Vertrauensliste CacaoBenefitList der beiden Kaufrouten gewandert. WORTLAUT, Overlay und Sichtbarkeit vor der Bindung sind UNVERAENDERT; geaendert ist allein die Gestalt. Die drei Dateien haengen zusammen und wurden deshalb gemeinsam K1->K2 gestuft: die Vertrauensliste steht hart in den beiden Routen, eine Ebene tiefer gibt es sie nicht. Die MENGE der Seiten mit Pflichthinweis aendert sich dadurch nicht (CacaoProductForm hat auf diesem Laden genau zwei Aufrufer, gemessen 2026-09-08); der Catch-all products.$handle benutzt ProductForm und bringt seinen Hinweis weiter selbst mit."
     },
     {
       "upstream": "app/styles/qb-swipetab.css",

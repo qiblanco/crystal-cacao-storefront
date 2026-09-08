@@ -48,6 +48,7 @@ import {
   KAKAO_KOLLEKTIONEN,
   KAKAO_SEITEN,
   KAKAO_BLOGS,
+  UMGELEITETE_SEITEN,
 } from '~/lib/kakao-zone';
 
 /** Wieviele Produkte höchstens gezogen werden. Deckelt die Antwort, entscheidet nichts. */
@@ -162,6 +163,12 @@ export async function sitemapSeiten({storefront, origin}) {
   }
   for (const seite of seiten) {
     if (!KAKAO_SEITEN.includes(seite.handle)) continue;
+    // Eine Adresse, die dauerhaft weiterleitet, gehört nicht in die eigene
+    // Sitemap: sie meldet einen Inhalt an, den es dort nicht mehr gibt, und
+    // ist damit dieselbe Fehlerform wie die 404-Einträge, die dieser Zaun
+    // 2026-09-02 abgestellt hat — nur eine Stufe leiser. Das Ziel steht
+    // ohnehin schon als Eintrag 1 (die Startseite) in dieser Liste.
+    if (seite.handle in UMGELEITETE_SEITEN) continue;
     eintraege.push(
       urlEintrag({
         loc: `${origin}/pages/${seite.handle}`,

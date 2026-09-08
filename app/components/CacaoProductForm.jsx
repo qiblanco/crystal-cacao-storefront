@@ -1,5 +1,4 @@
 import {AddToCartButton} from './AddToCartButton';
-import {EuGewaehrleistungsHinweis} from './EuGewaehrleistungsLabel';
 import {useAside} from './Aside';
 import {anzeigeSatz, formatPreis} from '~/lib/markt-pricing';
 
@@ -149,20 +148,30 @@ export function CacaoProductForm({selectedVariant, handle, quantity, onQuantityC
         </AddToCartButton>
       </div>
       {/*
-        Sichtbarer Text-Link zur Pflichtmitteilung, unmittelbar unter dem
-        Kauf-Button (Art. 6 Abs. 1 lit. l RL 2011/83/EU: "in hervorgehobener
-        Weise", BEVOR der Verbraucher gebunden ist). Die amtliche Grafik
-        selbst erscheint erst im Overlay nach Klick -- so beschreiben es die
-        Praxisleitlinien der Kommission (April 2026, Abschnitt 2.3) für die
-        Mitteilung.
+        DIE PFLICHTMITTEILUNG STAND BIS ZUM 2026-09-08 HIER — jetzt steht sie
+        als Zeile in der Vertrauensliste der beiden Kakao-Kaufseiten
+        (<CacaoBenefitList/> in products.crystal-cacao-awake.jsx und
+        -create.jsx). Christian, woertlich: „Der Button gesetzliche Garantie
+        ist mega gross und komisch. Das sollte einfach als weitere Zeile bei
+        den Gimmicks aufgelistet werden."
 
-        Die Naht sitzt bewusst HIER und nicht in den einzelnen
-        Produktseiten-Komponenten: die Kaufflaechen entstehen über
-        veroeffentlichte Shopify-Produkte, von denen ein Grossteil ohne
-        eigene Route-Datei über den Catch-all läuft. Eine Naht je Seite
-        würde genau die stillschweigend auslassen.
+        DER WORTLAUT IST UNVERAENDERT und die Anforderung gehalten: der Satz
+        steht weiter sichtbar, unmittelbar unter dem Kauf-Button und BEVOR
+        der Verbraucher gebunden ist (Art. 6 Abs. 1 lit. l RL 2011/83/EU,
+        "in hervorgehobener Weise"); die amtliche Grafik erscheint
+        unveraendert erst im Overlay nach dem ersten Klick (Praxisleitlinien
+        der Kommission, April 2026, Abschnitt 2.3). Geaendert hat sich allein
+        die GESTALT.
+
+        WAS DIESER UMZUG NICHT VERAENDERT, gemessen und nicht angenommen:
+        die MENGE der Seiten, die die Mitteilung tragen. Der urspruengliche
+        Kommentar hier begruendete die Naht damit, dass Kaufflaechen ueber
+        den Catch-all products.$handle entstehen — der benutzt aber
+        <ProductForm/> und bringt seinen eigenen Hinweis mit.
+        <CacaoProductForm/> hat auf diesem Laden genau ZWEI Aufrufer
+        (gemessen 2026-09-08: die beiden Kakao-Kaufrouten), und genau diese
+        zwei bekommen die Zeile jetzt in ihrer Vertrauensliste.
       */}
-      <EuGewaehrleistungsHinweis />
     </div>
   );
 }

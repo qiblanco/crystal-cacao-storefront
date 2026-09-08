@@ -139,7 +139,7 @@ function SearchResultsEmpty() {
         Probier’s mit einem anderen Wort — oder sieh dir gleich unsere zwei
         Sorten an.
       </p>
-      <Link className="cc-knopf" to="/pages/crystal-cacao">
+      <Link className="cc-knopf" to="/">
         Unseren Kakao ansehen
       </Link>
     </div>

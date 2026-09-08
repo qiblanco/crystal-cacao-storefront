@@ -75,7 +75,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 function CacaoAnnouncementBanner() {
   return (
     <div className="Header-AnnouncementBanner">
-      <NavLink prefetch="intent" to="/pages/crystal-cacao">
+      <NavLink prefetch="intent" to="/">
         <p>
           <span className="banner-line">
             {KAKAO_KENNZAHLEN.bewertungSkala} ⭐⭐⭐⭐⭐ - Über{' '}

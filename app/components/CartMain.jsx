@@ -112,7 +112,7 @@ function CartEmpty({hidden = false}) {
       </p>
       <Link
         className="cc-knopf"
-        to="/pages/crystal-cacao"
+        to="/"
         onClick={close}
         prefetch="viewport"
       >
