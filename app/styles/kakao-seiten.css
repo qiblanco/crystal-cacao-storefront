@@ -679,6 +679,24 @@
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
+
+  /* DIE TREFFERFLAECHE — und warum hier 24 px statt der 44 px des Hauses.
+     GEMESSEN 2026-09-08 am gerenderten DOM: die Zeile war 44 px hoch,
+     ihre fuenf Nachbarn 19 px. Damit war sie auch als Zeile noch der
+     groesste Klotz der Liste — genau der Eindruck, den Christian
+     beanstandet hat („mega gross und komisch"), nur eine Nummer kleiner.
+     Ursache ist die Basisregel `main button` in app.css
+     (min-height: var(--cc-treffer-min, 44px), WCAG 2.5.5 AAA). Sie ist
+     fuer einen FREISTEHENDEN Knopf richtig; fuer einen Ausloeser INNERHALB
+     einer Textzeile ist sie es nicht.
+     WEGGENOMMEN WIRD SIE TROTZDEM NICHT: eine Pflichtmitteilung, die man
+     auf dem Telefon nicht trifft, waere schlechter als eine zu grosse.
+     24 px ist die Mindestgroesse aus WCAG 2.5.8 (Target Size Minimum, AA)
+     — also der begruendete Boden, nicht der bequemste Wert. Die Zeile ist
+     damit 5 px hoeher als ihre Nachbarn statt 25. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 .UpsellItem .btn--primary {
   width: 100%;
