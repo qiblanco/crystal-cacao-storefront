@@ -1,4 +1,5 @@
-import {CartForm, Money} from '@shopify/hydrogen';
+import {CartForm} from '@shopify/hydrogen';
+import {Preis} from './Preis';
 import {useEffect, useId, useRef, useState} from 'react';
 import {useFetcher} from 'react-router';
 
@@ -28,7 +29,7 @@ export function CartSummary({cart, layout}) {
         <dt>Zwischensumme</dt>
         <dd>
           {cart?.cost?.subtotalAmount?.amount ? (
-            <Money data={cart?.cost?.subtotalAmount} />
+            <Preis data={cart?.cost?.subtotalAmount} />
           ) : (
             '-'
           )}
@@ -257,7 +258,7 @@ function CartGiftCard({giftCardCodes, giftCardHeadingId, giftCardInputId}) {
               >
                 <code>***{giftCard.lastCharacters}</code>
                 &nbsp;
-                <Money data={giftCard.amountUsed} />
+                <Preis data={giftCard.amountUsed} />
               </RemoveGiftCardForm>
             </dd>
           ))}

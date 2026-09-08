@@ -2,6 +2,7 @@ import {Await, useLoaderData, Link} from 'react-router';
 import {Suspense} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
+import {cacaoPricing} from '~/components/CacaoProductForm';
 import {MockShopNotice} from '~/components/MockShopNotice';
 import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
 
@@ -97,6 +98,57 @@ const SORTEN_ORIENTIERUNG = Object.freeze({
   awake: 'Für den Start in den Tag.',
   create: 'Für den klaren Kopf.',
 });
+
+/**
+ * DIE MENGE, DIE DIE KACHEL ZEIGT — 2026-09-08.
+ *
+ * Christian: „Auf der Startseite steht bei beiden Sorten €71.03, auf der
+ * Produktseite 53,- € (gestrichen 76,- €). Ein Besucher sieht auf der
+ * Startseite den hoechsten Preis ohne Rabatt und klickt weg, bevor er das
+ * Angebot je sieht."
+ *
+ * BEIDE ZAHLEN WAREN RICHTIG, sie beantworteten nur verschiedene Fragen. 71,03
+ * ist der NETTO-Betrag der Variante aus der Storefront-API; die Kaufseite
+ * rechnet daraus ueber `cacaoPricing()` Brutto (7 % Kakao-Satz) und die
+ * Mengenstaffel: 71,03 -> 76,- € einzeln, 53,- € pro Packung im Dreierbund.
+ * Die Kaufseite steht dabei auf `useState('3')`
+ * (app/routes/products.crystal-cacao-awake.jsx), zeigt also den Dreierbund —
+ * und genau den zeigt die Kachel jetzt auch.
+ *
+ * WARUM DIE ZAHL HIER TROTZDEM NICHT ERFUNDEN IST: gerechnet wird
+ * ausschliesslich mit `cacaoPricing()` aus dem K1-Bauteil CacaoProductForm;
+ * diese Datei kennt keine Preiszahl. Und weil die Kaufseite ihre Menge in
+ * einer eigenen Datei fuehrt, ist die GLEICHHEIT der beiden Anzeigen eine
+ * MESSGROESSE und keine Zusage: `crystal-cacao-node/proben/probe_sofortfehler.py`
+ * vergleicht Achse (1) den Kachelpreis mit dem Hauptpreis der Kaufseite und
+ * geht rot, sobald sie auseinanderlaufen.
+ */
+const KACHEL_MENGE = '3';
+
+/**
+ * Der Preisblock der Sortenkachel: derselbe Betrag, dieselbe Schreibweise und
+ * dieselbe Rabattlogik wie auf der Kaufseite — plus die eine Zeile, die auf der
+ * Kaufseite das Dropdown darunter liefert („3x 420g … pro Packung"). Ohne sie
+ * waere „53,- €" auf einer Kachel ohne Mengenwahl eine halbe Wahrheit.
+ */
+function KachelPreis({produkt}) {
+  const preis = cacaoPricing(
+    KACHEL_MENGE,
+    {price: produkt?.priceRange?.minVariantPrice},
+    produkt?.handle,
+  );
+  return (
+    <div className="cc-kachel-preis">
+      <span className="cc-kachel-preis-jetzt">{preis.price}</span>
+      {preis.compareAt ? (
+        <s className="cc-kachel-preis-vorher">{preis.compareAt}</s>
+      ) : null}
+      <span className="cc-kachel-preis-hinweis">
+        pro Packung im {KACHEL_MENGE}er-Set
+      </span>
+    </div>
+  );
+}
 
 export default function Homepage() {
   /** @type {LoaderReturnData} */
@@ -278,7 +330,11 @@ function RecommendedProducts({products}) {
                     data-cc-sorte={sorte}
                     key={produkt.id}
                   >
-                    <ProductItem product={produkt} loading="eager" />
+                    <ProductItem
+                      product={produkt}
+                      loading="eager"
+                      preisSlot={<KachelPreis produkt={produkt} />}
+                    />
                     <p className="cc-sorten-orientierung">
                       {SORTEN_ORIENTIERUNG[sorte]}
                     </p>

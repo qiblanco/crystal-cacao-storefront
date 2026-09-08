@@ -1,5 +1,6 @@
 import {Link} from 'react-router';
-import {Image, Money} from '@shopify/hydrogen';
+import {Image} from '@shopify/hydrogen';
+import {Preis} from './Preis';
 import {urlWithTrackingParams} from '~/lib/search';
 
 /**
@@ -119,7 +120,7 @@ function SearchResultsProducts({term, products}) {
                 {image && <Image data={image} alt={product.title} width={64} />}
                 <div>
                   <p>{product.title}</p>
-                  <small>{price && <Money data={price} />}</small>
+                  <small>{price && <Preis data={price} />}</small>
                 </div>
               </Link>
             </div>

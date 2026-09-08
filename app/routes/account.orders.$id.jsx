@@ -1,5 +1,6 @@
 import {redirect, useLoaderData} from 'react-router';
-import {Money, Image} from '@shopify/hydrogen';
+import {Image} from '@shopify/hydrogen';
+import {Preis} from '~/components/Preis';
 import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
 
 /**
@@ -110,7 +111,7 @@ export default function OrderRoute() {
                   {discountPercentage ? (
                     <span>-{discountPercentage} % Rabatt</span>
                   ) : (
-                    discountValue && <Money data={discountValue} />
+                    discountValue && <Preis data={discountValue} />
                   )}
                 </td>
               </tr>
@@ -123,7 +124,7 @@ export default function OrderRoute() {
                 <p>Zwischensumme</p>
               </th>
               <td>
-                <Money data={order.subtotal} />
+                <Preis data={order.subtotal} />
               </td>
             </tr>
             <tr>
@@ -134,7 +135,7 @@ export default function OrderRoute() {
                 <p>Steuer</p>
               </th>
               <td>
-                <Money data={order.totalTax} />
+                <Preis data={order.totalTax} />
               </td>
             </tr>
             <tr>
@@ -145,7 +146,7 @@ export default function OrderRoute() {
                 <p>Gesamt</p>
               </th>
               <td>
-                <Money data={order.totalPrice} />
+                <Preis data={order.totalPrice} />
               </td>
             </tr>
           </tfoot>
@@ -205,11 +206,11 @@ function OrderLineRow({lineItem}) {
         </div>
       </td>
       <td>
-        <Money data={lineItem.price} />
+        <Preis data={lineItem.price} />
       </td>
       <td>{lineItem.quantity}</td>
       <td>
-        <Money data={lineItem.totalDiscount} />
+        <Preis data={lineItem.totalDiscount} />
       </td>
     </tr>
   );
