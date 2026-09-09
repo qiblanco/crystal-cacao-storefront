@@ -187,6 +187,115 @@ export const UMGELEITETE_SEITEN = Object.freeze({
 export const KAKAO_BLOGS = Object.freeze([]);
 
 /**
+ * PRODUKTE, DIE DAUERHAFT WOANDERS HIN ZEIGEN — Handle -> Ziel.
+ *
+ * ANLASS 2026-09-09: `/products/crystal-cacao-adfiefiale` ist eine DUBLETTE der
+ * Create-Kaufseite unter einem Müll-Handle, `/products/test-page-…-spater-
+ * wieder-loschen` ein Testartefakt, das seinen Zweck im eigenen Titel nennt.
+ * Beide standen in der eigenen Sitemap und wurden damit aktiv bei
+ * Suchmaschinen angemeldet.
+ *
+ * WARUM HIER EINE LISTE STEHT UND DAS TROTZDEM KEIN LITERAL-ZAUN IST — die
+ * Unterscheidung trägt den ganzen Bau, deshalb ausführlich:
+ * Der ZAUN (wer fliegt aus der Sitemap?) ist eine EIGENSCHAFT und steht in
+ * `istTestartefakt()` / `titelSchluessel()` — er fängt den NÄCHSTEN
+ * Müll-Handle ohne Code-Änderung. Diese Liste hier ist kein Zaun, sondern ein
+ * RÜCKWEG: sie beantwortet die Frage „wohin schicke ich einen Besucher, der
+ * eine ALTE Adresse in der Hand hat?". Die kann keine Eigenschaft beantworten
+ * — sie ist historisch. Ein neu auftauchendes Testartefakt wird vom Zaun
+ * stumm aus der Sitemap gehalten und antwortet 404; erst wenn jemand eine
+ * bereits verlinkte Adresse stilllegt, kommt sie hier herein.
+ *
+ * ZWEI LESER, WIE BEI UMGELEITETE_SEITEN — sie dürfen nicht auseinanderlaufen:
+ *   1. app/routes/products.$handle.jsx schickt die Weiterleitung (301),
+ *   2. app/lib/sitemap-zaun.js lässt die Adresse aus der Sitemap weg.
+ * Stünde das Ziel in der Route und die Ausnahme in der Sitemap, führten zwei
+ * Stellen denselben Zustand — und die falsche gewinnt still.
+ *
+ * WARUM WEITERLEITUNG UND NICHT 404: beide Adressen antworten seit Monaten mit
+ * HTTP 200 (gemessen 2026-09-09 an beiden Domains). Wer 200 ausliefert, muss
+ * damit rechnen, dass jemand darauf verlinkt hat. Das Ziel ist in beiden Fällen
+ * die Create-Kaufseite: die Dublette IST sie, und das Testartefakt trägt
+ * „Crystal Cacao® Create" im Titel.
+ */
+export const UMGELEITETE_PRODUKTE = Object.freeze({
+  'crystal-cacao-adfiefiale': '/products/crystal-cacao-create',
+  'test-page-crystal-cacao\u00ae-create-spater-wieder-loschen':
+    '/products/crystal-cacao-create',
+});
+
+/**
+ * MERKMALE, AN DENEN EIN TESTARTEFAKT SICH SELBST ZU ERKENNEN GIBT.
+ *
+ * Gemessen am echten Fall: der Titel lautet „Test Page - Crystal Cacao® Create
+ * später wieder löschen" — die Seite sagt ihren eigenen Zweck an. Das ist die
+ * EIGENSCHAFT, auf die sich ein Zaun stützen darf; der Handle ist es nicht
+ * (`crystal-cacao-adfiefiale` trägt kein Merkmal und wäre so nie zu fassen —
+ * den holt die Dubletten-Prüfung).
+ *
+ * BEWUSST AM TITEL UND NICHT AM HANDLE: ein Handle ist eine technische
+ * Adresse und kann alles heißen; der Titel ist das, was ein Mensch eintippt,
+ * und ein Mensch, der eine Wegwerfseite anlegt, schreibt es hin. Beide realen
+ * Fälle dieses Ladens bestätigen das.
+ *
+ * BEWUSST ENG GEHALTEN — die Gegenrichtung ist der teurere Fehler: ein zu
+ * weites Muster verschluckt eine echte Kaufadresse, und das fällt erst auf,
+ * wenn der Umsatz fehlt. Deshalb NICHT `/test/` als bloßer Teilstring
+ * („Testsieger", „Geschmackstest" wären Kundenware), sondern Wortgrenzen und
+ * die Lösch-Absicht.
+ */
+const TEST_MERKMALE = Object.freeze([
+  /\btest[- ]?(page|seite|produkt|product)\b/i,
+  /\b(sp(ä|ae)ter\s+)?wieder\s+l(ö|oe)schen\b/i,
+  /\bnicht\s+l(ö|oe)schen\b/i,
+  /\b(do\s+not|dont|don't)\s+(use|delete)\b/i,
+  /\bdummy\b/i,
+  /\bplatzhalter\b/i,
+  /\[?\bTESTE?\]\B/,
+]);
+
+/**
+ * Trägt dieser Titel ein Test-/Lösch-Merkmal?
+ * @param {string|undefined|null} titel
+ * @returns {boolean}
+ */
+export function istTestartefakt(titel) {
+  if (typeof titel !== 'string' || !titel.trim()) return false;
+  return TEST_MERKMALE.some((rx) => rx.test(titel));
+}
+
+/**
+ * Der VERGLEICHSSCHLÜSSEL eines Produkttitels — für die Dubletten-Erkennung.
+ *
+ * WARUM NORMALISIERT WERDEN MUSS, am echten Fall gemessen: die Kaufseite heißt
+ * „Crystal Cacao® Create – Bio" (Halbgeviertstrich U+2013), die Dublette
+ * „Crystal Cacao® Create - Bio" (Bindestrich U+002D). Ein Byte-Vergleich hält
+ * die beiden für verschieden und findet die Dublette NIE — genau der Fall, der
+ * diesen Bau ausgelöst hat. Normalisiert wird deshalb alles, was ein Mensch
+ * beim Abtippen variiert: Groß-/Kleinschreibung, Strich-Varianten,
+ * Markenzeichen, Mehrfach-Leerraum.
+ *
+ * NICHT normalisiert werden Wörter: „Create" und „Awake" bleiben verschieden,
+ * „2x CREATE" bleibt von „3x CREATE" verschieden. Der Schlüssel darf nur
+ * Schreibweisen zusammenziehen, nie Bedeutungen — sonst verschluckt er die
+ * Mengenrabatt-Staffeln, und die sind ausdrücklich Kundenware.
+ *
+ * @param {string|undefined|null} titel
+ * @returns {string} '' wenn kein brauchbarer Titel vorliegt
+ */
+export function titelSchluessel(titel) {
+  if (typeof titel !== 'string') return '';
+  return titel
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[\u00ae\u2122\u00a9]/g, '')
+    .replace(/[\u2010-\u2015\u2212]/g, '-')
+    .replace(/[^a-z0-9\u00e4\u00f6\u00fc\u00df]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+/**
  * Gehört dieses Produkt zum Kakao-Sortiment?
  * Entscheidet über die Kollektions-Mitgliedschaft, damit ein im Admin neu
  * angelegtes Kakao-Produkt OHNE Code-Änderung sofort erreichbar ist.
