@@ -2035,3 +2035,11 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 .cc-podcast__text h2 {
   margin-block-start: 0;
 }
+
+/* Zwei Absaetze standen ohne Abstand untereinander und lasen sich wie einer
+ * (am Bildschirmfoto gesehen, nicht vermutet). `.ProductPageKakao p` setzt
+ * keinen Abstand — der kommt sonst aus dem Layout der jeweiligen Sektion, und
+ * dieses Raster hat keins. Abstand aus dem 8pt-Token, kein freier Wert. */
+.cc-podcast__text p + p {
+  margin-top: var(--cc-space-2);
+}
