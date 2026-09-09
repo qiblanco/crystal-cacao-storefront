@@ -11,6 +11,7 @@ import {
   Abschluss as VaAbschluss,
 } from '~/components/startseite/Verkaufsauftritt';
 import {Kakao} from '~/components/product-pages/Kakao';
+import {PodcastEinstieg} from '~/components/reusables/PodcastEinstieg';
 import {waehleFassung} from '~/lib/startseite-fassung';
 import {canonicalLink} from '~/lib/seo';
 import {MockShopNotice} from '~/components/MockShopNotice';
@@ -184,6 +185,112 @@ function KachelPreis({produkt}) {
 }
 
 /**
+ * DER PODCAST-EINSTIEG — Christians Auftrag vom 2026-09-08.
+ *
+ * „Und der Podcast muss auf die Seite — dort erklaeren wir den Kakao. Das muss
+ * ziemlich weit oben auf der Frontseite integriert werden, mit einem coolen
+ * kleinen Text dazu, und an einer interessanten Stelle ein Timeslot gesetzt
+ * werden. Eventuell dort, wo wir den Unterschied zwischen den Sorten
+ * erklaeren. Soll ja nur ein kleiner Einstieg sein — wer mehr wissen will,
+ * kann es dann ganz abspielen."
+ *
+ * ======================================================================
+ * DIE EINSTIEGSSTELLE IST GEPRUEFT UND VERSCHOBEN — 165 s -> 510 s.
+ * ======================================================================
+ * Christians Vorschlag war `?t=165s` (2:45). Der Auftrag verlangt
+ * ausdruecklich, ihn NACHZUHOEREN statt zu uebernehmen. Gemessen an der
+ * Tonspur-Abschrift der Folge (YouTube-eigene ASR-Spur, mit unserem eigenen
+ * Kanal-Zugang ueber `captions.download` geholt; liegt als
+ * homepage-bauer/data/erfahrungen/transkripte/kd7Z-ITKYDo.sbv, geerntet
+ * 2026-09-09) faellt 165 s an ZWEI Stellen daneben:
+ *
+ *   1. MITTEN IN DEN SATZ. Die Marke 165,72 s traegt woertlich
+ *      „unterwegs. Das ist die Stadt aeh in ganz" — der Satz beginnt bei
+ *      160,88 s mit „Aehm in Oaxaca war …". Wer bei 2:45 einsteigt, hoert
+ *      als erstes Wort das Ende eines Satzes, dessen Anfang er nie hatte.
+ *      Genau der Fall, den der Auftrag „wirkt wie ein Fehler" nennt.
+ *   2. FALSCHES THEMA. 2:33–4:22 ist laut den Kapitelmarken des Kanals
+ *      „Die Begegnung mit Kakao in Tulum, Mexiko" — die Herkunftsgeschichte,
+ *      nicht der Unterschied. Christian nennt als Wunsch aber die Stelle,
+ *      „wo wir den Unterschied zwischen den Sorten erklaeren".
+ *
+ * GEWAEHLT: 510 s = 8:30. Zwei Gruende, beide nachmessbar.
+ *
+ *   INHALT. Ab hier laeuft genau die Erklaerung, die Christian meint — in
+ *   der Sprache der Folge selbst: „Und das Interessante dabei ist jetzt eben,
+ *   wenn wir mal diese grobe Eingliederung machen: Kakao, Schokolade,
+ *   Zeremonie Kakao, Kristallkakao …" (Marke 519,76–531,88 s). Die
+ *   Kanal-Kapitelmarke dafuer heisst „08:42 Die vier Stufen: Kakaopulver,
+ *   Schokolade, Zeremoniekakao, Crystal Cacao®", und die Beschreibung der
+ *   Folge nennt es woertlich „Der Unterschied zwischen Kakaopulver,
+ *   Schokolade, Zeremoniekakao und Crystal Cacao®". Die Passage laeuft bis
+ *   rund 11:40 — gut drei Minuten, also ein Einstieg und kein Film.
+ *
+ *   SCHNITTKANTE. 510,80 s ist der Beginn eines VOLLSTAENDIGEN Satzes
+ *   („Und wir mit Kristallkakao fokussieren uns wirklich auf die Urstaemme
+ *   …"), und zwar der erste Satz, der auch am Anfang einer Abschrift-Marke
+ *   steht — bei dieser Folge laufen die Marken sonst ueberlappend, ein
+ *   Wortanfang mitten in einer Marke waere geraten und nicht gemessen.
+ *   ABGERUNDET WIRD BEWUSST NACH UNTEN auf 510: der `start`-Parameter nimmt
+ *   nur ganze Sekunden, und der Player springt zusaetzlich auf das naechste
+ *   Vollbild — beides kann den Einstieg nur nach VORNE verschieben, nie nach
+ *   hinten. Eine Aufrundung auf 511 haette das erste Wort anschneiden
+ *   koennen; 510 kann im schlechtesten Fall eine knappe Sekunde Pause
+ *   voranstellen. Von den zwei Fehlern ist das der harmlose.
+ *
+ * WAS ICH NICHT KONNTE, und das gehoert dazu: die Tonspur selbst liegt nicht
+ * vor. YouTube weist die Server-Adresse als Bot ab (`Sign in to confirm
+ * you're not a bot`), yt-dlp scheitert an allen vier Client-Varianten. Die
+ * Stelle ist damit an der ASR-Abschrift und an den von Hand gesetzten
+ * Kapitelmarken des Kanals gemessen — zwei unabhaengige Quellen, die
+ * uebereinstimmen —, aber NICHT abgehoert. Das ist eine Messgrenze, keine
+ * Vermutung, und sie steht auch im RESULT.
+ */
+const PODCAST_VIDEO = 'kd7Z-ITKYDo';
+const PODCAST_START_S = 510;
+/* Laufzeit der Folge aus dem Kanal-Inventar (dauer_sek 1993 = 33:13),
+ * nicht geschaetzt: homepage-bauer/data/erfahrungen/videos.json. */
+const PODCAST_DAUER = '33 Min.';
+
+/**
+ * DER TEXT DANEBEN — „ein cooler kleiner Text" (Christian).
+ *
+ * ER SAGT, WAS MAN IN DIESEN MINUTEN ERFAEHRT, und nicht „hoer rein".
+ * Massstab ist laut Auftrag der Stil der Fachartikel: klar statt hochtrabend.
+ *
+ * WAS HIER AUSDRUECKLICH NICHT STEHT, und das ist die teurere Haelfte:
+ *   - KEINE Wirkzusage. Der Kunde liest hier, worin sich vier Erzeugnisse
+ *     unterscheiden — nicht, was eines davon mit ihm macht. Was im Podcast
+ *     gesagt wird, wird nicht zur Zusage dieser Seite.
+ *   - KEIN Zitat aus der Aufnahme. Jeder Satz ist unsere Formulierung.
+ *   - KEINE Zahl aus dem Gespraech, die ich nicht belegen kann: die Folge
+ *     sagt „manchmal ueber 36 Stunden oder noch laenger" ueber das Walzen
+ *     von Schokolade. „Stundenlang" ist deshalb die ehrliche Wiedergabe;
+ *     „36 Stunden" waere eine Praezision, die die Quelle nicht hergibt.
+ *   - KEIN Gaestename als Autoritaet und kein „Talking Vibes"-Vorspann.
+ */
+function PodcastAbschnitt() {
+  return (
+    <PodcastEinstieg
+      videoId={PODCAST_VIDEO}
+      startSekunde={PODCAST_START_S}
+      dauerWort={PODCAST_DAUER}
+      titel="Crystal Cacao® — die Kraft des Amazonas. In deiner Tasse."
+    >
+      <h2 id="cc-podcast-titel">Vier Dinge heißen „Kakao"</h2>
+      <p>
+        Kakaopulver, Schokolade, Zeremoniekakao, Kristallkakao — im Regal steht
+        auf allen vieren dasselbe Wort. Ab Minute 8:30 gehen wir sie im Podcast
+        der Reihe nach durch: was beim Entölen aus dem Pulver verschwindet,
+        warum Schokolade stundenlang gewalzt wird, und was danach von der Bohne
+        noch übrig ist.
+      </p>
+      <p>Gut drei Minuten — und von dort aus, wenn du magst, die ganze Folge.</p>
+    </PodcastEinstieg>
+  );
+}
+
+/**
  * DIE STARTSEITE IST SEIT DEM 2026-09-08 „UNSER KAKAO".
  *
  * Christian, woertlich: „Oder andere Frage: ist ‚Unser Kakao' nicht die
@@ -227,6 +334,7 @@ export default function Homepage() {
       <Kakao
         stimmen={<VaStimmen />}
         sorten={<RecommendedProducts products={data.recommendedProducts} />}
+        podcast={<PodcastAbschnitt />}
       />
     </div>
   );

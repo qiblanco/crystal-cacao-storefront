@@ -25,6 +25,17 @@ import {SwipeTable} from '../reusables/SwipeTable';
  *              wer es geprueft hat, dann wer es getrunken hat, dann die
  *              Risikoumkehr. Sozialer Beweis zieht, aber er zieht erst,
  *              wenn der Leser weiss, worum es geht.
+ *   podcast  — der Podcast-Einstieg. Er steht direkt hinter `Benefits`,
+ *              also an dritter Stelle der Seite: die Seite hat gerade
+ *              „wach / klar / mineralisiert / naturrein" behauptet, und die
+ *              naechste Frage eines Fremden ist „ja, und wodurch unterscheidet
+ *              sich das von dem Kakaopulver aus dem Supermarkt?". Genau die
+ *              beantwortet die eingestellte Stelle der Folge — und der
+ *              Vergleich mit Kaffee/Energy-Drink direkt darunter liefert
+ *              danach die Zahlen. Er steht bewusst VOR `ComparisonTable`
+ *              und NICHT zwischen `SideToSideWithTable` und
+ *              `ComparisonTable`: die beiden sind ein Paar (dieselbe Frage,
+ *              einmal als Text, einmal als Tabelle) und werden nicht getrennt.
  *   sorten   — die zwei Sortenkacheln mit Preis. Sie stehen direkt hinter
  *              dem Versprechen, also an der Stelle, an der die Frage von
  *              „will ich das" auf „welche nehme ich" kippt. Sie tragen
@@ -32,15 +43,16 @@ import {SwipeTable} from '../reusables/SwipeTable';
  *              probe_sofortfehler.py); ohne sie waere er auf der Startseite
  *              nicht mehr messbar.
  *
- * @param {{stimmen?: import('react').ReactNode, sorten?: import('react').ReactNode}} props
+ * @param {{stimmen?: import('react').ReactNode, sorten?: import('react').ReactNode, podcast?: import('react').ReactNode}} props
  */
-export function Kakao({stimmen = null, sorten = null} = {}) {
+export function Kakao({stimmen = null, sorten = null, podcast = null} = {}) {
   return (
     <div className="ProductPageKakao">
       <h1 className="text-6xl! text-center mb-[0px]!">High Performance Cacao</h1>
       <h2 className="text-5xl! text-center mt-5!">Wach. Klar. Mineralisiert.</h2>
       <Hero />
       <Benefits />
+      {podcast}
       <SideToSideWithTable />
       <ComparisonTable />
       <Belege id="cc-pruefdokumente" />

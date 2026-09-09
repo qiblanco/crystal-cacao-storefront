@@ -1895,3 +1895,143 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   font-size: 0.8125rem;
   color: var(--cc-muted, #6b665d);
 }
+
+/* ==========================================================================
+ * PODCAST-EINSTIEG (2026-09-09, Job 20260908-BAU-crystal-cacao-podcast-weit-
+ * oben-mit-einstiegsstelle-statt-startknopf)
+ * ==========================================================================
+ * NUR LAYOUT. Diese Schicht fuehrt KEINE neue Schriftgroesse, KEINEN neuen
+ * Farbwert, KEINEN zweiten Radius und KEINEN zweiten Goldton ein — jede
+ * Groesse unten ist ein bestehender Token.
+ *
+ * Das ist eine bewusste Entscheidung gegen die naheliegende Variante: eine
+ * eigene, kleinere Ueberschrift fuer die Textspalte haette gut ausgesehen und
+ * waere genau der zweite H2-Stil gewesen, den s07 an dieser Seite gemessen
+ * und abgestellt hat („BEFUND 2 H2-Stil-Kombis"). Die Ueberschrift des
+ * Abschnitts nimmt deshalb unveraendert `.ProductPageKakao h2`.
+ *
+ * DER EINE AKZENT sitzt auf der Abspielscheibe. Das ist die Stelle, an der
+ * gehandelt wird — genau die Rolle, fuer die --cc-gold reserviert ist. Die
+ * Zeitmarke daneben ist ABSICHTLICH neutral (--cc-dunkel): zwei goldene
+ * Flaechen im selben Bild waeren zwei Handlungsangebote, und es gibt nur eins.
+ * ======================================================================== */
+
+.cc-podcast__raster {
+  display: grid;
+  gap: var(--cc-space-4);
+  align-items: center;
+}
+@media (min-width: 48em) {
+  .cc-podcast__raster {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--cc-space-5);
+  }
+}
+
+/* 16:9 traegt sich selbst — der Rahmen steht, bevor das Vorschaubild da ist.
+ * Das ist kein Schmuck: ohne feste Proportion springt die Seite genau in dem
+ * Moment, in dem das lazy geladene Poster eintrifft, und der Sprung passiert
+ * weit oben. */
+.cc-podcast__buehne {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--cc-radius-bild);
+  overflow: hidden;
+  background: var(--cc-dunkel);
+}
+
+.cc-podcast__knopf {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.cc-podcast__fuellung {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /* hqdefault ist 4:3 — ohne cover stuenden schwarze Balken im Rahmen. */
+  object-fit: cover;
+  /* Der Rahmen rundet bereits; ein zweiter Radius auf dem Bild waere die
+   * Radien-Streuung, die s07 abgestellt hat. */
+  border-radius: 0;
+}
+
+.cc-podcast__play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.cc-podcast__play-scheibe {
+  display: grid;
+  place-items: center;
+  /* Trefferflaeche aus WCAG 2.5.5 AAA, nicht frei gewaehlt. */
+  width: calc(var(--cc-treffer-min) * 1.5);
+  height: calc(var(--cc-treffer-min) * 1.5);
+  border-radius: var(--cc-radius-rund);
+  background: var(--cc-gold);
+  color: var(--cc-dunkel);
+  font-size: var(--cc-fs-4);
+  /* Das Dreieck sitzt optisch links vom Kreismittelpunkt, wenn man es
+   * mathematisch zentriert. Ein Achtel Schriftgroesse holt es zurueck. */
+  padding-left: 0.125em;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 35%);
+}
+
+.cc-podcast__knopf:hover .cc-podcast__play-scheibe,
+.cc-podcast__knopf:focus-visible .cc-podcast__play-scheibe {
+  background: var(--cc-gold-tief);
+}
+
+/* Die Zeitmarke steht IM Bild, nicht im Text: sie beantwortet die Frage
+ * „wo lande ich, wenn ich hier klicke" genau dort, wo geklickt wird. */
+.cc-podcast__marke {
+  position: absolute;
+  right: var(--cc-space-1);
+  bottom: var(--cc-space-1);
+  padding: 0.25rem var(--cc-space-1);
+  border-radius: var(--cc-radius-knopf);
+  background: var(--cc-dunkel);
+  color: var(--cc-grund);
+  font-size: var(--cc-fs-1);
+  line-height: 1.4;
+}
+
+.cc-podcast__ohne-skript {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: var(--cc-space-1);
+  background: var(--cc-dunkel);
+  color: var(--cc-grund);
+  font-size: var(--cc-fs-2);
+  text-align: center;
+}
+
+.cc-podcast__ganze {
+  display: inline-block;
+  margin-top: var(--cc-space-2);
+  color: var(--cc-gold-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.cc-podcast__ganze:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Die Ueberschrift des Abschnitts traegt sonst den Sektions-Vorlauf von 48px
+ * aus `.ProductPageKakao h2` — innerhalb einer Rasterzelle, die ohnehin schon
+ * an ihrem Nachbarn ausgerichtet ist, schiebt das die Spalte nach unten. */
+.cc-podcast__text h2 {
+  margin-block-start: 0;
+}
