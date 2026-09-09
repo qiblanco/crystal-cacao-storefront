@@ -545,6 +545,88 @@ export const SORTEN_PFADE = Object.freeze({
 });
 
 /**
+ * IST DIESES PRODUKT EINE SORTE? — abgeleitet aus SORTEN_PFADE, nicht daneben
+ * geschrieben. Wer eine dritte Sorte anlegt, traegt sie dort ohnehin ein
+ * (sonst bleibt sie farblos); eine zweite Liste waere die naechste Stelle, die
+ * auseinanderlaeuft.
+ *
+ * @param {string|undefined|null} handle Produkt-Handle
+ * @returns {boolean}
+ */
+export function istSorte(handle) {
+  if (!handle) return false;
+  return Object.prototype.hasOwnProperty.call(
+    SORTEN_PFADE,
+    `/products/${handle}`,
+  );
+}
+
+/**
+ * DIE AUSWAHL DER SORTENUEBERSICHT — und ihr Restbericht.
+ *
+ * Christian am 2026-09-09: „hier wird noch alles gelistet was nicht gelistet
+ * werden soll. wir haben nur 2 Sorten." Die Kollektion `zeremonie-kakao` ist
+ * und bleibt die SSoT des Sortiments (dort haengt der 7-%-Steuer-Override, und
+ * ein im Admin neu angelegtes Kakao-Produkt soll ohne Code-Aenderung
+ * erreichbar sein) — die UEBERSICHT ist aber eine Anzeige und nicht der
+ * Katalog. Sie zeigt die Sorten; Mengen derselben Sorte gehoeren auf die
+ * Kaufseite, wo die Staffel steht (und wo dieselbe Menge GUENSTIGER ist als
+ * ueber ein Buendel-Produkt — gemessen, siehe cart-display-pricing.js).
+ *
+ * WARUM DAS EIN EINSCHLUSS-SELEKTOR IST UND WAS DAS KOSTET: die Auswahl sagt,
+ * was sie NIMMT ('die Sorten'), nicht was sie weglaesst. Ihre ausgelassene
+ * Menge ist damit nur relativ zum Kandidatenkreis benennbar — ein statischer
+ * Zaun-Detektor kann sie baulich nicht pruefen. Der einzige bekannte Heilweg
+ * ist ein LAUFZEIT-RESTBERICHT im geprueften Modul selbst: diese Funktion
+ * zaehlt das Kandidaten-Universum auf und gibt jeden Ausgelassenen MIT GRUND
+ * zurueck. Bauform uebernommen von homepage-bauer/src/design_beleg.py
+ * `ausnahmen_bericht()`.
+ *
+ * KEIN Rueckweg-Schalter im Code: der Rueckweg ist die ENV-Variable
+ * UEBERSICHT_ZAUN=off, die der Aufrufer liest — ein Schalter, den nur diese
+ * Datei kennt, waere von aussen nicht bedienbar.
+ *
+ * @param {Array<{handle?: string, title?: string}>} produkte Kandidatenkreis
+ *   (die Mitglieder der Kollektion, wie sie die Storefront-API liefert)
+ * @returns {{gezeigt: Array<object>, ausgelassen: Array<{handle: string, titel: string, grund: string}>}}
+ */
+export function uebersichtAuswahl(produkte) {
+  const kandidaten = Array.isArray(produkte) ? produkte : [];
+  const gezeigt = [];
+  const ausgelassen = [];
+  const gesehen = new Map();
+  for (const p of kandidaten) {
+    const handle = p?.handle ?? '';
+    const titel = p?.title ?? '';
+    let grund = null;
+    if (istTestartefakt(titel)) {
+      grund = 'testartefakt';
+    } else if (
+      Object.prototype.hasOwnProperty.call(UMGELEITETE_PRODUKTE, handle)
+    ) {
+      // Eine Kachel, deren Adresse 301 auf eine andere Kaufseite antwortet,
+      // ist eine tote Kachel: der Kunde landet ohnehin woanders.
+      grund = 'umgeleitet';
+    } else if (!istSorte(handle)) {
+      grund = 'keine-sorte';
+    } else {
+      const schluessel = titelSchluessel(titel);
+      if (schluessel && gesehen.has(schluessel)) {
+        grund = `dublette-zu:${gesehen.get(schluessel)}`;
+      }
+    }
+    if (grund) {
+      ausgelassen.push({handle, titel, grund});
+    } else {
+      const schluessel = titelSchluessel(titel);
+      if (schluessel) gesehen.set(schluessel, handle);
+      gezeigt.push(p);
+    }
+  }
+  return {gezeigt, ausgelassen};
+}
+
+/**
  * Sorte dieses Pfades — 'awake', 'create' oder null (keine Sortenseite).
  * @param {string} pathname
  * @returns {string|null}
