@@ -240,7 +240,7 @@ export function Abschluss() {
       </p>
       <ul className="cc-va-abschluss-liste">
         <li>Kostenloser Versand ab 99 € innerhalb Deutschlands</li>
-        <li>Lieferung in 1–3 Werktagen</li>
+        <li>In 1-3 Tagen bei Dir</li>
         <li>Laboranalytisch geprüft (Dartsch Institut)</li>
         <li>Bio-zertifiziert nach DE-ÖKO-006</li>
       </ul>

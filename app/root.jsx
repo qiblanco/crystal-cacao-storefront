@@ -92,7 +92,30 @@ export function links() {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
+    /* DAS ZEICHEN IM BROWSER-REITER — drei Zeilen, weil drei Leser fragen.
+     *
+     * ANLASS (Christian, 2026-09-08): "Und man sieht oben im Browser noch ein
+     * Hydrogen-Logo." Die Vorgaengerdatei app/assets/favicon.svg war das
+     * Zeichen des Geruests; sie ist durch eine Kakaobohne ersetzt, die aus
+     * der Verpackung abgeleitet ist (Herkunft und Messwerte stehen in der
+     * SVG-Datei selbst).
+     *
+     * WARUM NICHT NUR DIE SVG-ZEILE, DIE HIER VORHER ALLEIN STAND: sie deckt
+     * den Reiter moderner Browser ab und sonst nichts. Am echten Rand
+     * gemessen (2026-09-08, vor diesem Bau): /favicon.ico -> HTTP 404 und
+     * /apple-touch-icon.png -> HTTP 404. Beide werden von Klienten OHNE
+     * jeden Verweis im Markup angefragt — ein Browser ohne SVG-Reiter-
+     * Unterstuetzung und iOS beim Ablegen auf dem Startbildschirm holen sie
+     * blind von der Wurzel. Eine 404 dort ist kein Fehler im Log, sondern
+     * ein leeres oder generisches Zeichen beim Menschen.
+     *
+     * Die Dateien liegen deshalb in public/ (wird als Wurzel ausgeliefert)
+     * und nicht in app/assets/ (bekaeme einen Inhalts-Hash im Namen und
+     * waere unter der festen Wurzel-Adresse gerade nicht auffindbar).
+     */
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico', sizes: '48x48'},
+    {rel: 'apple-touch-icon', href: '/apple-touch-icon.png', sizes: '180x180'},
   ];
 }
 
