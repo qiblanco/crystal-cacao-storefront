@@ -179,16 +179,24 @@ async function loadCriticalData({context}) {
  * @param {Route.LoaderArgs}
  */
 function loadDeferredData({context}) {
-  const {storefront, customerAccount, cart} = context;
+  const {cart} = context;
 
   // SORTIMENTS-ZAUN: die Fußzeilen-Abfrage entfällt vollständig. Sie holte das
   // Shopify-Menü `footer` des Fremdshops samt Links auf checkout.qiblanco.com;
   // die Fußzeile rendert jetzt KAKAO_FUSSMENUE aus app/lib/kakao-zone.js.
   // `footer` bleibt als aufgelöstes null im Vertrag, damit PageLayout und
   // Footer unverändert weiterlaufen (beide warten ohnehin auf ein Promise).
+  // `isLoggedIn` IST HIER AM 2026-09-09 ENTFALLEN, und nicht nur, weil
+  // niemand es mehr liest. `customerAccount.isLoggedIn()` liefert ohne
+  // Zugangsdaten fuer die Customer Account API ein Promise, das ABLEHNT
+  // ("[h2:error:customerAccount] You do not have the valid credential").
+  // Solange die Kopfzeile es in einem <Await> mit errorElement auffing, war
+  // das folgenlos; ohne Leser waere daraus auf JEDER Seite eine unbehandelte
+  // Ablehnung im gestreamten Antwortstrom geworden. Ein weggenommener
+  // Verbraucher macht eine fehlerhafte Quelle nicht harmlos — er nimmt ihr
+  // nur den Faenger.
   return {
     cart: cart.get(),
-    isLoggedIn: customerAccount.isLoggedIn(),
     footer: Promise.resolve(null),
   };
 }
@@ -422,7 +430,6 @@ export function ErrorBoundary() {
         cart={rootData?.cart}
         footer={rootData?.footer}
         header={rootData?.header}
-        isLoggedIn={rootData?.isLoggedIn}
         publicStoreDomain={rootData?.publicStoreDomain ?? ''}
       >
         {inhalt}

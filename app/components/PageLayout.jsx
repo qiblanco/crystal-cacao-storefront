@@ -1,15 +1,10 @@
-import {Await, Link} from 'react-router';
-import {Suspense, useId} from 'react';
+import {Await} from 'react-router';
+import {Suspense} from 'react';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
 import {KAKAO_MENUE} from '~/lib/kakao-zone';
 import {CartMain} from '~/components/CartMain';
-import {
-  SEARCH_ENDPOINT,
-  SearchFormPredictive,
-} from '~/components/SearchFormPredictive';
-import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 
 /**
  * @param {PageLayoutProps}
@@ -19,19 +14,23 @@ export function PageLayout({
   children = null,
   footer,
   header,
-  isLoggedIn,
   publicStoreDomain,
 }) {
   return (
     <Aside.Provider>
       <CartAside cart={cart} />
-      <SearchAside />
+      {/* HIER STAND BIS 2026-09-09 <SearchAside />. Die Schublade war der
+          einzige Zugang zur Suche; ihr Schalter ist mit der Kopfzeile
+          entfallen (Begruendung mit Messwerten in Header.jsx, HeaderCtas).
+          Sie hier stehen zu lassen waere toter Code mit einem eigenen
+          Zustand — und toter Code sieht spaeter wie eine vergessene
+          Bedingung aus. Die Route /search bleibt bestehen: sie ist nicht
+          kaputt, sie ist nur nicht mehr beworben. */}
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
       {header && (
         <Header
           header={header}
           cart={cart}
-          isLoggedIn={isLoggedIn}
           publicStoreDomain={publicStoreDomain}
         />
       )}
@@ -58,88 +57,6 @@ function CartAside({cart}) {
           }}
         </Await>
       </Suspense>
-    </Aside>
-  );
-}
-
-function SearchAside() {
-  const queriesDatalistId = useId();
-  return (
-    <Aside type="search" heading="Suche">
-      <div className="predictive-search">
-        <br />
-        <SearchFormPredictive>
-          {({fetchResults, goToSearch, inputRef}) => (
-            <>
-              <input
-                name="q"
-                onChange={fetchResults}
-                onFocus={fetchResults}
-                placeholder="Suchen"
-                ref={inputRef}
-                type="search"
-                list={queriesDatalistId}
-              />
-              &nbsp;
-              <button onClick={goToSearch}>Suchen</button>
-            </>
-          )}
-        </SearchFormPredictive>
-
-        <SearchResultsPredictive>
-          {({items, total, term, state, closeSearch}) => {
-            const {articles, collections, pages, products, queries} = items;
-
-            if (state === 'loading' && term.current) {
-              return <div>Wird geladen …</div>;
-            }
-
-            if (!total) {
-              return <SearchResultsPredictive.Empty term={term} />;
-            }
-
-            return (
-              <>
-                <SearchResultsPredictive.Queries
-                  queries={queries}
-                  queriesDatalistId={queriesDatalistId}
-                />
-                <SearchResultsPredictive.Products
-                  products={products}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Collections
-                  collections={collections}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Pages
-                  pages={pages}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Articles
-                  articles={articles}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                {term.current && total ? (
-                  <Link
-                    onClick={closeSearch}
-                    to={`${SEARCH_ENDPOINT}?q=${term.current}`}
-                  >
-                    <p>
-                      Alle Treffer zu <q>{term.current}</q> ansehen
-                      &nbsp; →
-                    </p>
-                  </Link>
-                ) : null}
-              </>
-            );
-          }}
-        </SearchResultsPredictive>
-      </div>
     </Aside>
   );
 }
@@ -172,7 +89,6 @@ function MobileMenuAside({header, publicStoreDomain}) {
  * @property {Promise<CartApiQueryFragment|null>} cart
  * @property {Promise<FooterQuery|null>} footer
  * @property {HeaderQuery} header
- * @property {Promise<boolean>} isLoggedIn
  * @property {string} publicStoreDomain
  * @property {React.ReactNode} [children]
  */

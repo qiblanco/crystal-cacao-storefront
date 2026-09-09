@@ -1153,6 +1153,33 @@ main h3[style] {
   font-size: var(--cc-fs-4) !important;
 }
 
+/* ==== Der Warenkorb als ZEICHEN (2026-09-09) ==============================
+ * Christian: er soll "erkennbar sein, den Fuellstand zeigen und sich nicht
+ * hinter Text verstecken". Bis heute war er ein Wort mit einer Zahl daneben —
+ * gemessen 85 x 44 px, davon 61 px reiner Text.
+ *
+ * WARUM DIE REGELN HIER STEHEN UND NICHT IN app.css: diese Datei wird in
+ * root.jsx NACH app.css geladen und gewinnt deshalb ohnehin. Zwei Regeln fuer
+ * dasselbe Element haetten sich nur gegenseitig verdeckt — genau der Irrtum,
+ * der im Kommentar "KEIN EIGENER BLOCK FUER DEN WARENKORB-ZAEHLER" in app.css
+ * (2026-09-02, P10) nachgemessen steht.
+ *
+ * DIE TREFFERFLAECHE KOMMT WEITER AUS app.css (min-height/min-width 44px,
+ * WCAG 2.5.5 AAA). Hier wird NICHTS kleiner gemacht — nur der sichtbare
+ * Inhalt wechselt vom Wort zum Zeichen. */
+.header-warenkorb {
+  justify-content: center;
+  color: var(--cc-dunkel, #171310);
+}
+
+.header-warenkorb-zeichen {
+  /* Das Zeichen bleibt auf der Token-Skala und waechst nicht mit der
+   * Schriftstufe der Kopfzeile — ein Symbol ist kein Buchstabe. */
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
 /* Warenkorb-Zaehler als Abzeichen statt als mitlaufender Text (s07).
  * Restbefund nach dem Kopf-Umbau: bei 390px blieben +4px Ueberhang, per
  * display:none isoliert auf das <span> mit der Stueckzahl im Cart-Link
@@ -1160,6 +1187,7 @@ main h3[style] {
  * (app.css:462 `.cart-count { position: absolute }`) — der Zaehler kostet
  * dort keine Zeilenbreite. Selektor ueber den Link, weil das span in der
  * K1-fremden, aber unveraenderten Header-Komponente keine Klasse traegt. */
+.header-ctas a[href='/cart'] .cart-count,
 .header-ctas a[href='/cart'] span {
   position: absolute;
   top: -2px;
