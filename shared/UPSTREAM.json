@@ -78,8 +78,10 @@
     },
     {
       "upstream": "app/lib/cart-display-pricing.js",
-      "klasse": "K1",
-      "sha256": "d91cd0909e1f795083dc9ff55a47f452973882c2e452d3d1429b50d50ca71565"
+      "klasse": "K2",
+      "sha256_upstream": "d91cd0909e1f795083dc9ff55a47f452973882c2e452d3d1429b50d50ca71565",
+      "sha256_lokal": "d80cca7d8b0fc60f61eaed0bcef5cd7469f554ac14a45b6c274f83e6e207087a",
+      "abweichung_grund": "Cent-genaue Warenkorb-Anzeige, Job 20260909-REPAIR-warenkorb-zeigt-netto-ohne-land-76-euro-werden-zu-71-03. Christian: „In der Ansicht steht ja schon korrekt 76 EUR, aber dann im Warenkorb stimmt es leider nicht.“ Der Warenkorb dieses Ladens zeigte 71,03 EUR (Netto) statt 76,00 EUR. DIE DATEI WAR NICHT DIE URSACHE — sie hatte in dieser Fassung des Ladens NULL Aufrufer, waehrend qiblanco.com sie aus CartLineItem und CartSummary ruft. Der Aufruf ist jetzt da (beide Komponenten stehen ausserhalb der Huelle und sind deshalb nicht im Manifest). ADDITIV UND VERHALTENSGLEICH FUER DEN BESTAND: die Rechnung ist in die private bruttoZeileRoh() gezogen — EINE Implementierung —, getCartLineGrossDisplayTotal() rundet unveraendert auf ganze Euro (gegengeprueft am LIVE-Stand von qiblanco.com am 2026-09-09: Menge 3 zeigt dort 160,- EUR, genau das liefert die Funktion weiter). NEU sind getCartLineGrossDisplayTotalExact()/getCartLinePriceDisplayExact(), die auf CENT runden. Grund fuer Cent: die Kasse ist die einzige Flaeche, die wir nicht aendern koennen, und sie belastet den Cent-Betrag (gemessen Menge 3: 149,19 + 10,44 MwSt = 159,63 EUR; Math.round haette 160 gezeigt). Der Warenkorb dieses Ladens ist per Bauform cent-genau (Kopf von app/components/Preis.jsx). DIESE ABWEICHUNG SOLL VERSCHWINDEN: der Zusatz gehoert nach qiblanco/qiblanco-storefront und die Datei danach zurueck auf K1. Der Nachzug war aus diesem Job NICHT erreichbar — gemessen 2026-09-09: kein `gh` auf dem Rechner, `ssh -T git@github.com` → Permission denied (publickey), und der qiblanco-Arbeitsbaum trug fremde uncommittete Arbeit auf main. Als Vorlage bei Christian: siehe RESULT Abschnitt „Was offen bleibt“."
     },
     {
       "upstream": "app/lib/entity-schema.js",
