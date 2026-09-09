@@ -277,7 +277,24 @@ function ComparisonTable() {
           className="qb-swipetab--zebra rounded-xl border border-gray-200"
           label="Nährstoff-Vergleich Crystal Cacao, Kaffee, Energydrink — horizontal wischbar"
         >
-          <table className="w-full text-sm">
+          {/* cc-vgl: EIN Kopf-Stil fuer alle drei Vergleichsspalten (Groesse,
+              Zeilenhoehe, Abstand der Mengenangabe) — die Regeln stehen in
+              app/styles/kakao-seiten.css, NICHT je Zelle. Vorher trug jede
+              Kopfzelle nur `text-sm`, und das griff nicht: `main h3` und der
+              K1-Neutralisierer `main h3[style]` (!important) hoben alle drei
+              auf 25 px. "Crystal Cacao®" brach dadurch als einziger Kopf auf
+              zwei Zeilen um und zog seine Mengenangabe 15,6 px nach unten.
+              Das <colgroup> deklariert die Spaltenaufteilung, statt sie dem
+              Auto-Layout zu ueberlassen. KEINE feste Breite und kein
+              table-layout:fixed — beides wuerde den Wisch-Baukasten
+              (qb-swipetab) auf dem Handy aushebeln. */}
+          <table className="cc-vgl w-full text-sm">
+            <colgroup>
+              <col className="cc-vgl__spalte-label" />
+              <col className="cc-vgl__spalte-wert" />
+              <col className="cc-vgl__spalte-wert" />
+              <col className="cc-vgl__spalte-wert" />
+            </colgroup>
             <thead>
               {/* Trennlinie auf den <th>, NICHT auf dem <tr>: der Baukasten schaltet
                   auf border-collapse:separate, und dort zeichnet der Browser Ränder
@@ -372,9 +389,17 @@ function ComparisonTable() {
           </table>
         </SwipeTable>
         <div className="text-center">
+          {/* Dieselbe Hausform wie der Zwilling im Aufmacher (Zeile ~148,
+              "Analyse anzeigen"): gefuellt, randlos. Beide zeigen auf
+              #cc-pruefdokumente und tun dasselbe — der eine trug bisher als
+              einziger die umrandete Variante und sah neben den gefuellten
+              Knoepfen der Seite wie ein Fremdkoerper aus. Kein dritter Stil:
+              die Klassenkette ist woertlich die des Zwillings.
+              Das href bleibt unveraendert — die Wache crystal-belege-abrufbar
+              prueft genau diesen Anker. */}
           <a
             href="#cc-pruefdokumente"
-            className="btn--secondary mx-auto! mt-2!"
+            className="btn--secondary border-none! bg-[#00000025] mx-auto! mt-2!"
             >
             Analysedaten
           </a>
@@ -425,14 +450,19 @@ function SideToSideWithTable() {
           Die Wirkung von <b>Kaffee &amp; Energy-Drinks</b> beruht fast
           ausschließlich auf den <b>hohen Koffeingehalt.</b>
         </p>
+        {/* Der Wortlaut ist unveraendert; entfernt sind nur die drei harten
+            <br>. Sie waren nicht bloss Geschmack: ein Absatz mit hartem
+            Umbruch hat eine kleine max-content-Breite, und als Flex-Kind
+            macht `margin-inline: auto` (.ProductPageKakao p, kakao-seiten.css)
+            daraus eine geschrumpfte, MITTIG gesetzte Box. Gemessen am
+            gerenderten DOM: 299 px in einer 544-px-Spalte, 122,5 px
+            eingerueckt gegenueber dem Absatz darueber — vier Zeilen mit vier
+            verschiedenen linken Kanten. Ohne die <br> laeuft der Absatz auf
+            derselben Kante wie sein Nachbar (x = 160, Breite 544). */}
         <p>
-          Das führt zu
-          <br />
-          einem <b>schnellen Kick,</b>
-          <br />
-          <b>einem schnellen Crash</b>
-          <br />
-          und man <b>braucht immer mehr davon.</b>
+          Das führt zu einem <b>schnellen Kick,</b>{' '}
+          <b>einem schnellen Crash</b> und man{' '}
+          <b>braucht immer mehr davon.</b>
         </p>
       </div>
       <div className="hidden sm:flex items-center">
