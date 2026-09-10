@@ -118,8 +118,29 @@ def arm_a():
 
 
 # --------------------------------------------------------------- ARM B
+def _deploy_achse():
+    """(urteil_fn|None, deploys, bestimmt, meldung) — einmal je Lauf.
+
+    URSACHEN-ACHSE (2026-09-10, Job 20260910-belegleser-ohne-ursachenachse-
+    sieben-leser-und-gate9-prio25): ein Beleg, der vor dem letzten Deploy seiner
+    Seite entstand, ist ueber die HEUTIGE Seite kein Urteil. Fail-open in jedem
+    Zweig — ist die Lage unbestimmt, verhaelt sich diese Probe wie vorher.
+    """
+    try:
+        sys.path.insert(0, '/srv/openclaw/shared-state/homepage-bauer/src')
+        import design_deploy_signal as dds
+        deploys, meldungen, bestimmt = dds.lage()
+        return dds, deploys, bestimmt, (meldungen[0] if meldungen else '')
+    except Exception as exc:                              # noqa: BLE001
+        return None, {}, False, f'deploy-achse nicht ladbar: {exc!r}'
+
+
 def arm_b():
     print('--- ARM B  Belege gehoeren dieser Storefront')
+    dds, deploys, bestimmt, achse_meldung = _deploy_achse()
+    if not bestimmt:
+        print(f'  deploy-achse: KEINE AUSSAGE ({achse_meldung}) — fail-open')
+    ungedeckt, beurteilt = 0, 0
     for slug in sorted(SEITEN):
         pfad = os.path.join(AUDITS, slug, 'design-review.json')
         if not os.path.exists(pfad):
@@ -143,10 +164,39 @@ def arm_b():
                 f'{slug}: der Beleg wurde an {target} gemessen, nicht an '
                 f'{BASIS} — der Namensraum wurde von einem fremden Lauf '
                 'ueberschrieben')
+        # Ursachen-Achse VOR dem Schwellen-Urteil: ein Beleg, der die zu
+        # beurteilende Aenderung nicht kennt, ist weder Befund noch Freispruch
+        # und faellt auf den vorhandenen Messausfall-Kanal (ausfaelle -> 4).
+        veraltet = None
+        if bestimmt and dds is not None:
+            try:
+                veraltet, grund = dds.urteil(deploys, slug, beleg.get('zeit'))
+            except Exception as exc:                      # noqa: BLE001
+                veraltet, grund = None, f'achse-fehler: {exc!r}'
+            if veraltet is True:
+                ausfaelle.append(f'{slug}: {grund} — keine Aussage ueber die '
+                                 'HEUTIGE Seite')
+            elif veraltet is False and 'kein Deploy' in str(grund):
+                ungedeckt += 1
+            elif veraltet is False:
+                beurteilt += 1
         if schlecht:
             befunde.append(f'{slug}: score {score} unter Schwelle {SCHWELLE}')
-        marke = 'OK' if not (fremd or schlecht) else '!!'
+        marke = 'OK' if not (fremd or schlecht or veraltet is True) else '!!'
         print(f'  [{marke}] {slug:16} score={score} target={target}')
+    # DECKUNGS-RESTBERICHT, gezaehlt und benannt (Hausmuster
+    # design_beleg.ausnahmen_bericht): das Deploy-Signal liest EINEN Ledger und
+    # EIN Repo (werkbank/qiblanco-storefront). Diese Belege messen eine lokale
+    # Vorschau dieser Storefront (localhost:3399) aus einem EIGENEN Repo, dessen
+    # Auslieferungen in keinem Ledger stehen — die Achse kann hier baulich nichts
+    # beurteilen. Das ist fail-open richtig und trotzdem KEINE Deckung.
+    if bestimmt:
+        print(f'  deploy-achse: {beurteilt} von {beurteilt + ungedeckt} Seite(n) '
+              f'beurteilbar, {ungedeckt} ohne auffindbaren Deploy im Fenster')
+        if ungedeckt and not beurteilt:
+            print('  DECKUNGSGRENZE: keine dieser Seiten ist fuer die Achse '
+                  'beurteilbar — eigenes Repo (crystal-cacao-storefront), kein '
+                  'Ledger; die Achse laeuft mit, urteilt aber ueber nichts.')
 
 
 # --------------------------------------------------------------- ARM C
