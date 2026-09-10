@@ -2037,6 +2037,31 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
    Knopf-Regel in app.css ist seit diesem Job eine Basis (0-0-2), die eine
    eigene Klasse überschreiben darf.
 --------------------------------------------------------------------------- */
+/* ==========================================================================
+ * PRUEFDOKUMENTE — SORTENREIN, TABELLARISCH (2026-09-10, Job 20260910-BAU-
+ * pruefdokumente-sortenrein-create-vor-awake-je-drei-und-zwei-mineralstoff-
+ * analysen-fehlen)
+ * ==========================================================================
+ * Christian: „das sollte wirklich noch schoener sortenrein angezeigt werden
+ * … Der Abschnitt soll wie eine Tabelle wirken und nicht wie eine Linkliste."
+ *
+ * NUR LAYOUT. Diese Schicht fuehrt KEINE neue Schriftgroesse, KEINEN neuen
+ * Farbwert und KEINEN zweiten Radius ein — jede Groesse unten ist ein
+ * bestehender Token. Die Vorfassung stand mit drei rohen Werten hier
+ * (1.125rem, 0.8125rem, rgba(0,0,0,0.08)); sie sind durch --cc-fs-3,
+ * --cc-fs-1 und --cc-linie ersetzt, weil genau das ihre Rolle war.
+ *
+ * DIE TABELLENWIRKUNG ENTSTEHT AUS EINER EINZIGEN REGEL: `.cc-belege__daten`
+ * ist ein Raster mit `max-content 1fr`. Alle Bezeichnungen einer Sorte stehen
+ * damit auf derselben Kante, und die Werte beginnen buendig. Es gibt bewusst
+ * KEIN <table>: sechs Belege mit je fuenf Angaben ergaeben in einer 400px
+ * breiten Spalte eine Tabelle, die auf dem Handy scrollt statt umbricht.
+ *
+ * DER SORTEN-BALKEN ist der einzige Farbeinsatz und nimmt die vorhandenen
+ * --cc-sorte-Token (Christian 2026-09-01, „dezent entsprechend nutzen"). Die
+ * SCHRIFT bleibt in beiden Gruppen dieselbe — „gleiche Schrift" war Vorgabe.
+ * ======================================================================== */
+
 .cc-belege {
   max-width: var(--cc-kaufblock-max, 400px);
   margin: 6vh auto;
@@ -2044,9 +2069,25 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 }
 
 .cc-belege__titel {
-  font-size: 1.125rem !important;
-  margin-bottom: 0.75rem !important;
-  color: var(--cc-kraft-tief, #4a4741);
+  font-size: var(--cc-fs-3) !important;
+  margin-bottom: var(--cc-space-2) !important;
+  color: var(--cc-kraft-tief, #846142);
+}
+
+.cc-belege__sorte + .cc-belege__sorte {
+  margin-top: var(--cc-space-3);
+}
+
+/* Der Balken traegt die Sorte. Er ist 3px schmal und steht links neben der
+   Ueberschrift, nicht darunter: eine farbige Linie ueber der ganzen Breite
+   waere ein zweiter Trenner neben den Zeilenlinien der Tabelle. */
+.cc-belege__sorten-titel {
+  font-size: var(--cc-fs-2) !important;
+  font-weight: 600;
+  margin: 0 0 var(--cc-space-1) !important;
+  padding-left: var(--cc-space-1);
+  border-left: 3px solid var(--cc-sorte);
+  color: var(--cc-text);
 }
 
 .cc-belege__liste {
@@ -2055,15 +2096,20 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   padding: 0;
 }
 
-.cc-belege__liste li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+.cc-belege__zeile {
+  padding: var(--cc-space-1) 0 var(--cc-space-2);
+  border-bottom: 1px solid var(--cc-linie);
+}
+
+/* Die letzte Zeile einer Sorte braucht keinen Trenner — darunter kommt
+   ohnehin die naechste Ueberschrift oder der Schlusssatz. */
+.cc-belege__zeile:last-child {
+  border-bottom: none;
 }
 
 .cc-belege__link {
+  display: inline-block;
+  margin-bottom: var(--cc-space-1);
   color: var(--cc-gold-text, #90671D);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -2074,15 +2120,30 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 }
 
 /* Labor, Datum und Zertifikatsnummer stehen absichtlich VOR dem Klick da:
-   die Zeugnisse sind von 2025, und niemand soll Aktualität annehmen müssen. */
-.cc-belege__quelle {
-  font-size: 0.8125rem;
+   die Dokumente sind von 2025 und 2026, und niemand soll Aktualitaet
+   annehmen muessen. */
+.cc-belege__daten {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--cc-space-2);
+  row-gap: 0.15rem;
+  margin: 0;
+  font-size: var(--cc-fs-1);
+}
+
+.cc-belege__daten dt {
+  margin: 0;
   color: var(--cc-muted, #6b665d);
 }
 
+.cc-belege__daten dd {
+  margin: 0;
+  color: var(--cc-text);
+}
+
 .cc-belege__grenze {
-  margin-top: 0.9rem;
-  font-size: 0.8125rem;
+  margin-top: var(--cc-space-2);
+  font-size: var(--cc-fs-1);
   color: var(--cc-muted, #6b665d);
 }
 
