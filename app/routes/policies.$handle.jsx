@@ -1,4 +1,4 @@
-import {Link, useLoaderData} from 'react-router';
+import {Link, redirect, useLoaderData} from 'react-router';
 import {ABSENDER_MARKE, rechtstextTitel} from '~/lib/kakao-zone';
 
 /**
@@ -17,6 +17,26 @@ export const meta = ({data}) => {
 export async function loader({params, context}) {
   if (!params.handle) {
     throw new Response('Es wurde keine Seite angegeben', {status: 404});
+  }
+
+  // DATENSCHUTZ KOMMT NICHT MEHR AUS SHOPIFY (Job 20260910-crystal-cacao-dse-
+  // ist-alter-generatortext-jameda-patienten, gemessen am 2026-09-10):
+  // Der Rechtstext `privacy-policy` des geteilten Stores qi-blanco.myshopify.com
+  // ist ein alter Generatortext -- 78 528 Zeichen, die „Jameda" nennen und von
+  // „Patienten" sprechen. Er gehoert einer fremden Praxis-Vorlage, nicht diesem
+  // Laden, und er laesst sich von hier aus nicht heilen: Schreiben braeuchte den
+  // Shopify-Scope `write_legal_policies` (fehlt serverweit), und derselbe Text
+  // haengt zugleich am Schwester-Laden qiblanco.com.
+  //
+  // Die Umleitung steht bewusst HIER und nicht nur im Fussmenue: der Fussmenue-
+  // Link ist EIN Weg auf diese Adresse, nicht der einzige. Lesezeichen, der
+  // Google-Index, die Uebersicht /policies und Verweise aus anderen Rechtstexten
+  // zeigen weiter hierher -- ein blosser Link-Tausch haette den Generatortext
+  // unter derselben Adresse erreichbar gelassen.
+  //
+  // 301 und nicht 302: die Verschiebung ist dauerhaft gemeint.
+  if (params.handle === 'privacy-policy') {
+    throw redirect('/pages/datenschutz', 301);
   }
 
   const policyName = params.handle.replace(/-([a-z])/g, (_, m1) =>

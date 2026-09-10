@@ -436,7 +436,12 @@ export const KAKAO_FUSSMENUE = Object.freeze({
     {
       id: 'kakao-datenschutz',
       title: RECHTSTEXT_TITEL['privacy-policy'],
-      url: '/policies/privacy-policy',
+      // EIGENE ROUTE, NICHT DER SHOPIFY-RECHTSTEXT (2026-09-10): der
+      // Store-Rechtstext `privacy-policy` ist ein alter Generatortext, der
+      // „Jameda" nennt -- siehe Kopf von app/routes/pages.datenschutz.jsx.
+      // /policies/privacy-policy leitet seitdem mit 301 hierher; dieser Link
+      // spart den Umweg.
+      url: '/pages/datenschutz',
       items: [],
     },
     {
