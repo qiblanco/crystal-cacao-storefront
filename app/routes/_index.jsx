@@ -15,6 +15,7 @@ import {waehleFassung} from '~/lib/startseite-fassung';
 import {canonicalLink} from '~/lib/seo';
 import {MockShopNotice} from '~/components/MockShopNotice';
 import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
+import {SORTEN} from '~/lib/sorten-profil';
 
 /**
  * @type {Route.MetaFunction}
@@ -126,11 +127,21 @@ const SORTEN_HANDLES = Object.freeze(
  * klaren Kopf"). Sie beantwortet die einzige Frage, die der Kunde an dieser
  * Stelle hat: welche der zwei nehme ich. Der Beweis ist ein Closer und steht
  * auf der Kaufseite, nicht hier.
+ *
+ * SEIT DEM 2026-09-10 STEHT DER SATZ NICHT MEHR HIER, sondern in
+ * app/lib/sorten-profil.js (Feld `kurz`) — Job 20260910-BAU-sortenbloecke-...
+ * Grund: er hat seither einen ZWEITEN Leser. Der Sorten-Aufmacher der einen
+ * Kaufseite verweist auf die andere Sorte und nennt dabei genau diesen Satz
+ * ("Lieber Create? Fuer den klaren Kopf."). Zwei Kopien desselben Satzes
+ * waeren die naechste Stelle, an der die zwei Sorten auseinanderlaufen —
+ * und der Kunde laese auf der Startseite etwas anderes als auf der
+ * Kaufseite. Der Wortlaut ist beim Umzug zeichengleich geblieben.
  */
-const SORTEN_ORIENTIERUNG = Object.freeze({
-  awake: 'Für den Start in den Tag.',
-  create: 'Für den klaren Kopf.',
-});
+const SORTEN_ORIENTIERUNG = Object.freeze(
+  Object.fromEntries(
+    Object.entries(SORTEN).map(([sorte, profil]) => [sorte, profil.kurz]),
+  ),
+);
 
 /**
  * DIE MENGE, DIE DIE KACHEL ZEIGT — 2026-09-08.

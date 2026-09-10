@@ -2294,3 +2294,334 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 .cc-podcast__text p + p {
   margin-top: var(--cc-space-2);
 }
+
+/* ==========================================================================
+ * DER SORTEN-AUFMACHER — EIN Bauteil, ZWEI Seiten (2026-09-10)
+ * Job 20260910-BAU-sortenbloecke-awake-und-create-leerer-bildschirm-ohne-aufgabe
+ * ==========================================================================
+ * Christian, zu zwei Bildschirmaufnahmen: „Das ist optisch auch nicht gut
+ * gemacht, auch Crystal Cacao." Auftrag: „Beide Abschnitte deckungsgleich
+ * bauen. Gleiche Groessen, gleiche Abstaende, gleiche Position — der einzige
+ * Unterschied ist Farbe, Name, Claim und Bild."
+ *
+ * DER VORZUSTAND, an crystal-cacao.com gemessen (nicht am Quelltext), 1440 px:
+ *
+ *                                   awake     create    Differenz
+ *   Hoehe des Blocks                427,0 px  469,2 px  +42,2 px
+ *   Hoehe des Schriftzugs           178,9 px  221,0 px  +42,1 px
+ *   Breite des Schriftzugs          500,0 px  500,0 px    0
+ *   Schriftzug-Mitte zu Fenstermitte -117,0 px -117,0 px   0
+ *   Schriftzug -> Claim              70,0 px   70,0 px    0
+ *   Claim -> Unterzeile              76,0 px   76,0 px    0
+ *   anklickbare Ziele im Block           0         0
+ *
+ * DREI BEFUNDE, DIE DIESE TABELLE ZEIGT UND DAS AUGE NICHT:
+ *
+ * (1) DIE ABSTAENDE WAREN NIE VERSCHIEDEN. Der Auftrag vermutet „die
+ *     Abstaende zwischen Schriftzug, Claim und Unterzeile sind in beiden
+ *     Abschnitten verschieden" — gemessen sind sie auf 0,0 px identisch.
+ *     Verschieden war allein die HOEHE des Bildes, und die schiebt alles
+ *     darunter mit. Wer hier nach Augenmass an den Abstaenden geschoben
+ *     haette, haette die einzige Groesse verstellt, die schon stimmte.
+ *
+ * (2) DIE URSACHE IST DIE GEDECKELTE BREITE. Beide Bilder standen in
+ *     `max-w-[500px]`. Ihre Seitenverhaeltnisse sind aber verschieden
+ *     (awake 995x356 = 2,795; create 950x420 = 2,262). Gleiche Breite bei
+ *     ungleichem Verhaeltnis ERZWINGT ungleiche Hoehe. Deshalb fuehrt dieser
+ *     Bau die HOEHE und laesst die Breite folgen: der Tintenanteil an der
+ *     Leinwandhoehe ist bei beiden fast gleich (97,2 % / 96,2 %), bei
+ *     gleicher Leinwandhoehe stehen die Buchstaben also auf 1 % genau gleich
+ *     hoch. Dass „Awake" dabei breiter ausfaellt als „Create", ist kein
+ *     Fehler — es sind zwei verschiedene Woerter.
+ *
+ * (3) „CREATE STEHT WEITER LINKS" WAR NICHT DIE BOX. Beide Boxen standen
+ *     gemessen an derselben Stelle: 117,0 px links der Fenstermitte, und
+ *     zwar BEIDE. Das war ein eigener Fehler — `m-center` ist keine
+ *     Tailwind-Klasse (0 Treffer im ganzen Stylesheet-Baum), und die
+ *     Elternregel hiess `items-center-justify-center` statt `items-center
+ *     justify-center`, war also ebenfalls wirkungslos. Die 500-px-Box klebte
+ *     damit links in ihrer 734-px-Spalte, waehrend Claim und Unterzeile
+ *     ueber `text-center` mittig standen. Der SICHTBARE Unterschied zwischen
+ *     den Sorten kommt aus den Bilddateien selbst: die Awake-Datei traegt
+ *     rechts 45 px leeren Rand und links 11 (Tinte also 17 px links der
+ *     Leinwandmitte), die Create-Datei ist mit 11/11 symmetrisch. Zwei
+ *     „mittig" eingesetzte Bilder stehen dann sichtbar verschieden.
+ *     Ausgeglichen wird das ueber --cc-wortmarke-dx, je Sorte GEMESSEN
+ *     (app/lib/sorten-profil.js, nachgerechnet von Arm C der Probe).
+ *
+ * DIE GROESSE DES SCHRIFTZUGS IST NICHT GESCHMACK, SONDERN AUFLOESUNG.
+ * Der Auftrag: „Pruef Aufloesung, Format und ob es als Vektor vorliegt."
+ * Ergebnis: KEIN Vektor. Beide Dateien sind Raster-PNG — die Awake-Datei
+ * traegt sogar die Endung `.webp` und liefert PNG (Content-Type image/png,
+ * PNG-Magic). Bei 500 px Anzeigebreite braucht ein Geraet mit dreifacher
+ * Pixeldichte 1500 Bildpunkte; vorhanden sind 995 bzw. 950. Der Schriftzug
+ * wurde also um Faktor 1,5 hochgezogen, und die Sprenkel neben den
+ * Buchstaben (in der Create-Datei als einzelne blaue Pixelinseln messbar)
+ * wurden mit vergroessert.
+ * 112 px Hoehe kehren das um: awake braucht dann 3 x 112 x 2,795 = 939 von
+ * 995 verfuegbaren Punkten, create 3 x 112 x 2,262 = 760 von 950. Beide
+ * bleiben bei DREIFACHER Pixeldichte innerhalb ihrer Aufloesung — das Bild
+ * wird verkleinert statt gestreckt, und dabei verschwinden die Sprenkel
+ * optisch. Eine Vektorfassung bleibt trotzdem der richtige Endzustand; das
+ * ist eine Marken-Entscheidung und steht als Vorlage im RESULT.
+ *
+ * DIE DECKELUNG AUF SCHMALEN GERAETEN folgt derselben Ueberlegung wie die
+ * H1-Deckelung weiter oben: eine reine px-Hoehe kennt die Fensterbreite
+ * nicht. Gedeckelt wird ueber das BREITERE der beiden Verhaeltnisse (2,8),
+ * damit die Deckelung fuer BEIDE Sorten denselben Wert liefert — eine
+ * Deckelung je Sorte waere genau die Ungleichheit, die dieser Bau abstellt.
+ * Bei 320 px Fensterbreite: (320 - 32) / 2,8 = 102,9 px Hoehe, awake dann
+ * 287,6 px breit bei 288 px verfuegbarem Platz. Kein Ueberlauf, und beide
+ * Sorten weiterhin auf derselben Hoehe. */
+
+.cc-sortenaufmacher {
+  /* Die EINE Groesse, aus der alles andere folgt. */
+  --cc-wortmarke-hoehe: min(
+    112px,
+    calc((100vw - 2 * var(--cc-space-2)) / 2.8)
+  );
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: var(--cc-zeile-max);
+  margin-inline: auto;
+  padding-block: var(--cc-space-4);
+  padding-inline: var(--cc-space-2);
+}
+
+/* AB 48em ZWEI SPALTEN — und das ist keine Geschmacksfrage, sondern die
+ * Antwort auf den schwersten Punkt des Auftrags.
+ *
+ * GEMESSEN, nicht geschaetzt: gestapelt kam der neue Aufmacher bei 1440 px
+ * auf 512,6 px Hoehe. Der Vorzustand stand bei 427,0 px (awake) und
+ * 469,2 px (create). Ein Abschnitt, der Inhalt bekommt UND dabei waechst,
+ * hat den Befund „kostet einen ganzen Bildschirm und liefert nichts" nur zur
+ * Haelfte beantwortet — und die teurere Haelfte verschlimmert.
+ *
+ * Nebeneinander bestimmt nicht mehr die SUMME aus Wortmarke und Text die
+ * Hoehe, sondern ihr MAXIMUM. Der breite Bildschirm hat den Platz waagerecht;
+ * gestapelt bleibt er links und rechts leer und der Besucher bezahlt ihn
+ * senkrecht.
+ *
+ * DIE SPALTENBREITEN SIND BEIDE FEST, und genau daran haengt die
+ * Deckungsgleichheit: eine Spalte `auto` haette sich nach der Wortmarke
+ * gerichtet, und die ist je Sorte verschieden breit (313,0 px gegen
+ * 253,3 px bei gleicher Hoehe — zwei verschiedene Woerter). Die Textspalte
+ * saesse dann bei awake 60 px weiter rechts als bei create. Die Markenspalte
+ * ist deshalb so breit wie die BREITERE der beiden Wortmarken
+ * (Hoehe x 2,8, dasselbe Verhaeltnis, mit dem oben die vw-Deckelung rechnet)
+ * und die Wortmarke steht darin mittig. */
+@media (min-width: 48em) {
+  .cc-sortenaufmacher {
+    display: grid;
+    grid-template-columns:
+      calc(var(--cc-wortmarke-hoehe) * 2.8)
+      minmax(0, 44ch);
+    align-items: center;
+    justify-content: center;
+    column-gap: var(--cc-space-5);
+    text-align: left;
+    max-width: none;
+  }
+  .cc-sortenaufmacher__text {
+    /* Der Text steht linksbuendig an der Kante der Wortmarke — zentriert
+     * neben einem Bild entstuenden zwei Achsen und keine. */
+    text-align: left;
+  }
+  .cc-sortenaufmacher__wege {
+    justify-content: flex-start;
+  }
+}
+
+.cc-sortenaufmacher__marke {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* DIE POSITIONIERUNG TRAEGT DEN ABSCHNITT, statt als Rest darunter zu haengen.
+ * Auftrag: „‚High Performance Cacao' sieht aus wie ein Rest. Klein, grau, weit
+ * abgesetzt, in einer anderen Schrift als alles darueber. Das ist unsere
+ * Positionierung — entweder sie traegt den Abschnitt oder sie gehoert weg."
+ *
+ * Sie steht jetzt als erste Zeile UEBER der Wortmarke und in der Sortenfarbe
+ * — also in derselben Familie wie der Claim, nicht als grauer Nachsatz. Die
+ * „andere Schrift" war uebrigens keine: gemessen rendern Claim und
+ * Unterzeile beide "Open Sans Variable". Verschieden waren Groesse (39,06
+ * gegen 25 px), Gewicht und Farbe, und der Abstand von 76 px darueber
+ * trennte sie vom Rest. Der Wortlaut ist unveraendert. */
+.cc-sortenaufmacher__positionierung {
+  font-size: var(--cc-fs-1);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cc-sorte-text, var(--cc-muted));
+  margin: 0 0 var(--cc-space-2);
+  max-width: none;
+}
+
+.cc-sortenaufmacher__wortmarke {
+  height: var(--cc-wortmarke-hoehe);
+  /* Die Breite FOLGT dem Bild. `width: auto` bei gesetzter Hoehe heisst:
+   * jede Sorte behaelt ihr eigenes Seitenverhaeltnis und beide stehen
+   * trotzdem gleich hoch. Genau umgekehrt zum Vorzustand. */
+  width: auto;
+  /* Notnagel, falls die vw-Deckelung oben je durch eine Elternbreite
+   * unterlaufen wird (Raster, Modal). Er darf nie beissen — beisst er doch,
+   * faellt Arm B der Probe, weil dann die Hoehen wieder auseinanderlaufen. */
+  max-width: 100%;
+  /* Der GEMESSENE Ausgleich fuer die unsymmetrische Leinwand. Prozent bezieht
+   * sich bei translateX auf die EIGENE Breite des Elements — also genau die
+   * Groesse, in der der Versatz in sorten-profil.js gemessen ist. Default 0:
+   * eine Sorte ohne gemessenen Wert wird nicht geraten verschoben. */
+  transform: translateX(var(--cc-wortmarke-dx, 0));
+  margin: 0;
+}
+
+/* Der Claim. Er behaelt seinen Wortlaut und seine Sortenfarbe (die kommt aus
+ * `[data-cc-sorte] .items-center-justify-center > h2` weiter oben) und
+ * verliert nur die Inline-Groesse, die bisher aus der Route kam.
+ *
+ * WARUM --cc-fs-5 UND NICHT --cc-fs-6 WIE BISHER: der Claim ist auf einer
+ * KAUFSEITE nicht die Hauptueberschrift — das ist der Produktname darunter.
+ * Bei 39,06 px stand er bis heute groesser da als die <h1> der Seite. Eine
+ * Stufe tiefer stellt die Rangfolge her, ohne eine neue Groesse zu erfinden:
+ * --cc-fs-5 ist die vorhandene Nachbarstufe derselben Skala. */
+.cc-sortenaufmacher h2 {
+  font-size: var(--cc-fs-5);
+  line-height: 1.15;
+  /* Die Abstaende stehen HIER und nur hier — das ist der ganze Punkt von
+   * „einmal bauen, zweimal verwenden". `main h2` bringt 48/24 px mit; das
+   * ist der Sektions-Takt der Seite und in einem gestapelten Aufmacher zu
+   * viel. */
+  margin-block: 0 var(--cc-space-1);
+  /* KEINE reservierte Zeilenzahl hier — und das ist gemessen, nicht
+   * unterlassen. Die erste Fassung reservierte zwei Zeilen als Riegel gegen
+   * ungleiche Bloecke; nachgemessen ueber 320/360/390/414/768/1024/1280/
+   * 1440/1920 px brechen die zwei Claims aber auf KEINER dieser Breiten
+   * verschieden um. Die Reservierung kostete damit auf schmalen Geraeten
+   * eine ganze leere Zeile (28,8 px) und schuetzte gegen nichts.
+   * Was sie schuetzen SOLLTE, schuetzt jetzt die Probe: Arm B von
+   * pruefungen/probe_sortenaufmacher.py vergleicht die Blockhoehen ueber
+   * denselben Breitenbereich und wird rot, sobald eine kuenftige
+   * Textaenderung die Umbrueche auseinandertreibt. Ein Messgeraet an der
+   * WIRKUNG schlaegt eine Reserve auf Verdacht. */
+}
+
+/* DIE EINORDNUNG — der Satz, den der Abschnitt vorher nicht hatte.
+ * Auftrag: „zwei bis drei Zeilen, wofuer diese Sorte gedacht ist". Ein Satz
+ * reicht; was daran zaehlt, steht in app/lib/sorten-profil.js. */
+.cc-sortenaufmacher__einordnung {
+  font-size: var(--cc-fs-3);
+  line-height: 1.5;
+  color: var(--cc-text);
+  /* Deutlich enger als --cc-zeile-max: dieser Satz soll als BLOCK gelesen
+   * werden, nicht als Zeile quer ueber die Spalte. 42ch ergeben bei 20 px
+   * rund zwei Zeilen. */
+  max-width: 36ch;
+  margin: 0;
+  /* Auch hier keine Reservierung: die zwei Saetze sind 85 und 84 Zeichen
+   * lang und brechen ueber den ganzen gemessenen Breitenbereich gleich um.
+   * Gemessene Gegenprobe siehe Claim-Regel darueber. */
+}
+
+/* Die zwei Wege. `.cc-knopfreihe` ist Bestand (app/styles/app.css) und bringt
+ * Abstand, Umbruch und das Stapeln unter 480 px schon mit — hier wird nur
+ * zentriert, was dort linksbuendig steht. */
+.cc-sortenaufmacher__wege {
+  justify-content: center;
+  align-items: center;
+  margin-top: var(--cc-space-2);
+}
+
+/* DER ZWEITWEG IST EIN TEXTLINK UND TRAEGT DESHALB TEXTGROESSE.
+ * `.cc-knopf--ruhig` erbt von `.cc-knopf` die KNOPF-Schrift (17,6 px). Das
+ * ist dort richtig, wo er neben einem Knopf in voller Breite steht — hier
+ * steht er in einer 324 px schmalen Spalte, und 1,6 px entscheiden ueber
+ * eine zweite Zeile. Auf der Token-Fliesstextstufe (16 px) bleiben BEIDE
+ * Sorten-Texte ueber den ganzen gemessenen Breitenbereich (320 bis 1440 px)
+ * einzeilig — und damit sind die zwei Bloecke gleich hoch. Die
+ * Trefferflaeche bleibt unberuehrt: `min-height: 44px` kommt aus
+ * `.cc-knopf` und wird hier nicht angefasst. */
+.cc-sortenaufmacher__wege .cc-knopf--ruhig {
+  font-size: var(--cc-fs-2);
+  /* DIE EINE RESERVIERUNG, DIE BLEIBT — weil sie als einzige einen
+   * gemessenen Anlassfall hat. „Awake: Fuer den Start in den Tag." ist vier
+   * Zeichen laenger als „Create: Fuer den klaren Kopf."; bei 320 px
+   * Fensterbreite bricht der laengere auf zwei Zeilen und der kuerzere
+   * nicht. Gemessen: 70,4 px gegen 51,2 px, also 19,2 px Unterschied
+   * zwischen den zwei Bloecken — genau an der Breite, an der am wenigsten
+   * Platz ist. Zwei Zeilen sind deshalb reserviert; ab 360 px sind beide
+   * einzeilig und die Reservierung kostet dort 19,2 px, die der Abschnitt
+   * an anderer Stelle zurueckgibt.
+   * WARUM NICHT EINFACH KUERZEN: jede Textwahl, die heute passt, kann durch
+   * die naechste Textaenderung wieder kippen. Die Reservierung ist der
+   * strukturelle Riegel, Arm B der Probe ist die Kontrolle darueber —
+   * reicht sie eines Tages nicht mehr, wird sie rot statt still ungleich.
+   * Zeilenhoehe 1,2 kommt aus `.cc-knopf`, der Innenabstand ebenso. */
+}
+
+/* DIE BREITE, AB DER RESERVIERT WIRD, IST GEMESSEN — nicht gerundet.
+ * Die natuerliche Hoehe des Links wurde in 5-px-Schritten von 320 bis 479 px
+ * erhoben (jeweils mit abgeschalteter Reservierung): bei 320 px stehen
+ * 51,2 px gegen 70,4 px, ab 325 px sind beide 51,2 px. Der Umbruch kippt
+ * also zwischen 320 und 325 px. Reserviert wird deshalb nur bis 20,25em
+ * (= 324 px bei Standard-Schriftgroesse) — daruber kostet die Reservierung
+ * 19,2 px, ohne je zu greifen.
+ * IN `em` UND NICHT IN `px`, mit Absicht: erhoeht der Besucher seine
+ * Grundschrift, bricht der Text frueher um, und die Schranke wandert mit.
+ * Dieselbe Einheit, die die Nachbarabfrage weiter unten benutzt. */
+@media (max-width: 20.25em) {
+  .cc-sortenaufmacher__wege .cc-knopf--ruhig {
+    min-height: calc(2 * 1.2em + 2 * var(--cc-space-2));
+  }
+}
+
+/* Auf schmalen Geraeten stapelt `.cc-knopfreihe` auf volle Breite. Der ruhige
+ * Zweitweg soll dabei ein Textlink bleiben und nicht wie ein zweiter Knopf
+ * ueber die ganze Breite liegen — sonst stehen wieder zwei gleich laute
+ * Angebote nebeneinander, genau der Befund vom 2026-09-08. */
+@media (max-width: 29.99em) {
+  .cc-sortenaufmacher__wege {
+    align-items: stretch;
+  }
+  .cc-sortenaufmacher__wege .cc-knopf--ruhig {
+    align-self: center;
+  }
+  /* Der Claim eine Stufe kleiner: bei 390 px braucht „Wach. Mutig.
+   * Kraftvoll." auf --cc-fs-5 zwei Zeilen und schiebt den Kaufweg wieder
+   * unter den Falz. --cc-fs-4 ist die naechste vorhandene Stufe, kein
+   * freier Wert. */
+  .cc-sortenaufmacher h2 {
+    font-size: var(--cc-fs-4);
+  }
+  .cc-sortenaufmacher {
+    padding-block: var(--cc-space-3);
+    /* Gestapelt zaehlt jede Zeile doppelt: hier steht die Wortmarke UEBER
+     * dem Text statt daneben, ihre Hoehe geht also voll in die Blockhoehe
+     * ein. 88 px halten sie deutlich lesbar und geben 24 px zurueck. Die
+     * Aufloesungsrechnung bleibt gedeckt: 3 x 88 x 2,795 = 738 von 995
+     * verfuegbaren Bildpunkten. */
+    --cc-wortmarke-hoehe: min(
+      88px,
+      calc((100vw - 2 * var(--cc-space-2)) / 2.8)
+    );
+  }
+  /* Gestapelt steht der Einordnungssatz ueber der vollen Spaltenbreite und
+   * braucht die Lead-Stufe nicht — auf --cc-fs-2 (der Fliesstextstufe, dem
+   * Mindestwert aus web-soll) bleibt er gleich lesbar und spart eine Zeile.
+   * Kein freier Wert, eine Stufe tiefer auf derselben Skala. */
+  .cc-sortenaufmacher__einordnung {
+    font-size: var(--cc-fs-2);
+  }
+}
+
+/* DAS SPRUNGZIEL DES ERSTEN WEGES.
+ * `scroll-margin-top` ist nicht Kosmetik: die Kopfzeile steht `sticky` und
+ * verdeckt sonst die obersten Pixel des Ziels. Der Wert ist die gemessene
+ * Kopfhoehe (ca. 72 px) plus eine Zeile Luft aus dem 8er-Raster. */
+#cc-kaufen {
+  scroll-margin-top: calc(72px + var(--cc-space-2));
+}
