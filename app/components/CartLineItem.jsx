@@ -99,32 +99,42 @@ function CartLineQuantity({line}) {
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
-    // Die Abstaende kommen aus `gap` in app.css Abschnitt 26, nicht mehr aus
-    // &nbsp;-Textknoten: ein geschuetztes Leerzeichen ist fuer Flexbox KEIN
-    // umbrechbarer Weissraum, sondern ein eigenes Flex-Kind — es zaehlte in die
-    // min-content-Breite der Zeile mit hinein und liess sich nicht umbrechen.
+    // AUFBAU DER VORLAGE qiblanco.com (Christian 2026-09-10: "genauso aufbauen
+    // wie auf www.qiblanco.com"): links der Stepper [-] Zahl [+] in EINEM
+    // Wrapper, rechts aussen das Entfernen — dieselbe Reihenfolge, dieselben
+    // Klassen (.quantity-wrapper), damit die Abstaende aus app.css Abschnitt 15
+    // mit gemessenen Vorlagewerten greifen. Vorher stand hier "Menge: 3" als
+    // Text auf halber Hoehe neben zwei goldenen Quadraten und "Entfernen" als
+    // umrandeter Knopf in eigener Zeile.
+    // "Menge" bleibt fuer Screenreader als sr-only-Text erhalten; sichtbar
+    // ist wie in der Vorlage nur die Zahl.
     <div className="cart-line-quantity">
-      <small>Menge: {quantity}</small>
-      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
-        <button
-          aria-label="Menge verringern"
-          disabled={quantity <= 1 || !!isOptimistic}
-          name="decrease-quantity"
-          value={prevQuantity}
-        >
-          <span>&#8722;</span>
-        </button>
-      </CartLineUpdateButton>
-      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
-        <button
-          aria-label="Menge erhöhen"
-          name="increase-quantity"
-          value={nextQuantity}
-          disabled={!!isOptimistic}
-        >
-          <span>&#43;</span>
-        </button>
-      </CartLineUpdateButton>
+      <div className="quantity-wrapper">
+        <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+          <button
+            aria-label="Menge verringern"
+            disabled={quantity <= 1 || !!isOptimistic}
+            name="decrease-quantity"
+            value={prevQuantity}
+          >
+            <span>&#8722;</span>
+          </button>
+        </CartLineUpdateButton>
+        <small>
+          <span className="sr-only">Menge: </span>
+          {quantity}
+        </small>
+        <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+          <button
+            aria-label="Menge erhöhen"
+            name="increase-quantity"
+            value={nextQuantity}
+            disabled={!!isOptimistic}
+          >
+            <span>&#43;</span>
+          </button>
+        </CartLineUpdateButton>
+      </div>
       <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
     </div>
   );
@@ -147,8 +157,23 @@ function CartLineRemoveButton({lineIds, disabled}) {
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button disabled={disabled} type="submit">
-        Entfernen
+      {/* Wie in der Vorlage: ein Muelleimer-Zeichen statt eines umrandeten
+          Textknopfs — die Handlung, die wir am wenigsten wollen, traegt das
+          geringste Gewicht. Das Wort bleibt als zugaenglicher Name. */}
+      <button disabled={disabled} type="submit" aria-label="Entfernen">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
+          height="1em"
+          viewBox="0 0 512 512"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            fill="currentColor"
+            d="M447.55 96H336V48a16 16 0 0 0-16-16H192a16 16 0 0 0-16 16v48H64.45L64 136h33l20.09 314A32 32 0 0 0 149 480h214a32 32 0 0 0 31.93-29.95L415 136h33ZM176 416l-9-256h33l9 256Zm96 0h-32V160h32Zm24-320h-80V68a4 4 0 0 1 4-4h72a4 4 0 0 1 4 4Zm40 320h-33l9-256h33Z"
+          />
+        </svg>
       </button>
     </CartForm>
   );

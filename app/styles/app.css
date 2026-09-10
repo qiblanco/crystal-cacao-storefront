@@ -114,6 +114,31 @@ aside {
   transition: transform 200ms ease-in-out;
 }
 
+/*
+ * SCHREIBTISCH-PANEL WIE DIE VORLAGE — 2026-09-10 (Christian: "genauso aufbauen
+ * wie auf www.qiblanco.com"). Dort haengt die Schublade ab 1024 px als Panel
+ * unter dem Kopf (height: auto) statt die volle Hoehe zu fuellen; die
+ * Zusammenfassung folgt dann direkt auf die letzte Position. Gemessen
+ * 2026-09-10 vor dem Umbau: Loch Artikelzeile -> Summenblock am Schreibtisch
+ * 347,8 px hier gegen 2 px in der Vorlage. Auf dem Telefon bleibt der Fuss
+ * unten (so auch die Vorlage: 386 px Loch bei einer Position, Kaufknopf in
+ * Daumenreichweite). `.overlay > aside` gewinnt ueber `aside` oben.
+ */
+@media screen and (min-width: 1024px) {
+  .overlay > aside {
+    transform: translate(0, 0) !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: calc(100dvh - 50px);
+    right: 25px;
+    border-radius: 0 0 20px 20px;
+  }
+  .overlay > aside > main {
+    padding-bottom: 0 !important;
+    border-radius: 0 0 10px 10px;
+  }
+}
+
 aside header {
   align-items: center;
   border-bottom: 1px solid var(--color-dark);
@@ -527,12 +552,39 @@ aside .cart-details {
   overflow-y: auto;
 }
 
+/*
+ * ARTIKELZEILE WIE DIE VORLAGE — 2026-09-10. Werte GEMESSEN an qiblanco.com
+ * (proben/mess_warenkorb_schublade.py, nicht nach Augenmass): Zeile 1rem oben/
+ * unten, Trennlinie, Bild 100x100 mit 0,75rem Abstand, Titel und Preis 1.2rem
+ * (19,2 px; hier waren es 16 px), Preis mit Gewicht 600. Farben bleiben die
+ * des Kakao-Ladens (Linie --cc-linie statt rgba(0,0,0,.1)).
+ * `.cart-line-inner` ist die Flex-Zeile (Bild | Text); in der Vorlage ist das
+ * die <li> selbst — der Wrapper bleibt, weil darunter Kind-Zeilen (Buendel)
+ * gerendert werden koennen.
+ */
 .cart-line {
-  padding: 0.75rem 0;
+  padding: 1rem 0;
 }
 
 .cart-line-inner {
   display: flex;
+}
+
+.cart-line-inner > div {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.cart-line-inner p,
+.cart-line-inner .product-price {
+  font-size: 1.2rem;
+}
+
+.cart-line .product-price {
+  font-weight: 600;
 }
 
 .cart-line img {
@@ -562,17 +614,89 @@ aside .cart-details {
  * nicht gibt.
  */
 .cart-summary-aside {
-  background: white;
-  border-top: 1px solid var(--color-dark);
-  padding-top: 0.75rem;
   position: static;
   flex: 0 0 auto;
   width: auto;
   padding-bottom: max(8px, env(safe-area-inset-bottom));
 }
 
+/*
+ * MENGE UND ENTFERNEN WIE DIE VORLAGE — 2026-09-10, gemessen an qiblanco.com:
+ * Stepper [-] Zahl [+] links, Entfernen rechts aussen, alle auf EINER Mitte;
+ * Knoepfe 44x44, Radius 10, NICHT gefuellt, Rand 1 px, Zeichen 1.2rem; Zahl
+ * 1.1rem mit 10 px Luft; Entfernen als Zeichen 44x44 ohne Rand, Deckkraft 0,2
+ * (die Handlung, die wir am wenigsten wollen, traegt das geringste Gewicht).
+ *
+ * WARUM DIE MENGENKNOEPFE VORHER GOLDENE QUADRATE WAREN: die Basis
+ * `main button:where(:not(.reset)):where(:not(.cc-knopf))` (Abschnitt 17)
+ * fuellt jeden Knopf gold und gibt ihm 1.5rem Seitenpolster. Sie ist als
+ * BASIS gebaut (Spezifitaet 0-0-2) und will von Bauteilen mit eigener Klasse
+ * ueberschrieben werden — genau das passiert hier (0-2-1 / 0-2-2). Der Rand
+ * traegt die Farbe des Ladens (--cc-dunkel) im Gewicht der Vorlage (Alpha .2).
+ */
 .cart-line-quantity {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.cart-line-quantity .quantity-wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.cart-line-quantity .quantity-wrapper small {
+  display: inline-block;
+  margin: 0 10px;
+  font-size: 1.1rem;
+}
+
+.cart-line-quantity .quantity-wrapper button {
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid rgba(23, 19, 16, 0.2);
+  background: transparent;
+  color: var(--cc-dunkel, #171310);
+}
+
+.cart-line-quantity button[type='submit'] {
+  border: none;
+  background: transparent;
+  color: var(--cc-dunkel, #171310);
+  font-size: 1.3rem;
+  opacity: 0.2;
+  transition: 0.2s all linear;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.5rem;
+}
+
+.cart-line-quantity .quantity-wrapper button:hover,
+.cart-line-quantity button[type='submit']:hover {
+  background: transparent;
+  cursor: pointer;
+}
+
+.cart-line-quantity button[type='submit']:hover {
+  opacity: 0.5;
+}
+
+.cart-line-quantity button:disabled {
+  cursor: default;
+  opacity: 0.35;
 }
 
 /* Child line components (warranties, gift wrapping, etc.) */
@@ -586,9 +710,65 @@ aside .cart-details {
   margin-top: 0.25rem;
 }
 
-.cart-subtotal {
-  align-items: center;
+/*
+ * SUMMENBLOCK WIE DIE VORLAGE — 2026-09-10. Zwischensumme als EINE Zeile
+ * (Bezeichner links, Betrag rechts, 1.1rem / 500, gedaempft), darunter der
+ * Kassenknopf. Der Block hat nur noch eine helle Trennlinie oben (Vorlage:
+ * 1 px rgba(0,0,0,.1); hier die Linie des Ladens) — die dunkle Umrandung mit
+ * Radius und beiger Fuellung, die sonst nirgends im Laden vorkam, ist weg.
+ * Gilt fuer Schublade UND /cart-Seite (Basis + Modifier wie in der Vorlage).
+ */
+.cart-summary-page,
+.cart-summary-aside {
+  border-top: 1px solid var(--cc-linie, #e6ded3);
+  padding-top: 8px;
+  background: transparent;
+  border-radius: 0;
+}
+
+.cart-aside-subtotal {
+  width: 100%;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--cc-muted, #6b665d);
+  padding: 8px 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/*
+ * DER KASSENKNOPF — der Kern des Auftrags vom 2026-09-10. Die Hausform
+ * .cc-knopf (Gold traegt Handlung) in den GEMESSENEN Massen des Vorlage-Knopfs
+ * .btn--primary: Polster 1.25rem, Zeilenhoehe 1.5, Rand 2 px in Knopffarbe,
+ * Schrift 17,6 px / 600 => Box 20 + 26,4 + 20 + 2*2 = 70,4 px, volle Breite.
+ * Das <p> darin wird typografisch durchsichtig (erbt Schrift und Zeilenhoehe),
+ * sonst setzte `aside p` eigene Werte darueber. 8 px Luft nach oben wie dort.
+ */
+.cartSummaryWrapper {
+  margin-top: 8px;
+}
+
+.cartSummaryWrapper .cc-knopf {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  padding: 1.25rem;
+  line-height: 1.5;
+  border-width: 2px;
+  border-color: var(--cc-gold, rgb(242, 191, 114));
+  font-size: var(--cc-knopf-schrift, 1.1rem);
+  font-weight: var(--cc-knopf-gewicht, 600);
+}
+
+.cartSummaryWrapper .cc-knopf:hover {
+  border-color: var(--cc-gold-tief, rgb(200, 152, 90));
+}
+
+.cartSummaryWrapper .cc-knopf p {
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
 }
 /*
 * --------------------------------------------------
@@ -1666,127 +1846,29 @@ aside .cc-leerzustand .cc-knopf {
   font-weight: 600;
 }
 
-/* --- 15. Warenkorb-Seite und -Schublade --- */
+/* --- 15. Warenkorb-Seite und -Schublade ---
+ * Zeile, Menge, Fuss und Kassenknopf stehen seit dem 2026-09-10 gesammelt im
+ * Block "components/Cart" oben, mit den an qiblanco.com gemessenen Werten.
+ * Hier standen bis dahin: die beige Fuss-Fuellung mit Radius und 1.5rem
+ * Polster (Christian: "eine duenne dunkle Umrandung, die sonst nirgends im
+ * Laden vorkommt") und der Code-Falz der Schublade (details.cc-code-falz vom
+ * 2026-09-08) — den Falz gibt es in der Schublade nicht mehr, weil die Vorlage
+ * dort keine Code-Formulare fuehrt (CartSummary.jsx, CodeFalz). Was bleibt:
+ * die Linie unter jeder Zeile und der Bildradius des Ladens. */
 .cart-line {
   border-bottom: 1px solid var(--cc-linie, #e6ded3);
-  padding-bottom: var(--cc-space-2, 1rem);
+}
+
+.cart-line:first-child {
+  border-top: 1px solid var(--cc-linie, #e6ded3);
+}
+
+.cart-line:last-child {
+  border-bottom: none;
 }
 
 .cart-line img {
   border-radius: var(--cc-radius-bild, 10px);
-}
-
-.cart-summary-page,
-.cart-summary-aside {
-  background: var(--cc-flaeche, #f6f1ea);
-  border-radius: var(--cc-radius-bild, 10px);
-  padding: var(--cc-space-3, 1.5rem);
-}
-
-/*
- * --- 15b. DER CODE-FALZ IM DRAWER-FUSS --- 2026-09-08
- * (Job 20260908-crystal-warenkorb-scrollflaeche-37prozent-drift-prio30)
- *
- * DER BEFUND, GEMESSEN UND NICHT VERMUTET (390x844, zwei Artikel, A/B im
- * selben Browser): die scrollende Mitte des Warenkorb-Drawers war auf 313 von
- * 844 px = 37,1 % geschrumpft, gefordert sind 40 %, nach dem Drei-Zonen-Umbau
- * am 2026-08-22 waren es 437 px = 51,8 %. Die fehlenden Pixel sassen
- * VOLLSTAENDIG im Fuss (435 px), nicht im Kopf (in beiden Lagen unveraendert
- * 64 px): padding 24+24 | h4 24 | Zwischensumme 24 | Rabattcode-Formular 132 |
- * Gutschein-Formular 132 | Kasse 50.
- *
- * WER DIE 124 PX GENOMMEN HAT — und warum die Antwort NICHT lautet, das
- * rueckgaengig zu machen: die Design-Token-Schicht setzt
- * `main input:not([type='checkbox']):not([type='radio'])` und
- * `main button:not(.reset):not(.cc-knopf)` auf
- * `min-height: var(--cc-treffer-min, 44px)` — WCAG 2.5.5, bewusst gesetzt.
- * Das sind DESZENDANTEN-Selektoren, und der Drawer-Fuss liegt in
- * `<aside><main>`; sie treffen ihn also, ohne ihn zu nennen. Feld und Knopf
- * wuchsen je von 26 auf 44 px und stapeln sich (Formular 70 -> 132 px).
- * DIESE REGELN SIND NICHT DER FEHLER. Sie haben nur sichtbar gemacht, dass der
- * Fuss zwei OPTIONALE Formulare permanent offen traegt, die er sich in 844 px
- * nie leisten konnte. Sie zu verkleinern, um wieder gruen zu werden, waere
- * eine Barrierefreiheits-Regression — und dasselbe Torpfosten-Verschieben wie
- * das Senken von MINDEST_ANTEIL, das der Auftrag ausdruecklich verbietet.
- * Behoben wird deshalb die URSACHE: der Fuss gibt den Platz her, den er nicht
- * braucht, und die Trefferflaechen bleiben unangetastet.
- *
- * NUR DIE SCHUBLADE. `.cart-summary-page` (die /cart-Seite) hat die Hoehe und
- * bleibt vollstaendig unveraendert — dort ist ein Falz unnoetig.
- */
-.cart-summary-aside .cc-code-falz {
-  border-top: 1px solid var(--cc-linie, #e6ded3);
-  margin-top: var(--cc-space-2, 1rem);
-}
-
-/* Der Griff selbst traegt dieselbe Trefferflaeche wie jeder andere Knopf —
- * `<summary>` ist weder `button` noch `input` und wird von den Token-Regeln
- * oben NICHT erfasst, also steht sie hier ausdruecklich. */
-.cart-summary-aside .cc-code-falz > summary {
-  align-items: center;
-  color: var(--cc-dunkel, #171310);
-  cursor: pointer;
-  display: flex;
-  font-size: var(--cc-fs-2, 1rem);
-  min-height: var(--cc-treffer-min, 44px);
-  user-select: none;
-}
-
-.cart-summary-aside .cc-code-falz > summary:focus-visible {
-  outline: 2px solid var(--cc-gold-tief, rgb(200, 152, 90));
-  outline-offset: 2px;
-}
-
-/*
- * DAS AUFKLAPP-ZEICHEN MUSS HIER SELBST GEBAUT WERDEN. `display: flex` auf dem
- * <summary> nimmt ihm den `list-item`-Anzeigetyp — und damit das native
- * Dreieck. Ohne Ersatz saehe der Griff aus wie ein Satz, nicht wie etwas zum
- * Aufklappen; der Kunde mit einem Gutscheincode fände seine Felder nicht.
- * Deshalb ein eigener Winkel, der beim Oeffnen kippt.
- */
-.cart-summary-aside .cc-code-falz > summary::-webkit-details-marker {
-  display: none;
-}
-
-.cart-summary-aside .cc-code-falz > summary::after {
-  border-bottom: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  content: '';
-  height: 7px;
-  margin-left: auto;
-  transform: rotate(45deg);
-  transition: transform 150ms ease-in-out;
-  width: 7px;
-}
-
-.cart-summary-aside .cc-code-falz[open] > summary::after {
-  transform: rotate(-135deg);
-}
-
-/*
- * AUFGEKLAPPT LIEGEN FELD UND KNOPF NEBENEINANDER statt uebereinander. Das ist
- * der zweite, kleinere Teil desselben Befunds: gestapelt kostet ein Formular
- * 132 px, in einer Zeile rund 44. Die 44 px Trefferflaeche bleiben dabei
- * erhalten — es wird nichts kleiner, nur nebeneinander gelegt.
- * `min-width: 0` ist Pflicht, sonst weigert sich das Eingabefeld als
- * Flex-Kind, unter seine Standardbreite zu schrumpfen, und die Zeile bricht
- * doch wieder um.
- */
-.cart-summary-aside .cc-code-falz form > div,
-.cart-summary-aside .cc-code-falz section > form > div {
-  align-items: center;
-  display: flex;
-  gap: var(--cc-space-1, 0.5rem);
-  margin-top: var(--cc-space-1, 0.5rem);
-}
-
-.cart-summary-aside .cc-code-falz input[type='text'] {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.cart-summary-aside .cc-code-falz button[type='submit'] {
-  flex: 0 0 auto;
 }
 
 /* --- 16. Fehlerseite --- */
@@ -2131,48 +2213,26 @@ aside header h3 {
  * der Schublade hinaus — 20 Elemente bis x=424 bei einer 390 px breiten
  * Schublade (34 px), und bei 360 px waren es 80 px, weil die Textspalte mit
  * ihren 296 px min-content-Breite NICHT mit dem Viewport mitwanderte.
- * Abgeschnitten waren Produkttitel, Preis, Variante — und der 126 px breite
- * "Entfernen"-Knopf stand zur Haelfte draussen ("Entfern").
  *
- * DIE URSACHENKETTE, GLIED FUER GLIED BELEGT (Gegenproben im RESULT):
- *   1. `.cart-line-quantity` ist eine Flex-Zeile OHNE Umbruch. Ihre
- *      min-content-Breite ist damit die SUMME ihrer Kinder — sie kann gar
- *      nicht schmaler werden, egal wie schmal das Geraet ist.
- *   2. Die Textspalte daneben ist ein Flex-Kind und traegt per Default
- *      `min-width: auto`. Ein Flex-Kind schrumpft NICHT unter seine
- *      min-content-Breite. Die 296 px aus (1) waren damit eine Untergrenze.
- *   3. Und die 296 px kamen aus Abschnitt 17: `main button:not(.reset)…`
- *      gibt JEDEM Knopf `padding: 0 var(--cc-space-3)` = 48 px Luft. Fuer
- *      einen Knopf mit EINEM Zeichen ("−", "+") ist das der halbe Knopf.
- *      Gemeint war Seiteninhalt; getroffen wurde jede Schublade mit, denn
- *      `Aside.jsx` baut `<aside><main>…</main></aside>`. Dieselbe Wurzel wie
- *      der Fuss-Befund vom selben Tag, nur die andere Achse.
+ * DIE URSACHENKETTE: (1) `.cart-line-quantity` war eine Flex-Zeile ohne
+ * Umbruch, ihre min-content-Breite die SUMME ihrer Kinder; (2) die Textspalte
+ * daneben traegt als Flex-Kind `min-width: auto` und schrumpft nicht unter
+ * ihre min-content-Breite; (3) Abschnitt 17 gab jedem Knopf 48 px
+ * Seitenpolster, auch den Ein-Zeichen-Knoepfen.
  *
- * WAS HIER AUSDRUECKLICH NICHT PASSIERT: die 44-px-Trefferflaechen werden
- * NICHT angetastet (WCAG 2.5.5, bewusst gesetzt 2026-09-02). Die A/B-
- * Gegenprobe "nur das Polster weg" heilt den Ueberlauf zwar auf 0 px, macht
- * aus den Schrittknoepfen aber 11x44 px — eine Barrierefreiheits-Regression
- * gegen einen Geometrie-Befund einzutauschen waere kein Fix. Die Zonenwache
- * misst diesen Ausweg seit heute mit (Arm ZEILE-TREFFERFLAECHE) und faellt
- * darauf durch.
- *
- * WARUM DIESER BLOCK AM ENDE STEHT und nicht bei Abschnitt 15: die
- * Token-Regeln in Abschnitt 17 haben dieselbe Spezifitaet wie die Selektoren
- * hier (`main button:not(.reset):not(.cc-knopf)` = 0-2-2). Bei Gleichstand
- * gewinnt die spaetere Regel. Ein Block bei 15 haette verloren — gemessen:
- * genau so ist die erste Fassung dieses Fix an den Schrittknoepfen
- * wirkungslos geblieben, waehrend sie am Entfernen-Knopf (hoehere Spezifitaet)
- * griff. Die Selektoren unten gewinnen zusaetzlich AUS EIGENER KRAFT; die
- * Position ist der zweite Gurt, nicht der einzige.
- *
- * NICHT auf `aside` gescopt, und das ist Absicht: die /cart-SEITE rendert
- * dieselbe Komponente. Umbruch und Mindestbreite koennen dort nichts
- * verschlechtern (sie greifen nur, wenn der Platz fehlt), und ein zweites
- * Aussehen fuer dieselbe Bedienung waere teurer als der geteilte Stand. */
+ * UMBAU 2026-09-10 (Christians Auftrag "Warenkorb genauso wie qiblanco.com"):
+ * die Glieder (3)-(5) dieses Blocks — Umbruch der Mengenzeile, Polster 0 an
+ * den Schrittknoepfen, ruhiger Text-Knopf "Entfernen" — sind in den Block
+ * "components/Cart" gewandert und dort mit den an der Vorlage GEMESSENEN
+ * Werten neu gefasst: Stepper [-] Zahl [+] 44x44 ohne Fuellung, Entfernen als
+ * 44x44-Zeichen ohne Rand. Die Zeile ist damit 44+44+44+2*10+44 = 196 px
+ * breit (min-content) und braucht keinen Umbruch mehr; die 44-px-
+ * Trefferflaechen (WCAG 2.5.5) bleiben unangetastet, die Zonenwache misst sie
+ * weiter (Arm ZEILE-TREFFERFLAECHE). Was hier bleibt, sind die zwei Glieder,
+ * die unabhaengig vom Aussehen der Zeile gelten:
+ */
 
-/* (1) Die Textspalte darf unter ihre min-content-Breite. OHNE das nuetzt der
- *     Umbruch unten nichts — gemessen: mit Umbruch allein blieben 4 Elemente
- *     und 17 px Ueberlauf uebrig. */
+/* (1) Die Textspalte darf unter ihre min-content-Breite. */
 .cart-line-inner > * {
   min-width: 0;
 }
@@ -2182,60 +2242,4 @@ aside header h3 {
  *     erkennt seine Ware am Bild — es ist das Letzte, was schrumpfen darf. */
 .cart-line img {
   flex-shrink: 0;
-}
-
-/* (3) DIE EIGENTLICHE HEILUNG: die Mengenzeile bricht um, statt hinauszulaufen.
- *     Damit ist die min-content-Breite der Zeile nicht mehr die SUMME ihrer
- *     Kinder, sondern nur noch ihr BREITESTES Kind ("Entfernen", 93 px) —
- *     die Zeile passt damit bis hinunter zu rund 270 px Schubladenbreite.
- *
- *     EHRLICH NACHGEMESSEN, statt "auf breiten Geraeten bleibt es einzeilig"
- *     zu behaupten: sie bleibt es NIRGENDS. Die Schublade ist per
- *     `--aside-width` auf 400 px gedeckelt und die /cart-Seite auf `main`
- *     400 px; gemessen bei Viewport 1280 ist die Mengenzeile ebenfalls 96 px
- *     hoch, also zweizeilig. Die Zeile braucht 268 px und bekommt hoechstens
- *     256 — es fehlen ueberall dieselben 12 px.
- *     DAS IST KEIN KOMPROMISS, SONDERN DIE BESSERE LAGE, und der Grund steht
- *     hier, damit ihn niemand spaeter "wegoptimiert": zweizeilig liegt
- *     "Entfernen" NICHT 8 px neben "+". Auf einem Telefon ist ein
- *     Fehlgriff auf die unwiderrufliche Handlung teurer als eine gesparte
- *     Zeile. Wer die 12 px durch schmaleres Polster holen will, holt sich
- *     genau diese Nachbarschaft zurueck. */
-.cart-line-quantity {
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--cc-space-1, 0.5rem);
-}
-
-/* (4) Ein Knopf mit EINEM Zeichen braucht keine 24 px Polster je Seite. Die
- *     Trefferflaeche wird dabei nicht kleiner, sondern QUADRATISCH: 44x44
- *     statt 59x44 — genau das Mass, das das Token vorgibt. */
-main .cart-line-quantity button[name='decrease-quantity'],
-main .cart-line-quantity button[name='increase-quantity'] {
-  min-width: var(--cc-treffer-min, 44px);
-  padding: 0;
-}
-
-/* (5) "Entfernen" ist die GEGENHANDLUNG zum Kauf und traegt deshalb nicht den
- *     einen Gold-Akzent. Die Designsprache dieses Shops sagt es selbst
- *     (kakao-seiten.css): `--cc-gold` ist "der eine Akzent — nur
- *     Handlung/Beweis", akzent_farben_max 1. Drei goldene Pillen je
- *     Warenkorb-Zeile, davon die lauteste am Entfernen, stellen die Hierarchie
- *     auf den Kopf: die Schublade wird am NAECHSTEN KLICK gemessen, und der
- *     heisst "zur Kasse", nicht "Entfernen".
- *     Ruhig heisst NICHT unsichtbar: Rahmen, Radius und die volle 44-px-Hoehe
- *     bleiben, es ist weiter erkennbar ein Knopf und kein Wort. */
-main .cart-line-quantity form button[type='submit']:not([name]) {
-  background: transparent;
-  border-color: var(--cc-linie, #e6ded3);
-  color: var(--cc-muted, #6b665d);
-  font-size: var(--cc-fs-1, 0.8rem);
-  font-weight: 400;
-  padding: 0 var(--cc-space-2, 1rem);
-}
-
-main .cart-line-quantity form button[type='submit']:not([name]):hover {
-  background: var(--cc-flaeche, #f6f1ea);
-  border-color: var(--cc-muted, #6b665d);
-  color: var(--cc-dunkel, #171310);
 }

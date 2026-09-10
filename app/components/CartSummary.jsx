@@ -15,27 +15,32 @@ export function CartSummary({cart, layout}) {
   const giftCardHeadingId = useId();
   const giftCardInputId = useId();
 
-  // Ein BEREITS EINGELOESTER Code wird nie versteckt — sonst koennte der Kunde
-  // ihn weder sehen noch entfernen. Der Falz startet dann offen.
-  const codeEingeloest = Boolean(
-    cart?.discountCodes?.some((d) => d.applicable) ||
-      cart?.appliedGiftCards?.length,
-  );
-
   return (
+    // AUFBAU DER VORLAGE qiblanco.com (Christian 2026-09-10): Zwischensumme ->
+    // Kassenknopf, sonst nichts. Die Ueberschrift "Summe" ist entfallen (die
+    // Vorlage hat keine), und die Zwischensumme steht wie dort als
+    // `Zwischensumme:` + Leerzeichen + Betrag in EINER Zeile mit
+    // `justify-content: space-between`. Vorher war es ein <dl> mit <dt>/<dd>
+    // ohne Textknoten dazwischen — im DOM stand "Zwischensumme159,63 €", und
+    // weil <dl> als Flex-Zeile ohne gap gesetzt war, klebten Bezeichner und
+    // Betrag auch sichtbar zusammen. Das Leerzeichen kommt jetzt aus der
+    // Zusammensetzung (Textknoten), nicht aus der Anzeige — sonst kaeme es beim
+    // naechsten Feld wieder.
     <div aria-labelledby={summaryId} className={className}>
-      <h4 id={summaryId}>Summe</h4>
-      <dl role="group" className="cart-subtotal">
-        <dt>Zwischensumme</dt>
-        <dd>
-          {cart?.cost?.subtotalAmount?.amount ? (
-            <Preis data={cart?.cost?.subtotalAmount} />
-          ) : (
-            '-'
-          )}
-        </dd>
-      </dl>
-      <CodeFalz layout={layout} offen={codeEingeloest}>
+      {/* SPIEGEL DES NODE-BAUS (7e262df): dort summiert diese Zeile brutto
+          ueber app/lib/cart-display-pricing.js (D-018, Job 20260909-REPAIR-
+          warenkorb-zeigt-netto...). Dieser Stand des Repos fuehrt die
+          Exact-Fassung des Kanons nicht; gespiegelt wird hier NUR der Aufbau,
+          der Betrag bleibt, was er in diesem Repo war. */}
+      <div className="cart-aside-subtotal">
+        <div id={summaryId}>Zwischensumme:</div>{' '}
+        {cart?.cost?.subtotalAmount?.amount ? (
+          <Preis data={cart?.cost?.subtotalAmount} />
+        ) : (
+          '-'
+        )}
+      </div>
+      <CodeFalz layout={layout}>
         <CartDiscounts
           discountCodes={cart?.discountCodes}
           discountsHeadingId={discountsHeadingId}
@@ -53,37 +58,23 @@ export function CartSummary({cart, layout}) {
 }
 
 /**
- * DIE ZWEI CODE-FORMULARE KLAPPEN IN DER SCHUBLADE ZU — auf der /cart-SEITE
- * bleibt alles unveraendert.
+ * DIE CODE-FORMULARE (Rabattcode, Geschenkgutschein) STEHEN NUR NOCH AUF DER
+ * /cart-SEITE — in der Schublade gar nicht mehr.
  *
- * GEMESSEN 2026-09-08 (390x844, zwei Artikel, Diagnose-A/B im selben Browser):
- * der Drawer-Fuss war 435 px hoch, davon 264 px allein die beiden IMMER offenen
- * Code-Formulare (Rabattcode + Geschenkgutschein, je 132 px). Die scrollende
- * Mitte behielt 313 px = 37,1 % der Drawer-Hoehe; kalibriert und gefordert sind
- * mindestens 40 %, gemessen waren es nach dem Drei-Zonen-Umbau am 2026-08-22
- * noch 437 px = 51,8 %.
- *
- * WARUM NICHT DIE 44-px-TREFFERFLAECHEN ZURUECKNEHMEN, die den Fuss haben
- * wachsen lassen: `main input`/`main button { min-height: var(--cc-treffer-min) }`
- * ist WCAG 2.5.5 und am 2026-09-02 bewusst gesetzt worden. Diese Regeln sind
- * NICHT der Fehler — sie haben nur sichtbar gemacht, dass der Fuss zwei
- * optionale Formulare traegt, die er sich in 844 px nie leisten konnte. Sie zu
- * verkleinern waere eine Barrierefreiheits-Regression und eine Verschiebung der
- * eigenen Torpfosten. Aufgeklappt behalten die Felder ihre vollen 44 px.
- *
- * WARUM `<details>` UND KEIN EIGENER SCHALTER: nativ tastaturbedienbar, von
- * Screenreadern als aufklappbare Gruppe angesagt, kein JavaScript, kein
- * Hydration-Zustand. Und nichts wird ENTFERNT: wer einen Code hat, findet ihn
- * mit einem Klick — wer keinen hat (der Regelfall), sieht seine Ware.
+ * Bis zum 2026-09-10 trug die Schublade sie in einem <details>-Falz
+ * ("Rabatt- oder Gutscheincode?", Job 20260908-crystal-warenkorb-
+ * scrollflaeche-37prozent-drift-prio30: der Falz gab der scrollenden Mitte
+ * 124 px zurueck, ohne die 44-px-Trefferflaechen anzutasten). Christians
+ * Auftrag vom 2026-09-10 verlangt fuer die Schublade DENSELBEN AUFBAU wie
+ * qiblanco.com — gleiche Reihenfolge der Elemente — und die Vorlage fuehrt
+ * dort keine Code-Formulare: Zwischensumme, dann der Kassenknopf. Ein Code
+ * wird in der Kasse eingeloest (Shopify-Checkout hat das Feld), und ein per
+ * Link mitgebrachter Code (/discount/<code>) haengt ohnehin am Warenkorb.
+ * NICHTS geht verloren: die Seite /cart behaelt beide Formulare unveraendert.
  */
-function CodeFalz({layout, offen, children}) {
+function CodeFalz({layout, children}) {
   if (layout === 'page') return <>{children}</>;
-  return (
-    <details className="cc-code-falz" open={offen}>
-      <summary>Rabatt- oder Gutscheincode?</summary>
-      {children}
-    </details>
-  );
+  return null;
 }
 
 /**
@@ -92,12 +83,25 @@ function CodeFalz({layout, offen, children}) {
 function CartCheckoutActions({checkoutUrl}) {
   if (!checkoutUrl) return null;
 
+  // DER KASSENKNOPF IST DER KERN (Christian 2026-09-10): "Jetzt sicher zur
+  // Kasse" war nackter Text in derselben Groesse wie die Zeile darueber. Jetzt
+  // traegt er die Hausform .cc-knopf (dieselben Masse wie .btn--primary der
+  // Vorlage: 70,4 px hoch, 17,6 px / 600, Radius 10 — gemessen, nicht
+  // geschaetzt) im Wrapper .cartSummaryWrapper, der in der Vorlage denselben
+  // Namen traegt.
+  //
+  // BEWUSST WEITER EIN <a> AUF cart.checkoutUrl und KEIN <Form> auf
+  // /cart/attribution wie in der Vorlage: der Auftrag verbietet jeden Eingriff
+  // in den Kaufvorgang, vier stehende Proben messen
+  // `aside a[href*='checkout.qiblanco.com']`, und die Herkunfts-/Klick-Marker
+  // reisen auf diesem Laden bereits als Cart-Attribute mit
+  // (persistAttributionOnCartResult in cart.jsx und cart.$lines.jsx).
+  // Die Knopf-Gestalt ist Darstellung; der Weg bleibt derselbe.
   return (
-    <div>
-      <a href={checkoutUrl} target="_self">
+    <div className="cartSummaryWrapper">
+      <a className="cc-knopf cart-kasse" href={checkoutUrl} target="_self">
         <p>Jetzt sicher zur Kasse</p>
       </a>
-      <br />
     </div>
   );
 }
