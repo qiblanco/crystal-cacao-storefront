@@ -13,7 +13,7 @@ import {
 import {Kakao} from '~/components/product-pages/Kakao';
 import {PodcastEinstieg} from '~/components/reusables/PodcastEinstieg';
 import {waehleFassung} from '~/lib/startseite-fassung';
-import {canonicalLink} from '~/lib/seo';
+import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
 import {entityGraph, websiteSchema} from '~/lib/entity-schema';
 import {MockShopNotice} from '~/components/MockShopNotice';
 import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
@@ -42,6 +42,27 @@ export const meta = () => {
         'Crystal Cacao® – High Performance Cacao. Wach. Klar. Mineralisiert. 100 % reiner Premium-Naturkakao aus Peru.',
     },
     canonicalLink('/'),
+    // OPEN GRAPH — ergaenzt 2026-09-10 im selben Job. Gemessen am 2026-09-10:
+    // die Startseite trug NULL og-Tags, waehrend die beiden Kaufseiten sieben
+    // tragen (app/lib/produkt-seo.js). Die Startseite ist aber genau die
+    // Adresse, die beim Teilen der MARKE verschickt wird; ohne diese Angaben
+    // entscheidet jedes Netzwerk selbst, welcher Text und welches Bild
+    // erscheinen.
+    //
+    // Bewusst OHNE og:image: es gibt hier kein gepflegtes Teilen-Bild, und
+    // `twitter:card: summary_large_image` ohne Bild waere eine Zusage ohne
+    // Deckung (dieselbe Begruendung wie in produkt-seo.js). Lieber vier
+    // richtige Angaben als fuenf, von denen eine ins Leere zeigt.
+    {property: 'og:type', content: 'website'},
+    {property: 'og:site_name', content: ABSENDER_MARKE},
+    {property: 'og:locale', content: 'de_DE'},
+    {property: 'og:title', content: `${ABSENDER_MARKE} – Bio-Kakao aus zeremonieller Ernte`},
+    {property: 'og:url', content: `${CANONICAL_ORIGIN}/`},
+    {
+      property: 'og:description',
+      content:
+        'Crystal Cacao® – High Performance Cacao. Wach. Klar. Mineralisiert. 100 % reiner Premium-Naturkakao aus Peru.',
+    },
     // ENTITAETS-GRAPH (Organization + WebSite), ergaenzt 2026-09-10 vom Job
     // 20260910-BAU-crystal-cacao-in-die-suchmessung-und-seo-nachziehen.
     //
