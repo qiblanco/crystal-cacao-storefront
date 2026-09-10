@@ -137,11 +137,18 @@ export const PRODUKT_BESCHREIBUNGEN = {
   // einem zweiten Modul: sie ist die eine Stelle, an der eine
   // Produktbeschreibung je Pfad steht.
   //
-  // EHRLICHE GRENZE AUF DIESER STOREFRONT: die Sammelroute liest diese Karte
-  // hier (anders als in der Vorlage) heute NICHT — crystals
+  // DIESE GRENZE IST AM 2026-09-10 GEFALLEN und der Absatz bleibt als
+  // Wegmarke stehen, statt gelöscht zu werden. Bis dahin galt hier: "die
+  // Sammelroute liest diese Karte heute NICHT — crystals
   // products.$handle.jsx importiert produkt-seo gar nicht. Die vier Einträge
-  // wirken hier also noch nicht; sie stehen trotzdem, weil es Kakao-Bundles
-  // sind und die Karte sonst beim nächsten Nachzug erneut auseinanderliefe.
+  // wirken hier also noch nicht." Genau das war ein Regelwerk ohne Aufrufer:
+  // gepflegte Beschreibungen, die keine Seite je ausgeliefert hat.
+  //
+  // Seit dem Job 20260910-BAU-crystal-cacao-in-die-suchmessung-und-seo-
+  // nachziehen importiert app/routes/products.$handle.jsx produktMeta() —
+  // die Einträge wirken. Wer diesen Import wieder entfernt, macht die Karte
+  // schweigend wirkungslos; dann gehört dieser Absatz zurück in seine alte
+  // Fassung.
   // Kein toter Fremdinhalt: alle vier sind Produkte DIESES Sortiments.
   '/products/bundle-2x-awake':
     'Crystal Cacao® Awake – Bio im 2er-Bundle: Zeremonie-Kakao aus dem Piura-Tal ' +
@@ -155,6 +162,25 @@ export const PRODUKT_BESCHREIBUNGEN = {
   '/products/mengenrabatt-3x-create':
     'Crystal Cacao® Create – Bio im 3er-Bundle: Zeremonie-Kakao aus dem Piura-Tal ' +
     'in Peru, schonend kalt verarbeitet.',
+  // DER FUENFTE — lokal ergaenzt 2026-09-10 (Job
+  // 20260910-BAU-crystal-cacao-in-die-suchmessung-und-seo-nachziehen), NICHT
+  // aus der Vorlage nachgezogen: qiblanco-storefront fuehrt diesen Pfad in
+  // PRODUKT_BESCHREIBUNGEN gar nicht (0 Treffer, am 2026-09-10 nachgezaehlt).
+  //
+  // Er steht hier trotzdem, weil er auf DIESER Storefront eine verkaufte Seite
+  // ist: /products/crystal-cacao-angebot steht in sitemap/seiten/1.xml,
+  // antwortet live mit HTTP 200 — und trug am 2026-09-10 als einzige der
+  // fuenf Sammelrouten-Seiten weder Beschreibung noch einen Eintrag in dieser
+  // Karte. Ohne ihn haette der Fix an products.$handle.jsx vier von fuenf
+  // Seiten geheilt und die fuenfte still ausgelassen.
+  //
+  // Sortenneutral formuliert, weil das Angebot BEIDE Sorten fuehrt (der
+  // Seitentitel lautet 'Crystal Cacao® Create & Awake – Bio'). Wie die vier
+  // darueber: nur Produktbeschaffenheit, keine gesundheitsbezogene Angabe
+  // (EU 1924/2006) — siehe Dateikopf.
+  '/products/crystal-cacao-angebot':
+    'Crystal Cacao® Create und Awake – Bio im Set: beide Sorten Zeremonie-Kakao ' +
+    'aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
 };
 
 /**

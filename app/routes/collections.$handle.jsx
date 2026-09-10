@@ -4,13 +4,90 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ProductItem} from '~/components/ProductItem';
 import {ABSENDER_MARKE, istKakaoKollektion, fremdinhaltAbweisen} from '~/lib/kakao-zone';
+import {canonicalLink, absoluteCanonical} from '~/lib/seo';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `${data?.collection.title ?? 'Kollektion'} | ${ABSENDER_MARKE}`}];
+  const kollektion = data?.collection;
+  const titel = `${kollektion?.title ?? 'Kollektion'} | ${ABSENDER_MARKE}`;
+  if (!kollektion?.handle) return [{title: titel}];
+
+  const descriptoren = [{title: titel}];
+  // Beschreibung aus dem gepflegten Kollektionstext. Gekürzt statt
+  // abgeschnitten: Google zeigt rund 160 Zeichen, ein mitten im Wort
+  // endendes Snippet liest sich wie ein Fehler.
+  const beschreibung =
+    kuerzeBeschreibung(kollektion.description) ??
+    ERSATZ_BESCHREIBUNG[kollektion.handle];
+  if (beschreibung) {
+    descriptoren.push({name: 'description', content: beschreibung});
+    descriptoren.push({property: 'og:description', content: beschreibung});
+  }
+  descriptoren.push(canonicalLink(`/collections/${kollektion.handle}`));
+  descriptoren.push({property: 'og:type', content: 'website'});
+  descriptoren.push({property: 'og:site_name', content: ABSENDER_MARKE});
+  descriptoren.push({property: 'og:locale', content: 'de_DE'});
+  descriptoren.push({property: 'og:title', content: titel});
+  descriptoren.push({
+    property: 'og:url',
+    content: absoluteCanonical(`/collections/${kollektion.handle}`),
+  });
+  return descriptoren;
 };
+
+/**
+ * Beschreibung für Kollektionen, die im Shopify-Datensatz KEINE führen.
+ *
+ * WARUM ES DIESEN ERSATZ GIBT (Job 20260910-BAU-crystal-cacao-in-die-
+ * suchmessung-und-seo-nachziehen, am 2026-09-10 am gerenderten Markup
+ * gemessen):
+ * `collection.description` ist für `zeremonie-kakao` leer — die Seite rendert
+ * ein leeres `<p class="collection-description">`. Ein Canonical allein macht
+ * die Seite noch nicht auffindbar; ohne Beschreibung reimt sich Google das
+ * Snippet aus dem Seitentext zusammen, und der besteht auf einer
+ * Kollektionsseite fast nur aus Produktnamen und Preisen.
+ *
+ * WARUM IM QUELLTEXT UND NICHT IM SHOPIFY-DATENSATZ: der Datensatz wäre der
+ * bessere Ort, aber er ist von hier aus nicht schreibbar — und eine Seite,
+ * die auf eine fremde Hand wartet, bleibt ohne Beschreibung. Der Quelltext
+ * ist die Stelle, die dieser Bau erreicht. Trägt Shopify später eine
+ * Beschreibung, GEWINNT SIE: `kuerzeBeschreibung()` steht vor diesem Ersatz,
+ * und dieser Eintrag wird von selbst wirkungslos statt falsch.
+ *
+ * ZUR SPRACHE: nur Produktbeschaffenheit (Herkunft, Bio-Zertifikat,
+ * Verarbeitung, Sortenzahl), KEINE gesundheitsbezogene Angabe — dieselbe
+ * Grenze wie bei den Produktbeschreibungen in app/lib/produkt-seo.js
+ * (EU 1924/2006).
+ *
+ * @type {Record<string, string>}
+ */
+const ERSATZ_BESCHREIBUNG = {
+  'zeremonie-kakao':
+    'Zeremonie-Kakao von Crystal Cacao® in Bio-Qualität (DE-ÖKO-006): zwei ' +
+    'Sorten aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+};
+
+/**
+ * Kollektionstext auf Snippet-Länge bringen.
+ *
+ * Ohne Text -> undefined, damit der Aufrufer den Descriptor WEGLÄSST statt
+ * einen leeren zu rendern: ein leeres `content` täuscht eine gepflegte
+ * Angabe vor und ist für eine Suchmaschine schlechter als gar keins
+ * (dieselbe Begründung wie bei produktBeschreibung() in app/lib/produkt-seo.js).
+ *
+ * @param {string|undefined|null} text
+ * @returns {string|undefined}
+ */
+function kuerzeBeschreibung(text) {
+  const roh = (text ?? '').replace(/\s+/g, ' ').trim();
+  if (!roh) return undefined;
+  if (roh.length <= 160) return roh;
+  const schnitt = roh.slice(0, 157);
+  const luecke = schnitt.lastIndexOf(' ');
+  return `${(luecke > 100 ? schnitt.slice(0, luecke) : schnitt).trim()}…`;
+}
 
 /**
  * @param {Route.LoaderArgs} args

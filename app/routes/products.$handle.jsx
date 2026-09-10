@@ -12,18 +12,54 @@ import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {istKakaoProdukt, fremdinhaltAbweisen, ABSENDER_MARKE} from '~/lib/kakao-zone';
+import {produktMeta} from '~/lib/produkt-seo';
 
 /**
  * @type {Route.MetaFunction}
+ *
+ * WARUM DIESE ROUTE SEIT 2026-09-10 UEBER produktMeta() LAEUFT (Job
+ * 20260910-BAU-crystal-cacao-in-die-suchmessung-und-seo-nachziehen, an der
+ * Live-Auslieferung gemessen, nicht vermutet):
+ *
+ * Die bisherige Fassung gab den Descriptor `{rel: 'canonical', href: ...}`
+ * OHNE `tagName: 'link'` zurueck. react-router 7 rendert einen Descriptor nur
+ * dann als `<link>`, wenn er `tagName` traegt; ohne ihn entsteht KEIN
+ * Canonical-Tag. Gemessen am 2026-09-10 an allen fuenf Seiten, die ueber diese
+ * Sammelroute laufen (/products/mengenrabatt-2x, /mengenrabatt-3x-create,
+ * /bundle-2x-awake, /bundle-3x-awake, /crystal-cacao-angebot): canonical = 0,
+ * meta description = 0, og = 0, JSON-LD = 0. Der href war zusaetzlich relativ
+ * statt absolut — ein Canonical MUSS absolut sein.
+ *
+ * DER HELFER EXISTIERTE BEREITS UND HATTE NUR KEINEN AUFRUFER (P10): der Kopf
+ * von app/lib/produkt-seo.js fuehrt diese Luecke seit dem 2026-09-08 als
+ * "EHRLICHE GRENZE" — die vier Bundle-Beschreibungen stehen dort seither
+ * gepflegt, "wirken hier also noch nicht", weil diese Datei produkt-seo gar
+ * nicht importierte. Genau dieser Import ist der Fix; es entsteht KEIN
+ * zweiter Emitter und keine zweite Beschreibungs-Karte.
+ *
+ * WAS produktMeta() HIER BEWUSST NICHT TUT: alle fuenf Handles stehen in
+ * OHNE_PREIS_NACHWEIS (app/lib/produkt-schema.js), deshalb liefert
+ * produktSchema() fuer sie weiterhin `null` und es entsteht KEIN
+ * Product-JSON-LD. Das ist ein Zaun, kein Versaeumnis: ein Product-Knoten ohne
+ * belastbaren Preis steht dauerhaft als Fehler in der Search Console. Die
+ * BreadcrumbList entsteht trotzdem — sie sagt ueber den Preis nichts aus.
  */
 export const meta = ({data}) => {
-  return [
-    {title: `${data?.product.title ?? 'Produkt'} | ${ABSENDER_MARKE}`},
-    {
-      rel: 'canonical',
-      href: `/products/${data?.product.handle}`,
-    },
-  ];
+  const produkt = data?.product;
+  // Kein Produkt (Fehlerfall der Route): nur ein Titel. Bewusst KEIN Canonical
+  // auf `/products/undefined` — die alte Fassung las `data?.product.title` mit
+  // Optional-Chaining allein auf `data` und waere hier ausgestiegen.
+  if (!produkt?.handle) {
+    return [{title: `Produkt | ${ABSENDER_MARKE}`}];
+  }
+  return produktMeta({
+    produkt,
+    pfad: `/products/${produkt.handle}`,
+    titel: `${produkt.title ?? 'Produkt'} | ${ABSENDER_MARKE}`,
+    bildUrl:
+      produkt.selectedOrFirstAvailableVariant?.image?.url ??
+      produkt.images?.nodes?.[0]?.url,
+  });
 };
 
 /**

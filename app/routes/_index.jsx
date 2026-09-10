@@ -12,7 +12,8 @@ import {
 } from '~/components/startseite/Verkaufsauftritt';
 import {Kakao} from '~/components/product-pages/Kakao';
 import {waehleFassung} from '~/lib/startseite-fassung';
-import {canonicalLink} from '~/lib/seo';
+import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
+import {entityGraph, websiteSchema} from '~/lib/entity-schema';
 import {MockShopNotice} from '~/components/MockShopNotice';
 import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
 import {SORTEN} from '~/lib/sorten-profil';
@@ -40,8 +41,76 @@ export const meta = () => {
         'Crystal Cacao® – High Performance Cacao. Wach. Klar. Mineralisiert. 100 % reiner Premium-Naturkakao aus Peru.',
     },
     canonicalLink('/'),
+    // OPEN GRAPH — ergaenzt 2026-09-10 im selben Job. Gemessen am 2026-09-10:
+    // die Startseite trug NULL og-Tags, waehrend die beiden Kaufseiten sieben
+    // tragen (app/lib/produkt-seo.js). Die Startseite ist aber genau die
+    // Adresse, die beim Teilen der MARKE verschickt wird; ohne diese Angaben
+    // entscheidet jedes Netzwerk selbst, welcher Text und welches Bild
+    // erscheinen.
+    //
+    // Bewusst OHNE og:image: es gibt hier kein gepflegtes Teilen-Bild, und
+    // `twitter:card: summary_large_image` ohne Bild waere eine Zusage ohne
+    // Deckung (dieselbe Begruendung wie in produkt-seo.js). Lieber vier
+    // richtige Angaben als fuenf, von denen eine ins Leere zeigt.
+    {property: 'og:type', content: 'website'},
+    {property: 'og:site_name', content: ABSENDER_MARKE},
+    {property: 'og:locale', content: 'de_DE'},
+    {property: 'og:title', content: `${ABSENDER_MARKE} – Bio-Kakao aus zeremonieller Ernte`},
+    {property: 'og:url', content: `${CANONICAL_ORIGIN}/`},
+    {
+      property: 'og:description',
+      content:
+        'Crystal Cacao® – High Performance Cacao. Wach. Klar. Mineralisiert. 100 % reiner Premium-Naturkakao aus Peru.',
+    },
+    // ENTITAETS-GRAPH (Organization + WebSite), ergaenzt 2026-09-10 vom Job
+    // 20260910-BAU-crystal-cacao-in-die-suchmessung-und-seo-nachziehen.
+    //
+    // GEMESSENER ANLASS, nicht vermutet: am 2026-09-10 trug die gesamte
+    // Storefront NULL Organization- und NULL WebSite-Auszeichnung — die
+    // Startseite lieferte ueberhaupt kein JSON-LD. app/lib/entity-schema.js
+    // war vollstaendig gebaut (organizationSchema, websiteSchema, entityGraph)
+    // und hatte KEINEN Aufrufer: importiert wurde es nur von
+    // produkt-schema.js, und zwar allein wegen ORG_ID/ORGANISATION. Ein
+    // Regelwerk ohne Aufrufer ist wirkungslos.
+    //
+    // WARUM DER AUFRUF HIER STEHT UND NICHT IN entity-schema.js: die Datei
+    // ist im Vendoring-Manifest (shared/UPSTREAM.json) als K1 gefuehrt, also
+    // byte-gleich zur Vorlage, und bleibt es. Diese Route gehoert crystal
+    // allein und steht in keinem Manifest-Eintrag — der Anpassungspunkt ist
+    // deshalb der AUFRUFER, nicht der Helfer.
+    {'script:ld+json': startseitenGraph()},
   ];
 };
+
+/**
+ * Entitaets-Graph der Startseite mit dem richtigen Website-Namen.
+ *
+ * websiteSchema() setzt `name` auf ORGANISATION.name, also 'Qi Blanco'. In der
+ * Vorlage ist das richtig — dort heisst die Website so. Auf crystal-cacao.com
+ * ist 'Qi Blanco' die FREMDE Absender-Marke; es ist exakt dieselbe Drift, die
+ * am 2026-09-04 schon <title> und og:site_name der beiden Kaufseiten getroffen
+ * hat (siehe CRYSTAL-ABWEICHUNG im Kopf von app/lib/produkt-seo.js). Die
+ * Korrektur steht hier am Aufrufer, weil entity-schema.js K1 ist.
+ *
+ * DIE ABGRENZUNG IST TRAGEND und dieselbe wie dort: korrigiert wird der Name
+ * der WEBSITE, nicht die Organisation. Betreiberin von crystal-cacao.com IST
+ * die Qi Blanco UG (haftungsbeschraenkt) — der Organization-Knoten bleibt
+ * deshalb unveraendert, samt Anschrift, USt-IdNr. und sameAs. Die Website
+ * heisst 'Crystal Cacao®' und wird von dieser Organisation herausgegeben;
+ * genau das sagt `publisher` bereits, und es bleibt wahr.
+ */
+function startseitenGraph() {
+  const graph = entityGraph();
+  const seite = websiteSchema();
+  return {
+    ...graph,
+    '@graph': graph['@graph'].map((knoten) =>
+      knoten['@id'] === seite['@id']
+        ? {...knoten, name: ABSENDER_MARKE}
+        : knoten,
+    ),
+  };
+}
 
 /**
  * @param {Route.LoaderArgs} args
