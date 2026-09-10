@@ -23,7 +23,7 @@ import {
 import {waehleAufmacherFassung} from '~/lib/sortenaufmacher-fassung';
 
 import {produktMeta, MARKE} from '~/lib/produkt-seo';
-import {StarRating, SterneSprung} from '~/components/reusables/StarRating';
+import {StarRating} from '~/components/reusables/StarRating';
 /** 
  * @type {MetaFunction<typeof loader>}
  */
@@ -128,31 +128,70 @@ export default function Product() {
         <div className="product-main">
           <h1>{title}</h1>
           {/*
-            * MERGE 2026-08-30 (Job 20260830-sterne-s05-...): VEREINIGUNG, kein
-            * Seiten-Sieg. Von diesem Zweig kommt die Bedienbarkeit (SterneSprung
-            * + StarRating + Marker), von origin/main (a75fd47) kommen die
-            * KENNZAHLEN. Der Zweig trug hier noch hartkodiert 4.8 und "14.000
-            * Nutzer" — das ist der Stand VOR jener Aenderung. Wer beim
-            * Aufloesen "ours" nimmt, dreht eine juengere, bewusste
-            * Inhalts-Entscheidung an einer KUNDENSICHTBAREN ZAHL zurück.
-            * Die Sterne-Zahl wird aus derselben Konstante ABGELEITET statt
-            * daneben geschrieben, damit sie nicht erneut auseinanderlaufen kann.
+            * 2026-09-10 — Christian zur Aufnahme der Create-Kaufseite:
+            * „Dass diese 4,9 Sterne mit Button hinterlegt sind, der aufleuchtet
+            * und dann nirgendwo hin geht, ist auch Quatsch. Das entfernen."
+            *
+            * ER HAT RECHT, UND DER GRUND IST BAULICH: <SterneSprung/> ist ein
+            * echter <button>, sein VERHALTEN haengt aber nicht an ihm, sondern
+            * an useSterneSprungDelegation in GoogleRezensionenBereich.jsx (so
+            * steht es im Kopf von StarRating.jsx). DIESE DATEI GIBT ES IN
+            * DIESEM LADEN NICHT — das Bauteil wurde ohne seinen
+            * Verhaltenstraeger uebernommen. Am Kundenrand gemessen
+            * (Playwright, 390/768/1440 px): echter Klick bewegt 0,0 px,
+            * location.hash bleibt leer, Sprungziele auf der Seite = 0.
+            *
+            * DIE AUSNAHME DES AUFTRAGS IST GEPRUEFT UND GREIFT NICHT: einen
+            * Bewertungsabschnitt gibt es auf dieser Seite nicht. Die echten
+            * Google-Stimmen (app/data/kakao-stimmen.js) stehen ausschliesslich
+            * auf der Startseite (Verkaufsauftritt.jsx). Einen Abschnitt nur zu
+            * bauen, damit ein Link ein Ziel hat, verbietet der Auftrag
+            * ausdruecklich.
+            *
+            * ES BLEIBT ALSO REINER TEXT — und der Marker wandert von "s"
+            * (Sprung zum Bewertungsbereich derselben Seite) auf "d" (rein
+            * darstellend). Das ist der Vertrag aus StarRating.jsx, nicht eine
+            * Abkuerzung: "d" ist eine BEWERTUNG, die nur nicht springt, ihre
+            * Farbe wird weiter geurteilt und muss --qb-sterne-gold tragen.
+            * "z" (Zierde) waere hier falsch — die Zeile RENDERT einen Wert.
+            *
+            * StarRating.jsx selbst bleibt UNANGETASTET: die Datei steht in
+            * shared/UPSTREAM.json und wird gegen qiblanco-storefront auf
+            * sha256 gewacht. Geaendert wird die Verwendungsstelle, wie es der
+            * Marker-Vertrag verlangt ("die Klasse wird an der
+            * VERWENDUNGSSTELLE gesetzt, nie zur Laufzeit erraten").
+            *
+            * DIE KENNZAHLEN bleiben, wo sie sind (KAKAO_KENNZAHLEN): 4,9 ist
+            * der Stand von crystal-cacao.com und wird nie mit den 4,8 von
+            * qiblanco.com verrechnet — zwei Marken, zwei Bestaende.
             */}
-          <SterneSprung className="product-rating">
+          <p className="product-rating">
             <span>{KAKAO_KENNZAHLEN.bewertung}</span>{' '}
             <StarRating
               value={Number(KAKAO_KENNZAHLEN.bewertung.replace(',', '.'))}
+              qb="d"
             />{' '}
             <span>Über {KAKAO_KENNZAHLEN.nutzer} Nutzer</span>
-          </SterneSprung>
+          </p>
           <div
             className="ProductDescription"
             dangerouslySetInnerHTML={{__html: descriptionHtml}}
           />
 
-          <p className="mt-2">
-            <b>Mehr als {KAKAO_KENNZAHLEN.nutzer}+ aktive Nutzer</b>
-          </p>
+          {/*
+            * 2026-09-10 ENTFERNT — Christian: „Mehr als 1.000+ aktive Nutzer
+            * sagt dasselbe wie die Zeile bei den Sternen. Zweimal dieselbe Zahl
+            * in acht Zeilen schwaecht sie, statt sie zu staerken."
+            * Gemessen ueber BLATTKNOTEN im Kaufblock (nie ueber den
+            * Zeichenstrom — ausgeliefertes HTML traegt eingebettete Daten und
+            * fremde Titel): 2 Vorkommen, "Über 1.000 Nutzer" und "Mehr als
+            * 1.000+ aktive Nutzer". Die Zahl bleibt — sie steht jetzt an genau
+            * EINER Stelle, naemlich dort, wo sie als sozialer Beweis neben den
+            * Sternen wirkt. Die Aussage ist nicht verschwunden, sie ist
+            * einmal.
+            * Nebenwirkung, gewollt: der Preis rueckt 47,6 px hoeher an die
+            * Merkmalsliste heran.
+            */}
 
           <CacaoPriceDisplay
             quantity={quantity}

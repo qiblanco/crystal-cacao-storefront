@@ -494,6 +494,26 @@
   color: var(--cc-dunkel);   /* s03: war #000 — EIN dunkler Ton, nicht zwei */
   font-weight: 500;
 }
+/* 2026-09-10: die Zeile ist wieder reiner Text (Christian, "das entfernen").
+ * Sie war ein <button class="sterne-sprung product-rating"> — dessen
+ * inline-flex, gap und die Nutzerzahl-Regel weiter unten hingen ALLE an
+ * `.sterne-sprung`. Faellt der Traeger weg, faellt ohne diese vier Zeilen
+ * auch das Aussehen der Zeile weg: die Nutzerzahl waere auf 25 px Gold
+ * hochgesprungen (geerbt von .product .product-rating), statt 16 px dunkel
+ * zu bleiben. Es ist kein neuer Stil, es ist derselbe an einem Traeger, den
+ * es noch gibt. KEIN cursor, KEIN :hover, KEIN Fokusring — genau das war
+ * der Befund. */
+.product p.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+.product p.product-rating span:last-child {
+  font-size: var(--cc-fs-2);
+  color: var(--cc-dunkel);
+  font-weight: 500;
+}
 .btn--primary {
   display: block;
   font-size: var(--cc-knopf-schrift) !important;
@@ -990,13 +1010,40 @@
   border-radius: var(--cc-radius-bild);
 }
 .Bestseller-Price {
-  position: relative;
+  /* 2026-09-10: `position: relative` trug die absolute Lage des Etiketts.
+   * Christian: „Der Streichpreis 76,- € ist fast so gross wie der aktuelle
+   * Preis und liegt teilweise unter dem Knopf Bestseller Angebot; die
+   * Durchstreichung laeuft durch den Knopf hindurch."
+   * DIE URSACHE WAR NICHT EIN WERT, SONDERN DIE BAUFORM: das Etikett stand
+   * unterhalb von 750 px absolut ueber der Preiszeile (right:0, top:50%) und
+   * konnte deshalb ueberhaupt mit ihr kollidieren — bei laengerem Preistext
+   * (CHF, zweistellige Rabatte) zwangslaeufig. Ein groesserer Abstand haette
+   * den Fall vertagt; die Bauform beseitigt ihn. Jetzt EIN Fluss auf ALLEN
+   * Breiten, statt zwei Bauformen mit einer Bruchkante bei 750 px. */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: var(--cc-space-2);   /* 16px — Token, kein freier Wert */
+  row-gap: 0;
+  /* 2026-09-10, Christians vierter Punkt: „Die fuenf gruenen Haken sind
+   * kraeftiger als der Preis; das Auge landet auf der Liste statt auf dem
+   * Angebot."
+   * GEMESSEN, UND DIE MESSUNG HAT DIE URSACHE VERSCHOBEN: nach der Korrektur
+   * am Preis traegt der PREISBLOCK bereits MEHR Tinte als die fetten Zeilen
+   * der Beschreibung (18.169 px^2 bei 390 px und 25.705 px^2 bei 1440 px
+   * gegen 13.112 px^2). Es fehlte ihm nicht an Gewicht, sondern an TRENNUNG:
+   * die Luecke zwischen Beschreibungsblock und Preisblock war auf beiden
+   * Breiten gemessen 0,0 px — das Angebot klebte an der Merkmalsliste und war
+   * kein eigener Ort mehr.
+   * Deshalb EIN Token-Schritt Abstand, statt die Merkmale leiser zu machen:
+   * die fuenf Zeilen sind die Kaufgruende und kommen ausserdem aus dem
+   * Shopify-Datensatz, nicht aus diesem Haus. Wer sie schwaecht, um die
+   * Rangfolge zu retten, bezahlt sie mit dem Inhalt. */
+  margin-top: var(--cc-space-3);   /* 24px */
 }
 .Bestseller-Price .BestsellerLabel {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  position: static;
   /* s03, 2026-09-04: war `linear-gradient(90deg,#f30,#ff6f82)` — ZWEI weitere
    * freie Rottoene, und zwar direkt neben dem Preis, den derselbe Bau gerade
    * aus dem Rot geholt hat. Ein Verlauf aus zwei Signalfarben ist die
@@ -1013,24 +1060,15 @@
   font-weight: 600;
   color: var(--cc-gold);
 }
-@media screen and (min-width: 750px) {
-  .Bestseller-Price {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 20px;
+/* 2026-09-10 ENTFERNT: die 750-px-Sonderfassung des Preisblocks.
+ * Sie hat oberhalb von 750 px genau das hergestellt, was die Grundregel jetzt
+ * auf ALLEN Breiten tut (flex, align-items:center, Etikett im Fluss). Ihr
+ * einziger verbliebener Unterschied war `gap: 20px` — ein freier Wert neben
+ * der 8pt-Skala — und `width: fit-content`. Zwei Bauformen fuer dieselbe
+ * Absicht sind die Bruchkante, an der Christians Befund entstanden ist:
+ * unterhalb der Kante lag das Etikett ueber dem Preis, oberhalb daneben. */
+.Bestseller-Price .BestsellerLabel {
   width: fit-content;
-}
-  .Bestseller-Price .BestsellerLabel {
-  position: relative;
-  right: 0;
-  top: 0;
-  transform: translateY(0);
-  width: fit-content;
-}
-}
-.Bestseller-Price {
-  flex-wrap: wrap;
 }
 .CacaoPriceMain {
   display: flex;
@@ -1066,13 +1104,31 @@
   color: var(--cc-gold-text)!important;
 }
 .CacaoPriceCompare {
-  font-size: var(--cc-fs-5)!important;
+  /* 2026-09-10: war var(--cc-fs-5) — also GENAU DIE GROESSE des gueltigen
+   * Preises daneben (beide 31,25 px, live nachgemessen: 100 %). Christian
+   * las es als „fast so gross"; gemessen war es identisch. Ein
+   * durchgestrichener Preis, der so gross ist wie der gueltige, macht aus
+   * einem Angebot zwei konkurrierende Zahlen.
+   * Jetzt eine Stufe tiefer auf DERSELBEN Skala (--cc-fs-3 = 20 px, 64 %),
+   * kein freier Wert. Der WERT ist unveraendert — der Auftrag verbietet jede
+   * Preisaenderung ausdruecklich und erlaubt nur die Darstellung. */
+  font-size: var(--cc-fs-3)!important;
   color: var(--color-dark)!important;
   text-decoration: line-through!important;
 }
 .CacaoPricePer100g {
+  /* 2026-09-10, Christian: „Der Grundpreis 12,62€ / 100g steht weit abgesetzt
+   * und in einer anderen Groesse als alles darum."
+   * BEIDES GEMESSEN UND BEIDES WAHR: 12,8 px gegen 16 px ringsum, und 29,8 px
+   * (Schreibtisch) bzw. 83,7 px (Tablet) unter der Preiszeile — Letzteres,
+   * weil der `gap: 20px` des Blocks auch auf die umgebrochene Zeile wirkte
+   * und das absolut gesetzte Etikett darueber Hoehe beanspruchte.
+   * Jetzt: dieselbe Groesse wie alles darum (--cc-fs-2 = 16 px) und row-gap 0
+   * am Block, also am Preis statt darunter. Die Pflichtangabe wird dabei
+   * GROESSER, nie kleiner — ein Grundpreis nach PAngV ist eine Angabe, die
+   * der Kunde zum Vergleichen braucht, kein Feindruck. */
   width: 100%;
-  font-size: var(--cc-fs-1);
+  font-size: var(--cc-fs-2);
   /* s03, 2026-09-02: war der freie Wert #888 und damit 3,54:1 auf Weiss —
    * unter AA, und ausgerechnet am Grundpreis, den der Kunde zum Vergleichen
    * braucht. --cc-muted ist der Token fuer genau diese Rolle (zurueckhaltend,
