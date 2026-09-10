@@ -255,6 +255,17 @@ export function Layout({children}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        {/*
+          MASCHINENLESBARER NUTZUNGSVORBEHALT, sitewide (44b Abs. 3 UrhG).
+          Job 20260910-crystal-cacao-hat-kein-impressum; Vorbild fuer die
+          Platzierung ist dieselbe Zeile in app/root.jsx des Schwester-Ladens:
+          eine sitewide Kopfzeile gehoert in dieses Layout, nicht in jede
+          Route. Der gleichnamige HTTP-Header sitzt bei uns wie dort auf den
+          beiden .well-known-Routen, NICHT auf "/" -- wer die Abdeckung am
+          Header von "/" misst, meldet faelschlich "Vorbehalt weg". Die
+          sitewide Traeger sind robots.txt, tdmrep.json und dieses meta.
+        */}
+        <meta name="tdm-reservation" content="1" />
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <link rel="stylesheet" href={kakaoStyles}></link>

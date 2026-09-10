@@ -434,6 +434,21 @@ export const KAKAO_FUSSMENUE = Object.freeze({
   id: 'kakao-fussmenue',
   items: Object.freeze([
     {
+      id: 'kakao-impressum',
+      title: 'Impressum',
+      // EIGENE ROUTE (2026-09-10, Job 20260910-crystal-cacao-hat-kein-
+      // impressum): dieser Laden hatte UEBERHAUPT KEIN Impressum --
+      // /pages/impressum antwortete mit HTTP 404, das Wort kam auf der
+      // Startseite 0x vor, und dieses Menue fuehrte vier Rechtstext-Links,
+      // von denen keiner ein Impressum war. Es gibt dafuer auch keinen
+      // Shopify-Rechtstext, auf den man ausweichen koennte: die
+      // Anbieterkennzeichnung ist kein `policies`-Handle. Erste Position wie
+      // im Fussbereich des Schwester-Ladens (Footer.jsx: Impressum ->
+      // Datenschutz -> AGB -> Widerruf).
+      url: '/pages/impressum',
+      items: [],
+    },
+    {
       id: 'kakao-datenschutz',
       title: RECHTSTEXT_TITEL['privacy-policy'],
       // EIGENE ROUTE, NICHT DER SHOPIFY-RECHTSTEXT (2026-09-10): der

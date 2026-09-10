@@ -22,7 +22,36 @@ function robotsTxtData({url}) {
   const sitemapUrl = url ? `${url}/sitemap.xml` : undefined;
 
   return `
+# ---------------------------------------------------------------------------
+# NUTZUNGSVORBEHALT / TDM RESERVATION
+# (Job 20260910-crystal-cacao-hat-kein-impressum)
+#
+# Die Betreiberin (Qi Blanco UG (haftungsbeschränkt), siehe /pages/impressum)
+# behält sich die Nutzung der Inhalte dieser Website für kommerzielles
+# Text- und Data-Mining im Sinne von 44b UrhG ausdrücklich vor
+# (Art. 4 Abs. 3 DSM-RL 2019/790/EU).
+#
+# Dieser Vorbehalt wird MASCHINENLESBAR erklärt - hier, per W3C TDMRep unter
+# /.well-known/tdmrep.json und per HTTP-Header 'tdm-reservation: 1'. Grund:
+# das OLG Hamburg hat am 10.12.2025 (5 U 104/24, Kneschke ./. LAION) die
+# gegenteilige Lesart der Vorinstanz aufgehoben - ein Vorbehalt in bloßer
+# Prosa genügt danach NICHT (Revision zum BGH zugelassen).
+#
+# Content Signals (Cloudflare Content Signals Policy, 24.09.2025):
+#   search=yes, ai-input=yes, ai-train=no
+# Lies: gefunden werden JA, als Antwortquelle zitiert werden JA,
+#       als Trainingsmaterial verwendet werden NEIN.
+#
+# ABGRENZUNG, damit niemand hier eine Sperre vermutet, die nicht dasteht:
+# das ist eine ERKLÄRUNG, keine Zugangssperre. Der Schwester-Laden
+# qiblanco.com führt zusätzlich einen Disallow-Block gegen 20 Trainings-
+# Crawler; dieser Laden führt ihn NICHT. Das ist eine bewusst offene
+# Flanke dieses Jobs (Zugangssperren sind eine eigene Entscheidung mit
+# eigener SEO-Wirkung), keine Lücke im Vorbehalt.
+# ---------------------------------------------------------------------------
+
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
 ${generalDisallowRules({sitemapUrl})}
 
 # Google adsbot ignores robots.txt unless specifically named!
