@@ -2,6 +2,13 @@ node_modules
 /.cache
 /build
 /dist
+# Der Node-Bau (server.node.mjs) legt hier ab, wenn jemand ihn aus der
+# Werkbank statt aus crystal-cacao-node/repo faehrt. Das INNERE Repo ignoriert
+# ihn seit jeher (dort .gitignore Zeile 5); hier fehlte die Zeile, und ein
+# einmal gefahrener Bau meldete sich danach jedem Folgejob als "uncommittete
+# Arbeit im geteilten Arbeitsbaum". Ein Bauartefakt ist rebuildbar und gehoert
+# in keine Historie. (2026-09-10, Job 20260910-BAU-sortenbloecke-...)
+/dist-node
 /public/build
 /.mf
 .env
