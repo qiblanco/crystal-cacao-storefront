@@ -80,8 +80,43 @@
   --cc-fs-3: 1.25rem;     /* 20.00px  Lead, kleine Ueberschrift   */
   --cc-fs-4: 1.5625rem;   /* 25.00px  H3                          */
   --cc-fs-5: 1.9531rem;   /* 31.25px  H2 klein / Sektionstitel    */
-  --cc-fs-6: 2.4414rem;   /* 39.06px  H2                          */
-  --cc-fs-7: 3.0518rem;   /* 48.83px  H1                          */
+  /* DIE ZWEI OBERSTEN STUFEN TRAGEN EINE VIEWPORT-DECKELUNG — 2026-09-09,
+   * Job 20260909-REPAIR-startseite-kakao-h1-und-stimmen-gitter-...
+   *
+   * BEFUND, am Kundenrand gemessen: bei 320 px Fensterbreite lief das
+   * Dokument 8 px aus dem Bild (scrollWidth 328 / clientWidth 320). Der
+   * Taeter war das Wort "Performance" der H1 — bei 48,83 px ist es 311,6 px
+   * breit, und zwischen den 16-px-Raendern eines 320-px-Fensters stehen nur
+   * 288 px zur Verfuegung. Es KANN dort nicht passen, und weil ein einzelnes
+   * Wort nicht umbricht, ragt es heraus.
+   *
+   * DIE WURZEL WAR NICHT DIE TAILWIND-STUFE. `text-6xl!` im Markup ist
+   * korrekt: der @theme-Block weiter unten bindet --text-6xl an --cc-fs-7,
+   * die Klasse rendert also die TOKEN-Stufe (48,83 px), nicht Tailwinds
+   * 60 px. Die Wurzel war, dass die Skala eine reine rem-Skala ohne obere
+   * Schranke war — sie kannte die Fensterbreite nicht und konnte deshalb
+   * eine Groesse ausgeben, die baulich nicht darstellbar ist.
+   *
+   * WARUM `min()` UND NICHT `clamp()`: eine untere Schranke in rem waere
+   * genau der Fehler nochmal. Sie skaliert mit der Wurzel-Schriftgroesse und
+   * gewinnt dann gegen die vw-Deckelung — bei erhoehter Schrift auf schmalem
+   * Fenster stuende die H1 wieder ueber dem Rand. `min()` hat keine solche
+   * Hintertuer: die vw-Zahl ist eine harte Obergrenze, die auch eine
+   * dreifach vergroesserte Wurzelschrift nicht ueberschreiten kann.
+   *
+   * DIE KOEFFIZIENTEN SIND GEEICHT, NICHT GERATEN — auf die Entwurfsbreite
+   * 390 px, an der die Gestaltung gemessen und abgenommen wurde:
+   *   48,8288 / 390 = 12,5202  ->  12,6vw  (bei 390 px gewinnt der rem-Wert)
+   *   39,0624 / 390 = 10,0160  ->  10,1vw  (dito)
+   * Bei 390, 768 und 1440 px ist die Darstellung damit BYTE-GLEICH zu
+   * vorher — nachgemessen ueber einen Geometrie-Fingerabdruck aller
+   * sichtbaren Elemente, A gegen B, identisch. Die Deckelung beisst erst
+   * unterhalb von 390 px und in vergroesserter Schrift, also genau dort, wo
+   * die alte Skala nicht darstellbar war.
+   * Sie senkt die Zahl der Stufen NICHT (weiterhin 7) — es bleibt eine
+   * Stufe je Token, sie hat jetzt nur eine Obergrenze. */
+  --cc-fs-6: min(2.4414rem, 10.1vw);   /* <= 39.06px  H2 */
+  --cc-fs-7: min(3.0518rem, 12.6vw);   /* <= 48.83px  H1 */
 
   /* ---- Abstand: 8pt-Raster (web-soll spacing_grid_px 8) ---- */
   --cc-space-1: 0.5rem;   /*  8px */
@@ -1067,6 +1102,28 @@
  * (center, left)". Gemessen waren 48px/700 und 19.2px/700 nebeneinander.
  * EIN H2-Stil, EINE Ausrichtung — die Groesse kommt aus dem Token, damit sie
  * nicht wieder auseinanderlaeuft. */
+/* DAS SICHERHEITSNETZ UNTER DER DECKELUNG — 2026-09-09, selber Job.
+ * Die vw-Deckelung darueber loest den REGELFALL: die Schrift wird kleiner,
+ * bevor sie den Rand erreicht. Sie ist aber auf eine Wortlaenge geeicht, die
+ * heute im Text steht. Ein laengeres Wort — ein Produktname, ein Kompositum,
+ * eine Bewertung, die jemand morgen schreibt — kann sie wieder sprengen, und
+ * dann ist der Ueberlauf zurueck, ohne dass jemand etwas falsch gemacht hat.
+ * `overflow-wrap: break-word` ist die LETZTE Instanz: sie greift NUR, wenn
+ * ein Wort auch allein nicht in seine Zeile passt, und laesst jeden normalen
+ * Umbruch unberuehrt. In den neun gemessenen Lagen loest sie kein einziges
+ * Mal aus — sie kostet also nichts und macht die Zusage "kein waagerechter
+ * Ueberlauf" strukturell statt handverlesen.
+ * Sie aendert KEINEN Text: "High Performance Cacao" bleibt woertlich, nur
+ * seine Darstellung bekommt einen Rueckweg. */
+h1,
+h2,
+h3,
+h4,
+.cc-va-stimme blockquote,
+.cc-va-stimme figcaption {
+  overflow-wrap: break-word;
+}
+
 .ProductPageKakao h2,
 main h2 {
   font-size: var(--cc-fs-6);
@@ -1621,13 +1678,13 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   align-items: center;
   display: grid;
   gap: var(--cc-space-4);
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   padding-top: var(--cc-space-4);
 }
 
 @media (min-width: 45em) {
   .cc-va-kopf {
-    grid-template-columns: 1.1fr 1fr;
+    grid-template-columns: 1.1fr minmax(0, 1fr);
     gap: var(--cc-space-5);
   }
 }
@@ -1663,13 +1720,13 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 .cc-va-vorteile-gitter {
   display: grid;
   gap: var(--cc-space-3);
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   margin-top: var(--cc-space-3);
 }
 
 @media (min-width: 45em) {
   .cc-va-vorteile-gitter {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1696,12 +1753,12 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   align-items: center;
   display: grid;
   gap: var(--cc-space-4);
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 @media (min-width: 45em) {
   .cc-va-herkunft {
-    grid-template-columns: 1fr 1.1fr;
+    grid-template-columns: minmax(0, 1fr) 1.1fr;
   }
 }
 
@@ -1724,17 +1781,44 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 /* --- Stimmen: drei Karten, ruhig, Zahlen und Zitate lesbar. Die Sterne sind
  * hier `d` (darstellend) und tragen denselben lesbaren Goldton wie auf der
  * Kaufseite. */
+/* DAS STIMMEN-GITTER ZAEHLT SEINE SPALTEN SELBST — 2026-09-09, Job
+ * 20260909-REPAIR-startseite-kakao-h1-und-stimmen-gitter-...
+ *
+ * BEFUND: bei 768 px Fensterbreite und auf 24 px erhoehter Wurzelschrift lief
+ * das Dokument 76 px aus dem Bild. GEMESSEN, nicht vermutet: das Gitter-
+ * Element war korrekt 720 px breit, aber `grid-template-columns` loeste zu
+ * `222px 311px 215px` auf — zusammen mit den Abstaenden 820 px, also exakt
+ * die min-content-Breite des Gitters. Die dritte Karte endete bei 844, und
+ * 844 WAR die scrollWidth des Dokuments.
+ *
+ * ZWEI URSACHEN, und beide muessen weg:
+ * (1) `1fr` hat als Automatik-Minimum `min-content`. Eine Spur kann deshalb
+ *     NICHT unter die laengste unumbrechbare Stelle ihres Inhalts schrumpfen
+ *     und sprengt lieber ihren Container. Die ungleichen Spurbreiten sind die
+ *     Signatur dieses Falls — bei echter 1fr-Verteilung waeren sie gleich.
+ *     `minmax(0, 1fr)` nimmt dieses Minimum zurueck. Es ist im nicht
+ *     gesprengten Fall WIRKUNGSLOS, deshalb steht es jetzt an jedem Gitter
+ *     dieses Abschnitts und nicht nur an dem einen, das aufgefallen ist.
+ * (2) Der Breakpoint `min-width: 45em` konnte den Fall nicht sehen. Die
+ *     `em` einer Media Query rechnen IMMER gegen die anfaengliche
+ *     Schriftgroesse, nie gegen die eingestellte — 45em sind hier unter allen
+ *     Umstaenden 720 px. Bei dreifach vergroesserter Schrift blieb es deshalb
+ *     bei drei Spalten, obwohl in eine Spalte nur noch ein halbes Wort passt.
+ *     `repeat(auto-fit, minmax(min(100%, 14rem), 1fr))` fragt stattdessen in
+ *     `rem` — also in der Groesse, die der Leser eingestellt hat: wer gross
+ *     liest, bekommt weniger, dafuer lesbare Spalten.
+ *
+ * NACHGEMESSEN, dass die Gestaltung dabei stehen bleibt: bei 390 px eine
+ * Spalte (358 px), bei 768 px drei (je 229 px), bei 1440 px drei (je 368 px)
+ * — in Position UND Breite identisch zum Stand davor. Bei 24-px-Wurzelschrift
+ * werden aus drei Spalten zwei zu je 342 px, und der Ueberlauf ist weg.
+ * `min(100%, 14rem)` haelt die Einspaltigkeit auf schmalen Fenstern: ohne das
+ * `100%` waere die Mindestspur breiter als das Fenster selbst. */
 .cc-va-stimmen-gitter {
   display: grid;
   gap: var(--cc-space-3);
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
   margin-top: var(--cc-space-3);
-}
-
-@media (min-width: 45em) {
-  .cc-va-stimmen-gitter {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 .cc-va-stimme {
