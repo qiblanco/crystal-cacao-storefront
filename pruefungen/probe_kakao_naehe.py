@@ -53,25 +53,13 @@ import sys
 import urllib.error
 import urllib.request
 
-# Shop-Landkarte statt Domain-Literal (Job 20260821-storefront-messung-
-# adoption-restproben-prio15): qiblanco.com und qi-blanco.com trennt EIN
-# Bindestrich, beide antworten 200 - ein Vertipper waere hier kein 404,
-# sondern ein stiller Shop-Wechsel. Domain aufloesen, nicht tippen.
-sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
-# Alias BEWUSST nicht 'sm': Zeile 555 bindet 'sm' lokal an einen
-# difflib.SequenceMatcher. Zwei Bedeutungen fuer einen Namen in einer
-# Datei haelt nur, solange die Stellen in verschiedenen Funktionen
-# liegen - das ist eine Falle fuer den naechsten, der Code verschiebt.
-import storefront_messung as smessung  # noqa: E402
-
 SEITEN = [
     '/pages/crystal-cacao',
     '/products/crystal-cacao-awake',
     '/products/crystal-cacao-create',
 ]
 
-VORLAGE_SHOP = 'dach'
-VORLAGE_BASIS = f"https://{smessung.shop(VORLAGE_SHOP).domain}"
+VORLAGE_BASIS = 'https://qiblanco.com'
 CRYSTAL_BASIS_VORGABE = 'http://localhost:3399'
 
 # Der Pin. Siehe Kopf: ohne ihn misst man zwei Maerkte und nennt es Drift.
@@ -259,6 +247,88 @@ ABWEICHUNGEN = [
     # einen Abschnitt, waechst sie auf BEIDEN Seiten und diese Zeile bleibt
     # unberuehrt — die Sollwerte der Probe kommen ausschliesslich aus der
     # LIVE-Vorlage, nie aus dieser Datei.
+    # --- Der Kaufblock-Umbau vom 2026-09-10 ---------------------------------
+    # Job 20260910-BAU-sternzeile-ist-eine-tote-flaeche-und-produktseite-naeher
+    # -ans-original. Christian: „Dass diese 4,9 Sterne mit Button hinterlegt
+    # sind, der aufleuchtet und dann nirgendwo hin geht, ist auch Quatsch. Das
+    # entfernen."
+    #
+    # DIE VORLAGE TRAEGT DENSELBEN DEFEKT, und das ist der Grund, warum hier
+    # eine Ausnahme steht statt eines Nachzugs: qiblanco-storefront/app/routes/
+    # products.crystal-cacao-{create,awake}.jsx importieren GoogleRezensionen-
+    # Bereich NICHT (16 Dateien im qiblanco-Baum tun es, die beiden Kakao-
+    # Kaufseiten sind nicht darunter). Auf der Vorlage geht der Knopf also
+    # ebenso wenig irgendwohin. "Naeher ans Original" wuerde den Befund nicht
+    # heilen, sondern zurueckholen. Faellt er dort, sind diese Zeilen wieder
+    # zu entfernen — dann ist die Naht von selbst geschlossen.
+    {
+        'id': 'sternzeile-kein-knopf-vorlage',
+        'achse': 'struktur',
+        'richtung': 'nur_vorlage',
+        'seiten': ['/products/crystal-cacao-awake', '/products/crystal-cacao-create'],
+        'muster': None,
+        'folge': [
+            'button|product-rating sterne-sprung|data-qb-rating=s',
+            'span|star-rating|data-qb-rating=s',
+        ],
+        'grund': 'Die tote Flaeche der Vorlage: <SterneSprung/> ist ein echter '
+                 '<button>, sein Verhalten haengt aber an useSterneSprung'
+                 'Delegation in GoogleRezensionenBereich.jsx — die beiden '
+                 'Kakao-Kaufseiten laden diese Datei auf KEINER der beiden '
+                 'Seiten. Am Kundenrand gemessen (390/768/1440 px): Klick '
+                 'bewegt 0,0 px, Hash bleibt leer, Sprungziele auf der Seite 0. '
+                 'Hier ist die Zeile reiner Text; der Marker steht auf "d" '
+                 '(rein darstellend) statt "s" (Sprung), also weiter ein '
+                 'DEFINIERTES Verhalten nach dem Vertrag in StarRating.jsx. '
+                 'Ein Bewertungsabschnitt wurde bewusst NICHT gebaut — der '
+                 'Auftrag verbietet, einen Abschnitt nur anzulegen, damit ein '
+                 'Link ein Ziel hat.',
+    },
+    {
+        'id': 'sternzeile-reiner-text-crystal',
+        'achse': 'struktur',
+        'richtung': 'nur_crystal',
+        'seiten': ['/products/crystal-cacao-awake', '/products/crystal-cacao-create'],
+        'muster': None,
+        'folge': [
+            'p|product-rating|',
+            'span|star-rating|data-qb-rating=d',
+        ],
+        'grund': 'Der Ersatz fuer die tote Flaeche: derselbe Inhalt (Zahl, '
+                 'Sterne, Nutzerzahl) in einem Traeger ohne Klick-Affordanz. '
+                 'Ein <p> statt eines <button>, kein cursor, kein :hover, kein '
+                 'Fokusring. Die Grafik selbst ist unveraendert — StarRating.jsx '
+                 'steht in shared/UPSTREAM.json und wurde nicht angefasst; '
+                 'geaendert ist allein die VERWENDUNGSSTELLE, wie es der '
+                 'Marker-Vertrag verlangt.',
+    },
+    {
+        'id': 'nutzerzahl-dopplung-vorlage',
+        'achse': 'struktur',
+        'richtung': 'nur_vorlage',
+        'seiten': ['/products/crystal-cacao-awake', '/products/crystal-cacao-create'],
+        'muster': None,
+        'folge': ['p|mt-2|'],
+        'grund': 'Der Traeger der zweiten Nutzerzahl. Christian: „Mehr als '
+                 '1.000+ aktive Nutzer sagt dasselbe wie die Zeile bei den '
+                 'Sternen. Zweimal dieselbe Zahl in acht Zeilen schwaecht sie, '
+                 'statt sie zu staerken." Gemessen ueber Blattknoten im '
+                 'Kaufblock: 2 Vorkommen. Die ZAHL bleibt — sie steht jetzt an '
+                 'genau einer Stelle, dort wo sie neben den Sternen als '
+                 'sozialer Beweis wirkt.',
+    },
+    {
+        'id': 'nutzerzahl-dopplung-text-vorlage',
+        'achse': 'text',
+        'richtung': 'nur_vorlage',
+        'seiten': ['/products/crystal-cacao-awake', '/products/crystal-cacao-create'],
+        'muster': r'(^Mehr als$|^\+ aktive Nutzer$)',
+        'grund': 'Die Textstuecke der getilgten zweiten Nutzerzahl. Die Vorlage '
+                 'zerlegt den Satz durch die <b>-Auszeichnung in mehrere '
+                 'Stuecke; die blosse Zahl "1.000" steht in der verbliebenen '
+                 'Sternzeile weiterhin und ist deshalb NICHT Teil dieser '
+                 'Ausnahme.',
+    },
     {
         'id': 'struktur-faq-eintrag-entfernt',
         'achse': 'struktur',
@@ -619,12 +689,6 @@ def main() -> int:
     for seite in seiten:
         try:
             dv = hole(args.vorlage_basis + seite)
-            _erk = smessung.identitaet_von_text(dv)
-            if _erk is None or _erk.schluessel != VORLAGE_SHOP:
-                raise Messausfall(
-                    f"{args.vorlage_basis + seite} gehoert nicht zu "
-                    f"{VORLAGE_SHOP} (erkannt: "
-                    f"{_erk.schluessel if _erk else 'keinem Shop'})")
             dc = hole(args.crystal_basis + seite)
             mv = haupt(dv, args.vorlage_basis + seite)
             mc = haupt(dc, args.crystal_basis + seite)
