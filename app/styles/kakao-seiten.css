@@ -1149,6 +1149,30 @@ main > p {
   margin-inline: auto;
 }
 
+/* NACHTRAG 2026-09-09 (Job 20260909-REPAIR-startseite-kakao-...), zur Regel
+ * DIREKT DARUEBER und deshalb hier und nicht in einem eigenen Abschnitt:
+ * `margin-inline: auto` ist als ZENTRIERUNG einer auf --cc-zeile-max
+ * gedeckelten Textspalte gemeint. In einem FLEX-Kind tut es aber noch etwas
+ * Zweites: es hebt `align-items: stretch` auf. Der Absatz wird dann auf seine
+ * max-content-Breite geschrumpft und mittig gesetzt — und die max-content-
+ * Breite eines Absatzes mit hartem <br> ist die laengste HARTE ZEILE, nicht
+ * die Spaltenbreite.
+ * GEMESSEN am gerenderten DOM (1440 px, crystal-cacao.com, 2026-09-09):
+ * der Absatz "Das fuehrt zu ..." stand 299 px breit in einer 544-px-Spalte
+ * und 122,5 px eingerueckt gegenueber seinem Nachbarn — vier Zeilen mit vier
+ * verschiedenen linken Kanten. Zwei weitere Absaetze derselben Klasse
+ * ("Dein Moment", "Dein Effekt") standen 558 bzw. 562 px breit neben ihren
+ * 630 px breiten Geschwistern, also 36 bzw. 34 px daneben.
+ * Der Zaun haengt an der EIGENSCHAFT, die den Schaden macht (hat der Absatz
+ * einen harten Umbruch?), nicht an einem Abschnittsnamen — sonst gilt er
+ * beim naechsten Text nicht mehr. Die Zentrierung selbst bleibt unangetastet:
+ * ein Absatz OHNE <br> laeuft weiter in die Deckelung von --cc-zeile-max und
+ * wird weiter mittig gesetzt. Gemessen nach dem Nachtrag: 15 mittig gesetzte
+ * Absaetze vorher, davon veraendern sich genau die 3 mit <br>. */
+.ProductPageKakao p:has(br) {
+  width: 100%;
+}
+
 /* BEFUND "3 Bild-Radius-Werte" (Live-Vorlage) bzw. Radien-Streuung nach der
  * Extraktion: EIN Bildradius-Token fuer alle Bildflaechen. */
 .ProductPageKakao img,
@@ -1200,14 +1224,123 @@ main img {
  * sondern der EINZIGE lawful Weg, ohne die Klassen-Regel zu verletzen.
  * Der handgefuehrte Rueckweg aus ADR 0056 Festlegung 5 (Inline-Stile
  * stromaufwaerts durch Klassen ersetzen) bleibt der saubere Endzustand und
- * ist als Vorschlag an qiblanco vermerkt — nicht hier einseitig vollzogen. */
-.ProductPageKakao h2[style],
-main h2[style] {
+ * ist als Vorschlag an qiblanco vermerkt — nicht hier einseitig vollzogen.
+ *
+ * NACHGEZOGEN 2026-09-09 (Job 20260909-REPAIR-startseite-kakao-...): der Zaun
+ * hing an einem ZU WEITEN Merkmal. `h3[style]` heisst "traegt IRGENDEINEN
+ * Inline-Stil" — gemeint war "traegt eine Inline-SCHRIFTGROESSE". Gemessen im
+ * ganzen Baum: 4 Ueberschriften tragen inline font-size (die zwei K1-Routen,
+ * je h2+h3) — genau die, fuer die diese Regel gebaut ist. Mit erwischt wurden
+ * die DREI Kopfzeilen der Vergleichstabelle in Kakao.jsx, die inline nur eine
+ * FARBE tragen: sie standen dadurch auf 25 px statt auf ihrer Kopfgroesse,
+ * "Crystal Cacao®" brach als einziger auf zwei Zeilen um, und weil die Regel
+ * `!important` traegt, war sie ueber eine normale Klassenregel nicht
+ * erreichbar. Der Zaun misst jetzt die EIGENSCHAFT (`[style*="font-size"]`)
+ * statt die blosse Anwesenheit eines style-Attributs.
+ * React schreibt kebab-case: `style={{fontSize:'2em'}}` wird zu
+ * `style="font-size:2em"` — an der Live-Route nachgelesen, nicht vermutet. */
+.ProductPageKakao h2[style*='font-size'],
+main h2[style*='font-size'] {
   font-size: var(--cc-fs-6) !important;
 }
-.ProductPageKakao h3[style],
-main h3[style] {
+.ProductPageKakao h3[style*='font-size'],
+main h3[style*='font-size'] {
   font-size: var(--cc-fs-4) !important;
+}
+
+/* ==== Der Warenkorb als ZEICHEN (2026-09-09) ==============================
+ * Christian: er soll "erkennbar sein, den Fuellstand zeigen und sich nicht
+ * hinter Text verstecken". Bis heute war er ein Wort mit einer Zahl daneben —
+ * gemessen 85 x 44 px, davon 61 px reiner Text.
+ *
+ * WARUM DIE REGELN HIER STEHEN UND NICHT IN app.css: diese Datei wird in
+ * root.jsx NACH app.css geladen und gewinnt deshalb ohnehin. Zwei Regeln fuer
+ * dasselbe Element haetten sich nur gegenseitig verdeckt — genau der Irrtum,
+ * der im Kommentar "KEIN EIGENER BLOCK FUER DEN WARENKORB-ZAEHLER" in app.css
+ * (2026-09-02, P10) nachgemessen steht.
+ *
+ * DIE TREFFERFLAECHE KOMMT WEITER AUS app.css (min-height/min-width 44px,
+ * WCAG 2.5.5 AAA). Hier wird NICHTS kleiner gemacht — nur der sichtbare
+ * Inhalt wechselt vom Wort zum Zeichen. */
+.header-warenkorb {
+  justify-content: center;
+  color: var(--cc-dunkel, #171310);
+}
+
+.header-warenkorb-zeichen {
+  /* Das Zeichen bleibt auf der Token-Skala und waechst nicht mit der
+   * Schriftstufe der Kopfzeile — ein Symbol ist kein Buchstabe. */
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+/* ==========================================================================
+ * VERGLEICHSTABELLE — EIN KOPF-STIL FUER ALLE DREI SPALTEN (2026-09-09,
+ * Job 20260909-REPAIR-startseite-kakao-textblock-...).
+ *
+ * DER BEFUND, am gerenderten DOM von crystal-cacao.com gemessen, nicht am
+ * Quelltext: die drei Kopfzellen tragen im Markup alle dieselbe Klasse
+ * (`text-sm font-bold`) — und rendern trotzdem 25 px. `text-sm` liegt in
+ * @layer utilities und verliert gegen die ungelayerte Regel `main h3`; der
+ * K1-Neutralisierer `main h3[style]` legte zusaetzlich ein !important
+ * darueber. Folge: "Crystal Cacao®" (14 Zeichen mit Leerraum) brach als
+ * einziger Kopf auf ZWEI Zeilen um und schob seine Mengenangabe 15,6 px
+ * unter die der Nachbarn — die eigene Marke wirkte kleiner als der
+ * Vergleich. Die Klasse im Markup behauptete eine Groesse, die es nie gab.
+ *
+ * DIE GROESSE STEHT DESHALB HIER, AN EINER STELLE, und nicht je Zelle — das
+ * ist dieselbe Fehlerklasse wie ein Preis, der an zwei Orten formatiert wird.
+ *
+ * WARUM --cc-fs-2 UND NICHT GROESSER: mit `white-space: nowrap` bestimmt der
+ * laengste Kopf die Spaltenbreite. Gemessen bei 1440 px (Spalte 542 px):
+ * --cc-fs-2 (16 px) -> Tabelle 542 px, passt genau, kein Wischen am
+ * Schreibtisch; --cc-fs-3 (20 px) -> 543 px, also 1 px Ueberlauf und ein
+ * Wisch-Hinweis auf dem Desktop; --cc-fs-4 (25 px) -> 629 px. Auf dem Handy
+ * wischt die Tabelle ohnehin — das ist der Zweck des Bausteins qb-swipetab.
+ *
+ * WAS BEWUSST NICHT PASSIERT: kein `table-layout: fixed` und keine festen
+ * Pixelbreiten. Beides wuerde die Mindestbreiten des Bausteins aushebeln,
+ * unter denen die feste erste Spalte auf dem Handy steht (qb-swipetab.css,
+ * "@media (max-width: 749px)") — die Prozentwerte im <colgroup> sind ein
+ * Vorschlag ans Auto-Layout, kein Zwang. Erreichte Spaltenbreiten bei
+ * 1440 px: 160 / 145 / 113 / 124 px (vorher 138 / 124 / 105 / 175).
+ * BENANNTE GRENZE: gleich BREITE Wertspalten sind hier nicht erreichbar,
+ * ohne die Beschriftungsspalte unter ihre min-content-Breite (136 px,
+ * "Phenylethylamin") zu druecken oder den Kopf unter die Token-Skala zu
+ * setzen. Die Marke ist jetzt die BREITESTE der drei — das war die Vorgabe.
+ * ======================================================================== */
+.cc-vgl thead h3 {
+  font-size: var(--cc-fs-2);
+  line-height: 1.25;
+  margin: 0;
+  white-space: nowrap;
+}
+.cc-vgl thead h4 {
+  font-size: var(--cc-fs-1);
+  font-weight: 600;
+  margin: var(--cc-space-1) 0 0;
+}
+.cc-vgl__spalte-label {
+  width: 31%;
+}
+.cc-vgl__spalte-wert {
+  width: 23%;
+}
+
+/* Eine Ueberschrift, die das ERSTE Kind einer senkrecht zentrierten Spalte
+ * ist, hat nichts ueber sich, wovon ihr oberer Abstand sie trennen koennte —
+ * er ist dort reine Leerflaeche und kippt den Textblock gegen die Bildspalte
+ * daneben. GEMESSEN (1440 px, Abschnitt "Wach. Klar. Ohne Koffein-Crash."):
+ * Text- und Bildspalte sind exakt gleich hoch (beide 3137..3510 px), der
+ * TEXT darin sass aber 99 px unter der Oberkante und 51 px ueber der
+ * Unterkante — die 48 px Kopfabstand aus `main h2` in voller Hoehe. Ohne ihn
+ * 75 / 75. Der Abschnittstakt bleibt unberuehrt: er kommt aus
+ * .NormalSectionSize, nicht aus diesem Abstand.
+ * Betrifft 6 der 24 Ueberschriften der Seite (gemessen 2026-09-09), alle in
+ * dieselbe Richtung. */
+.ProductPageKakao .flex.flex-col.justify-center > h2:first-child {
+  margin-top: 0;
 }
 
 /* Warenkorb-Zaehler als Abzeichen statt als mitlaufender Text (s07).
@@ -1217,6 +1350,7 @@ main h3[style] {
  * (app.css:462 `.cart-count { position: absolute }`) — der Zaehler kostet
  * dort keine Zeilenbreite. Selektor ueber den Link, weil das span in der
  * K1-fremden, aber unveraenderten Header-Komponente keine Klasse traegt. */
+.header-ctas a[href='/cart'] .cart-count,
 .header-ctas a[href='/cart'] span {
   position: absolute;
   top: -2px;
@@ -1903,6 +2037,31 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
    Knopf-Regel in app.css ist seit diesem Job eine Basis (0-0-2), die eine
    eigene Klasse überschreiben darf.
 --------------------------------------------------------------------------- */
+/* ==========================================================================
+ * PRUEFDOKUMENTE — SORTENREIN, TABELLARISCH (2026-09-10, Job 20260910-BAU-
+ * pruefdokumente-sortenrein-create-vor-awake-je-drei-und-zwei-mineralstoff-
+ * analysen-fehlen)
+ * ==========================================================================
+ * Christian: „das sollte wirklich noch schoener sortenrein angezeigt werden
+ * … Der Abschnitt soll wie eine Tabelle wirken und nicht wie eine Linkliste."
+ *
+ * NUR LAYOUT. Diese Schicht fuehrt KEINE neue Schriftgroesse, KEINEN neuen
+ * Farbwert und KEINEN zweiten Radius ein — jede Groesse unten ist ein
+ * bestehender Token. Die Vorfassung stand mit drei rohen Werten hier
+ * (1.125rem, 0.8125rem, rgba(0,0,0,0.08)); sie sind durch --cc-fs-3,
+ * --cc-fs-1 und --cc-linie ersetzt, weil genau das ihre Rolle war.
+ *
+ * DIE TABELLENWIRKUNG ENTSTEHT AUS EINER EINZIGEN REGEL: `.cc-belege__daten`
+ * ist ein Raster mit `max-content 1fr`. Alle Bezeichnungen einer Sorte stehen
+ * damit auf derselben Kante, und die Werte beginnen buendig. Es gibt bewusst
+ * KEIN <table>: sechs Belege mit je fuenf Angaben ergaeben in einer 400px
+ * breiten Spalte eine Tabelle, die auf dem Handy scrollt statt umbricht.
+ *
+ * DER SORTEN-BALKEN ist der einzige Farbeinsatz und nimmt die vorhandenen
+ * --cc-sorte-Token (Christian 2026-09-01, „dezent entsprechend nutzen"). Die
+ * SCHRIFT bleibt in beiden Gruppen dieselbe — „gleiche Schrift" war Vorgabe.
+ * ======================================================================== */
+
 .cc-belege {
   max-width: var(--cc-kaufblock-max, 400px);
   margin: 6vh auto;
@@ -1910,9 +2069,25 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 }
 
 .cc-belege__titel {
-  font-size: 1.125rem !important;
-  margin-bottom: 0.75rem !important;
-  color: var(--cc-kraft-tief, #4a4741);
+  font-size: var(--cc-fs-3) !important;
+  margin-bottom: var(--cc-space-2) !important;
+  color: var(--cc-kraft-tief, #846142);
+}
+
+.cc-belege__sorte + .cc-belege__sorte {
+  margin-top: var(--cc-space-3);
+}
+
+/* Der Balken traegt die Sorte. Er ist 3px schmal und steht links neben der
+   Ueberschrift, nicht darunter: eine farbige Linie ueber der ganzen Breite
+   waere ein zweiter Trenner neben den Zeilenlinien der Tabelle. */
+.cc-belege__sorten-titel {
+  font-size: var(--cc-fs-2) !important;
+  font-weight: 600;
+  margin: 0 0 var(--cc-space-1) !important;
+  padding-left: var(--cc-space-1);
+  border-left: 3px solid var(--cc-sorte);
+  color: var(--cc-text);
 }
 
 .cc-belege__liste {
@@ -1921,15 +2096,20 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   padding: 0;
 }
 
-.cc-belege__liste li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+.cc-belege__zeile {
+  padding: var(--cc-space-1) 0 var(--cc-space-2);
+  border-bottom: 1px solid var(--cc-linie);
+}
+
+/* Die letzte Zeile einer Sorte braucht keinen Trenner — darunter kommt
+   ohnehin die naechste Ueberschrift oder der Schlusssatz. */
+.cc-belege__zeile:last-child {
+  border-bottom: none;
 }
 
 .cc-belege__link {
+  display: inline-block;
+  margin-bottom: var(--cc-space-1);
   color: var(--cc-gold-text, #90671D);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -1940,14 +2120,177 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 }
 
 /* Labor, Datum und Zertifikatsnummer stehen absichtlich VOR dem Klick da:
-   die Zeugnisse sind von 2025, und niemand soll Aktualität annehmen müssen. */
-.cc-belege__quelle {
-  font-size: 0.8125rem;
+   die Dokumente sind von 2025 und 2026, und niemand soll Aktualitaet
+   annehmen muessen. */
+.cc-belege__daten {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--cc-space-2);
+  row-gap: 0.15rem;
+  margin: 0;
+  font-size: var(--cc-fs-1);
+}
+
+.cc-belege__daten dt {
+  margin: 0;
   color: var(--cc-muted, #6b665d);
 }
 
+.cc-belege__daten dd {
+  margin: 0;
+  color: var(--cc-text);
+}
+
 .cc-belege__grenze {
-  margin-top: 0.9rem;
-  font-size: 0.8125rem;
+  margin-top: var(--cc-space-2);
+  font-size: var(--cc-fs-1);
   color: var(--cc-muted, #6b665d);
+}
+
+/* ==========================================================================
+ * PODCAST-EINSTIEG (2026-09-09, Job 20260908-BAU-crystal-cacao-podcast-weit-
+ * oben-mit-einstiegsstelle-statt-startknopf)
+ * ==========================================================================
+ * NUR LAYOUT. Diese Schicht fuehrt KEINE neue Schriftgroesse, KEINEN neuen
+ * Farbwert, KEINEN zweiten Radius und KEINEN zweiten Goldton ein — jede
+ * Groesse unten ist ein bestehender Token.
+ *
+ * Das ist eine bewusste Entscheidung gegen die naheliegende Variante: eine
+ * eigene, kleinere Ueberschrift fuer die Textspalte haette gut ausgesehen und
+ * waere genau der zweite H2-Stil gewesen, den s07 an dieser Seite gemessen
+ * und abgestellt hat („BEFUND 2 H2-Stil-Kombis"). Die Ueberschrift des
+ * Abschnitts nimmt deshalb unveraendert `.ProductPageKakao h2`.
+ *
+ * DER EINE AKZENT sitzt auf der Abspielscheibe. Das ist die Stelle, an der
+ * gehandelt wird — genau die Rolle, fuer die --cc-gold reserviert ist. Die
+ * Zeitmarke daneben ist ABSICHTLICH neutral (--cc-dunkel): zwei goldene
+ * Flaechen im selben Bild waeren zwei Handlungsangebote, und es gibt nur eins.
+ * ======================================================================== */
+
+.cc-podcast__raster {
+  display: grid;
+  gap: var(--cc-space-4);
+  align-items: center;
+}
+@media (min-width: 48em) {
+  .cc-podcast__raster {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--cc-space-5);
+  }
+}
+
+/* 16:9 traegt sich selbst — der Rahmen steht, bevor das Vorschaubild da ist.
+ * Das ist kein Schmuck: ohne feste Proportion springt die Seite genau in dem
+ * Moment, in dem das lazy geladene Poster eintrifft, und der Sprung passiert
+ * weit oben. */
+.cc-podcast__buehne {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--cc-radius-bild);
+  overflow: hidden;
+  background: var(--cc-dunkel);
+}
+
+.cc-podcast__knopf {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.cc-podcast__fuellung {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /* hqdefault ist 4:3 — ohne cover stuenden schwarze Balken im Rahmen. */
+  object-fit: cover;
+  /* Der Rahmen rundet bereits; ein zweiter Radius auf dem Bild waere die
+   * Radien-Streuung, die s07 abgestellt hat. */
+  border-radius: 0;
+}
+
+.cc-podcast__play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.cc-podcast__play-scheibe {
+  display: grid;
+  place-items: center;
+  /* Trefferflaeche aus WCAG 2.5.5 AAA, nicht frei gewaehlt. */
+  width: calc(var(--cc-treffer-min) * 1.5);
+  height: calc(var(--cc-treffer-min) * 1.5);
+  border-radius: var(--cc-radius-rund);
+  background: var(--cc-gold);
+  color: var(--cc-dunkel);
+  font-size: var(--cc-fs-4);
+  /* Das Dreieck sitzt optisch links vom Kreismittelpunkt, wenn man es
+   * mathematisch zentriert. Ein Achtel Schriftgroesse holt es zurueck. */
+  padding-left: 0.125em;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 35%);
+}
+
+.cc-podcast__knopf:hover .cc-podcast__play-scheibe,
+.cc-podcast__knopf:focus-visible .cc-podcast__play-scheibe {
+  background: var(--cc-gold-tief);
+}
+
+/* Die Zeitmarke steht IM Bild, nicht im Text: sie beantwortet die Frage
+ * „wo lande ich, wenn ich hier klicke" genau dort, wo geklickt wird. */
+.cc-podcast__marke {
+  position: absolute;
+  right: var(--cc-space-1);
+  bottom: var(--cc-space-1);
+  padding: 0.25rem var(--cc-space-1);
+  border-radius: var(--cc-radius-knopf);
+  background: var(--cc-dunkel);
+  color: var(--cc-grund);
+  font-size: var(--cc-fs-1);
+  line-height: 1.4;
+}
+
+.cc-podcast__ohne-skript {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: var(--cc-space-1);
+  background: var(--cc-dunkel);
+  color: var(--cc-grund);
+  font-size: var(--cc-fs-2);
+  text-align: center;
+}
+
+.cc-podcast__ganze {
+  display: inline-block;
+  margin-top: var(--cc-space-2);
+  color: var(--cc-gold-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.cc-podcast__ganze:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Die Ueberschrift des Abschnitts traegt sonst den Sektions-Vorlauf von 48px
+ * aus `.ProductPageKakao h2` — innerhalb einer Rasterzelle, die ohnehin schon
+ * an ihrem Nachbarn ausgerichtet ist, schiebt das die Spalte nach unten. */
+.cc-podcast__text h2 {
+  margin-block-start: 0;
+}
+
+/* Zwei Absaetze standen ohne Abstand untereinander und lasen sich wie einer
+ * (am Bildschirmfoto gesehen, nicht vermutet). `.ProductPageKakao p` setzt
+ * keinen Abstand — der kommt sonst aus dem Layout der jeweiligen Sektion, und
+ * dieses Raster hat keins. Abstand aus dem 8pt-Token, kein freier Wert. */
+.cc-podcast__text p + p {
+  margin-top: var(--cc-space-2);
 }
