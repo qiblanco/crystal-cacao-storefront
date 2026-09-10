@@ -994,31 +994,43 @@ aside .cart-details {
   .Header-AnnouncementBanner a {
     padding: 0.5rem 0.75rem;
   }
-}
-@media (max-width: 374px) {
-  /* SEHR SCHMALE GERAETE — 2026-09-03 (s06) korrigiert.
-   *
-   * VORHER: font-size 0.7rem = 11.2px, damit Zeile 1 ohne Ueberlauf in eine
-   * Zeile passt. Gemessen bei 360 px Viewport waren das 11.2 px und damit
-   * UNTER dem Lesbarkeitsboden, den web-soll.yaml als mobile_font_px_min 12
-   * fuehrt — auf jeder Seite, weil der Balken ueber jeder Seite steht.
-   * (Der Wert ist AELTER als dieses Segment; meine Aenderung der
-   * Grundgroesse hat ihn nicht verursacht — diese Regel ueberschreibt sie.)
-   *
-   * DIE ABWAEGUNG: die Zeile passt bei 12.8 px nicht mehr in eine Zeile.
-   * Statt die Schrift unter den Boden zu druecken, darf sie jetzt umbrechen —
-   * `.banner-line` gibt sein `nowrap` hier auf. Zwei kurze Zeilen sind
-   * lesbar, eine unlesbare ist es nicht. Der Umbruch faellt weiterhin
-   * zwischen die Sinneinheiten, weil `banner-offer-sep` schon ab 749 px
-   * ausgeblendet ist und die Einheiten Flex-Kinder sind. */
-  .Header-AnnouncementBanner a p {
-    font-size: var(--cc-fs-1, 0.8rem);
-  }
 
+  /* DER UMBRUCH WIRD HIER FREIGEGEBEN, NICHT ERST BEI 374 px — 2026-09-09,
+   * Job 20260909-REPAIR-startseite-kakao-h1-und-stimmen-gitter-...
+   *
+   * BEFUND: bei 390 px Fensterbreite und auf 24 px erhoehter Wurzelschrift
+   * lief der Balken 8 px aus dem Bild. Er war der letzte Taeter, der uebrig
+   * blieb, nachdem die H1 gedeckelt war — vorher stand er in deren Schatten.
+   *
+   * DIE WURZEL IST DIESELBE WIE BEI DER H1: eine harte Zusage ohne Rueckweg,
+   * deren Freigabe an einem BREAKPOINT haengt. `white-space: nowrap` galt bis
+   * 375 px, und diese Grenze kann die eingestellte Schriftgroesse baulich
+   * nicht sehen — die `em`/`px` einer Media Query rechnen gegen das Fenster,
+   * nicht gegen die Schrift. Wer gross liest, bekam auf einem 390-px-Telefon
+   * denselben unumbrechbaren Satz wie jemand mit Standardschrift.
+   *
+   * DIE ABWAEGUNG IST DIE GLEICHE, DIE 2026-09-03 SCHON GETROFFEN WURDE —
+   * "zwei kurze Zeilen sind lesbar, eine unlesbare ist es nicht" —, sie gilt
+   * nur fuer einen groesseren Bereich als damals gedacht. Der Umbruch faellt
+   * weiterhin zuerst ZWISCHEN die Sinneinheiten: `banner-offer-sep` ist ab
+   * 749 px ausgeblendet, und die beiden `.banner-line` sind Flex-Kinder eines
+   * umbrechenden Absatzes — es bricht also erst innerhalb einer Einheit, wenn
+   * die Einheit allein schon zu breit ist. Das ist der gewollte letzte
+   * Ausweg, nicht der Regelfall. */
   .Header-AnnouncementBanner .banner-line {
     white-space: normal;
   }
 }
+/* DER FRUEHERE SONDERFALL @media (max-width: 374px) IST ENTFALLEN — 2026-09-09.
+ * Er tat ab 2026-09-03 genau zwei Dinge: er setzte `font-size` auf
+ * var(--cc-fs-1) und gab `white-space` frei. Beides steht seit derselben
+ * Aenderung schon im Block darueber fuer die gesamte mobile Lage (<= 749 px),
+ * der Sonderfall war danach wirkungslos. Seine Begruendung gilt unveraendert
+ * weiter und ist dort nachzulesen: die Schrift wird NICHT unter den
+ * Lesbarkeitsboden mobile_font_px_min 12 aus web-soll.yaml gedrueckt (der
+ * fruehere Wert 0.7rem = 11.2 px lag darunter) — stattdessen darf die Zeile
+ * umbrechen. Zwei Regeln fuer dieselbe Zusage waeren zwei Stellen, die
+ * denselben Zustand fuehren; die falsche gewinnt dann still. */
 
 /* ==========================================================================
  * ANGLEICHUNG DER UEBRIGEN SEITEN AN DIE KAKAO-SEITEN — 2026-09-02, Segment s05
