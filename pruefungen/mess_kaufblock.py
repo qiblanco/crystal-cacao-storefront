@@ -32,6 +32,25 @@ import argparse
 import json
 import sys
 
+# SHOP-LANDKARTE STATT DOMAIN-LITERAL (Job 20260911-crystal-cacao-literale-auf-sm-url-
+# und-adoption-regex-prio30, REZEPT Abschnitt 2). crystal-cacao.com und qiblanco.com
+# sind BEIDE Hydrogen und tragen BEIDE `data-qb-region`; getrennt werden sie erst am
+# Marker `header-marke`. Ein Fehlgriff zwischen ihnen ist deshalb kein 404, sondern
+# ein stiller Shop-Wechsel mit HTTP 200 — und den kann eine Probe, die ihre Domain
+# TIPPT, baulich nicht bemerken. Der absolute Pfad ist Absicht: diese Datei liegt im
+# crystal-Storefront-Repo, die Landkarte ist die SSoT des Servers.
+sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+try:
+    import storefront_messung as sm          # noqa: E402
+except Exception as _sm_fehlt:               # Landkarte fehlt -> MESSAUSFALL, nie Befund
+    print("MESSAUSFALL: storefront_messung nicht ladbar (%s)" % _sm_fehlt,
+          file=sys.stderr)
+    raise SystemExit(4)
+
+SHOP = "crystal"
+BASIS_VORGABE = f"https://{sm.shop(SHOP).domain}"   # Domain aufloesen, nicht tippen
+
+
 BREITEN = [(390, 'telefon'), (768, 'tablet'), (1440, 'schreibtisch')]
 
 # Rollen im Kaufblock. Schluessel = Rolle, Wert = CSS-Selektor.
@@ -150,7 +169,7 @@ def ueberlappen(a, b):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('--basis', default='https://crystal-cacao.com')
+    p.add_argument('--basis', default=BASIS_VORGABE)
     p.add_argument('--pfad', default='/products/crystal-cacao-create')
     p.add_argument('--json', action='store_true')
     p.add_argument('--aufnahme-nach', default=None,

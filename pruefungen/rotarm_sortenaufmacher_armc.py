@@ -47,6 +47,25 @@ import subprocess
 import sys
 import tempfile
 
+# SHOP-LANDKARTE STATT DOMAIN-LITERAL (Job 20260911-crystal-cacao-literale-auf-sm-url-
+# und-adoption-regex-prio30). Derselbe Griff wie im Pruefgegenstand nebenan
+# (probe_sortenaufmacher.py): crystal und dach sind BEIDE Hydrogen mit
+# `data-qb-region` und werden erst am Marker `header-marke` getrennt.
+# WARUM HIER MIT, obwohl `adoption` diese Datei gar nicht sieht (ihr Abruf laeuft
+# ueber den Pruefgegenstand, `ABRUF` trifft sie nicht): ein Rot-Arm, der auf einen
+# ANDEREN Laden zeigt als sein Pruefgegenstand, belegt nichts -- und das Auseinander-
+# laufen der beiden waere still.
+sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+try:
+    import storefront_messung as sm          # noqa: E402
+except Exception as _sm_fehlt:               # Landkarte fehlt -> MESSAUSFALL, nie Befund
+    print("MESSAUSFALL: storefront_messung nicht ladbar (%s)" % _sm_fehlt,
+          file=sys.stderr)
+    raise SystemExit(4)
+
+BASIS_VORGABE = f"https://{sm.shop('crystal').domain}"   # Domain aufloesen, nicht tippen
+
+
 HIER = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HIER)
 PROBE = os.path.join(HIER, "probe_sortenaufmacher.py")
@@ -65,7 +84,7 @@ BEINE = [
 
 
 def main():
-    basis = sys.argv[1] if len(sys.argv) > 1 else "https://crystal-cacao.com"
+    basis = sys.argv[1] if len(sys.argv) > 1 else BASIS_VORGABE
     try:
         src = open(PROFIL, encoding="utf-8").read()
     except OSError as exc:

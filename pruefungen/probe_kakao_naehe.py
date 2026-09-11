@@ -59,7 +59,22 @@ SEITEN = [
     '/products/crystal-cacao-create',
 ]
 
-VORLAGE_BASIS = 'https://qiblanco.com'
+# SHOP-LANDKARTE STATT DOMAIN-LITERAL (Job 20260911-crystal-cacao-literale-auf-sm-url-
+# und-adoption-regex-prio30, REZEPT Abschnitt 2). Diese Probe vergleicht ZWEI Laeden;
+# genau hier ist ein Fehlgriff am teuersten: crystal und dach sind BEIDE Hydrogen und
+# tragen BEIDE `data-qb-region`, getrennt werden sie erst am Marker `header-marke`.
+# Eine getippte Domain kann diesen Wechsel baulich nicht bemerken — sie bekommt
+# HTTP 200 vom falschen Laden und meldet Drift, die es nicht gibt.
+sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+try:
+    import storefront_messung as sm          # noqa: E402
+except Exception as _sm_fehlt:               # Landkarte fehlt -> MESSAUSFALL, nie Befund
+    print("MESSAUSFALL: storefront_messung nicht ladbar (%s)" % _sm_fehlt,
+          file=sys.stderr)
+    raise SystemExit(4)
+
+VORLAGE_SHOP = "dach"
+VORLAGE_BASIS = f"https://{sm.shop(VORLAGE_SHOP).domain}"   # Domain aufloesen, nicht tippen
 CRYSTAL_BASIS_VORGABE = 'http://localhost:3399'
 
 # Der Pin. Siehe Kopf: ohne ihn misst man zwei Maerkte und nennt es Drift.
@@ -367,6 +382,7 @@ ABWEICHUNGEN = [
         'richtung': 'beide',
         'muster': None,   # wird durch Domain-Normalisierung behandelt
         'grund': 'K2-Adaption app/lib/seo.js: CANONICAL_ORIGIN steht auf '
+                 # sm-ausnahme: Prosa in der Begruendungs-Tabelle — zitiert den Wert der Storefront-Konstante CANONICAL_ORIGIN, kein Abrufziel dieses Programms
                  'https://crystal-cacao.com. Byte-gleich uebernommen truege JEDE '
                  'crystal-Seite einen Canonical auf qiblanco.com — Google wuerde '
                  'crystal-cacao.com dorthin konsolidieren und der Kakao-Laden '
@@ -626,8 +642,8 @@ def vergleiche(achse, v: list[str], c: list[str], benutzt: set,
                seite: str) -> list[str]:
     """Gibt die NICHT begruendeten Abweichungen zurueck."""
     nur_v, nur_c = [], []
-    sm = difflib.SequenceMatcher(None, v, c)
-    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+    vgl = difflib.SequenceMatcher(None, v, c)   # nicht `sm`: Bibliotheks-Alias
+    for tag, i1, i2, j1, j2 in vgl.get_opcodes():
         if tag == 'equal':
             continue
         for z in v[i1:i2]:

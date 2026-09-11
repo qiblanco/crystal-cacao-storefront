@@ -21,7 +21,8 @@ steht neben jeder Differenz die Grundmenge, aus der sie stammt, und ein
 fehlendes Element wird als FEHLT gedruckt statt als 0.
 
 AUFRUF
-  pruefungen/mess_sortenaufmacher.py --basis https://crystal-cacao.com
+  pruefungen/mess_sortenaufmacher.py [--basis <URL>]
+  (ohne --basis: der crystal-Rand aus der Shop-Landkarte)
   pruefungen/mess_sortenaufmacher.py --basis http://localhost:3399 --json
 
 EXIT
@@ -34,6 +35,25 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+
+# SHOP-LANDKARTE STATT DOMAIN-LITERAL (Job 20260911-crystal-cacao-literale-auf-sm-url-
+# und-adoption-regex-prio30, REZEPT Abschnitt 2). crystal-cacao.com und qiblanco.com
+# sind BEIDE Hydrogen und tragen BEIDE `data-qb-region`; getrennt werden sie erst am
+# Marker `header-marke`. Ein Fehlgriff zwischen ihnen ist deshalb kein 404, sondern
+# ein stiller Shop-Wechsel mit HTTP 200 — und den kann eine Probe, die ihre Domain
+# TIPPT, baulich nicht bemerken. Der absolute Pfad ist Absicht: diese Datei liegt im
+# crystal-Storefront-Repo, die Landkarte ist die SSoT des Servers.
+sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+try:
+    import storefront_messung as sm          # noqa: E402
+except Exception as _sm_fehlt:               # Landkarte fehlt -> MESSAUSFALL, nie Befund
+    print("MESSAUSFALL: storefront_messung nicht ladbar (%s)" % _sm_fehlt,
+          file=sys.stderr)
+    raise SystemExit(4)
+
+SHOP = "crystal"
+BASIS_VORGABE = f"https://{sm.shop(SHOP).domain}"   # Domain aufloesen, nicht tippen
+
 
 SORTEN = ("awake", "create")
 BREITEN = (("breit", 1440, 900), ("schmal", 390, 844))
@@ -149,7 +169,7 @@ def messe(basis, sorten=SORTEN, breiten=BREITEN):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--basis", default="https://crystal-cacao.com")
+    ap.add_argument("--basis", default=BASIS_VORGABE)
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--out", default=None, help="JSON zusaetzlich hierhin schreiben")
     args = ap.parse_args()

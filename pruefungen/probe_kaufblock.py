@@ -63,7 +63,8 @@ EXIT
      ausdruecklich NICHT 'sauber'
 
 AUFRUF
-  pruefungen/probe_kaufblock.py [--basis https://crystal-cacao.com]
+  pruefungen/probe_kaufblock.py [--basis <URL>]
+  (ohne --basis: der crystal-Rand aus der Shop-Landkarte)
   pruefungen/probe_kaufblock.py --rot-arm A   # Selbstpruefung: baut den
                                               # Defekt im Browser nach
 """
@@ -71,6 +72,25 @@ from __future__ import annotations
 
 import argparse
 import sys
+
+# SHOP-LANDKARTE STATT DOMAIN-LITERAL (Job 20260911-crystal-cacao-literale-auf-sm-url-
+# und-adoption-regex-prio30, REZEPT Abschnitt 2). crystal-cacao.com und qiblanco.com
+# sind BEIDE Hydrogen und tragen BEIDE `data-qb-region`; getrennt werden sie erst am
+# Marker `header-marke`. Ein Fehlgriff zwischen ihnen ist deshalb kein 404, sondern
+# ein stiller Shop-Wechsel mit HTTP 200 — und den kann eine Probe, die ihre Domain
+# TIPPT, baulich nicht bemerken. Der absolute Pfad ist Absicht: diese Datei liegt im
+# crystal-Storefront-Repo, die Landkarte ist die SSoT des Servers.
+sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+try:
+    import storefront_messung as sm          # noqa: E402
+except Exception as _sm_fehlt:               # Landkarte fehlt -> MESSAUSFALL, nie Befund
+    print("MESSAUSFALL: storefront_messung nicht ladbar (%s)" % _sm_fehlt,
+          file=sys.stderr)
+    raise SystemExit(4)
+
+SHOP = "crystal"
+BASIS_VORGABE = f"https://{sm.shop(SHOP).domain}"   # Domain aufloesen, nicht tippen
+
 
 PFADE = ['/products/crystal-cacao-create', '/products/crystal-cacao-awake']
 BREITEN = [390, 768, 1440]
@@ -277,7 +297,7 @@ def pruefe(page, url, breite, rot_arm):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--basis', default='https://crystal-cacao.com')
+    ap.add_argument('--basis', default=BASIS_VORGABE)
     ap.add_argument('--rot-arm', default=None, choices=list('ABCDEF'),
                     help='Selbstpruefung: baut den Defekt dieses Arms im Browser nach')
     ap.add_argument('--nur-pfad', default=None)

@@ -3,6 +3,7 @@
 """probe_sortenaufmacher — urteilt ueber den Sorten-Aufmacher der zwei Kaufseiten.
 
 Job 20260910-BAU-sortenbloecke-awake-und-create-leerer-bildschirm-ohne-aufgabe.
+# sm-ausnahme: Anlass-Prosa im Docstring -- Christians Befund, kein Abrufziel
 Christian, zu zwei Bildschirmaufnahmen von crystal-cacao.com: „Das ist optisch
 auch nicht gut gemacht, auch Crystal Cacao."
 
@@ -100,7 +101,8 @@ EXIT
      gruen; der Ausfall war der fremde Interpreter (siehe AUFRUF).
 
 AUFRUF
-  python3 pruefungen/probe_sortenaufmacher.py [--basis https://crystal-cacao.com]
+  python3 pruefungen/probe_sortenaufmacher.py [--basis <URL>]
+  (ohne --basis: der crystal-Rand aus der Shop-Landkarte)
   INTERPRETER IST /usr/bin/python3 (so faehrt der rt-Traeger): dort liegen
   Playwright UND Pillow. playwright-env/bin/pw-python traegt KEIN Pillow —
   Arm C ist dort baulich Messausfall, und die Probe sagt das jetzt VOR dem
@@ -127,6 +129,24 @@ import sys as _sys_ic
 if "/srv/openclaw/shared-state/tracking-linkage/src" not in _sys_ic.path:
     _sys_ic.path.insert(0, "/srv/openclaw/shared-state/tracking-linkage/src")
 import internal_client as _internal_client  # noqa: E402
+
+# SHOP-LANDKARTE STATT DOMAIN-LITERAL (Job 20260911-crystal-cacao-literale-auf-sm-url-
+# und-adoption-regex-prio30, REZEPT Abschnitt 2). crystal-cacao.com und qiblanco.com
+# sind BEIDE Hydrogen und tragen BEIDE `data-qb-region`; getrennt werden sie erst am
+# Marker `header-marke`. Ein Fehlgriff zwischen ihnen ist deshalb kein 404, sondern
+# ein stiller Shop-Wechsel mit HTTP 200. Der absolute Pfad ist Absicht: diese Datei
+# liegt im crystal-Storefront-Repo, die Landkarte ist die SSoT des Servers.
+sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+try:
+    import storefront_messung as sm          # noqa: E402
+except Exception as _sm_fehlt:               # Landkarte fehlt -> MESSAUSFALL, nie Befund
+    print("MESSAUSFALL: storefront_messung nicht ladbar (%s)" % _sm_fehlt,
+          file=sys.stderr)
+    raise SystemExit(4)
+
+SHOP = "crystal"
+BASIS_VORGABE = f"https://{sm.shop(SHOP).domain}"   # Domain aufloesen, nicht tippen
+
 
 SORTEN = ("awake", "create")
 
@@ -340,7 +360,7 @@ def messe(basis, fassung, breiten=BREITEN):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--basis", default=os.environ.get("CC_BASIS", "https://crystal-cacao.com"))
+    ap.add_argument("--basis", default=os.environ.get("CC_BASIS", BASIS_VORGABE))
     ap.add_argument("--repo", default=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     ap.add_argument("--fassung", default=None, choices=["neu", "bestand"],
                     help="bestand = Rot-Nachweis gegen den Zustand vor dem Umbau")
