@@ -106,6 +106,50 @@ const PFAD_JE_SORTE = Object.freeze(
  * Flaechen brauchen: die Kachel auf `/` und der Quer-Verweis im Aufmacher
  * der jeweils anderen Sorte. Zwei Kopien desselben Satzes waeren die
  * naechste Stelle, an der die zwei Sorten auseinanderlaufen.
+ *
+ * ------------------------------------------------------------------------
+ * `inhaltsstoffe` UND `herkunft` — DER REST DER KAUFSEITE, JE SORTE
+ * (Job 20260910-REPAIR-awake-und-create-sind-zwei-kopien-derselben-seite)
+ * ------------------------------------------------------------------------
+ * Awake.jsx und Create.jsx trugen bis zum 2026-09-11 je ~420 Zeilen, davon
+ * 351 woertlich gleich (82,8 %, difflib). Der Sorten-Aufmacher hatte davon
+ * schon EINEN Abschnitt geloest; der Rumpf stand weiter zweimal da. Jetzt
+ * rendert app/components/product-pages/SortenSeite.jsx den Rumpf EINMAL, und
+ * hier steht, was WIRKLICH je Sorte verschieden ist — nicht mehr:
+ *
+ *   inhaltsstoffe.liste   die fuenf Gehalte je 100 g (Theobromin 950 gegen
+ *                         1.050 mg, PEA 5 gegen 10 mg, ...) — Messwerte der
+ *                         Sorte, aus dem Bestand uebernommen, kein Zeichen
+ *                         geaendert.
+ *   inhaltsstoffe.fazit   der Schluss-Satz, der die Sorte aus ihrem Profil
+ *                         heraus beschreibt — Bestandstext.
+ *   inhaltsstoffe.bild    das erste der zwei Bilder (Frau / Armband-Motiv);
+ *                         das zweite (Kaffee) ist auf beiden Seiten dasselbe
+ *                         und steht deshalb im Bauteil, nicht hier.
+ *   inhaltsstoffe.bildSeite  'links' (Awake) / 'rechts' (Create): am
+ *                         Schreibtisch stehen die zwei Bilder bei Awake links
+ *                         vom Text, bei Create rechts. EHRLICH: dafuer gibt es
+ *                         keinen inhaltlichen Grund, die Seiten begegnen
+ *                         einander nie. Es bleibt ein Parameter, damit beide
+ *                         Seiten nach dem Zusammenlegen GENAU so aussehen wie
+ *                         vorher — den Bau dieses Jobs am Kundenrand als
+ *                         'unveraendert' nachzuweisen war wichtiger als eine
+ *                         Vereinheitlichung, die niemand verlangt hat. Wer sie
+ *                         will, aendert EIN Wort hier.
+ *   herkunft              drei Zeilen Text+Bild: die Herkunfts-Erzaehlung ist
+ *                         je Sorte eine andere (Piura-Tal gegen Departamento
+ *                         Amazonas, andere Bilder, andere Aromanoten).
+ *
+ * WAS NICHT HIER STEHT, weil es auf beiden Seiten zeichengleich war: die 24
+ * Mineralstoffe, der Ursprung (Montegrande), das Banner, die Belege, die
+ * FAQ, die Zubereitung. Das gehoert ins Bauteil.
+ *
+ * TEXTFORM: Absaetze sind Strings; **so** markierte Stellen rendert das
+ * Bauteil als <b>. Das ist bewusst KEIN HTML (kein dangerouslySetInnerHTML
+ * — Create.jsx hatte eines fuer Titel, die nie Markup trugen) und keine
+ * JSX-Datenstruktur (die gehoerte in eine .jsx-Datei und damit weg von
+ * hier). Jeder Absatz wird ein <p>. Der Wortlaut ist Bestand; er wurde am
+ * gelieferten HTML vor und nach dem Bau Zeichen fuer Zeichen verglichen.
  */
 export const SORTEN = Object.freeze({
   awake: Object.freeze({
@@ -117,6 +161,77 @@ export const SORTEN = Object.freeze({
     einordnung:
       'Gedacht für den Start in den Tag: morgens, vor dem Sport, ' +
       'vor einem langen Vormittag.',
+    inhaltsstoffe: Object.freeze({
+      bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06589_1.jpg?v=1764275150',
+      bildSeite: 'links',
+      liste: Object.freeze([
+        {
+          titel: 'Theobromin: 950 mg / 100g',
+          punkte: ['sanfte, ausgewogene Aktivierung', 'harmonisches 7,9:1-Verhältnis'],
+        },
+        {
+          titel: 'Phenylethylamin (PEA): 5 mg / 100g',
+          punkte: ['subtiler Impuls für Wohlgefühl'],
+        },
+        {
+          titel: 'Anandamid: 54 µg / 100g',
+          punkte: ['unterstützt Ruhe, Verbindung und innere Präsenz'],
+        },
+        {
+          titel: 'L-Tryptophan: 30 mg / 100g',
+          punkte: [
+            'höchste Menge aller Crystal Cacao® Sorten',
+            'Serotonin-Vorstufe für emotionale Ausgeglichenheit',
+          ],
+        },
+        {
+          titel: 'Polyphenole & Flavanole: 5.030 mg / 100g',
+          punkte: ['antioxidative Pflanzenstoffe für neuronale Balance'],
+        },
+      ]),
+      fazit:
+        '**Crystal Cacao® Awake** kombiniert sanfte Aktivierung mit dem ' +
+        '**höchsten L-Tryptophan-Gehalt aller Kristall Kakao® Sorten – für ' +
+        'präsente Klarheit, emotionale Tiefe und ein Gefühl innerer Weite.**',
+    }),
+    herkunft: Object.freeze([
+      {
+        absaetze: [
+          'Aus den **goldenen Flusstälern des Piura-Tals im Norden Perus** ' +
+            'stammt eine heilige Pflanze – in ihrer reinsten Form: unser ' +
+            'bio-zertifizierter **Awake – Kristall Kakao®.**',
+          'Die hellen Kakaobohnen aus dieser Region zählen zu den seltensten und ' +
+            'aromatischsten der Welt. Sie stammen aus nachhaltigem Anbau, werden ' +
+            'von lokalen Kleinbauern mit großer Sorgfalt geerntet und bewahren ' +
+            'durch ihre besondere Bohnenstruktur ein außergewöhnlich feines ' +
+            'Aromaprofil.',
+        ],
+        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/tal-kakao-awake.jpg?v=1764276290',
+      },
+      {
+        absaetze: [
+          'Schonend bei niedriger Temperatur vermahlen, gießen wir sie ' +
+            'anschließend in eine elegante, quadratische 420 g-Tafel – ein purer ' +
+            'Block **Bio Kristall Kakao®.**',
+          'Nach der Formung geben wir dem Kakao die Zeit, die er braucht: In ' +
+            'Ruhe kristallisiert er langsam aus und entfaltet dabei sein ' +
+            'charakteristisches Kristallmuster.',
+        ],
+        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC02183_1.jpg?v=1764259399',
+      },
+      {
+        absaetze: [
+          'Es ist ein Sinnbild für naturbelassene Qualität, aromatische Tiefe und ' +
+            'unsere tiefe Achtung vor dem Ursprung. Versiegelt im Aroma-Schutzpack ' +
+            'bleiben das volle Bouquet frischer Fruchtnoten, feiner Kokosnuancen ' +
+            'und alle wertvollen Bestandteile optimal bewahrt.',
+          '**Brich dir ein Stück ab, bereite ein warmes Elixier zu und tauche ein ' +
+            'in dein persönliches Ritual – mit Achtsamkeit, Herzöffnung und ' +
+            'tiefer Verbindung zu dir selbst.**',
+        ],
+        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01401.jpg?v=1766919672',
+      },
+    ]),
     wortmarke: Object.freeze({
       url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/Awake_Schriftzug.webp?v=1766482188',
       breite: 995,
@@ -138,6 +253,73 @@ export const SORTEN = Object.freeze({
     einordnung:
       'Gedacht für den klaren Kopf: lange Stunden am Schreibtisch, ' +
       'Arbeit, die Ruhe braucht.',
+    inhaltsstoffe: Object.freeze({
+      bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/bracelet-kakao-highlight.png?v=1764257247',
+      bildSeite: 'rechts',
+      liste: Object.freeze([
+        {
+          titel: 'Theobromin: 1.050 mg / 100g & Koffein: 140 mg / 100g',
+          punkte: ['stabile, langanhaltende Wachheit', 'natürliches 7,5:1-Verhältnis'],
+        },
+        {
+          titel: 'Phenylethylamin (PEA): 10 mg / 100g',
+          punkte: ['Teil des körpereigenen Motivationssystems.'],
+        },
+        {
+          titel: 'Anandamid: 61 µg / 100g',
+          punkte: ['das „Bliss Molecule" für ruhige, klare Präsenz.'],
+        },
+        {
+          titel: 'L-Tryptophan: 20 mg / 100g',
+          punkte: ['Serotonin-Vorstufe für emotionale Balance.'],
+        },
+        {
+          titel: 'Polyphenole & Flavanole: 5.620 mg / 100g',
+          punkte: ['antioxidative Pflanzenstoffe für kognitive Vitalität.'],
+        },
+      ]),
+      fazit:
+        '**Crystal Cacao® Create** enthält das ' +
+        '**stärkste aktivierende Profil aller Kristall Kakao® Sorten** – für ' +
+        '**sanfte Wachheit, kognitive Klarheit und stabile innere Ausrichtung.**',
+    }),
+    herkunft: Object.freeze([
+      {
+        absaetze: [
+          'Aus dem geheimnisvollen Amazonas bringen wir dir eine heilige Pflanze in ' +
+            'ihrer reinsten Form: unseren bio-zertifizierten ' +
+            '**Kristall Kakao® Create.** Diese besonderen Kakaobohnen stammen aus ' +
+            'nachhaltigem Anbau in den ' +
+            '**Bergwäldern des peruanischen Departamento Amazonas**. Sie werden ' +
+            'behutsam bei niedriger Temperatur vermahlen und anschließend in eine ' +
+            'elegante, quadratische 420 g-Tafel gegossen – ein purer Block ' +
+            '**Bio Kristall Kakao®.**',
+        ],
+        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01491_Kopie.webp?v=1759179615',
+      },
+      {
+        absaetze: [
+          'Nach der Formung geben wir dem Kakao die Zeit, die er braucht: In Ruhe ' +
+            'kristallisiert er langsam und entwickelt dabei sein charakteristisches ' +
+            'Kristallmuster – Sinnbild für naturbelassene Qualität, aromatische Tiefe ' +
+            'und unsere tiefe Achtung vor dem Ursprung.',
+        ],
+        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC02183_1.jpg?v=1764259399',
+      },
+      {
+        absaetze: [
+          'So entsteht unser unverwechselbarer **Kristall Kakao®** – mit ' +
+            'feiner Struktur, voller Kraft und lebendigem Geschmack. Versiegelt im ' +
+            'Aroma-Schutzpack bleiben das volle Bouquet tropischer Früchte, feiner ' +
+            'Kokosnoten und Zitrusnuancen sowie alle wertvollen Bestandteile ' +
+            'optimal bewahrt.',
+          '**Brich dir ein Stück ab, bereite ein warmes Elixier zu und tauche ein ' +
+            'in dein persönliches Ritual – voller Achtsamkeit, Herzöffnung und ' +
+            'tiefer Verbundenheit.**',
+        ],
+        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01953.jpg?v=1766919764',
+      },
+    ]),
     wortmarke: Object.freeze({
       url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/Create_Schriftzug_1.png?v=1766481502',
       breite: 950,
