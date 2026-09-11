@@ -1,4 +1,111 @@
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ÄNDERUNG 2026-09-11 (Job 20260911-BAU-videoumschaltung-seite-bricht-beim-
+ * play-klick-zusammen, Christian): ÜBERBLENDEN STATT ELEMENT-TAUSCH.
+ *
+ * Christian: „wenn man auf Play drückt, verschwindet zuerst alles Sichtbare,
+ * dann kommt was Schwarzes, und dann wird das Video geladen."
+ *
+ * Der Defekt stand hier in derselben Form wie im DACH-Laden: ein Ternär
+ * (`{laeuft ? <iframe/> : <button><img/></button>}`) hat die Vorschau
+ * ausgehängt und im selben Bildaufbau einen leeren Rahmen eingehängt.
+ * GEMESSEN VOR DEM UMBAU (bin/mess_videoumschaltung.py, live, 2026-09-11):
+ * crystal-cacao.com, vorschau_sichtbar_ms = 0, schwarz 195 ms.
+ *
+ * Jetzt bleibt die Vorschau als unterste Schicht liegen und der Player wird
+ * darüber eingeblendet, sobald er MELDET, dass er spielt. Bauform und
+ * Fristen sind dieselben wie in
+ * homepage-bauer/werkbank/qiblanco-storefront/app/components/reusables/
+ * YoutubeTimestamp.jsx — bewusst dieselben, damit beide Läden dasselbe tun.
+ *
+ * WARUM DER MELDER HIER EIGENS STEHT (und das keine Doppelung nach P10 ist):
+ * im DACH-Laden wird die Auskunft aus der bestehenden Watchtime-Erfassung
+ * durchgereicht (app/lib/video-watchtime.js). Dieser Laden hat KEINE
+ * Watchtime-Erfassung — es gibt hier nichts, woran man sich hängen könnte.
+ * Gebaut ist deshalb das kleinstmögliche Stück: ein Handschlag, ein
+ * `message`-Empfänger, ein Zustand. Kein zweites Skript, kein zusätzlicher
+ * Abruf; die YouTube-IFrame-API spricht über `postMessage` mit dem Player,
+ * der ohnehin geladen wird.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/* Wie lange nach `onLoad` noch auf die Auskunft gewartet wird. `onLoad` sagt
+ * nur, dass das Player-DOKUMENT da ist — nicht, dass Bild da ist. */
+const GNADENFRIST_MS = 900;
+/* Die Frist, die nicht ausfallen kann. Bliebe die Vorschau liegen, weil die
+ * Auskunft nie kommt, stünde ein Standbild über einem laufenden Video — das
+ * wäre schlimmer als der Fehler, der hier behoben wird. */
+const HARTE_FRIST_MS = 4000;
+const ZUSTAND_ABSPIELEND = 1;
+
+/**
+ * Fragt den YouTube-Player, wann er wirklich spielt.
+ *
+ * @param {HTMLIFrameElement} iframe  das eingebettete iframe (mit enablejsapi=1)
+ * @param {() => void} beiSpielt      genau einmal gerufen, wenn er spielt
+ * @returns {() => void} Abmelder
+ */
+function spielMelderAnbinden(iframe, beiSpielt) {
+  if (typeof window === 'undefined' || !iframe) return () => {};
+  let gemeldet = false;
+  let versuche = 0;
+  let takt = 0;
+
+  const aufNachricht = (ev) => {
+    /* Nur der eigene Player zählt: auf der Seite können weitere fremde
+     * Fenster sprechen, und ein `message` ohne Absenderprüfung ist eine
+     * offene Tür. */
+    if (!iframe.contentWindow || ev.source !== iframe.contentWindow) return;
+    let d;
+    try {
+      d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+    } catch {
+      return;
+    }
+    if (!d || typeof d !== 'object') return;
+    const info = d.info && typeof d.info === 'object' ? d.info : null;
+    const zustand =
+      d.event === 'onStateChange'
+        ? typeof d.info === 'number'
+          ? d.info
+          : info && info.playerState
+        : info && info.playerState;
+    if (zustand === ZUSTAND_ABSPIELEND && !gemeldet) {
+      gemeldet = true;
+      beiSpielt();
+    }
+  };
+
+  /* Der Player antwortet erst, wenn er zuhört — also ein paar Mal anklopfen
+   * und dann nicht mehr. Kein Dauer-Timer. */
+  const anklopfen = () => {
+    versuche += 1;
+    try {
+      const f = iframe.contentWindow;
+      if (f) {
+        const gruss = JSON.stringify({event: 'listening', id: 1, channel: 'widget'});
+        f.postMessage(gruss, 'https://www.youtube.com');
+        f.postMessage(gruss, 'https://www.youtube-nocookie.com');
+      }
+    } catch {
+      /* fremdes Fenster noch nicht bereit — beim nächsten Versuch wieder */
+    }
+    if (gemeldet || versuche >= 8) {
+      window.clearInterval(takt);
+      takt = 0;
+    }
+  };
+
+  window.addEventListener('message', aufNachricht);
+  anklopfen();
+  takt = window.setInterval(anklopfen, 700);
+  return () => {
+    window.removeEventListener('message', aufNachricht);
+    if (takt) window.clearInterval(takt);
+  };
+}
 
 /**
  * PodcastEinstieg — das Vorschaubild-mit-Einstiegsstelle fuer die Startseite.
@@ -99,7 +206,23 @@ export function PodcastEinstieg({
   children,
 }) {
   const [laeuft, setLaeuft] = useState(false);
+  /* `zeigt` ist NICHT „der Player existiert", sondern „der Player hat Bild".
+   * Der Unterschied zwischen beidem ist genau das Schwarz, um das es geht. */
+  const [zeigt, setZeigt] = useState(false);
+  const rahmen = useRef(null);
   const [stufe, setStufe] = useState(0);
+
+  useEffect(() => {
+    if (!laeuft || !rahmen.current) return undefined;
+    return spielMelderAnbinden(rahmen.current, () => setZeigt(true));
+  }, [laeuft]);
+
+  /* Die Frist, die nicht ausfallen kann — unabhängig von jeder Auskunft. */
+  useEffect(() => {
+    if (!laeuft || zeigt) return undefined;
+    const t = setTimeout(() => setZeigt(true), HARTE_FRIST_MS);
+    return () => clearTimeout(t);
+  }, [laeuft, zeigt]);
   const start = Math.max(0, Math.floor(startSekunde || 0));
   const [datei, breite, hoehe] = POSTER_STUFEN[stufe];
 
@@ -125,28 +248,49 @@ export function PodcastEinstieg({
   return (
     <section className="cc-podcast NormalSectionSize" aria-labelledby="cc-podcast-titel">
       <div className="cc-podcast__raster">
-        <div className="cc-podcast__buehne">
+        <div
+          className="cc-podcast__buehne"
+          data-qb-video-zustand={laeuft ? (zeigt ? 'spielt' : 'laedt') : 'vorschau'}
+        >
+          {/* SCHICHT 1 — die Vorschau. Sie wird NIE entfernt. Sie liegt auch
+              während des Ladens und danach unter dem Player: puffert er
+              später nach, fällt er auf ein Bild zurück statt auf Schwarz.
+              Sie kostet nichts, sie ist längst geladen. */}
+          <img
+            {...poster}
+            className="cc-podcast__fuellung"
+            alt=""
+            loading="lazy"
+            aria-hidden={laeuft ? 'true' : undefined}
+          />
+
+          {/* SCHICHT 2 — der Player. Erst ab dem Klick im Dokument (die
+              schlanke Ladeweise bleibt), sichtbar erst wenn er Bild hat. */}
           {laeuft ? (
             <iframe
+              ref={rahmen}
               className="cc-podcast__fuellung"
-              src={`https://www.youtube-nocookie.com/embed/${videoId}?start=${start}&autoplay=1`}
+              src={`https://www.youtube-nocookie.com/embed/${videoId}?start=${start}&autoplay=1&enablejsapi=1`}
               title={titel}
+              style={{opacity: zeigt ? 1 : 0, transition: 'opacity 240ms ease-out'}}
+              onLoad={() => setTimeout(() => setZeigt(true), GNADENFRIST_MS)}
               allow="autoplay; encrypted-media; picture-in-picture"
               allowFullScreen
             />
-          ) : (
+          ) : null}
+
+          {/* SCHICHT 3 — die Bedienung. Vor dem Klick der Knopf mit dem
+              Play-Zeichen; während des Ladens bleibt an derselben Stelle ein
+              Ladezeichen stehen: „wer klickt und eine Sekunde nichts sieht,
+              klickt nochmal" (Christian). Der Knopf selbst ist dann weg, er
+              läge sonst über dem Player und finge dessen Klicks ab. */}
+          {laeuft ? null : (
             <button
               type="button"
               className="cc-podcast__knopf"
               onClick={() => setLaeuft(true)}
               aria-label={`Podcast ab Minute ${minuteWort(start)} abspielen: ${titel}`}
             >
-              <img
-                {...poster}
-                className="cc-podcast__fuellung"
-                alt=""
-                loading="lazy"
-              />
               <span className="cc-podcast__play" aria-hidden="true">
                 <span className="cc-podcast__play-scheibe">▶</span>
               </span>
@@ -155,6 +299,13 @@ export function PodcastEinstieg({
               </span>
             </button>
           )}
+          {laeuft && !zeigt ? (
+            <span className="cc-podcast__play" aria-hidden="true">
+              <span className="cc-podcast__play-scheibe">
+                <span className="cc-video-spinner" />
+              </span>
+            </span>
+          ) : null}
           {/*
             OHNE AKTIVES SKRIPT passiert bei einem <button> nichts. Das ist
             eine echte Schwaeche der Fassade gegenueber einem festen <iframe>,
