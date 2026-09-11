@@ -2681,6 +2681,43 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 #cc-kaufen {
   scroll-margin-top: calc(72px + var(--cc-space-2));
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LADEZEICHEN DER VIDEO-EINBETTUNG
+   Job 20260911-BAU-videoumschaltung-seite-bricht-beim-play-klick-zusammen.
+
+   Christians dritte Bedingung: „Ein sichtbares Zeichen, dass etwas passiert."
+   Es sitzt in derselben Goldscheibe, in der vorher das Play-Dreieck stand —
+   also genau dort, wo der Zeiger beim Klick war. Die Groesse haengt an `1em`
+   und damit an der Schriftgroesse der Scheibe; sie skaliert mit, ohne eine
+   eigene Zahl zu brauchen. Gleiche Bauform wie `.qb-video-spinner` im
+   DACH-Laden — beide Laeden tun dasselbe.
+   ───────────────────────────────────────────────────────────────────────── */
+.cc-video-spinner {
+  display: block;
+  width: 1em;
+  height: 1em;
+  border: 0.14em solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: cc-video-dreh 720ms linear infinite;
+}
+
+@keyframes cc-video-dreh {
+  to { transform: rotate(360deg); }
+}
+
+/* Eine Dreh- oder Deckkraftbewegung IST Bewegung im Sinne der Einstellung.
+   Wer sie abbestellt hat, bekommt ein ruhendes Zeichen — sichtbar bleibt es,
+   denn seine Aufgabe ist die Sichtbarkeit, nicht die Animation. */
+@media (prefers-reduced-motion: reduce) {
+  .cc-video-spinner {
+    animation: none;
+    border-top-color: currentColor;
+    opacity: 0.55;
+  }
+  .cc-podcast__buehne iframe {
+    transition: none !important;
   }
 }
 
