@@ -26,11 +26,35 @@ ARME (jeder druckt seinen Marker; ein Rot-Nachweis nennt den Arm, nicht den Exit
      Menge {75 ml, 15 g}; (E2) die Menge aller VOLUMEN-Angaben der ganzen
      Seite ist genau {75 ml}, denn eine zweite Zubereitungsanweisung bringt
      immer ihre eigene Fluessigkeitsmenge mit.
+     (E3) der Zubereitungs-ABSCHNITT und die Zubereitungs-FAQ nennen DIESELBEN
+     Mengen — nicht nur je erlaubte; (E4) die Rechnung der Seite geht auf:
+     Tafelgewicht / Tagesdosis == die versprochene Zahl der Tage (420 / 15 = 28).
      WAS E NICHT MISST, damit niemand mehr hineinliest: die GRAMM-Angaben der
      ganzen Seite. 100 g (Naehrwerte), 420 g (Tafel) und die 5 bis 10 g der
      Empfindlichkeits-FAQ stehen dort zu Recht; ein globaler Gramm-Arm waere
-     ein Fluter. Gramm werden deshalb nur INNERHALB der Zubereitungs-Antwort
-     gemessen (E1), wo genau eine Dosierung hingehoert.
+     ein Fluter. Gramm werden deshalb nur dort gemessen, wo genau eine
+     Dosierung hingehoert: in der Zubereitungs-Antwort (E1) und im
+     Zubereitungs-Abschnitt (E3).
+     WARUM E3 UND E4 NACHTRAEGLICH DAZUKAMEN, und es ist der Ertrag einer
+     adversarialen Gegenpruefung (K3 P2, 2026-09-11): mit E1+E2 allein waere der
+     WAHRSCHEINLICHSTE Rueckfall unsichtbar geblieben — jemand setzt im
+     ABSCHNITT 15 g auf 25 g, laesst 75 ml stehen und ruehrt die FAQ nicht an.
+     Dann ist das Volumen weiter eindeutig (E2 gruen), die FAQ weiter in der
+     erlaubten Menge (E1 gruen), und die Seite ist wieder zweizuengig. E3 misst
+     deshalb die EINIGKEIT der zwei Aussagen statt zweimal ihre Zulaessigkeit.
+     E4 haengt die Dosis zusaetzlich an einen DRITTEN, unabhaengigen Zeugen:
+     "Fuer 28 Tage" kommt aus den Shopify-Produktdaten, nicht aus unserem Code —
+     eine in sich einige, aber falsche Dosis faellt dort auf.
+     EHRLICHE UEBERSCHNEIDUNG MIT ARM B, damit E3 niemand fuer mehr haelt als es
+     ist: den oben genannten 25-g-Rueckfall faengt B/gemeinsam bereits, weil es
+     den Zubereitungs-Satz als LITERAL fuehrt — gemessen, nicht vermutet. B ist
+     dabei aber an den WORTLAUT gebunden und geht auch bei einer harmlosen
+     Umformulierung rot, waehrend es ueber den SINN nichts weiss. Der eigene
+     Wert von E3/E4 liegt deshalb dort, wo die Zahlen sich einmal LEGITIM
+     aendern: dann muessen B und E1 von Hand neu gepinnt werden, E3 (Einigkeit
+     der zwei Aussagen) und E4 (Rechnung gegen die Shopify-Zusage) halten
+     dagegen ohne Zutun — und E4 ist der einzige Arm, der einen Zeugen
+     AUSSERHALB unseres Repos liest.
   C KLASSE  Der Abschnitt "Anwendung & Tageszeiten" (2026-09-10: 453 px,
             0 Ziele, 13,6 % Fuellgrad, in beiden Dateien zeichengleich) ist
             weg; die pruefbare Zubereitungs-Angabe (15 g / 75 ml / 85 °C)
@@ -69,6 +93,12 @@ WEG = ["Anwendung &amp; Tageszeiten", "Nachmittags:", "Sanftes Ausklingen des Ta
 # und die Produktbeschreibung ("Fuer 28 Tage") sagen alle 15 g / 75 ml / max. 85 °C.
 ZUB_ERLAUBT = {(75.0, "ml"), (15.0, "g")}
 ZUB_FRAGE = "zubereitet"   # Teilstring der FAQ-Frage, klein geschrieben verglichen
+# E3: der Zubereitungs-Abschnitt ist <h2>Zubereitung</h2> + folgender <p> (SortenSeite.jsx).
+ABSCHNITT_RX = re.compile(r"<h2[^>]*>\s*Zubereitung\s*</h2>\s*<p[^>]*>(.*?)</p>", re.S | re.I)
+# E4: die drei Zeugen der Rechnung. Tafel tolerant (Prosa "420 g-Tafel" und
+# Variantenzeile "1x 420g"), Tage aus der Shopify-Produktbeschreibung.
+TAFEL_RX = re.compile(r"(\d{2,4})\s*-?\s*g\s*-?\s*Tafel|(?:^|[^0-9])1\s*x\s*(\d{2,4})\s*g", re.I)
+TAGE_RX = re.compile(r"F\u00fcr\s+(\d{1,3})\s+Tage", re.I)
 MENGE_RX = re.compile(r"(\d+(?:[.,]\d+)?)\s*(ml|g)\b", re.I)
 BEREICH_RX = re.compile(r"(\d+(?:[.,]\d+)?)\s*(?:bis|-|–|—)\s*(\d+(?:[.,]\d+)?)\s*(ml|g)\b", re.I)
 
@@ -202,6 +232,38 @@ def main():
         ok &= arm(f"E/{sorte}/volumen", volumen == {75.0},
                   f"Volumen-Angaben der Seite: {sorted(volumen)} — erwartet genau [75.0]"
                   if volumen != {75.0} else "genau EIN Volumen auf der Seite: 75 ml")
+
+        # E3 — Abschnitt und FAQ muessen EINIG sein, nicht nur je zulaessig.
+        treffer = ABSCHNITT_RX.search(h)
+        if not treffer:
+            print(f"[MESSAUSFALL] {sorte}: kein <h2>Zubereitung</h2> + <p> im gelieferten HTML")
+            return 4
+        abschnitt = mengen(re.sub(r"<[^>]+>", " ", treffer.group(1)))
+        faq = mengen(antwort)
+        einig = abschnitt == faq
+        ok &= arm(f"E/{sorte}/einig", einig,
+                  f"Abschnitt {sorted(abschnitt)} vs FAQ {sorted(faq)} — zwei Zubereitungen"
+                  if not einig else f"Abschnitt und FAQ nennen dieselben Mengen {sorted(abschnitt)}")
+
+        # E4 — dritter Zeuge: Tafelgewicht / Tagesdosis == versprochene Tage.
+        tafel = {float(a or b) for a, b in TAFEL_RX.findall(h)}
+        tage = {float(t) for t in TAGE_RX.findall(h)}
+        dosis = {z for z, e in abschnitt if e == "g"}
+        if not tafel or not tage or not dosis:
+            print(f"[MESSAUSFALL] {sorte}: Rechnung nicht lesbar — Tafel {sorted(tafel)}, "
+                  f"Tage {sorted(tage)}, Dosis {sorted(dosis)}")
+            return 4
+        if len(tafel) > 1 or len(tage) > 1 or len(dosis) > 1:
+            ok &= arm(f"E/{sorte}/rechnung", False,
+                      f"mehrdeutige Zeugen: Tafel {sorted(tafel)}, Tage {sorted(tage)}, "
+                      f"Dosis {sorted(dosis)} — je genau EINE Angabe erwartet")
+        else:
+            t, d, n = tafel.pop(), dosis.pop(), tage.pop()
+            passt = abs(t / d - n) < 0.5
+            ok &= arm(f"E/{sorte}/rechnung", passt,
+                      f"{t:.0f} g / {d:.0f} g = {t / d:.2f}, versprochen sind {n:.0f} Tage"
+                      if not passt else
+                      f"Rechnung geht auf: {t:.0f} g / {d:.0f} g = {n:.0f} Tage")
     print("\nOK" if ok else "\nBEFUND")
     return 0 if ok else 1
 
