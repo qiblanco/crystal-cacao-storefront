@@ -28,7 +28,7 @@ export const FAQ_CACAO = [
   },
   {
     q: 'Wie wird zeremonieller Kakao zubereitet?',
-    a: 'Die Zubereitung von zeremoniellem Kakao ist unkompliziert und kann nach den ersten Versuchen zu einer natürlichen und sogar freudigen Praxis werden. Eine Kurzanleitung dazu: 1. Erwärmen von etwa 150 ml Wasser oder pflanzlicher Milch (z.B. Hafermilch). 2. Zerkleinern der Kakaomasse. 3. Abmessen von 20 bis 25g für eine Alltagstasse und 30g für eine rituelle Tasse. 4. Auflösen der Kakaomasse in der warmen Flüssigkeit. Rühren kann dabei helfen! 5. Je nach Vorliebe den Kakao mit verschiedenen Gewürzen verfeinern. 6. Zeit nehmen, den Kakao spüren und genießen.',
+    a: 'Die Zubereitung von zeremoniellem Kakao ist unkompliziert und kann nach den ersten Versuchen zu einer natürlichen und sogar freudigen Praxis werden. Eine Kurzanleitung dazu: 1. Erwärmen von etwa 75 ml Wasser oder pflanzlicher Milch (z.B. Hafermilch) auf maximal 85 °C. 2. Zerkleinern der Kakaomasse. 3. Abmessen von 15 g für eine Tasse. 4. Auflösen der Kakaomasse in der warmen Flüssigkeit. Rühren kann dabei helfen! 5. Je nach Vorliebe den Kakao mit verschiedenen Gewürzen verfeinern. 6. Zeit nehmen, den Kakao spüren und genießen.',
   },
   {
     q: 'Für wen ist Kakao (un)geeignet?',
