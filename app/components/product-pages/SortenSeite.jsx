@@ -44,7 +44,10 @@ import {sortenProfil} from '~/lib/sorten-profil';
  *        sichere Richtung. Es faellt dabei keine pruefbare Angabe weg.
  *
  * 2. DIE ZUBEREITUNGS-ZEILE ("15 g in 75 ml warmer Milch oder Wasser (max.
- *    85 °C)") BLEIBT, wortgleich. Sie ist eine PRUEFBARE Angabe, die einzige
+ *    85 °C)") BLEIBT. Genau: das Praefix "Zubereitung: " ist aus dem Absatz in
+ *    die Ueberschrift gewandert, die Angabe selbst ist unveraendert (Advisor-
+ *    Pruefung 2026-09-11 hat "wortgleich" zu Recht als zu scharf geruegt).
+ *    Sie ist eine PRUEFBARE Angabe, die einzige
  *    Dosierung auf der Kaufseite, und sie macht das "Fuer 28 Tage" der
  *    Produktbeschreibung nachrechenbar (420 g / 15 g = 28). Vor allem aber
  *    verspricht die Startseite sie: "Wie du ihn zubereitest und welche Sorte
@@ -53,7 +56,7 @@ import {sortenProfil} from '~/lib/sorten-profil';
  *    dieser Weg. Die Ueberschrift heisst jetzt "Zubereitung": "Anwendung &
  *    Tageszeiten" haette Inhalt angekuendigt, der nicht mehr da ist, und
  *    "Zubereitung" ist das Wort, das die Startseite fuer dieselbe Sache
- *    benutzt. Kein neuer Wortlaut ausser dieser Ueberschrift.
+ *    benutzt. Kein neuer Wortlaut — die Ueberschrift ist der alte Praefix.
  *
  * NICHT GETAN, und warum: die Zeile in die Vertrauensliste des Kaufblocks zu
  * ziehen (CacaoBenefitList in der Route) haette den Kaufblock veraendert, an
@@ -63,8 +66,12 @@ import {sortenProfil} from '~/lib/sorten-profil';
  * Fremd-Drift, eine geteilte Konstante war ohne Eingriff dort nicht zu haben).
  *
  * ======================================================================
- * ZWEI KLEINE, BEWUSSTE ABWEICHUNGEN VOM BESTAND (am Rand nachgemessen):
+ * DREI KLEINE, BEWUSSTE ABWEICHUNGEN VOM BESTAND (am Rand nachgemessen):
  * ======================================================================
+ * Massstab dabei ist der TEXTINHALT (textContent) und die Geometrie je
+ * Element, nicht das HTML-Byte: SSR setzt zwischen benachbarte Textknoten
+ * ein <!-- -->, und wo frueher {' '} stand, ist jetzt ein Knoten — ein
+ * Byte-Diff des HTML faellt also aus, ohne dass ein Zeichen anders waere.
  * - Create.jsx setzte die Inhaltsstoff-Titel per dangerouslySetInnerHTML,
  *   Awake.jsx als Text. Kein Titel traegt Markup; das DOM ist in beiden
  *   Faellen <b>Titel</b>. Jetzt ueberall Text — eine Angriffsflaeche weniger,
@@ -85,6 +92,8 @@ import {sortenProfil} from '~/lib/sorten-profil';
  * Rendert einen Absatz-String; **so** markierte Stellen werden <b>.
  * Kein HTML, kein dangerouslySetInnerHTML — die Texte kommen aus
  * sorten-profil.js und tragen ausser dieser einen Markierung nichts.
+ * Ein fehlendes zweites ** faellt hier lautlos durch (der Rest des Absatzes
+ * wuerde fett); deshalb prueft probe_sorten_eine_seite.py Arm D die Paare.
  */
 function Fett({text}) {
   const teile = text.split('**');
