@@ -57,6 +57,13 @@ export const KAKAO_PFADE = Object.freeze([
   '/products/crystal-cacao-create',
   '/products/crystal-cacao-awake',
   '/products/zeremonie-kakao',
+  // DIE ABSICHTSERKLAERUNG (2026-09-11, Job 20260911-BAU-absichtserklaerung-
+  // crystal-cacao-...): sie gehoert zur Kakao-Welt und traegt deshalb deren
+  // Vertrauensleiste (4,9 / 1.000 Nutzer), nicht die Qi-Blanco-Zahlen. Ohne
+  // diesen Eintrag stuende auf der Seite, die Christians Absicht erklaert,
+  // die Kennzahl der FREMDEN Produktwelt -- genau der Fehler, wegen dem diese
+  // Datei am 2026-08-24 entstanden ist.
+  '/pages/warum-crystal-cacao',
 ]);
 
 /**
@@ -126,6 +133,38 @@ export const KAKAO_KOLLEKTIONEN = Object.freeze([KAKAO_KOLLEKTION]);
  * (105 KB, 59 Fremdnennungen), nicht Kakao.
  */
 export const KAKAO_SEITEN = Object.freeze(['crystal-cacao', 'kristall-kakao']);
+
+/**
+ * SEITEN, DIE DIESE STOREFRONT SELBST ALS CODE FUEHRT — und die deshalb in
+ * die eigene Sitemap gehoeren.
+ *
+ * WARUM ES DIESE ZWEITE LISTE BRAUCHT UND SIE KEINE DUBLETTE VON KAKAO_SEITEN
+ * IST (gemessen 2026-09-11 an der eigenen Live-Sitemap):
+ * KAKAO_SEITEN ist ein FILTER auf einen fremden Bestand — der Sitemap-Zaun
+ * fragt die Shopify-`pages`-Query ab und laesst durch, was hier steht. Eine
+ * Seite, die es im Shopify-Admin GAR NICHT gibt, weil sie eine Route ist,
+ * kann dieser Filter baulich nie durchlassen: sie steht in keiner Antwort,
+ * die er filtert. Sie in KAKAO_SEITEN zu schreiben waere wirkungslos und
+ * saehe trotzdem nach Erledigung aus.
+ *
+ * DER ZUSTAND OHNE DIESE LISTE STAND AM 2026-09-11 LIVE DA: /sitemap/seiten/
+ * 1.xml fuehrte 9 Adressen — Startseite, eine Kollektion, sieben Produkte —
+ * und NULL Seiten, obwohl /pages/impressum und /pages/datenschutz seit dem
+ * 2026-09-10 mit HTTP 200 antworten. Beide sind Code-Routen. Keine Stelle
+ * haette das je gemeldet.
+ *
+ * WARUM IMPRESSUM UND DATENSCHUTZ TROTZDEM NICHT HIER STEHEN: eine Sitemap
+ * meldet an, was gefunden werden SOLL. Pflichtseiten sind ueber das Fussmenue
+ * von jeder Seite aus erreichbar und sollen keine Suchtreffer werden; sie
+ * fehlen hier also mit Absicht und nicht aus Versehen. Wer sie aufnehmen
+ * will, schreibt ihren Handle hierher — der Weg ist eine Zeile, die
+ * Entscheidung ist eine eigene.
+ *
+ * FORM: Handle ohne `/pages/`-Praefix, genau wie KAKAO_SEITEN. `lastmod`
+ * traegt keinen Wert — eine Code-Route hat kein Aenderungsdatum im Bestand,
+ * und ein erfundenes waere schlechter als keines.
+ */
+export const KAKAO_CODE_SEITEN = Object.freeze(['warum-crystal-cacao']);
 
 /**
  * SEITEN, DIE DAUERHAFT WOANDERS HIN ZEIGEN — Handle -> Ziel.
@@ -433,6 +472,19 @@ export function rechtstextTitel(handle, shopifyTitel) {
 export const KAKAO_FUSSMENUE = Object.freeze({
   id: 'kakao-fussmenue',
   items: Object.freeze([
+    {
+      id: 'kakao-absicht',
+      title: 'Warum es Crystal Cacao gibt',
+      // KEIN RECHTSTEXT ZWISCHEN RECHTSTEXTEN, und genau deshalb zuerst
+      // (2026-09-11): dieses Menue ist die EINZIGE Flaeche, die auf JEDER
+      // Seite dieses Ladens steht. Die Absichtserklaerung braucht das, weil
+      // eine Absicht, auf die nichts zeigt, nicht gefunden wird. Die drei
+      // gezielten Verweise (Startseite, beide Kaufseiten) stehen im INHALT
+      // und werden dort einzeln gemessen -- dieser hier ist der Boden, nicht
+      // der Nachweis.
+      url: '/pages/warum-crystal-cacao',
+      items: [],
+    },
     {
       id: 'kakao-impressum',
       title: 'Impressum',

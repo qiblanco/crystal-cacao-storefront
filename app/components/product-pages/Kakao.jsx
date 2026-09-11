@@ -1,5 +1,6 @@
 import LazyImage from '../reusables/LazyImage';
 import {Belege} from '../reusables/Belege';
+import {AbsichtHinweis} from '../reusables/AbsichtHinweis';
 import {KAKAO_KENNZAHLEN} from '~/lib/kakao-zone';
 import {ActiveCampaignForm} from '../reusables/ActiveCampaignForm';
 import {SwipeTable} from '../reusables/SwipeTable';
@@ -56,6 +57,10 @@ export function Kakao({stimmen = null, sorten = null, podcast = null} = {}) {
       <SideToSideWithTable />
       <ComparisonTable />
       <Belege id="cc-pruefdokumente" />
+      {/* Der Verweis steht DIREKT hinter den Pruefdokumenten und nicht am
+          Seitenende: wer gerade gesehen hat, dass es Analysen gibt, ist genau
+          der Leser, den die Frage „warum machen die das" erreicht. */}
+      <AbsichtHinweis id="cc-absicht-start" />
       {stimmen}
       <HerobannerWithText
         text="Wach. Klar. Im Flow."

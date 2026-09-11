@@ -2681,3 +2681,184 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 #cc-kaufen {
   scroll-margin-top: calc(72px + var(--cc-space-2));
 }
+  }
+}
+
+/* ===========================================================================
+ * DIE ABSICHTSERKLAERUNG — /pages/warum-crystal-cacao (2026-09-11, Job
+ * 20260911-BAU-absichtserklaerung-crystal-cacao-mineralmedizin-live-und-
+ * crawlbar) und ihr Verweis auf den drei Kundenflaechen.
+ *
+ * KEIN EINZIGER FREIER WERT IN DIESEM ABSCHNITT. Jede Groesse, jeder Abstand,
+ * jede Farbe und jeder Radius kommt aus den Token oben — Typo aus der
+ * modularen 1.25er-Skala (--cc-fs-1..7), Abstand aus dem 8pt-Raster
+ * (--cc-space-1..7), Farbe aus dem warmen Neutral-Kontinuum, und der EINE
+ * Goldton bleibt der eine. Das ist keine Formalie: die sechs Landingpages vom
+ * 2026-07-24 gingen mit 15 Schriftgroessen und ZWEI konkurrierenden Goldtoenen
+ * live und lasen sich danach „von AI gemacht". Ein Textdokument, dessen Zweck
+ * die Glaubwuerdigkeit einer Person ist, vertraegt genau das am wenigsten.
+ *
+ * WARUM HIER UND NICHT IN EINER EIGENEN DATEI: die Token stehen in DIESER
+ * Datei. Eine eigene Scope-Datei muesste sie entweder importieren (eine zweite
+ * Ladekette fuer fuenf Selektoren) oder eigene Werte fuehren — und damit
+ * begaenne genau die zweite Skala, die das Beauty-Gate verbietet.
+ * =========================================================================== */
+
+/* --- Die Seite selbst --- */
+
+/* Der Autorenblock. Er traegt die ganze Zurechenbarkeit dieser Seite: ohne ihn
+   ist der Text ein Werbetext, mit ihm die Aussage eines benannten Menschen.
+   Deshalb steht er UEBER dem Lead und nicht als Fussnote darunter. */
+.cc-absicht__urheber {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--cc-space-1) var(--cc-space-2);
+  margin: var(--cc-space-2) 0 var(--cc-space-4);
+  padding-bottom: var(--cc-space-2);
+  border-bottom: 1px solid var(--cc-linie);
+  font-size: var(--cc-fs-1);
+  color: var(--cc-muted);
+}
+
+.cc-absicht__autor {
+  font-size: var(--cc-fs-2);
+  font-weight: 600;
+  color: var(--cc-dunkel);
+}
+
+/* Zwei Angaben auf einer Zeile brauchen eine Trennung, die kein Zeichen ist —
+   ein Mittelpunkt waere ein weiteres Glyph in einer Zeile, die schon drei
+   Informationen traegt. */
+.cc-absicht__rolle::before,
+.cc-absicht time::before {
+  content: '·';
+  margin-right: var(--cc-space-1);
+  color: var(--cc-linie);
+}
+
+/* DIE ZWISCHENUEBERSCHRIFTEN EINES LESETEXTES SIND LINKSBUENDIG UND KLEINER
+   ALS DIE DER VERKAUFSSEITE — gemessen am ersten Live-Screenshot dieser Seite
+   (design-rubrik, 2026-09-11): `main h2` weiter oben in dieser Datei setzt
+   `--cc-fs-6` und `text-align: center`. Das ist auf der Startseite richtig,
+   wo jede Ueberschrift ein Plakat ist. Auf einer Seite mit 8.000 Zeichen
+   Fliesstext entsteht daraus ein Bruch, den man auf dem Bild sofort sieht:
+   der Text laeuft linksbuendig, die Ueberschrift springt in die Mitte, und
+   das Auge verliert bei jedem Abschnitt seine Zeilenanfangskante.
+   `--cc-fs-5` ist die Token-Stufe, die in der Skala oben woertlich mit
+   „H2 klein / Sektionstitel" beschriftet ist — hier wird also keine neue
+   Groesse erfunden, sondern die bereits vorgesehene benutzt.
+   SPEZIFITAET: `main .cc-absicht h2` (0-2-2) schlaegt `main h2` (0-1-1) ohne
+   `!important`. Ein `!important` waere hier die falsche Loesung — es
+   gewaenne auch gegen jede spaetere, absichtliche Regel. */
+main .cc-absicht h2 {
+  font-size: var(--cc-fs-5);
+  text-align: left;
+  text-wrap: balance;
+  margin-top: var(--cc-space-6);
+}
+
+main .cc-absicht section:first-of-type h2 {
+  margin-top: var(--cc-space-5);
+}
+
+/* Die H1 bleibt auf ihrer Stufe (--cc-fs-7), aber linksbuendig wie der Text
+   darunter: sie ist der Anfang einer Lesespalte, nicht die Mitte eines
+   Plakats. */
+main .cc-absicht h1 {
+  text-align: left;
+}
+
+.cc-absicht p {
+  line-height: 1.7;
+  margin-bottom: var(--cc-space-2);
+}
+
+/* DAS ZITAT IST DER KERN DER SEITE und wird deshalb auch optisch als Zitat
+   gefuehrt: eingerueckt, mit Goldkante links. Gold traegt hier BEWEIS im Sinne
+   der Designsprache — es ist der woertliche Satz des Gruenders und die einzige
+   Stelle, an der nicht wir sprechen. Kein zweiter Goldton, kein Fond: ein
+   farbig hinterlegter Kasten saehe aus wie ein Werbeversprechen. */
+.cc-absicht__zitat {
+  margin: var(--cc-space-4) 0;
+  padding: var(--cc-space-1) 0 var(--cc-space-1) var(--cc-space-3);
+  border-left: 3px solid var(--cc-gold);
+}
+
+.cc-absicht__zitat p {
+  font-size: var(--cc-fs-3);
+  line-height: 1.5;
+  color: var(--cc-dunkel);
+  margin-bottom: 0;
+}
+
+/* Die Absaetze, in denen der Text seine eigenen Grenzen benennt (fehlender
+   Vergleich, Alter der Dokumente). Sie werden LEISER gesetzt, nicht kleiner:
+   kleinere Schrift liest sich wie Kleingedrucktes, und Kleingedrucktes ist
+   genau die Form, in der man etwas versteckt. Dieselbe Groesse, ruhigerer
+   Ton — so sieht man, dass sie freiwillig dastehen. */
+.cc-absicht__ehrlich {
+  border-left: 1px solid var(--cc-linie);
+  padding-left: var(--cc-space-3);
+  color: var(--cc-muted);
+}
+
+.cc-absicht__unterschrift {
+  margin-top: var(--cc-space-6);
+  padding-top: var(--cc-space-3);
+  border-top: 1px solid var(--cc-linie);
+}
+
+.cc-absicht a {
+  color: var(--cc-gold-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --- Der Verweis auf den drei Kundenflaechen --- */
+
+.cc-absicht-hinweis {
+  max-width: var(--cc-zeile-max);
+  margin: var(--cc-space-6) auto;
+  padding: var(--cc-space-4);
+  background: var(--cc-flaeche);
+  border: 1px solid var(--cc-linie);
+  border-radius: var(--cc-radius-bild);
+  text-align: center;
+}
+
+.cc-absicht-hinweis__kicker {
+  font-size: var(--cc-fs-1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cc-muted);
+  margin-bottom: var(--cc-space-2);
+}
+
+.cc-absicht-hinweis__satz {
+  font-size: var(--cc-fs-4);
+  line-height: 1.4;
+  color: var(--cc-dunkel);
+  margin-bottom: var(--cc-space-1);
+}
+
+.cc-absicht-hinweis__wer {
+  font-size: var(--cc-fs-1);
+  color: var(--cc-muted);
+  margin-bottom: var(--cc-space-3);
+}
+
+/* Ein Textlink, kein Knopf — aber mit der Trefferflaeche eines Knopfes.
+   WCAG 2.5.5 AAA gilt auch fuer Links, und ein 16px hoher Link ist auf einem
+   Telefon nicht zuverlaessig zu treffen. */
+.cc-absicht-hinweis__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--cc-treffer-min);
+  padding: 0 var(--cc-space-1);
+  font-size: var(--cc-fs-2);
+  font-weight: 600;
+  color: var(--cc-gold-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
