@@ -14,9 +14,14 @@ import {Kakao} from '~/components/product-pages/Kakao';
 import {PodcastEinstieg} from '~/components/reusables/PodcastEinstieg';
 import {waehleFassung} from '~/lib/startseite-fassung';
 import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
-import {entityGraph, websiteSchema} from '~/lib/entity-schema';
+import {entityGraph, ORG_ID, websiteSchema} from '~/lib/entity-schema';
 import {MockShopNotice} from '~/components/MockShopNotice';
-import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
+import {
+  ABSENDER_MARKE,
+  KAKAO_KOLLEKTION,
+  markenOrganisation,
+  SORTEN_PFADE,
+} from '~/lib/kakao-zone';
 import {SORTEN} from '~/lib/sorten-profil';
 
 /**
@@ -84,32 +89,48 @@ export const meta = () => {
 };
 
 /**
- * Entitaets-Graph der Startseite mit dem richtigen Website-Namen.
+ * Entitaets-Graph der Startseite mit der richtigen MARKE — Website UND
+ * Organisation.
  *
- * websiteSchema() setzt `name` auf ORGANISATION.name, also 'Qi Blanco'. In der
- * Vorlage ist das richtig — dort heisst die Website so. Auf crystal-cacao.com
- * ist 'Qi Blanco' die FREMDE Absender-Marke; es ist exakt dieselbe Drift, die
- * am 2026-09-04 schon <title> und og:site_name der beiden Kaufseiten getroffen
- * hat (siehe CRYSTAL-ABWEICHUNG im Kopf von app/lib/produkt-seo.js). Die
- * Korrektur steht hier am Aufrufer, weil entity-schema.js K1 ist.
+ * ERSTE HAELFTE, seit 2026-09-10: websiteSchema() setzt `name` auf
+ * ORGANISATION.name, also 'Qi Blanco'. In der Vorlage ist das richtig — dort
+ * heisst die Website so. Auf crystal-cacao.com ist 'Qi Blanco' die FREMDE
+ * Absender-Marke; es ist exakt dieselbe Drift, die am 2026-09-04 schon <title>
+ * und og:site_name der beiden Kaufseiten getroffen hat (siehe
+ * CRYSTAL-ABWEICHUNG im Kopf von app/lib/produkt-seo.js).
  *
- * DIE ABGRENZUNG IST TRAGEND und dieselbe wie dort: korrigiert wird der Name
- * der WEBSITE, nicht die Organisation. Betreiberin von crystal-cacao.com IST
- * die Qi Blanco UG (haftungsbeschraenkt) — der Organization-Knoten bleibt
- * deshalb unveraendert, samt Anschrift, USt-IdNr. und sameAs. Die Website
- * heisst 'Crystal Cacao®' und wird von dieser Organisation herausgegeben;
- * genau das sagt `publisher` bereits, und es bleibt wahr.
+ * ZWEITE HAELFTE, ergaenzt 2026-09-11 vom Job
+ * 20260911-REPAIR-crystal-cacao-gibt-sich-als-qi-blanco-aus-…, Segment s03:
+ * DER ORGANIZATION-KNOTEN LAEUFT JETZT DURCH markenOrganisation(). An dieser
+ * Stelle stand bis heute der ausdrueckliche Zaun „der Organization-Knoten
+ * bleibt deshalb unveraendert, samt Anschrift, USt-IdNr. und sameAs" — er war
+ * BEWUSST gesetzt und wird nicht blind entfernt, sondern VERSCHOBEN: die
+ * Begruendung traegt fuer legalName, Anschrift, USt-IdNr., Handelsregister und
+ * offers.seller (Betreiberin und Verkaeuferin IST die Qi Blanco UG, daran
+ * aendert sich kein Zeichen) und sie traegt NICHT fuer `name` und `sameAs`.
+ * Gemessen am 2026-09-11 sagte dieser Knoten einer Suchmaschine woertlich
+ * „ich bin Qi Blanco": name='Qi Blanco' und sechs sameAs-Eintraege auf die
+ * Kanaele der Mutter. Die vollstaendige Herleitung samt Rueckweg steht an
+ * MARKE_EIGENSTAENDIG in app/lib/kakao-zone.js; die Entscheidungsvorlage in
+ * claude-jobs/20260911-REPAIR-crystal-cacao-…/KONZEPT-marken-identitaet-…md.
+ *
+ * DIE KORREKTUR STEHT WEITERHIN HIER AM AUFRUFER, weil entity-schema.js K1
+ * ist (shared/UPSTREAM.json) und byte-gleich zur Vorlage bleibt.
  */
 function startseitenGraph() {
   const graph = entityGraph();
   const seite = websiteSchema();
   return {
     ...graph,
-    '@graph': graph['@graph'].map((knoten) =>
-      knoten['@id'] === seite['@id']
-        ? {...knoten, name: ABSENDER_MARKE}
-        : knoten,
-    ),
+    '@graph': graph['@graph'].map((knoten) => {
+      if (knoten['@id'] === seite['@id']) {
+        return {...knoten, name: ABSENDER_MARKE};
+      }
+      if (knoten['@id'] === ORG_ID) {
+        return markenOrganisation(knoten, {origin: CANONICAL_ORIGIN});
+      }
+      return knoten;
+    }),
   };
 }
 

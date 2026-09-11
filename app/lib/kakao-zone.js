@@ -120,6 +120,199 @@ export const KAKAO_KOLLEKTION = 'zeremonie-kakao';
 export const ABSENDER_MARKE = 'Crystal Cacao®';
 
 /**
+ * IST CRYSTAL CACAO EINE EIGENE MARKE ODER EINE PRODUKTLINIE VON QI BLANCO?
+ * =========================================================================
+ * Diese eine Konstante trägt die Antwort — und sie ist der RÜCKWEG dieses
+ * Baus. `false` setzen und ausrollen stellt den Zustand vom 2026-09-11 her;
+ * es ist ein Handgriff plus Deploy, keine Neuimplementierung.
+ *
+ * ANLASS, am ausgelieferten HTML gemessen (2026-09-11, Job
+ * 20260911-REPAIR-crystal-cacao-gibt-sich-als-qi-blanco-aus-…, Segment s03):
+ * crystal-cacao.com sagte einer Suchmaschine wörtlich „ich bin Qi Blanco" —
+ * `Organization.name = 'Qi Blanco'`, `sameAs` mit den sechs Qi-Blanco-Kanälen
+ * und der Wikidata-Kennung der Mutter, und auf beiden Kaufseiten
+ * `Product.brand.name = 'Qi Blanco'` für ein Produkt namens „Crystal Cacao®".
+ *
+ * WARUM DER VORGÄNGER-ZAUN HIER VERSCHOBEN WIRD (Chesterton's Fence — er war
+ * bewusst gesetzt, und er wird nicht blind entfernt): app/routes/_index.jsx
+ * trägt seit dem 2026-09-10 die Begründung, der Organization-Knoten bleibe
+ * unverändert, weil die Betreiberin von crystal-cacao.com die Qi Blanco UG
+ * IST. Dieser Satz ist zur Hälfte richtig und zur Hälfte falsch, und genau
+ * diese Trennlinie ist der ganze Bau:
+ *   RICHTIG für `legalName`, `address`, `vatID`, das Handelsregister und für
+ *     `offers.seller` — Betreiberin und Verkäuferin IST die Qi Blanco UG.
+ *     Daran ändert sich kein Zeichen, das Impressum bleibt unberührt.
+ *   FALSCH für `name`, `sameAs` und die Wikidata-Kennung. `sameAs` heißt in
+ *     schema.org „dieselbe Entität, anderswo". An einem Knoten mit der Kennung
+ *     `crystal-cacao.com/#organization` behauptet es, die Organisation DIESES
+ *     Ladens SEI das Instagram-Konto @qiblanco. Das ist keine Herkunftsangabe,
+ *     sondern eine Gleichsetzung.
+ * Der Vorgänger hat die Unterscheidung zwischen RECHTSPERSON und MARKE für den
+ * WebSite-Namen bereits gezogen — nur nicht bis zum Organization-Knoten
+ * durchgehalten.
+ *
+ * DIE ZUGEHÖRIGKEIT WIRD NICHT VERSTECKT, sondern in das dafür vorgesehene
+ * Feld gelegt: `parentOrganization`. schema.org wörtlich: „The larger
+ * organization that this organization is a subOrganization of, if any"
+ * (Domain und Range je Organization, Inverse `subOrganization`).
+ *
+ * ENTSCHEIDUNGSVORLAGE: claude-jobs/20260911-REPAIR-crystal-cacao-…/
+ * KONZEPT-marken-identitaet-crystal-cacao.md (Weg 1 empfohlen und gebaut;
+ * Weg 2 = diese Konstante auf `false`).
+ */
+export const MARKE_EIGENSTAENDIG = true;
+
+/**
+ * Die Mutter — als KNOTEN-ZEIGER, nicht als Kopie ihrer Stammdaten.
+ *
+ * `@id` ist am 2026-09-11 an https://qiblanco.com/ nachgemessen und kein
+ * geratenes Fragment: die Startseite der Mutter liefert dort einen
+ * Organization-Knoten mit genau dieser Kennung. Ein `parentOrganization`, das
+ * auf einen nicht existierenden Knoten zeigt, wäre schlechter als keines.
+ *
+ * WARUM NUR EIN ZEIGER UND KEINE ZWEITE ADRESSE/USt-IdNr.: die Stammdaten der
+ * Mutter stehen an ihrem eigenen Knoten. Sie hier zu wiederholen hieße, zwei
+ * Quellen für dieselbe Angabe zu führen — genau der Fehler, gegen den der Kopf
+ * von app/lib/entity-schema.js argumentiert (zwei widersprechende NAP-Angaben
+ * sind für die Entitätsauflösung schlechter als gar keine).
+ *
+ * WARUM DAS LITERAL UND KEIN IMPORT: diese Datei ist importfrei und soll es
+ * bleiben (die im Dateikopf zugesagte Node-Testbarkeit hängt daran).
+ * qiblanco.com ist außerdem eine FREMDE Domain — sie steht in keiner Konstante
+ * dieses Ladens, und CANONICAL_ORIGIN ist hier `https://crystal-cacao.com`.
+ */
+export const MUTTER_ORGANISATION = Object.freeze({
+  name: 'Qi Blanco',
+  origin: 'https://qiblanco.com',
+  knotenId: 'https://qiblanco.com/#organization',
+});
+
+/**
+ * Das Bildzeichen dieser Marke, als WURZEL-RELATIVER Pfad.
+ *
+ * GEMESSENE LAGE, nicht angenommen: dieser Laden hat KEIN Wortmarken-Bild —
+ * Header.jsx rendert die Marke als Text. Das einzige eigene Bildzeichen mit
+ * STABILER Adresse ist public/apple-touch-icon.png (180×180, die aus der
+ * Verpackung abgeleitete Kakaobohne, angelegt 2026-09-08); live am
+ * 2026-09-11 geprüft: HTTP 200, image/png, 7.055 B.
+ *
+ * app/assets/favicon.svg scheidet aus, obwohl sie dasselbe Zeichen trägt: sie
+ * bekommt beim Bau einen Inhalts-Hash in den Namen und ist damit gerade keine
+ * stabile Logo-Adresse.
+ *
+ * EHRLICHE GRENZE: das ist ein ICON, keine Wortmarke. Es ist trotzdem richtig,
+ * es zu setzen statt das Feld wegzulassen — der Kopf von entity-schema.js
+ * begründet die Gegenrichtung („ein leeres logo-Feld ist ein kaputter Knoten,
+ * kein neutraler"), und ein vorhandenes Zeichen ist besser als keines. Kommt
+ * eine echte Wortmarke, wird hier EIN Pfad getauscht.
+ */
+export const MARKEN_LOGO_PFAD = '/apple-touch-icon.png';
+
+/**
+ * Macht aus dem Organization-Knoten der Vorlage den Knoten DIESER Marke.
+ *
+ * WARUM HIER UND NICHT IN app/lib/entity-schema.js: die Datei ist im
+ * Vendoring-Manifest (shared/UPSTREAM.json) als K1 geführt, also byte-gleich
+ * zur Qi-Blanco-Vorlage, und bleibt es. Wer sie editiert, bricht den
+ * Vorlagen-Nachzug. Der Anpassungspunkt ist deshalb der AUFRUFER — exakt der
+ * Weg, den der Vorgängerjob am 2026-09-10 für den WebSite-Namen gegangen ist.
+ *
+ * WAS SICH ÄNDERT (und nur das):
+ *   name                → die Marke dieses Ladens
+ *   sameAs              → FÄLLT WEG, nicht `[]`. Es gibt heute keine eigenen
+ *                         Crystal-Kanäle; ein leeres Array ist für eine
+ *                         Suchmaschine kein „wir haben keine", sondern ein
+ *                         kaputtes Feld (gleiche Regel wie beim logo, siehe
+ *                         entity-schema.js). Hier wird nichts erfunden.
+ *   identifier          → die Wikidata-Kennung der Mutter fällt, das
+ *                         Handelsregister bleibt. Begründung unten.
+ *   logo                → das eigene Bildzeichen
+ *   parentOrganization  → Zeiger auf die Mutter
+ * WAS BLEIBT: legalName, address, vatID, email, url, @id — und damit alles,
+ * was die Rechtsperson benennt.
+ *
+ * WARUM DIE WIKIDATA-KENNUNG MITGEHT, obwohl der Auftrag „identifier bleibt"
+ * sagt: `identifier` trägt live ZWEI Einträge. Der Handelsregister-Eintrag
+ * benennt die Rechtsperson und bleibt. Der zweite ist
+ * `{propertyID:'wikidata', value:'Q141070656'}` — die Entitätskennung von
+ * Qi Blanco, dieselbe Aussage wie der Wikidata-Eintrag in `sameAs`, nur in
+ * maschinenlesbarer Form; entity-schema.js sagt das selbst („die QID
+ * zusätzlich als maschinenlesbare Kennung"). `sameAs` zu räumen und die QID
+ * stehen zu lassen wäre die halbe Reparatur, die genau wie eine ganze
+ * aussieht. Gefiltert wird über die EIGENSCHAFT `propertyID = wikidata`, nicht
+ * über das QID-Literal: eine zweite Kennung der Mutter fiele damit von selbst
+ * mit, ohne dass jemand diese Datei anfasst.
+ *
+ * @param {object|null|undefined} knoten Organization-Knoten der Vorlage
+ * @param {{origin?: string}} [opt] `origin` dieses Ladens (für die Logo-URL)
+ * @returns {object|null|undefined} der Knoten dieser Marke
+ */
+export function markenOrganisation(knoten, {origin} = {}) {
+  if (!MARKE_EIGENSTAENDIG || !knoten || typeof knoten !== 'object') {
+    return knoten;
+  }
+  // sameAs wird ENTFERNT, nicht geleert — siehe oben.
+  const {sameAs: _fremdeKanaele, identifier, ...rest} = knoten;
+  const eigen = {
+    ...rest,
+    name: ABSENDER_MARKE,
+  };
+  const eigeneKennungen = (
+    Array.isArray(identifier) ? identifier : identifier ? [identifier] : []
+  ).filter(
+    (k) =>
+      !(
+        k &&
+        typeof k === 'object' &&
+        String(k.propertyID ?? '').toLowerCase() === 'wikidata'
+      ),
+  );
+  if (eigeneKennungen.length) eigen.identifier = eigeneKennungen;
+  else delete eigen.identifier;
+  if (origin) {
+    eigen.logo = {'@type': 'ImageObject', url: `${origin}${MARKEN_LOGO_PFAD}`};
+  }
+  eigen.parentOrganization = {
+    '@type': 'Organization',
+    '@id': MUTTER_ORGANISATION.knotenId,
+    name: MUTTER_ORGANISATION.name,
+    url: `${MUTTER_ORGANISATION.origin}/`,
+  };
+  return eigen;
+}
+
+/**
+ * Setzt die Marke DIESES Ladens in einen Product-Knoten.
+ *
+ * WARUM NICHT IN app/lib/produkt-schema.js: dieselbe Randbedingung wie oben —
+ * die Datei ist K1 und bleibt byte-gleich zur Vorlage. Sie setzt
+ * `brand.name = ORGANISATION.name`, also „Qi Blanco"; in der Qi-Blanco-Welt
+ * ist das richtig, auf einem Kakao-Laden ist es die fremde Marke.
+ *
+ * `offers.seller` WIRD AUSDRÜCKLICH NICHT ANGEFASST. Dass Marke und
+ * Verkäuferin auseinandergehen, ist der Punkt und kein Versehen: die Marke des
+ * Produkts ist Crystal Cacao®, verkauft wird es von der Qi Blanco UG
+ * (haftungsbeschränkt).
+ *
+ * @param {object|null|undefined} knoten Product-Knoten
+ * @returns {object|null|undefined}
+ */
+export function markenProdukt(knoten) {
+  if (!MARKE_EIGENSTAENDIG || !knoten || typeof knoten !== 'object') {
+    return knoten;
+  }
+  if (!knoten.brand) return knoten;
+  const marke = (m) =>
+    m && typeof m === 'object' ? {...m, name: ABSENDER_MARKE} : m;
+  return {
+    ...knoten,
+    brand: Array.isArray(knoten.brand)
+      ? knoten.brand.map(marke)
+      : marke(knoten.brand),
+  };
+}
+
+/**
  * Kollektions-Handles, die diese Storefront ausliefern darf.
  * Bewusst kurz: alles andere ist Fremdsortiment (gemessen standen unter
  * /collections die vier Qi-Blanco-Kollektionen frontpage, products,
