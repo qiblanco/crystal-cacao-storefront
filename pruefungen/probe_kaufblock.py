@@ -72,6 +72,16 @@ from __future__ import annotations
 import argparse
 import sys
 
+# Analyse-Einlieferungen des EIGENEN Zugriffs stummschalten (Job 20260911,
+# Christian: Helsinki nicht in den Besucherzahlen mitzaehlen). Bricht NUR
+# Analyse-Beacons ab (Shopify-monorail, Google, Meta) -- der Seitenabruf,
+# das DOM und der Kaufweg bleiben unberuehrt, und der Browser-UA bleibt
+# echt. SSoT: tracking-linkage/src/internal_client.py
+import sys as _sys_ic
+if "/srv/openclaw/shared-state/tracking-linkage/src" not in _sys_ic.path:
+    _sys_ic.path.insert(0, "/srv/openclaw/shared-state/tracking-linkage/src")
+import internal_client as _internal_client  # noqa: E402
+
 PFADE = ['/products/crystal-cacao-create', '/products/crystal-cacao-awake']
 BREITEN = [390, 768, 1440]
 
@@ -294,6 +304,7 @@ def main():
     with sync_playwright() as pw:
         b = pw.chromium.launch()
         page = b.new_context(locale='de-DE').new_page()
+        _internal_client.stumm_schalten(page)
         for pfad in pfade:
             for breite in BREITEN:
                 try:
