@@ -1568,10 +1568,14 @@ aside .cc-leerzustand .cc-knopf {
  * kein Funktionsverlust — der Weg zum Konto bleibt zwei Fingertipps entfernt.
  * Bewusst weiterhin KEIN overflow-x: hidden auf einem Vorfahren: das macht den
  * Ueberlauf unsichtbar statt weg und bricht position: sticky. */
+/* DIE .header-konto-REGEL IST AM 2026-09-09 ENTFALLEN, weil das Element
+ * entfallen ist: der Konto-Zugang wurde aus der Kopfzeile genommen (alle
+ * sechs Konto-Routen endeten in HTTP 500, die Kasse verlangt kein Konto).
+ * Der Kommentarblock darueber bleibt bewusst stehen — er erklaert, WARUM die
+ * Kopfzeile ueberhaupt schrumpfbar gebaut ist, und das gilt unveraendert.
+ * Eine Regel auf einen Selektor ohne Element waere dagegen genau der tote
+ * Code, der spaeter wie eine vergessene Bedingung aussieht. */
 @media (max-width: 47.99em) {
-  .header-ctas .header-konto {
-    display: none;
-  }
   .header {
     gap: var(--cc-space-1, 0.5rem);
     padding: 0 0.75rem;
@@ -1997,13 +2001,8 @@ main table {
   }
 }
 
-/* Der Konto-Eintrag verlaesst die Kopfzeile ueberall dort, wo der Burger
- * traegt — sonst faende ihn ein Tablet-Nutzer weder oben noch im Drawer. */
-@media (max-width: 63.99em) {
-  .header-ctas .header-konto {
-    display: none;
-  }
-}
+/* HIER STAND DIE ZWEITE .header-konto-REGEL (Tablet-Breite). Sie ist mit
+ * dem Element entfallen, 2026-09-09 — siehe Begruendung weiter oben. */
 
 /* Die Marke darf nicht mehr unter ihre Lesbarkeit schrumpfen. 9.5rem traegt
  * "Crystal Cacao®" bei --cc-fs-3 vollstaendig; darunter (320px-Geraete) kuerzt
@@ -2039,6 +2038,10 @@ main table {
   .header-marke > strong {
     font-size: var(--cc-fs-2, 1rem);
   }
+  /* Seit dem 2026-09-09 traegt die Kopfzeile nur noch den Menue-Schalter
+   * und den Warenkorb — die Schriftstufe wirkt hier praktisch nur noch auf
+   * das Abzeichen. Die Regel bleibt trotzdem allgemein: sie beschreibt die
+   * BREITE, nicht den heutigen Bestand an Schaltern. */
   .header-ctas a,
   .header-ctas button.reset {
     font-size: var(--cc-fs-1, 0.8rem);

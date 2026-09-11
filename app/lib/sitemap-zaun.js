@@ -49,6 +49,9 @@ import {
   KAKAO_SEITEN,
   KAKAO_BLOGS,
   UMGELEITETE_SEITEN,
+  UMGELEITETE_PRODUKTE,
+  istTestartefakt,
+  titelSchluessel,
 } from '~/lib/kakao-zone';
 
 /** Wieviele Produkte höchstens gezogen werden. Deckelt die Antwort, entscheidet nichts. */
@@ -60,6 +63,8 @@ const SITEMAP_PRODUKTE_QUERY = `#graphql
       products(first: $first) {
         nodes {
           handle
+          title
+          createdAt
           updatedAt
         }
       }
@@ -201,7 +206,55 @@ export async function sitemapSeiten({storefront, origin}) {
   } catch (fehler) {
     console.error('sitemap: Produkt-Abfrage fehlgeschlagen', fehler);
   }
-  for (const produkt of produkte) {
+  //    ZWEI EIGENSCHAFTS-ZÄUNE STEHEN HIER — ANLASS 2026-09-09, gemessen an der
+  //    eigenen Sitemap: sie meldete elf Adressen an, zwei davon falsch, nämlich
+  //    `/products/test-page-…-spater-wieder-loschen` (ein Testartefakt, das
+  //    seinen Zweck im Titel nennt) und `/products/crystal-cacao-adfiefiale`
+  //    (eine Dublette der Create-Kaufseite unter einem Müll-Handle). Beide sind
+  //    Mitglied der Kollektion und veröffentlicht — die Mitgliedschaft allein
+  //    trägt die Auswahl also NICHT.
+  //
+  //    WARUM DER ZAUN HIER STEHT UND NICHT IM SHOPIFY-BESTAND: dort wäre er
+  //    richtiger, und genau das wurde zuerst versucht und GEMESSEN VERWORFEN.
+  //    Beide Bestandswege treffen zwangsläufig qiblanco.com mit:
+  //      * Kanalentzug: unmöglich. Ausschlussbeweis am 2026-09-09 gefahren —
+  //        nach Entzug von `crystal-cacao-storefront`, `Microsoft Copilot` und
+  //        `Meta` blieb nur `Main Qi Blanco Storefront`, und die Storefront-API
+  //        unter DIESEM Token sah das Produkt weiter. Der Token dieses Ladens
+  //        hängt an derselben Publikation wie der DACH-Shop.
+  //      * Kollektionsentzug: wirkt sichtbar auf DACH —
+  //        qiblanco.com/collections/zeremonie-kakao listet beide Müllprodukte
+  //        im ausgelieferten HTML.
+  //    Der Auftrag verbietet beides („qiblanco.com wird nicht angefasst") und
+  //    erlaubt für genau diesen Fall den Weg hierher.
+  //
+  //    WARUM EIGENSCHAFT UND NICHT HANDLE-LISTE: ein Zaun aus zwei Namen fängt
+  //    genau diese zwei und beim nächsten Müll-Handle nichts. Gezäunt wird
+  //    deshalb an dem, was die Produkte WIRKLICH auszeichnet.
+  const gesehen = new Map();
+  // Die Kanonische unter Gleichnamigen ist die ÄLTESTE: das Original stand
+  // zuerst da, die Dublette kam später. Am echten Fall: die Create-Kaufseite
+  // stammt vom 2023-10-20, `crystal-cacao-adfiefiale` vom 2025-12-21. Nach
+  // Alter zu entscheiden ist stabil gegen die Reihenfolge, in der Shopify die
+  // Kollektion zurückgibt — eine Auswahl „die erste gewinnt" hinge an einer
+  // Sortierung, die ein Admin-Klick ändern kann.
+  const nachAlter = [...produkte].sort((a, b) =>
+    String(a.createdAt ?? '').localeCompare(String(b.createdAt ?? '')),
+  );
+  for (const produkt of nachAlter) {
+    // (a) Eine Adresse, die dauerhaft weiterleitet, gehört nicht in die eigene
+    //     Sitemap — dieselbe Regel wie oben bei den Seiten.
+    if (produkt.handle in UMGELEITETE_PRODUKTE) continue;
+    // (b) Testartefakt: sagt seinen Zweck im eigenen Titel an.
+    if (istTestartefakt(produkt.title)) continue;
+    // (c) Dublette: derselbe Inhalt unter einer zweiten Adresse. Die schwächere
+    //     Adresse zieht Ranking-Signal von der starken ab — Suchmaschinen
+    //     müssen raten, welche die echte ist.
+    const schluessel = titelSchluessel(produkt.title);
+    if (schluessel) {
+      if (gesehen.has(schluessel)) continue;
+      gesehen.set(schluessel, produkt.handle);
+    }
     eintraege.push(
       urlEintrag({
         loc: `${origin}/products/${produkt.handle}`,

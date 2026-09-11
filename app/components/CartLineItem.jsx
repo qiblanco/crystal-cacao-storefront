@@ -3,6 +3,7 @@ import {useVariantUrl} from '~/lib/variants';
 import {Link} from 'react-router';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
+import {getCartLinePriceDisplayExact} from '~/lib/cart-display-pricing';
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -22,6 +23,20 @@ export function CartLineItem({layout, line, childrenMap}) {
   const {close} = useAside();
   const lineItemChildren = childrenMap[id];
   const childrenLabelId = `cart-line-children-${id}`;
+  // BRUTTO STATT NETTO — 2026-09-09, Christian: „In der Ansicht steht ja schon
+  // korrekt 76 EUR, aber dann im Warenkorb stimmt es leider nicht."
+  //
+  // Hier stand `line?.cost?.totalAmount`. Das ist der ROHE Betrag der
+  // Storefront-API, und der ist bei diesem Shop NETTO (`taxes_included=false`):
+  // gemessen 71,03 EUR fuer eine Packung, die auf der Kaufseite 76,- EUR
+  // kostet. Der Umrechner dafuer lag die ganze Zeit im Repo
+  // (app/lib/cart-display-pricing.js) — er hatte in dieser Fassung des Ladens
+  // nur KEINEN EINZIGEN AUFRUFER, waehrend dieselbe Komponente auf
+  // qiblanco.com ihn aufruft und deshalb korrekt 76,- EUR zeigt.
+  // Hier wird deshalb NICHT gerechnet und NICHT formatiert, sondern der
+  // vorhandene Kanon gefragt — sonst laufen die beiden Zahlen beim naechsten
+  // Mal wieder auseinander.
+  const anzeigePreis = getCartLinePriceDisplayExact(line);
 
   return (
     <li key={id} className="cart-line">
@@ -51,7 +66,7 @@ export function CartLineItem({layout, line, childrenMap}) {
               <strong>{product.title}</strong>
             </p>
           </Link>
-          <ProductPrice price={line?.cost?.totalAmount} />
+          <ProductPrice price={anzeigePreis.price} />
           <ul>
             {selectedOptions.map((option) => (
               <li key={option.name}>

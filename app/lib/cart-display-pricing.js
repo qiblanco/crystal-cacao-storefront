@@ -74,20 +74,88 @@ export function getCartLinePriceDisplay(line) {
   };
 }
 
-export function getCartLineGrossDisplayTotal(line) {
+/**
+ * DER UNGERUNDETE BRUTTO-ZEILENBETRAG — die EINZIGE Stelle, an der in dieser
+ * Datei gerechnet wird. Beide oeffentlichen Funktionen unten runden nur noch;
+ * keine von ihnen rechnet ein zweites Mal.
+ *
+ * WARUM DAS AM 2026-09-09 AUSEINANDERGEZOGEN WURDE (Christian, an
+ * crystal-cacao.com): „In der Ansicht steht ja schon korrekt 76 EUR, aber dann
+ * im Warenkorb stimmt es leider nicht." Der Warenkorb dieses Ladens zeigte
+ * 71,03 EUR — den NETTO-Betrag aus der Storefront-API. Diese Datei lag dabei
+ * unveraendert im Repo und war fehlerfrei; sie hatte nur KEINEN Aufrufer
+ * (CartLineItem und CartSummary rendern in dieser Fassung des Ladens die rohen
+ * API-Betraege). Der Aufruf ist jetzt da, und zwar cent-genau:
+ *
+ * WARUM CENT UND NICHT GANZE EURO: der Warenkorb dieses Ladens ist per Bauform
+ * cent-genau (siehe Kopf von app/components/Preis.jsx: „hier MIT [Cent], weil
+ * ein Warenkorb centgenau ist"), und die Kasse ist die einzige Flaeche, die
+ * wir nicht aendern koennen — sie belastet den Cent-Betrag. Gemessen am
+ * 2026-09-09 fuer Awake, Menge 3: Netto-Zeilensumme 149,19 EUR, Kasse
+ * 149,19 + 10,44 MwSt = 159,63 EUR. `Math.round` haette 160 angezeigt.
+ *
+ * WARUM DIE STEUER UEBERHAUPT HIER GERECHNET WIRD und nicht von Shopify kommt:
+ * die Cart-API liefert sie nicht, solange keine Bestellung entsteht. Gemessen
+ * am 2026-09-09 gegen qi-blanco.myshopify.com, beide Male EUR:
+ *   ohne Adresse         -> totalTaxAmount: null, totalAmount == subtotal
+ *   mit DE-Lieferadresse -> totalTaxAmount: null, totalAmount == subtotal
+ * Der Satz muss deshalb von uns kommen. Genau das tut diese Datei seit jeher.
+ *
+ * @param {object} line Cart-Zeile
+ * @returns {number} Brutto, UNGERUNDET (EUR) bzw. Endbetrag (andere Waehrung)
+ */
+function bruttoZeileRoh(line) {
   // M3: Nicht-EUR-Maerkte (Shopify Markets, CHF/USD/GBP): der Cart-Betrag
   // IST der Endbetrag (belegt: Cart-API == @inContext, keine Steuer-Zeile)
-  // — keine deutsche MwSt aufschlagen, nur Warenkorb-Kanon-Rundung.
+  // — keine deutsche MwSt aufschlagen.
   const net = parseFloat(line?.cost?.totalAmount?.amount ?? '0');
   if (!Number.isFinite(net)) return 0;
 
   if (getCurrencyCode(line) !== 'EUR') {
-    return Math.round(net);
+    return net;
   }
 
   if (SALE_CACAO_HANDLES.has(getProductHandle(line))) {
     return SALE_CACAO_UNIT_GROSS_PRICE * getLineQuantity(line);
   }
 
-  return Math.round(net * (1 + getCartLineTaxRate(line)));
+  return net * (1 + getCartLineTaxRate(line));
+}
+
+/**
+ * Cent-genauer Brutto-Zeilenbetrag — der Betrag, den die Kasse belastet.
+ * @param {object} line
+ * @returns {number}
+ */
+export function getCartLineGrossDisplayTotalExact(line) {
+  return Math.round(bruttoZeileRoh(line) * 100) / 100;
+}
+
+/**
+ * Cent-genaue Preis-Anzeige einer Cart-Zeile (Aufrufform wie
+ * getCartLinePriceDisplay, nur ohne die Ganz-Euro-Rundung).
+ * @param {object} line
+ */
+export function getCartLinePriceDisplayExact(line) {
+  return {
+    price: {
+      amount: getCartLineGrossDisplayTotalExact(line).toFixed(2),
+      currencyCode: getCurrencyCode(line),
+    },
+    taxRate: 0,
+  };
+}
+
+/**
+ * BESTAND, unveraendert im Verhalten: Brutto-Zeilenbetrag auf ganze Euro
+ * gerundet (Warenkorb-Kanon von qiblanco.com). Rundet nur — gerechnet wird
+ * ausschliesslich in bruttoZeileRoh(), damit die beiden Fassungen nicht
+ * auseinanderlaufen koennen. Bewusst NICHT ueber die Cent-Fassung gefuehrt:
+ * zweimal zu runden verschoebe das Ergebnis im Band [x,495 .. x,50) um einen
+ * ganzen Euro gegenueber dem Bestand.
+ * @param {object} line
+ * @returns {number}
+ */
+export function getCartLineGrossDisplayTotal(line) {
+  return Math.round(bruttoZeileRoh(line));
 }

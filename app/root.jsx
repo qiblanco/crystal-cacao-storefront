@@ -202,16 +202,24 @@ async function loadCriticalData({context}) {
  * @param {Route.LoaderArgs}
  */
 function loadDeferredData({context}) {
-  const {storefront, customerAccount, cart} = context;
+  const {cart} = context;
 
   // SORTIMENTS-ZAUN: die Fußzeilen-Abfrage entfällt vollständig. Sie holte das
   // Shopify-Menü `footer` des Fremdshops samt Links auf checkout.qiblanco.com;
   // die Fußzeile rendert jetzt KAKAO_FUSSMENUE aus app/lib/kakao-zone.js.
   // `footer` bleibt als aufgelöstes null im Vertrag, damit PageLayout und
   // Footer unverändert weiterlaufen (beide warten ohnehin auf ein Promise).
+  // `isLoggedIn` IST HIER AM 2026-09-09 ENTFALLEN, und nicht nur, weil
+  // niemand es mehr liest. `customerAccount.isLoggedIn()` liefert ohne
+  // Zugangsdaten fuer die Customer Account API ein Promise, das ABLEHNT
+  // ("[h2:error:customerAccount] You do not have the valid credential").
+  // Solange die Kopfzeile es in einem <Await> mit errorElement auffing, war
+  // das folgenlos; ohne Leser waere daraus auf JEDER Seite eine unbehandelte
+  // Ablehnung im gestreamten Antwortstrom geworden. Ein weggenommener
+  // Verbraucher macht eine fehlerhafte Quelle nicht harmlos — er nimmt ihr
+  // nur den Faenger.
   return {
     cart: cart.get(),
-    isLoggedIn: customerAccount.isLoggedIn(),
     footer: Promise.resolve(null),
   };
 }
@@ -247,6 +255,17 @@ export function Layout({children}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        {/*
+          MASCHINENLESBARER NUTZUNGSVORBEHALT, sitewide (44b Abs. 3 UrhG).
+          Job 20260910-crystal-cacao-hat-kein-impressum; Vorbild fuer die
+          Platzierung ist dieselbe Zeile in app/root.jsx des Schwester-Ladens:
+          eine sitewide Kopfzeile gehoert in dieses Layout, nicht in jede
+          Route. Der gleichnamige HTTP-Header sitzt bei uns wie dort auf den
+          beiden .well-known-Routen, NICHT auf "/" -- wer die Abdeckung am
+          Header von "/" misst, meldet faelschlich "Vorbehalt weg". Die
+          sitewide Traeger sind robots.txt, tdmrep.json und dieses meta.
+        */}
+        <meta name="tdm-reservation" content="1" />
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <link rel="stylesheet" href={kakaoStyles}></link>
@@ -445,7 +464,6 @@ export function ErrorBoundary() {
         cart={rootData?.cart}
         footer={rootData?.footer}
         header={rootData?.header}
-        isLoggedIn={rootData?.isLoggedIn}
         publicStoreDomain={rootData?.publicStoreDomain ?? ''}
       >
         {inhalt}

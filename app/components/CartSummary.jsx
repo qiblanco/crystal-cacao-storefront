@@ -1,5 +1,6 @@
 import {CartForm} from '@shopify/hydrogen';
 import {Preis} from './Preis';
+import {getCartLineGrossDisplayTotalExact} from '~/lib/cart-display-pricing';
 import {useEffect, useId, useRef, useState} from 'react';
 import {useFetcher} from 'react-router';
 
@@ -15,6 +16,28 @@ export function CartSummary({cart, layout}) {
   const giftCardHeadingId = useId();
   const giftCardInputId = useId();
 
+  // ZWISCHENSUMME BRUTTO — 2026-09-09. Hier stand `cart.cost.subtotalAmount`,
+  // und das ist bei diesem Shop der NETTO-Betrag: gemessen 71,03 EUR fuer eine
+  // Packung mit 76,- EUR Kaufseitenpreis, 149,19 EUR fuer drei. Zur selben
+  // Sekunde zeigte die Kasse 149,19 + 10,44 MwSt = 159,63 EUR.
+  //
+  // DIE NAHT ZU CartMain, und sie ist der Grund fuer den Filter: `lines.nodes`
+  // enthaelt auch KIND-Zeilen (componentizable lines / Buendel). CartMain
+  // ueberspringt sie beim Rendern ueber genau dieses Praedikat und zeigt sie
+  // stattdessen unter ihrer Elternzeile. Der Elternbetrag enthaelt sie bereits
+  // — wer hier ungefiltert summiert, zaehlt ein Buendel doppelt. Das Praedikat
+  // ist woertlich dasselbe wie in CartMain; laeuft es dort auseinander, ist die
+  // Zwischensumme still falsch.
+  const zeilen = (cart?.lines?.nodes ?? []).filter(
+    (zeile) =>
+      !('parentRelationship' in zeile && zeile.parentRelationship?.parent),
+  );
+  const bruttoSumme = zeilen.reduce(
+    (summe, zeile) => summe + getCartLineGrossDisplayTotalExact(zeile),
+    0,
+  );
+  const waehrung = cart?.cost?.subtotalAmount?.currencyCode ?? 'EUR';
+
   return (
     // AUFBAU DER VORLAGE qiblanco.com (Christian 2026-09-10): Zwischensumme ->
     // Kassenknopf, sonst nichts. Die Ueberschrift "Summe" ist entfallen (die
@@ -27,15 +50,15 @@ export function CartSummary({cart, layout}) {
     // Zusammensetzung (Textknoten), nicht aus der Anzeige — sonst kaeme es beim
     // naechsten Feld wieder.
     <div aria-labelledby={summaryId} className={className}>
-      {/* SPIEGEL DES NODE-BAUS (7e262df): dort summiert diese Zeile brutto
-          ueber app/lib/cart-display-pricing.js (D-018, Job 20260909-REPAIR-
-          warenkorb-zeigt-netto...). Dieser Stand des Repos fuehrt die
-          Exact-Fassung des Kanons nicht; gespiegelt wird hier NUR der Aufbau,
-          der Betrag bleibt, was er in diesem Repo war. */}
       <div className="cart-aside-subtotal">
         <div id={summaryId}>Zwischensumme:</div>{' '}
         {cart?.cost?.subtotalAmount?.amount ? (
-          <Preis data={cart?.cost?.subtotalAmount} />
+          <Preis
+            data={{
+              amount: bruttoSumme.toFixed(2),
+              currencyCode: waehrung,
+            }}
+          />
         ) : (
           '-'
         )}

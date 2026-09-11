@@ -11,7 +11,7 @@ import {
 /**
  * @param {HeaderProps}
  */
-export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
+export function Header({header, cart, publicStoreDomain}) {
   // SORTIMENTS-ZAUN (app/lib/kakao-zone.js): `header.shop.name` und
   // `header.menu` kommen aus dem Shopify-Shop qi-blanco.myshopify.com und
   // trugen dadurch die fremde Absender-Marke und das fremde Sortiment in die
@@ -36,7 +36,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
         primaryDomainUrl={header.shop.primaryDomain.url}
         publicStoreDomain={publicStoreDomain}
       />
-      <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
+      <HeaderCtas cart={cart} />
       </header>
     </>
   );
@@ -132,55 +132,63 @@ export function HeaderMenu({
           </NavLink>
         );
       })}
-      {/* Der Drawer traegt seit 2026-09-02 (s05) auch den Weg zum Konto: in der
-          Kopfzeile hat er auf schmalen Geraeten die Marke verdraengt (siehe
-          HeaderCtas), hier ist Platz. Kein Funktionsverlust, ein Fingertipp
-          mehr — und er steht NACH der Navigation, weil ein Besucher zuerst den
-          Laden sucht und erst danach sein Konto.
-          "Home" ist dabei entfallen: der erste Menuepunkt heisst bereits
-          "Start" und zeigt auf dasselbe Ziel; zwei Eintraege fuer eine Seite
-          sahen wie zwei verschiedene Ziele aus. */}
-      {viewport === 'mobile' && (
-        <NavLink
-          className="header-menu-item header-menu-konto"
-          onClick={close}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to="/account"
-        >
-          Mein Konto
-        </NavLink>
-      )}
+      {/* HIER STAND BIS 2026-09-09 „Mein Konto" — UND DAHINTER LAG EIN
+          SERVERFEHLER. Gemessen am echten Rand https://crystal-cacao.com:
+          /account -> 302 -> /account/orders -> HTTP 500; alle SECHS
+          Konto-Routen endeten im Serverfehler. Ursache ist keine Zeile in
+          dieser Datei, sondern eine fehlende Zugangskonfiguration: der Dienst
+          meldet "[h2:error:customerAccount] You do not have the valid
+          credential to use Customer Account API". Sie zu beschaffen heisst
+          Shopify-Admin und Geheimnis — R3-Perimeter, nicht autonom.
+          ENTSCHIEDEN WURDE NICHT „reparieren oder liegenlassen", sondern die
+          Frage davor: BRAUCHT dieser Laden ein Kundenkonto? Gemessen an der
+          echten Kasse (checkout.qiblanco.com, Konfigurationsfeld
+          `customerAccountRequirement`): "OPTIONAL" — die Kasse verlangt KEIN
+          Konto, ein Gast kauft durch. Bei zwei Sorten ohne Abo ist ein Konto
+          damit kein Nutzen, sondern eine Huerde mit einem Fehler dahinter.
+          Wer trotzdem eines will, findet den Weg in der Kasse selbst
+          (`loginLinkVisible: true`) — dort funktioniert er, weil Shopify ihn
+          hostet. Ein entfernter Verweis ist ehrlicher als ein kaputter. */}
     </nav>
   );
 }
 
 /**
- * @param {Pick<HeaderProps, 'isLoggedIn' | 'cart'>}
+ * DIE KOPFZEILE TRAEGT NUR NOCH, WAS DER BESUCHER BRAUCHT — 2026-09-09.
+ *
+ * Bis heute standen hier DREI Wort-Schalter nebeneinander: „Anmelden",
+ * „Suchen", „Warenkorb". Zwei davon sind ersatzlos weg, und beide aus einem
+ * GEMESSENEN Grund, nicht aus Geschmack:
+ *
+ *  (1) ANMELDEN — dahinter lag ein Serverfehler. Alle sechs Konto-Routen
+ *      endeten am echten Rand in HTTP 500 (Ursache und Entscheidung stehen
+ *      ausfuehrlich im Kommentar in HeaderMenu). Die Kasse verlangt kein
+ *      Konto (`customerAccountRequirement: "OPTIONAL"`), der Laden hat zwei
+ *      Sorten und kein Abo. Also: Verweis weg statt Fassade repariert.
+ *
+ *  (2) SUCHEN — sie war nicht kaputt, sie war SCHAEDLICH. Gemessen am
+ *      2026-09-09: die Suche nach „kakao" liefert elf Treffer, darunter
+ *      „Test Page - Crystal Cacao® Create später wieder löschen" (HTTP 200,
+ *      fuer jeden Besucher erreichbar) und eine Dublette der Create-Seite
+ *      unter einem Muell-Handle. Ein Laden mit ZWEI Sorten, die beide
+ *      namentlich im Menue stehen, gewinnt durch eine Suche nichts — er
+ *      riskiert nur, dass ein Besucher unsere Werkbank sieht. Der Weg zur
+ *      Ware bleibt vollstaendig: „AWAKE", „CREATE", „Alle Sorten".
+ *      (Die Wurzel — Testartefakte in der Kollektion `zeremonie-kakao` —
+ *      gehoert nicht hierher; sie ist der Gegenstand des eingereihten Jobs
+ *      20260909-crystal-cacao-sitemap-meldet-testseite-und-dublette. Wird
+ *      sie dort behoben, ist dieser Kopf trotzdem richtig: die Suche bliebe
+ *      auch dann eine leere Geste bei zwei Sorten.)
+ *
+ * WAS BLEIBT, ist der Warenkorb — und er ist jetzt ein ZEICHEN mit einem
+ * Abzeichen statt eines Wortes mit einer Zahl daneben.
+ *
+ * @param {Pick<HeaderProps, 'cart'>}
  */
-function HeaderCtas({isLoggedIn, cart}) {
+function HeaderCtas({cart}) {
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
-      {/* Die Klasse ist der Griff, an dem app.css diesen Eintrag auf schmalen
-          Geraeten aus der Kopfzeile nimmt — den Weg zum Konto uebernimmt dort
-          der Menue-Drawer (HeaderMenu, viewport="mobile"). Gemessen 2026-09-02:
-          die drei Wort-CTAs belegten 226 von 358 px Innenbreite bei 390px und
-          drueckten den Ladennamen auf "Crys…"; bei 320px lief die Kopfzeile
-          sogar ueber (scrollWidth 327). */}
-      <NavLink
-        className="header-konto"
-        prefetch="intent"
-        to="/account"
-        style={activeLinkStyle}
-      >
-        <Suspense fallback="Anmelden">
-          <Await resolve={isLoggedIn} errorElement="Anmelden">
-            {(isLoggedIn) => (isLoggedIn ? 'Mein Konto' : 'Anmelden')}
-          </Await>
-        </Suspense>
-      </NavLink>
-      <SearchToggle />
       <CartToggle cart={cart} />
     </nav>
   );
@@ -198,16 +206,31 @@ function HeaderMenuMobileToggle() {
   );
 }
 
-function SearchToggle() {
-  const {open} = useAside();
-  return (
-    <button className="reset" onClick={() => open('search')}>
-      Suchen
-    </button>
-  );
-}
-
 /**
+ * DER WARENKORB IST EIN ZEICHEN, KEIN WORT — 2026-09-09.
+ *
+ * Christians Punkt woertlich: er soll „erkennbar sein, den Fuellstand zeigen
+ * und sich nicht hinter Text verstecken". Bis heute stand hier das Wort
+ * „Warenkorb" und daneben ein Zaehler, der auch bei leerem Korb eine „0"
+ * zeigte — gemessen 85 x 44 px, von denen 61 px reiner Text waren.
+ *
+ * DREI ENTSCHEIDUNGEN, jede mit ihrem Grund:
+ *
+ *  (a) EIN ZEICHEN STATT DES WORTES. Der Korb ist das eine Symbol, das im
+ *      Web niemand erklaeren muss. Das Wort geht dabei NICHT verloren: es
+ *      steht als `aria-label` weiter da, ein Screenreader liest unveraendert
+ *      „Warenkorb, N Artikel". Sichtbarer Text verschwindet, die
+ *      Zugaenglichkeit nicht.
+ *
+ *  (b) DAS ABZEICHEN ERSCHEINT ERST AB DEM ERSTEN ARTIKEL. Eine dauerhafte
+ *      „0" ist kein Fuellstand, sie ist Rauschen — sie sagt jedem Besucher
+ *      auf jeder Seite, dass er noch nichts gekauft hat. Ab dem ersten
+ *      Artikel traegt das Zeichen die Zahl sichtbar auf sich.
+ *
+ *  (c) DIE TREFFERFLAECHE BLEIBT >= 44 x 44 px (WCAG 2.5.5 AAA, wie
+ *      web-dach.yaml `trefferflaeche`). Kleiner wird das WORT, nicht der
+ *      Knopf — die Regel aus app.css Block 19 gilt unveraendert weiter.
+ *
  * @param {{count: number}}
  */
 function CartBadge({count}) {
@@ -216,7 +239,9 @@ function CartBadge({count}) {
 
   return (
     <a
+      className="header-warenkorb"
       href="/cart"
+      aria-label={`Warenkorb, ${count} Artikel`}
       onClick={(e) => {
         e.preventDefault();
         open('cart');
@@ -228,7 +253,29 @@ function CartBadge({count}) {
         });
       }}
     >
-      Warenkorb <span className="cart-count" aria-label={`(Artikel: ${count})`}>{count}</span>
+      {/* aria-hidden: der zugaengliche Name steht am <a>, sonst laese ein
+          Screenreader das Zeichen ein zweites Mal als leeres Bild vor. */}
+      <svg
+        className="header-warenkorb-zeichen"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d="M6 8h12l-1.2 10.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8Z" />
+        <path d="M9 8V6.5a3 3 0 0 1 6 0V8" />
+      </svg>
+      {count > 0 ? (
+        <span className="cart-count" aria-hidden="true">
+          {count}
+        </span>
+      ) : null}
     </a>
   );
 }

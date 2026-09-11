@@ -1,4 +1,4 @@
-import {useLoaderData} from 'react-router';
+import {useLoaderData, redirect} from 'react-router';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -11,7 +11,12 @@ import {ProductPrice} from '~/components/ProductPrice';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {istKakaoProdukt, fremdinhaltAbweisen, ABSENDER_MARKE} from '~/lib/kakao-zone';
+import {
+  istKakaoProdukt,
+  fremdinhaltAbweisen,
+  ABSENDER_MARKE,
+  UMGELEITETE_PRODUKTE,
+} from '~/lib/kakao-zone';
 import {produktMeta} from '~/lib/produkt-seo';
 
 /**
@@ -86,6 +91,28 @@ async function loadCriticalData({context, params, request}) {
 
   if (!handle) {
     throw new Error('Es wurde kein Produkt angegeben');
+  }
+
+  // STILLGELEGTE ADRESSEN — dauerhaft (301) auf ihr Ziel, nicht ins Leere.
+  // ANLASS 2026-09-09: `crystal-cacao-adfiefiale` (Dublette der Create-
+  // Kaufseite) und die Testseite standen in der eigenen Sitemap. Sie fliegen
+  // dort jetzt raus (app/lib/sitemap-zaun.js) — aber beide antworten seit
+  // Monaten mit HTTP 200 an beiden Domains, also kann jemand darauf verlinkt
+  // haben. Eine 404 würde diesen Besucher wegwerfen UND das Ranking-Signal der
+  // alten Adresse verfallen lassen, statt es auf die echte Kaufseite zu geben.
+  //
+  // WARUM GANZ VORN, VOR DER PRODUKTABFRAGE UND VOR DEM SORTIMENTS-ZAUN: die
+  // Zusage „keine Adresse läuft ins Leere" gilt sonst nur so lange, wie das
+  // Produkt in der Kollektion bleibt und überhaupt noch existiert. Räumt
+  // jemand später im Admin auf — und genau das ist die offene Vorlage zu
+  // diesem Bau —, dann greift weiter oben `fremdinhaltAbweisen()` bzw. die
+  // 404 des leeren Treffers, und die Weiterleitung käme nie zum Zug. Hier
+  // hängt sie an nichts als dem Handle aus der Adresse.
+  // Die Liste wohnt in kakao-zone.js, weil sie ZWEI Leser hat (diese Route und
+  // die Sitemap) — zwei Stellen für denselben Zustand wären die teurere Form.
+  const umleitungsZiel = UMGELEITETE_PRODUKTE[handle];
+  if (umleitungsZiel) {
+    throw redirect(umleitungsZiel, 301);
   }
 
   const [{product}] = await Promise.all([

@@ -3,7 +3,13 @@ import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ProductItem} from '~/components/ProductItem';
-import {ABSENDER_MARKE, istKakaoKollektion, fremdinhaltAbweisen} from '~/lib/kakao-zone';
+import {
+  ABSENDER_MARKE,
+  istKakaoKollektion,
+  fremdinhaltAbweisen,
+  uebersichtAuswahl,
+} from '~/lib/kakao-zone';
+import {KachelPreis} from '~/components/KachelPreis';
 import {canonicalLink, absoluteCanonical} from '~/lib/seo';
 
 /**
@@ -140,8 +146,50 @@ async function loadCriticalData({context, params, request}) {
   // The API handle might be localized, so redirect to the localized handle
   redirectIfHandleIsLocalized(request, {handle, data: collection});
 
+  // ── SORTENUEBERSICHT: NUR DIE SORTEN ────────────────────────────────────
+  // Christian am 2026-09-09: „hier wird noch alles gelistet was nicht gelistet
+  // werden soll. wir haben nur 2 Sorten." Gemessen vor der Aenderung lieferte
+  // die Storefront-API NEUN Mitglieder der Kollektion; die Seite zeigte acht,
+  // weil `pageBy: 8` das neunte abschnitt — die Liste war also nicht nur zu
+  // lang, sie war auch stillschweigend gekappt.
+  //
+  // Der Zaun sitzt im LOADER und nicht im Markup: was hier wegfaellt, steht
+  // gar nicht erst im ausgelieferten HTML. Ein Filter in der Komponente haette
+  // die Kacheln versteckt, die Titel aber weiter mitgeschickt.
+  //
+  // DIE KOLLEKTION BLEIBT DIE SSoT DES SORTIMENTS. Sie traegt den
+  // 7-%-Steuer-Override (cart-display-pricing.js) und entscheidet weiterhin,
+  // welche Produkt-Adressen ueberhaupt ausgeliefert werden (istKakaoProdukt).
+  // Gezaunt wird nur die ANZEIGE dieser einen Uebersichtsseite. Alle
+  // ausgelassenen Kaufseiten bleiben erreichbar und kaufbar — keine Kachel
+  // weniger heisst hier kein Kaufweg weniger.
+  //
+  // RUECKWEG OHNE DEPLOY: UEBERSICHT_ZAUN=off in repo/.env -> Dienst neu
+  // starten. Fail-closed in die SICHERE Richtung: nur der ausdrueckliche Wert
+  // 'off' hebt den Zaun auf, jeder andere Wert (und ein fehlender) laesst ihn
+  // wirken.
+  const zaunAus =
+    String(context.env?.UEBERSICHT_ZAUN ?? '').toLowerCase() === 'off';
+  let restbericht = [];
+  if (!zaunAus && collection?.products?.nodes) {
+    const {gezeigt, ausgelassen} = uebersichtAuswahl(collection.products.nodes);
+    restbericht = ausgelassen;
+    collection.products.nodes = gezeigt;
+    // RESTBERICHT statt stiller Auswahl: ein Einschluss-Selektor sagt nur, was
+    // er NIMMT — seine ausgelassene Menge ist von aussen nicht pruefbar.
+    // Deshalb zaehlt er sie hier auf, MIT Grund, im Serverprotokoll.
+    if (ausgelassen.length && typeof console !== 'undefined') {
+      console.log(
+        `[uebersicht-zaun] ${handle}: ${gezeigt.length} gezeigt, ` +
+          `${ausgelassen.length} ausgelassen — ` +
+          ausgelassen.map((a) => `${a.handle}=${a.grund}`).join(', '),
+      );
+    }
+  }
+
   return {
     collection,
+    restbericht,
   };
 }
 
@@ -172,6 +220,12 @@ export default function Collection() {
             key={product.id}
             product={product}
             loading={index < 8 ? 'eager' : undefined}
+            /* DERSELBE PREISBLOCK WIE AUF DER STARTSEITE — eine
+               Implementierung, zwei Leser (app/components/KachelPreis.jsx).
+               Ohne ihn faellt die Kachel auf den API-Preis der guenstigsten
+               Variante zurueck, und das ist bei diesem Sortiment der
+               NETTO-Betrag: genau die 71,03 €, die Christian gemeldet hat. */
+            preisSlot={<KachelPreis produkt={product} />}
           />
         )}
       </PaginatedResourceSection>
