@@ -91,6 +91,16 @@ import sys
 import urllib.error
 import urllib.request
 
+# Analyse-Einlieferungen des EIGENEN Zugriffs stummschalten (Job 20260911,
+# Christian: Helsinki nicht in den Besucherzahlen mitzaehlen). Bricht NUR
+# Analyse-Beacons ab (Shopify-monorail, Google, Meta) -- der Seitenabruf,
+# das DOM und der Kaufweg bleiben unberuehrt, und der Browser-UA bleibt
+# echt. SSoT: tracking-linkage/src/internal_client.py
+import sys as _sys_ic
+if "/srv/openclaw/shared-state/tracking-linkage/src" not in _sys_ic.path:
+    _sys_ic.path.insert(0, "/srv/openclaw/shared-state/tracking-linkage/src")
+import internal_client as _internal_client  # noqa: E402
+
 SORTEN = ("awake", "create")
 
 # Neun Breiten: die drei gaengigen Telefonbreiten, das Entwurfsmass 390, die
@@ -248,6 +258,7 @@ def messe(basis, fassung, breiten=BREITEN):
                 for sorte in SORTEN:
                     ctx = browser.new_context(viewport={"width": w, "height": 900},
                                               device_scale_factor=1)
+                    _internal_client.stumm_schalten(ctx)
                     page = ctx.new_page()
                     url = "%s/products/crystal-cacao-%s%s" % (basis.rstrip("/"), sorte, zusatz)
                     try:
