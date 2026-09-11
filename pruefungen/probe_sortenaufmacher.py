@@ -64,6 +64,22 @@ aus dem Lauf, beschreibt seine Absicht und nicht sein Werkzeug.
   pruefungen/probe_sortenaufmacher.py --basis <url> --fassung bestand
       -> erwartet exit 1 mit Befunden in A, B, C und D
 
+UND HIER STAND DIE ZWEITE ZU WEITE ZUSAGE UEBER ARM C, nachgemessen am
+2026-09-11: „Befunde in C" ist wahr und trotzdem zu grob. Arm C hat VIER
+BEINE — C1 Masse, C2 Tinten-Kasten, C3 Ausgleich, C4 Aufloesungs-Reserve —,
+und `--fassung bestand` roetet AUSSCHLIESSLICH C4. Beide C-Befunde der 34
+lauten „franst aus"; die Bilddateien sind in beiden Fassungen dieselben,
+also koennen C1-C3 dort baulich nicht ausschlagen. Sie waren bis zu diesem
+Tag NIE rot gefahren. Ein Rot-Nachweis am einen Bein zertifiziert die
+anderen nicht, und der Exit-Code unterscheidet sie nicht.
+C1-C3 haben deshalb einen EIGENEN, wiederholbaren Rot-Arm — live ist ihr
+Zustand nicht herstellbar, weil er genau den Vorgang voraussetzt, gegen den
+Arm C gebaut ist (eine getauschte Wortmarke ohne nachgezogene Geometrie):
+
+  pruefungen/rotarm_sortenaufmacher_armc.py
+      -> exit 0 = ROT BELEGT, je Bein mit eigenem Erkennungsmuster
+      -> exit 4 = MESSAUSFALL, ausdruecklich KEIN Beleg
+
 FAELLT DER ROT-ARM EINES TAGES AUS, weil die abgelegte Fassung entfernt
 wurde, meldet `--fassung bestand` MESSAUSFALL (exit 4) und nicht gruen: „ich
 kann den Rot-Zustand nicht mehr herstellen" und „der Pruefgegenstand ist in
@@ -73,11 +89,22 @@ fallen.
 EXIT
   0  gruen
   1  BEFUND
-  4  MESSAUSFALL (Seite nicht erreichbar, Playwright fehlt, CDN nicht
-     erreichbar, Rot-Zustand nicht herstellbar) — ausdruecklich NICHT gruen
+  4  MESSAUSFALL (Seite nicht erreichbar, Playwright fehlt, Pillow fehlt,
+     CDN nicht erreichbar, Rot-Zustand nicht herstellbar) — ausdruecklich
+     NICHT gruen. Die URSACHE steht als LETZTE stdout-Zeile („MESSAUSFALL:
+     …“, samt Interpreter-Pfad) und zusaetzlich auf stderr — nicht nur auf
+     stderr und nicht vor den Messwerten. Belegfall 2026-09-11: ein Job
+     fuhr die Probe mit `2>&1 | tail -4`, sah die Kopfzeile von Arm C und
+     danach nichts, und meldete „die Wache steht seit unbekannt auf
+     Messausfall“. Der Traeger rt war zu dem Zeitpunkt 2 von 2 Laeufen
+     gruen; der Ausfall war der fremde Interpreter (siehe AUFRUF).
 
 AUFRUF
-  pruefungen/probe_sortenaufmacher.py [--basis https://crystal-cacao.com]
+  python3 pruefungen/probe_sortenaufmacher.py [--basis https://crystal-cacao.com]
+  INTERPRETER IST /usr/bin/python3 (so faehrt der rt-Traeger): dort liegen
+  Playwright UND Pillow. playwright-env/bin/pw-python traegt KEIN Pillow —
+  Arm C ist dort baulich Messausfall, und die Probe sagt das jetzt VOR dem
+  34-s-Render (Pillow-Vorflug), nicht danach.
   Die Probe startet keinen Server — ein selbst gestarteter Server waere ein
   zweiter Messgegenstand.
 """
@@ -185,6 +212,40 @@ class Messausfall(Exception):
     pass
 
 
+def _messausfall(grund, zeilen=()):
+    """Messausfall melden: erst die bis dahin erhobenen Werte, dann die
+    Ursache als LETZTE stdout-Zeile, dazu ein Spiegel auf stderr.
+
+    Warum so: der Konsument (rt-Log, escalation-sweep, ein Mensch mit
+    `tail`) liest das ENDE der Ausgabe. Stand die Ursache nur auf stderr
+    und VOR den Messwerten (stderr ist ungepuffert, stdout nicht), war ein
+    Messausfall im Log von einem Absturz nach der Kopfzeile nicht zu
+    unterscheiden. Der Interpreter steht dabei, weil die haeufigste Ursache
+    hier nicht die Umgebung ist, sondern ein fremder Interpreter ohne
+    Pillow (playwright-env/.venv).
+    """
+    for z in zeilen:
+        print(z)
+    if zeilen:
+        print()
+    satz = "MESSAUSFALL: %s — Interpreter %s" % (grund, sys.executable)
+    print(satz)
+    sys.stdout.flush()
+    print("[MESSAUSFALL] %s" % grund, file=sys.stderr)
+    return 4
+
+
+def _pillow_vorflug():
+    """Pillow VOR dem Render pruefen — ohne Pillow ist Arm C Messausfall,
+    und 18 Seiten dafuer zu laden waere 34 s fuer ein Urteil, das es nicht
+    geben kann. Gleicher Text wie in _tinten_kasten, damit der Grund
+    unabhaengig vom Zeitpunkt derselbe ist."""
+    try:
+        from PIL import Image  # noqa: F401
+    except ImportError as exc:  # noqa: BLE001
+        raise Messausfall("Pillow fehlt — Arm C kann nicht messen") from exc
+
+
 def _lade_bild(url, timeout=25):
     try:
         with urllib.request.urlopen(url, timeout=timeout) as fh:
@@ -290,10 +351,10 @@ def main():
     zeilen = []
 
     try:
+        _pillow_vorflug()
         erg = messe(args.basis, args.fassung)
     except Messausfall as e:
-        print("[MESSAUSFALL] %s" % e, file=sys.stderr)
-        return 4
+        return _messausfall(str(e))
 
     # Wenn ausdruecklich der Rot-Zustand angefordert wurde: erst pruefen, ob es
     # ihn ueberhaupt noch gibt. Ein Bestand, der sich nicht mehr herstellen
@@ -301,10 +362,8 @@ def main():
     if args.fassung == "bestand":
         probe = erg[(1440, "awake")]
         if probe.get("einordnung") is not None or len(probe.get("ziele") or []) > 0:
-            print("[MESSAUSFALL] `?aufmacher=bestand` liefert nicht mehr den Vorzustand — "
-                  "der Rot-Nachweis ist nicht mehr fuehrbar. Das ist KEIN Gruen.",
-                  file=sys.stderr)
-            return 4
+            return _messausfall("`?aufmacher=bestand` liefert nicht mehr den Vorzustand — "
+                                "der Rot-Nachweis ist nicht mehr fuehrbar. Das ist KEIN Gruen.")
 
     # ---------------------------------------------------------------- Arm A
     zeilen.append("[A] INHALT: bietet der Abschnitt ausser Wortmarke und Claim etwas an?")
@@ -395,10 +454,7 @@ def main():
                                "hochgezogen (%d noetig, %d vorhanden) — er franst aus."
                                % (sorte, round(noetig), bw))
     except Messausfall as e:
-        print("[MESSAUSFALL] Arm C: %s" % e, file=sys.stderr)
-        for z in zeilen:
-            print(z)
-        return 4
+        return _messausfall("Arm C: %s" % e, zeilen)
 
     # ---------------------------------------------------------------- Arm D
     zeilen.append("")
