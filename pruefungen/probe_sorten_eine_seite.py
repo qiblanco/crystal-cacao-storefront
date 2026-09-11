@@ -16,6 +16,9 @@ ARME (jeder druckt seinen Marker; ein Rot-Nachweis nennt den Arm, nicht den Exit
   B RAND    Beide Kaufseiten liefern am Kundenrand (--basis) ihren SORTEN-
             Inhalt (und NICHT den der anderen) UND den gemeinsamen Inhalt.
             Das ist die Wirkung: Zusammenfuehren darf nichts vertauschen.
+  D MARKUP  Jede Fett-Markierung in sorten-profil.js ist ein PAAR: ein
+            fehlendes zweites ** faellt im Renderer lautlos durch (der Rest
+            des Absatzes wuerde fett) — Hinweis des Advisor-Pruefers, K3 P2.
   C KLASSE  Der Abschnitt "Anwendung & Tageszeiten" (2026-09-10: 453 px,
             0 Ziele, 13,6 % Fuellgrad, in beiden Dateien zeichengleich) ist
             weg; die pruefbare Zubereitungs-Angabe (15 g / 75 ml / 85 °C)
@@ -89,6 +92,22 @@ def main():
     beide = all(re.search(rx, "\n".join(t)) for t in (awake, create))
     ok &= arm("A/rumpf", beide, "beide Huellen importieren SortenSeite" if beide
               else "mindestens eine Huelle importiert SortenSeite NICHT")
+
+    # D — Fett-Paare im Profil: Strings samt '+'-Verkettung zusammensetzen, dann zaehlen
+    profil = os.path.join(a.repo, "app", "lib", "sorten-profil.js")
+    try:
+        quell = open(profil, encoding="utf-8").read()
+    except OSError as e:
+        print(f"[MESSAUSFALL] {profil}: {e}")
+        return 4
+    quell = re.sub(r"/\*.*?\*/", "", quell, flags=re.S)
+    quell = re.sub(r"^\s*//.*$", "", quell, flags=re.M)
+    lit = r"'(?:[^'\\]|\\.)*'"
+    laeufe = re.findall(rf"{lit}(?:\s*\+\s*{lit})*", quell)
+    texte = ["".join(t[1:-1] for t in re.findall(lit, lauf)) for lauf in laeufe]
+    kaputt = [t[:60] for t in texte if t.count("**") % 2 or "****" in t]
+    ok &= arm("D/markup", not kaputt, f"{len(texte)} Profil-Strings, Fett-Paare vollstaendig" if not kaputt
+              else f"unpaarige/leere Fett-Markierung in: {kaputt}")
 
     html = {}
     for sorte in ("awake", "create"):
