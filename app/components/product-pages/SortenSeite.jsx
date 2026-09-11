@@ -1,4 +1,5 @@
 import {Belege} from '../reusables/Belege';
+import {AbsichtHinweis} from '../reusables/AbsichtHinweis';
 import {ProductFAQ} from '../ProductFAQ';
 import {FAQ_CACAO} from '~/data/product-faqs';
 import {sortenProfil} from '~/lib/sorten-profil';
@@ -422,6 +423,9 @@ export function SortenSeite({sorte}) {
         text=""
       />
       <Belege sorte={`crystal-cacao-${sorte}`} />
+      {/* Einmal gebaut, zweimal ausgeliefert (AWAKE und CREATE) — dieselbe
+          Naht, aus der diese Datei ueberhaupt entstanden ist. */}
+      <AbsichtHinweis />
       <ProductFAQ items={FAQ_CACAO} />
     </>
   );

@@ -47,6 +47,7 @@ import {
   KAKAO_KOLLEKTION,
   KAKAO_KOLLEKTIONEN,
   KAKAO_SEITEN,
+  KAKAO_CODE_SEITEN,
   KAKAO_BLOGS,
   UMGELEITETE_SEITEN,
   UMGELEITETE_PRODUKTE,
@@ -180,6 +181,33 @@ export async function sitemapSeiten({storefront, origin}) {
         lastmod: seite.updatedAt,
         changefreq: 'weekly',
         priority: '0.9',
+      }),
+    );
+  }
+
+  // 2b. Die Seiten, die diese Storefront SELBST als Code fuehrt.
+  //
+  //     WARUM SIE NICHT IN SCHRITT 2 MITLAUFEN KOENNEN: Schritt 2 filtert die
+  //     Antwort der Shopify-`pages`-Query. Eine Code-Route steht in dieser
+  //     Antwort nicht — es gibt kein Page-Objekt, das sie zurueckgeben
+  //     koennte. Sie ist dort nicht „gefiltert", sondern baulich unsichtbar.
+  //
+  //     GEMESSEN 2026-09-11, bevor dieser Abschnitt entstand: die Live-
+  //     Sitemap fuehrte NULL /pages/-Adressen, waehrend /pages/impressum und
+  //     /pages/datenschutz mit HTTP 200 antworteten. Der Zustand war seit dem
+  //     2026-09-10 da und hatte keinen Melder.
+  //
+  //     WARUM KEIN `lastmod`: eine Code-Route hat kein Aenderungsdatum im
+  //     Bestand. Ein erfundenes (Deploy-Zeit, heute) waere eine Behauptung
+  //     ueber Inhalt, die der Bau gar nicht kennt — dieselbe Fehlerform wie
+  //     eine Adresse, die 404 gibt, nur leiser. Weglassen ist erlaubt und
+  //     ehrlich; die Startseite in Schritt 1 macht es genauso.
+  for (const handle of KAKAO_CODE_SEITEN) {
+    eintraege.push(
+      urlEintrag({
+        loc: `${origin}/pages/${handle}`,
+        changefreq: 'monthly',
+        priority: '0.7',
       }),
     );
   }
