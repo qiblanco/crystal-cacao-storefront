@@ -1,7 +1,7 @@
 import {Link} from 'react-router';
 
 import {Belege} from '~/components/reusables/Belege';
-import {ABSENDER_MARKE} from '~/lib/kakao-zone';
+import {ABSENDER_MARKE, markenOrganisation} from '~/lib/kakao-zone';
 import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
 import {ORG_ID, ORGANISATION, organizationSchema} from '~/lib/entity-schema';
 
@@ -117,12 +117,27 @@ const VEROEFFENTLICHT_TEXT = new Date(`${VEROEFFENTLICHT}T00:00:00Z`)
  * „Qi Blanco" — auf dieser Domain die fremde Absender-Marke. Dieselbe Drift,
  * die _index.jsx mit `startseitenGraph()` abfängt. Hier wird der Knoten
  * schlicht nicht gebraucht; die Startseite führt ihn.
+ *
+ * UND GENAU DIESE DRIFT TRAF AUCH DEN ORGANIZATION-KNOTEN HIER — nachgezogen
+ * am 2026-09-11 vom Job 20260911-REPAIR-crystal-cacao-…, Segment s03. Der
+ * Absatz darüber hatte die Hälfte der Sache schon erkannt (WebSite-Name) und
+ * `organizationSchema()` trotzdem ROH aufgerufen: live gemessen trug diese
+ * Seite denselben Knoten wie die Startseite — dieselbe `@id`, name='Qi Blanco'
+ * und alle sechs Qi-Blanco-Kanäle im `sameAs`.
+ *
+ * DAS IST DER TEURE TEIL FÜR SPÄTERE LESER: die Identitätsprobe
+ * (crystal-cacao-node/proben/probe_marken_identitaet.py) liest ausschließlich
+ * „/". Hätte s03 nur die Startseite korrigiert, wäre sie grün geworden,
+ * während derselbe kaputte Knoten unter derselben `@id` hier weitergelebt
+ * hätte. WER EINEN WEITEREN organizationSchema()-AUFRUF EINBAUT, LEGT IHN
+ * DURCH markenOrganisation() — sonst führen zwei Seiten dieselbe Entität mit
+ * zwei verschiedenen Identitäten, und gemessen wird nur eine davon.
  */
 function absichtsGraph() {
   return {
     '@context': 'https://schema.org',
     '@graph': [
-      organizationSchema(),
+      markenOrganisation(organizationSchema(), {origin: CANONICAL_ORIGIN}),
       {
         '@type': 'Person',
         '@id': AUTOR_ID,

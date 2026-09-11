@@ -46,7 +46,7 @@
 // aufgelöst, nicht von Node. Der hermetische Test (node --test, ohne Bundler)
 // könnte diese Datei sonst gar nicht laden.
 import {absoluteCanonical} from './seo.js';
-import {ABSENDER_MARKE} from './kakao-zone.js';
+import {ABSENDER_MARKE, markenProdukt} from './kakao-zone.js';
 import {brotkrumeSchema, produktSchema} from './produkt-schema.js';
 
 /**
@@ -344,7 +344,23 @@ export function produktMeta({pfad, titel, bildUrl, produkt}) {
   // produktSchema() gibt null zurück, wenn Preis oder Titel fehlen — dann
   // entsteht bewusst KEIN Knoten: ein unvollständiges Element steht dauerhaft
   // als Fehler in der Search Console, ein fehlendes bewirkt nur nichts.
-  const schema = produkt ? produktSchema(produkt) : null;
+  //
+  // DIE MARKE DES PRODUKTS, nachgezogen am 2026-09-11 vom Job
+  // 20260911-REPAIR-crystal-cacao-gibt-sich-als-qi-blanco-aus-…, Segment s03:
+  // produktSchema() setzt `brand.name = ORGANISATION.name`, also „Qi Blanco".
+  // In der Qi-Blanco-Welt ist das richtig; hier trug damit ein Produkt namens
+  // „Crystal Cacao® Awake – Bio" live die Marke „Qi Blanco" (gemessen am
+  // ausgelieferten HTML beider Kaufseiten). Es ist dieselbe Absender-Drift,
+  // die oben schon <title> und og:site_name betrifft — deshalb steht die
+  // Korrektur hier, an der Datei, die die Marke dieses Ladens ohnehin führt,
+  // und NICHT in app/lib/produkt-schema.js: die ist K1 (shared/UPSTREAM.json)
+  // und bleibt byte-gleich zur Vorlage.
+  //
+  // `offers.seller` bleibt UNANGETASTET und zeigt weiter auf den
+  // Organization-Knoten dieses Ladens. Dass Marke und Verkäuferin
+  // auseinandergehen, ist der Punkt: die Marke ist Crystal Cacao®, verkauft
+  // wird von der Qi Blanco UG (haftungsbeschränkt).
+  const schema = produkt ? markenProdukt(produktSchema(produkt)) : null;
   if (schema) {
     descriptoren.push({'script:ld+json': schema});
   }
