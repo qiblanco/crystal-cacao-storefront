@@ -290,3 +290,60 @@ export function rechteLinkFuerSprache(iso) {
 /** Beschriftung desselben Links. */
 export const RECHTE_LINK_TEXT =
   'Weitere Informationen zu Ihren Rechten: europa.eu/youreurope/garantien';
+
+/* ====================================================================
+ * DER AUSLOESER AUF DER KAUFFLAECHE (Elina EL-20260908-d8349a01)
+ * ====================================================================
+ *
+ * Bestellt ist eine reine DARSTELLUNGS-Aenderung des Ausloesers auf der
+ * Produktseite: links ein Zeichen, rechts daneben der Link. Die Mitteilung
+ * selbst, ihr Weg (erster Klick) und ihr Overlay bleiben unberuehrt.
+ *
+ * WARUM DIE BESCHRIFTUNGEN HIER STEHEN UND NICHT IM JSX: sie sind seit dem
+ * 2026-09-08 wieder VERSCHIEDEN (Produktseite lang, Footer kurz -- der
+ * Footer bleibt auf Anweisung unveraendert). Zwei Literale im JSX wären
+ * genau die Sorte Dublette, die beim nächsten Textwunsch zur Haelfte
+ * nachgezogen wird; als benannte Konstanten kann der Test beide Flaechen
+ * gegeneinander prüfen.
+ */
+
+/** Produktseite. Ersetzt den frueheren Linktext 'Gesetzliche Gewährleistung'. */
+export const AUSLOESER_TEXT_PDP = 'Garantierte gesetzliche Gewährleistung';
+
+/** Footer, Punkt 4. Bleibt ausdrücklich wie er war. */
+export const AUSLOESER_TEXT_FOOTER = 'Gesetzliche Gewährleistung';
+
+/**
+ * Das Zeichen links neben dem Link auf der Produktseite.
+ *
+ * DAS IST NICHT DIE AMTLICHE GRAFIK -- und diese Unterscheidung ist der
+ * ganze Grund, warum es hier eine EIGENE Konstante gibt statt eines
+ * Rueckgriffs auf LABEL_ASSETS. Das Zeichen ist ein Schild mit
+ * EU-Sternenkranz und weissem G: es trägt KEINEN QR-Code, KEINEN
+ * Verordnungstext und keine einzige Zusage. Es ist Schmuck neben einem
+ * Link, der genau dasselbe sagt.
+ *
+ * Daraus folgt dreierlei, und alle drei Punkte bewacht
+ * test/eu-gewaehrleistung.test.mjs:
+ *   1. alt="" -- ein Screenreader liest den Linktext daneben, nicht zweimal
+ *      dieselbe Sache. Ein beschreibender alt-Text wäre hier keine
+ *      Barrierefreiheit, sondern Laerm.
+ *   2. Die AUFLOESUNG trägt hier NICHTS. Anders als bei der amtlichen
+ *      Grafik (siehe LABEL_MINDESTBREITE_PX) darf dieses Bild über
+ *      `&width=` klein gerechnet werden -- es geht über die
+ *      Hausleiter `bildQuellen`, wie jedes andere Schmuckbild des Shops.
+ *   3. Es darf NIE gegen ein LABEL_ASSETS-Bild getauscht werden. Damit
+ *      stuende die amtliche Mitteilung wieder offen im Seitenfluss -- genau
+ *      die Abweichung, die am 2026-08-25 kassiert wurde.
+ *
+ * Masse gemessen an der hochgeladenen Datei (Shopify-Admin-API, 2026-09-08):
+ * 240 x 251 px, 14 020 B. `anzeigeBreite` ist die Flaeche in der CSS
+ * (.eu-gwl__zeichen) -- beide Zahlen stehen absichtlich beieinander, damit
+ * die Leiter nicht an der Gestaltung vorbeirechnet.
+ */
+export const AUSLOESER_ZEICHEN = {
+  url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/WhatsApp_Image_2026-09-08_at_21.27.22.jpg?v=1788895741',
+  breite: 240,
+  hoehe: 251,
+  anzeigeBreite: 36,
+};

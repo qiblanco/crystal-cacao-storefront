@@ -704,55 +704,58 @@
    und komisch. Das sollte einfach als weitere Zeile bei den Gimmicks
    aufgelistet werden."
 
-   DER BAUSTEIN IST DERSELBE GEBLIEBEN, nur sein Ort ist ein anderer: die
-   <section class="eu-gwl--pdp"> steht jetzt IN einem <li> der
-   Vertrauensliste. Sie bringt aus eu-gewaehrleistung.css (K1, byte-gleich
-   zur Vorlage) ihren eigenen Abstand mit — der war fuer einen
-   freistehenden Block richtig und ist in einer Liste falsch. Die drei
-   Zeilen hier nehmen ihn zurueck und sonst nichts.
+   SEIT DEM VENDORING-NACHZUG 2026-09-11 TRAEGT DIE ZEILE DIE BAUFORM DER
+   VORLAGE: <EuGewaehrleistungsListenpunkt/> ist selbst die <li> und bringt
+   aus eu-gewaehrleistung.css (K1, byte-gleich) schon mit, was frueher hier
+   von Hand zurueckgenommen werden musste — `.eu-gwl--listenpunkt >
+   .eu-gwl__link` setzt Schriftgewicht und Farbe auf `inherit`, Hover und
+   Fokus tragen Goldton plus Unterstreichung. Die drei frueheren Regeln
+   (`display:inline` auf .eu-gwl--pdp, `font: inherit` auf den Link, die
+   Unterstreichung) sind damit GEGENSTANDSLOS und entfernt: die Block-Bauform
+   .eu-gwl--pdp steht auf dieser Liste gar nicht mehr am Element.
 
-   WARUM HIER UND NICHT DORT: eu-gewaehrleistung.css ist K1. Eine Regel
-   dort waere Vendoring-Drift an einer Datei, die byte-gleich bleiben
-   soll — und sie wuerde ausserdem den Footer-Ausloeser mit treffen, der
-   weiter ein freistehender Block ist. Gemessen wird die EIGENSCHAFT
-   („dieser Ausloeser steht in einer Liste"), nicht der Ort. */
-.CacaoBenefitList .eu-gwl--pdp {
-  display: inline;
-  margin: 0;
-  padding: 0;
+   ES BLEIBEN GENAU ZWEI DINGE, und beide, weil DIESE Liste sie hat und die
+   Vorlage-Listen sie nicht haben. */
+
+/* (1) DAS ZEICHEN — uebernommen aus der Vorlage (app/styles/app.css,
+   fd143bb), weil crystal kein app.css der Vorlage fuehrt und die Regel sonst
+   nirgends steht. Wortlaut der Herleitung dort, hier in einem Satz: diese
+   Liste hat keine <svg>-Spalte, sondern ein EMOJI im Fliesstext. Das
+   Gewaehrleistungs-Zeichen ist ein <img>, und die Preflight-Basis stellt
+   <img> auf `display:block` — ohne diese Regel rutscht es auf eine eigene
+   Zeile und der sechste Punkt steht zweizeilig zwischen fuenf einzeiligen.
+   `height: 1em` und keine px-Zahl: 1em IST die Schriftgroesse dieser Zeile
+   (--cc-fs-1), also genau die Groesse der Emoji daneben; wandert der Token,
+   wandert das Zeichen mit. `margin-right` ersetzt das Leerzeichen, das in
+   den fuenf Nachbarzeilen hinter dem Emoji steht. */
+.CacaoBenefitList .eu-gwl__zeichen {
+  display: inline-block;
+  height: 1em;
+  width: auto;
+  margin-right: 0.3em;
 }
 
-/* Die Zeile erbt die Schrift ihrer Nachbarn, statt eine eigene
-   Auszeichnung mitzubringen: fuenf Zusagen und ein Recht sollen gleich
-   aussehen — das war der ganze Punkt an Christians Satz. Der Ausloeser
-   bleibt trotzdem als anklickbar erkennbar (Unterstreichung bei Hover
-   und Fokus, unveraendert aus eu-gewaehrleistung.css). */
-.CacaoBenefitList .eu-gwl__link {
-  font: inherit;
-  font-weight: inherit;
-  color: inherit;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-
-  /* DIE TREFFERFLAECHE — und warum hier 24 px statt der 44 px des Hauses.
-     GEMESSEN 2026-09-08 am gerenderten DOM: die Zeile war 44 px hoch,
-     ihre fuenf Nachbarn 19 px. Damit war sie auch als Zeile noch der
-     groesste Klotz der Liste — genau der Eindruck, den Christian
-     beanstandet hat („mega gross und komisch"), nur eine Nummer kleiner.
-     Ursache ist die Basisregel `main button` in app.css
-     (min-height: var(--cc-treffer-min, 44px), WCAG 2.5.5 AAA). Sie ist
-     fuer einen FREISTEHENDEN Knopf richtig; fuer einen Ausloeser INNERHALB
-     einer Textzeile ist sie es nicht.
-     WEGGENOMMEN WIRD SIE TROTZDEM NICHT: eine Pflichtmitteilung, die man
-     auf dem Telefon nicht trifft, waere schlechter als eine zu grosse.
-     24 px ist die Mindestgroesse aus WCAG 2.5.8 (Target Size Minimum, AA)
-     — also der begruendete Boden, nicht der bequemste Wert. Die Zeile ist
-     damit 5 px hoeher als ihre Nachbarn statt 25. */
+/* (2) DIE TREFFERFLAECHE — und warum hier 24 px statt der 44 px des Hauses.
+   GEMESSEN 2026-09-08 am gerenderten DOM: die Zeile war 44 px hoch, ihre
+   fuenf Nachbarn 19 px. Damit war sie auch als Zeile noch der groesste Klotz
+   der Liste — genau der Eindruck, den Christian beanstandet hat („mega gross
+   und komisch"), nur eine Nummer kleiner. Ursache ist die Basisregel
+   `main button` in app.css (min-height: var(--cc-treffer-min, 44px),
+   WCAG 2.5.5 AAA). Sie ist fuer einen FREISTEHENDEN Knopf richtig; fuer
+   einen Ausloeser INNERHALB einer Textzeile ist sie es nicht.
+   WEGGENOMMEN WIRD SIE TROTZDEM NICHT: eine Pflichtmitteilung, die man auf
+   dem Telefon nicht trifft, waere schlechter als eine zu grosse. 24 px ist
+   die Mindestgroesse aus WCAG 2.5.8 (Target Size Minimum, AA) — also der
+   begruendete Boden, nicht der bequemste Wert.
+   `>` und nicht Nachfahre: im Listenpunkt liegt der <dialog> INNERHALB der
+   <li>, und in ihm steht ein ZWEITER .eu-gwl__link (der Verweis aufs
+   amtliche Portal). Ein Nachfahren-Selektor griffe auch dort hinein. */
+.CacaoBenefitList .eu-gwl--listenpunkt > .eu-gwl__link {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
 }
+
 .UpsellItem .btn--primary {
   width: 100%;
   padding: 1rem;

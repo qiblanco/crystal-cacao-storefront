@@ -1,5 +1,6 @@
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
+import {EuGewaehrleistungsHinweis} from './EuGewaehrleistungsLabel';
 import {anzeigeSatz, formatPreis} from '~/lib/markt-pricing';
 
 /**
@@ -103,9 +104,32 @@ export function cacaoSizeOptions(selectedVariant, handle) {
  * No Shopify variants — the dropdown controls the quantity
  * of the single product variant added to the cart.
  *
- * @param {{ selectedVariant: object, handle?: string, quantity: string, onQuantityChange: (val: string) => void }} props
+ * @param {{ selectedVariant: object, handle?: string, quantity: string,
+ *   onQuantityChange: (val: string) => void,
+ *   gewaehrleistungsHinweis?: boolean }} props
+ *
+ * `gewaehrleistungsHinweis` (Default TRUE, und der Default IST die Aussage)
+ * steuert, ob die EU-Pflichtmitteilung hier unter dem Kauf-Knopf haengt.
+ * Wortgleich zur Prop der Vorlage, damit dieselbe Naht nicht zwei Namen
+ * traegt. Die beiden Kakao-Kaufflaechen dieses Ladens montieren die
+ * Mitteilung selbst — als sechsten Punkt ihrer Vertrauensliste — und
+ * schalten den Default deshalb ab.
+ *
+ * WARUM EIN ABSCHALTER UND KEIN AUSBAU (Nachzug 2026-09-11 aus der Vorlage,
+ * fd143bb): bis hierher stand in dieser Datei GAR KEIN Hinweis mehr. Das war
+ * am 2026-09-08 richtig gemessen — genau zwei Aufrufer, beide mit Liste —
+ * und traegt genau so lange, wie diese Zahl stimmt. Eine dritte
+ * Kakao-Kaufflaeche ohne Vertrauensliste haette die Pflichtmitteilung
+ * lautlos NICHT getragen: Seite rendert, Build gruen, HTTP 200. Der Default
+ * faengt diesen Fall; die zwei Bestandsseiten sehen davon nichts.
  */
-export function CacaoProductForm({selectedVariant, handle, quantity, onQuantityChange}) {
+export function CacaoProductForm({
+  selectedVariant,
+  handle,
+  quantity,
+  onQuantityChange,
+  gewaehrleistungsHinweis = true,
+}) {
   const {open} = useAside();
 
   return (
@@ -170,8 +194,11 @@ export function CacaoProductForm({selectedVariant, handle, quantity, onQuantityC
         <ProductForm/> und bringt seinen eigenen Hinweis mit.
         <CacaoProductForm/> hat auf diesem Laden genau ZWEI Aufrufer
         (gemessen 2026-09-08: die beiden Kakao-Kaufrouten), und genau diese
-        zwei bekommen die Zeile jetzt in ihrer Vertrauensliste.
+        zwei bekommen die Zeile jetzt in ihrer Vertrauensliste — sie schalten
+        den Default darunter deshalb ab. Der Default selbst bleibt stehen und
+        traegt jede KUENFTIGE Kakao-Kaufflaeche ohne eigene Liste.
       */}
+      {gewaehrleistungsHinweis ? <EuGewaehrleistungsHinweis /> : null}
     </div>
   );
 }

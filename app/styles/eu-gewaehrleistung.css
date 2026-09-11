@@ -17,18 +17,140 @@
  * (das verzerrt oder schneidet). Nur die BREITE wird gesteuert, das
  * Seitenverhaeltnis laeuft ueber height: auto mit.
  *
- * DIE GRAFIK KOMMT IN DIESER FASSUNG NUR IM OVERLAY VOR. Auf der
- * Produktseite steht ausschliesslich der Text-Link. Es gibt deshalb keinen
- * .eu-gwl__bild-Block mehr -- wer ihn wieder einfuehrt, baut die offen
- * sichtbare Grafik zurueck, die hier ausdruecklich nicht gewollt ist.
+ * DIE AMTLICHE GRAFIK KOMMT IN DIESER FASSUNG NUR IM OVERLAY VOR. Es gibt
+ * deshalb keinen .eu-gwl__bild-Block mehr -- wer ihn wieder einfuehrt, baut
+ * die offen sichtbare Grafik zurueck, die hier ausdruecklich nicht gewollt
+ * ist.
+ *
+ * NICHT ZU VERWECHSELN mit .eu-gwl__zeichen (seit 2026-09-08): das ist das
+ * Schmuck-Schild neben dem Link auf der Produktseite. Es traegt keinen
+ * QR-Code und keinen Verordnungstext, faellt also unter keine der Auflagen
+ * unten. Die beiden Klassen heissen bewusst verschieden -- ein gemeinsamer
+ * Name haette die Auflagen still auf ein Bild ausgedehnt, fuer das sie nicht
+ * gelten, oder von einem abgezogen, fuer das sie gelten.
  */
 
 /* ------------------------------------------------------------------ */
-/* Produktseite: NUR der Text-Link, kein Bild                          */
+/* Produktseite: Zeichen links, Text-Link rechts                       */
 /* ------------------------------------------------------------------ */
 
 .eu-gwl--pdp {
   margin: 1rem 0 0;
+}
+
+/*
+ * Die Zeile aus Zeichen und Link (Elina EL-20260908-d8349a01).
+ *
+ * `align-items: center` und nicht `baseline`: das Zeichen ist rund 2,5 Zeilen
+ * hoch: an der Schriftlinie ausgerichtet haenge es unten aus der Zeile
+ * heraus. Umbruch ist ausdruecklich erlaubt (flex-wrap) -- der Linktext ist
+ * seit dem 2026-09-08 laenger, und auf einem 320-px-Telefon in der
+ * schmalsten Spalte darf er unter das Zeichen rutschen, statt es zu
+ * quetschen.
+ */
+.eu-gwl__zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/*
+ * Das Zeichen. KEINE amtliche Grafik -- die Auflagen aus Anhang I Nr. 1 und
+ * Nr. 5 (kein filter, kein Radius, kein Beschnitt) gelten fuer
+ * .eu-gwl-dialog__bild und NICHT hier; dieses Bild traegt keinen Inhalt.
+ *
+ * `flex: 0 0 auto` haelt es bei knappem Platz auf seiner Breite, statt es
+ * vom laengeren Text zusammendruecken zu lassen. Die 36 px stehen ausserdem
+ * in AUSLOESER_ZEICHEN.anzeigeBreite -- dort rechnet die srcset-Leiter
+ * damit. Wer die Zahl hier aendert, aendert sie dort mit; der Test haelt
+ * beide Stellen zusammen.
+ *
+ * DIE 36 PX GELTEN FUER DIE BLOCK-BAUFORM. In der Listen-Bauform (seit
+ * Elina EL-20260909-395f848c) ueberschreiben `.BenefitList .eu-gwl__zeichen`
+ * und `.CacaoBenefitList .eu-gwl__zeichen` sie mit `1em` -- rund 19 px bzw.
+ * rund 14 px, weil die Nachbar-Icons bzw. die Emoji daneben genau so gross
+ * sind.
+ * Die srcset-Leiter rechnet dort also mit MEHR, als die Flaeche braucht:
+ * das Bild kommt schaerfer als noetig herein, nicht unschaerfer. Bewusst
+ * hingenommen, weil eine zweite Anzeigebreite eine zweite Zahl waere, die
+ * jemand pflegen muss; der Test haelt die Richtung fest (die Leiter darf die
+ * Listen-Flaeche nie UNTERschreiten -- das waere sichtbar).
+ */
+.eu-gwl__zeichen {
+  flex: 0 0 auto;
+  width: 36px;
+  height: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* Produktseite, zweite Bauform: der Hinweis ALS Listenpunkt           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Elina EL-20260909-395f848c: der Hinweis soll "optisch wie ein weiterer,
+ * fuenfter Punkt der bestehenden Icon-Liste wirken, nicht wie ein separater
+ * Block darunter". EL-20260909-8c4001d1 hat denselben Zuschnitt auf jede
+ * Kaufflaeche mit eigener Nutzen-Liste gezogen; je nach Liste ist er dort
+ * der 4., 5. oder 6. Punkt. DIESE DATEI MUSSTE DAFUER NICHT ANGEFASST
+ * WERDEN, und das ist der Beleg fuer den Zuschnitt: was hier steht, sagt
+ * nichts ueber die Liste aus, in der der Punkt haengt -- es nimmt ihm nur
+ * die Gestaltung der Block-Bauform ab und gibt ihm den Zeiger-Zustand.
+ *
+ * DER GROESSTE TEIL DAVON STEHT ABSICHTLICH NIRGENDS.
+ * Zeilenabstand (`li { margin-bottom: 0.5rem }`) sowie Schriftart, -groesse,
+ * -hoehe und -farbe (`p, li { font-size: 1.2rem; line-height: 1.4; color:
+ * var(--color-dark) }`) kommen aus reset.css und gelten fuer diese <li> wie
+ * fuer die vier darueber -- weil sie eine <li> IST und keine <section> mehr.
+ * Genau das war der Auftrag: gleiche Werte, nicht aehnliche.
+ *
+ * ES GIBT HIER DESHALB BEWUSST KEINE margin- ODER padding-ZEILE. Ein
+ * `margin: 0` waere kein harmloser Reset: es hat hoehere Spezifitaet als
+ * `li { margin-bottom: 0.5rem }` und wuerde ausgerechnet den Abstand
+ * loeschen, den der Auftrag herstellen will. Wer hier spaeter aufraeumen
+ * moechte: der Block-Bau (.eu-gwl--pdp) beruehrt diese Zeile nicht, seine
+ * Klasse steht gar nicht am Element.
+ *
+ * Die Icon-Groesse steht ihrerseits bei der Liste (app.css, .BenefitList) --
+ * dort, wo auch die vier Geschwister-Icons ihre Masse bekommen, statt hier
+ * als zweite Meinung darueber.
+ *
+ * DAS `>` IN DEN ZWEI SELEKTOREN UNTEN IST PFLICHT, NICHT GESCHMACK.
+ * In dieser Bauform liegt der <dialog> INNERHALB der <li> (er muss dort
+ * liegen, sonst haengt er als ungueltiges Kind in der <ul>). Im Overlay
+ * steht aber ein zweiter `.eu-gwl__link`: der Verweis auf das amtliche
+ * Portal. Ein Nachfahren-Selektor faerbt den mit um -- gemessen: er verlor
+ * Goldton und Fettung, obwohl am Overlay ausdruecklich nichts geaendert
+ * werden sollte. `>` trifft nur den Ausloeser, der direkt in der Zeile steht.
+ */
+.eu-gwl--listenpunkt > .eu-gwl__link {
+  /*
+   * `.eu-gwl__link` bringt aus der Block-Bauform `font-weight: 600` und die
+   * Goldschrift mit. Beides faellt hier weg -- bestellt ist "gleiche
+   * Schriftart/Schriftgroesse/Schriftgewicht wie der Text der anderen vier
+   * Punkte". `inherit` statt eigener Werte, damit die Zahlen aus der Liste
+   * kommen und nicht daneben noch einmal aufgeschrieben werden.
+   */
+  font-weight: inherit;
+  color: inherit;
+}
+
+/*
+ * … und weil der Text damit aussieht wie Text, muss der Zeiger-Zustand die
+ * Klickbarkeit tragen. Ausdruecklich bestellt: "mit sichtbarem Hover-Zustand
+ * (z.B. Unterstreichung oder Farbaenderung beim Drueberfahren mit der Maus),
+ * damit klar bleibt dass er anklickbar ist".
+ *
+ * BEIDES statt eines von beiden: eine Unterstreichung allein uebersieht man
+ * unter dem eigenen Mauszeiger leicht, eine Farbe allein sagt einem
+ * farbfehlsichtigen Leser nichts. `:focus-visible` laeuft mit, damit die
+ * Tastatur denselben Hinweis bekommt wie die Maus -- der Fokusrahmen weiter
+ * unten bleibt davon unberuehrt.
+ */
+.eu-gwl--listenpunkt > .eu-gwl__link:hover,
+.eu-gwl--listenpunkt > .eu-gwl__link:focus-visible {
+  color: var(--color-accent-ink, #856828);
+  text-decoration: underline;
 }
 
 /* ------------------------------------------------------------------ */
@@ -76,6 +198,27 @@
 .eu-gwl-dialog {
   /* Der <dialog> selbst ist der zentrierte Kasten; ::backdrop ist der Rand. */
   width: min(96vw, 760px);
+
+  /*
+   * SCHRIFT-GRUNDLAGE DES OVERLAYS -- unabhaengig davon, WO der <dialog> im
+   * Dokument steht. Das ist seit dem 2026-09-09 noetig und keine Kosmetik:
+   * in der Listen-Bauform (Elina EL-20260909-395f848c) liegt der <dialog>
+   * INNERHALB der <li> und erbte damit deren 1.2rem/1.4 -- auf allen anderen
+   * Kaufflaechen erbt er weiter 1rem/normal vom <body>.
+   *
+   * SICHTBAR war der Unterschied nicht (nachgemessen 2026-09-09: jeder
+   * Texttraeger im Overlay setzt seine Groesse selbst -- der Fuss ueber
+   * `p, li`, der Schliessen-Knopf ueber .eu-gwl-dialog__zu; beide Seiten
+   * lieferten Zeichen fuer Zeichen dasselbe). Genau deshalb steht die Zeile
+   * hier: ein Unterschied, den man nicht sieht, wird beim naechsten Zusatz
+   * im Overlay zu einem, den man sieht -- und dann sucht ihn niemand an der
+   * Stelle, an der das Fenster HAENGT.
+   *
+   * Die beiden Werte sind kein neuer Entwurf, sondern der Zustand von
+   * VORHER: 16 px / normal, wie er auf jeder Kaufflaeche gemessen wurde.
+   */
+  font-size: 1rem;
+  line-height: normal;
   max-height: 92vh;
   padding: 0;
   border: 0;
