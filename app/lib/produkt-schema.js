@@ -106,6 +106,34 @@ import {ORG_ID, ORGANISATION} from './entity-schema.js';
 import {bruttoAnzeige} from './markt-pricing.js';
 
 /**
+ * Der Produktname ohne Schutzrechts-Zeichen — die SUCHFORM.
+ *
+ * WARUM ES DIESES FELD GIBT (SEO-Stufe S6, ursprünglich PR #201 vom
+ * 2026-08-14; der PR wurde nicht gemergt, weil `main` diese Datei
+ * zwischenzeitlich selbst angelegt und weiter ausgebaut hat — ein Merge
+ * hätte die ärmere Fassung eingebracht. Die Substanz kommt deshalb hier
+ * additiv an):
+ * Kundensichtbar schreiben wir verbindlich „QiOne® 2 Pro“
+ * (Marken-Schreibregeln). GESUCHT wird dagegen „QiOne 2 Pro“ — ohne
+ * Zeichen. `name` trägt deshalb die Marken-Schreibung, `alternateName` die
+ * Suchform. Beides ist wahr, und keine der beiden Schreibweisen muss dafür
+ * irgendwo im sichtbaren Text verbogen werden.
+ *
+ * ABGELEITET STATT GEPFLEGT: eine zweite, handgepflegte Namensliste würde
+ * von der Shopify-Quelle wegdriften, sobald dort jemand den Titel ändert.
+ * Diese Funktion kann das nicht — sie hat keine eigene Wahrheit.
+ *
+ * @param {string} titel
+ * @returns {string}
+ */
+export function suchform(titel) {
+  return String(titel || '')
+    .replace(/[®™©]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * schema.org-Verfügbarkeit aus dem Shopify-Flag.
  * @param {boolean|undefined} verfuegbar
  * @returns {string}
@@ -156,10 +184,11 @@ const DE_VERSANDFREI_AB_EUR = 99;
 
 /**
  * Lieferzeit in Tagen [min, max] — NUR für Handles, deren Seite selbst eine
- * nennt. An allen 13 DACH-Produktseiten live abgezählt (2026-09-01):
+ * nennt. An allen 13 DACH-Produktseiten live abgezählt (2026-09-01; die
+ * Kakao-Seiten am 2026-09-09 auf die Hausform nachgezogen):
  *   „In 2-3 Tagen bei Dir"      → qione-2-pro, qibracelet, qihome-air,
  *                                  qione-kette
- *   „Lieferung in 1–3 Werktagen" → crystal-cacao-awake, crystal-cacao-create
+ *   „In 1-3 Tagen bei Dir"       → crystal-cacao-awake, crystal-cacao-create
  *   keine Aussage                → die übrigen sieben
  *
  * ES GIBT ALSO KEINE EINE LIEFERZEIT, DIE MAN GLOBAL EINTRAGEN KÖNNTE. Der
@@ -299,7 +328,13 @@ export function produktSchema(produkt) {
     '@id': `${url}#product`,
     name: produkt.title,
     url,
-    brand: {'@type': 'Brand', name: ORGANISATION.name},
+    // `@id` klammert die Marke an den Organization-Knoten aus
+    // entity-schema.js. Ohne sie stehen zwei gleichnamige, aber für eine
+    // Maschine unverbundene Aussagen nebeneinander: eine Marke „Qi Blanco“
+    // auf der Produktseite und eine Organisation „Qi Blanco“ im
+    // Wissensgraphen. Der Name bleibt derselbe — hinzu kommt allein die
+    // Verknüpfung.
+    brand: {'@type': 'Brand', '@id': ORG_ID, name: ORGANISATION.name},
     offers: {
       '@type': 'Offer',
       url,
@@ -311,6 +346,13 @@ export function produktSchema(produkt) {
       hasMerchantReturnPolicy: retourenRichtlinie(),
     },
   };
+
+  // Suchform NUR ausgeben, wenn sie sich vom Namen unterscheidet: sonst
+  // wäre `alternateName` eine wortgleiche Wiederholung von `name` und damit
+  // reines Rauschen — ein Feld, das nichts hinzufügt, ist kein neutraler
+  // Zusatz, sondern eine Aussage ohne Inhalt.
+  const suchname = suchform(produkt.title);
+  if (suchname && suchname !== produkt.title) knoten.alternateName = suchname;
 
   const versand = versandDetails(produkt.handle, preis, waehrung);
   if (versand) knoten.offers.shippingDetails = versand;

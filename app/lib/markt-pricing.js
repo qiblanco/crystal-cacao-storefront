@@ -48,21 +48,32 @@ export function bruttoAnzeige(amount, handle, currencyCode) {
 
 /**
  * Anzeigeformat je Waehrung. Stile:
- * - 'lp'  (Campaign-/Paket-Karten): "7.345 €" · "1.048 CHF" · "$1,383"
- * - 'pdp' (ProductPrice-Kanon):    "1.087,- €" · "1.048,- CHF" · "$1,383"
- * @param {number|null} wert gerundeter Anzeigewert
+ * - 'lp'        (Campaign-/Paket-Karten): "7.345 €" · "1.048 CHF" · "$1,383"
+ * - 'pdp'       (ProductPrice-Kanon):    "1.087,- €" · "1.048,- CHF" · "$1,383"
+ * - 'cart-cent' (Warenkorb, cent-genau, aiceo:digest54:p3): "76,00 €" ·
+ *   "159,63 €" — NUR für bereits cent-genaue Werte aus
+ *   cart-display-pricing.js (getCartLine*Exact); kein zweites Runden hier.
+ * @param {number|null} wert gerundeter Anzeigewert (bzw. cent-genau bei 'cart-cent')
  * @param {string} [currencyCode]
- * @param {'lp'|'pdp'} [stil]
+ * @param {'lp'|'pdp'|'cart-cent'} [stil]
  * @returns {string|null}
  */
 export function formatPreis(wert, currencyCode = 'EUR', stil = 'lp') {
   if (wert == null || !Number.isFinite(Number(wert))) return null;
   const n = Number(wert);
+  const digits = stil === 'cart-cent' ? 2 : 0;
   if (currencyCode === 'USD') {
-    return `$${n.toLocaleString('en-US', {maximumFractionDigits: 0})}`;
+    return `$${n.toLocaleString('en-US', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    })}`;
   }
-  const de = n.toLocaleString('de-DE', {maximumFractionDigits: 0});
+  const de = n.toLocaleString('de-DE', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
   const symbol = currencyCode === 'EUR' ? '€' : currencyCode;
+  if (stil === 'cart-cent') return `${de} ${symbol}`;
   return stil === 'pdp' ? `${de},- ${symbol}` : `${de} ${symbol}`;
 }
 

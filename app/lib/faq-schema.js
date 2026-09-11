@@ -74,8 +74,17 @@ export function isSchemaSafe(item) {
  * sauberen Items. Gibt `null` zurück, wenn kein sauberes Item uebrig bleibt
  * (dann emittiert die Komponente bewusst KEIN leeres Schema).
  *
+ * ZUSATZFELDER (optional, seit 2026-09-11 für /pages/kritik): `author`,
+ * `datePublished` und `dateModified` werden NUR gesetzt, wenn der Aufrufer sie
+ * uebergibt. Bestandsaufrufer (ProductFAQ, pages.faq) uebergeben sie nicht und
+ * erhalten damit byte-identisch dasselbe Schema wie vorher — die Erweiterung
+ * ist additiv, nicht verhaltensaendernd. Hintergrund: eine Antwortseite mit
+ * benanntem Autor und Datum ist die Quellenklasse, die von KI-Antworten
+ * zitiert wird; ohne sie bleibt die Seite maschinell anonym.
+ *
  * @param {Array<{q?: string, a?: string, flag?: string}>} items
- * @param {{inLanguage?: string}} [opts]
+ * @param {{inLanguage?: string, author?: string, datePublished?: string,
+ *   dateModified?: string}} [opts]
  * @returns {object|null} JSON-LD FAQPage oder null
  */
 export function buildFaqPageJsonLd(items, opts = {}) {
@@ -85,6 +94,11 @@ export function buildFaqPageJsonLd(items, opts = {}) {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     inLanguage: opts.inLanguage || 'de-DE',
+    ...(opts.author
+      ? {author: {'@type': 'Organization', name: opts.author}}
+      : {}),
+    ...(opts.datePublished ? {datePublished: opts.datePublished} : {}),
+    ...(opts.dateModified ? {dateModified: opts.dateModified} : {}),
     mainEntity: safe.map((it) => ({
       '@type': 'Question',
       name: normalizeText(it.q),

@@ -355,7 +355,12 @@ export type SitemapProdukteQueryVariables = StorefrontAPI.Exact<{
 export type SitemapProdukteQuery = {
   collection?: StorefrontAPI.Maybe<{
     products: {
-      nodes: Array<Pick<StorefrontAPI.Product, 'handle' | 'updatedAt'>>;
+      nodes: Array<
+        Pick<
+          StorefrontAPI.Product,
+          'handle' | 'title' | 'createdAt' | 'updatedAt'
+        >
+      >;
     };
   }>;
 };
@@ -1505,7 +1510,7 @@ interface GeneratedQueryTypes {
     return: FooterQuery;
     variables: FooterQueryVariables;
   };
-  '#graphql\n  query SitemapProdukte($handle: String!, $first: Int!) {\n    collection(handle: $handle) {\n      products(first: $first) {\n        nodes {\n          handle\n          updatedAt\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query SitemapProdukte($handle: String!, $first: Int!) {\n    collection(handle: $handle) {\n      products(first: $first) {\n        nodes {\n          handle\n          title\n          createdAt\n          updatedAt\n        }\n      }\n    }\n  }\n': {
     return: SitemapProdukteQuery;
     variables: SitemapProdukteQueryVariables;
   };

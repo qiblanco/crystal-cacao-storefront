@@ -10,7 +10,7 @@ import {
 } from '@shopify/hydrogen';
 import {ProductImage} from '~/components/ProductImage';
 import {CacaoProductForm} from '~/components/CacaoProductForm';
-import {EuGewaehrleistungsHinweis} from '~/components/EuGewaehrleistungsLabel';
+import {EuGewaehrleistungsListenpunkt} from '~/components/EuGewaehrleistungsLabel';
 import {CacaoPriceDisplay} from '~/components/CacaoPriceDisplay';
 import {ProductImageList} from '~/components/ProductImageList';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
@@ -204,6 +204,10 @@ export default function Product() {
             handle={product.handle}
             quantity={quantity}
             onQuantityChange={setQuantity}
+            /* Die Mitteilung haengt auf dieser Kaufflaeche IN der
+               Vertrauensliste darunter. Hier abgeschaltet — sonst stuende sie
+               zweimal auf der Seite. */
+            gewaehrleistungsHinweis={false}
           />
           <CacaoBenefitList />
         </div>
@@ -236,14 +240,33 @@ export default function Product() {
  *
  * Die Mitteilung stand bis dahin als eigener Block unter dem Kauf-Button
  * (in <CacaoProductForm/>). Sie ist NICHT verschwunden und ihr WORTLAUT ist
- * unveraendert — sie ist eine Zeile geworden. Der Ausloeser bleibt derselbe
- * Baustein (<EuGewaehrleistungsHinweis/>): er bringt sein Overlay selbst
- * mit, die amtliche Grafik erscheint weiterhin auf den ersten Klick.
+ * unveraendert — sie ist eine Zeile geworden; die amtliche Grafik erscheint
+ * weiterhin erst auf den ersten Klick.
  *
  * SIE STEHT BEWUSST ALS LETZTE. Die fuenf Zeilen darueber sind Zusagen, die
  * wir GEBEN; die sechste ist ein Recht, das der Kunde ohnehin HAT. Sie an
  * die Spitze zu stellen hiesse, ein gesetzliches Minimum als unsere
  * Leistung zu verkaufen.
+ *
+ * SEIT DEM 2026-09-11 TRAEGT SIE DIE BAUFORM DER VORLAGE (Vendoring-Nachzug
+ * aus fd143bb, Elina EL-20260909-8c4001d1): <EuGewaehrleistungsListenpunkt/>
+ * statt der hier von Hand gebauten Zeile <li>⚖️ <EuGewaehrleistungsHinweis/></li>.
+ * BEIDE tun dasselbe — dieser Laden war mit seiner Fassung sogar ZUERST da
+ * (2026-09-08, Christians Satz oben; die Vorlage zog am 09-09 nach).
+ * Uebernommen wird sie trotzdem, und der Grund ist nicht Ordnungsliebe:
+ *   (1) die Block-Bauform, die <EuGewaehrleistungsHinweis/> rendert, traegt
+ *       seit dem 2026-09-08 ein BILD (Elina EL-20260908-d8349a01, 36 px).
+ *       In einer Zeile mit ⚖️-Emoji stuenden damit ZWEI Zeichen nebeneinander,
+ *       das zweite 2,5 Zeilen hoch — genau das „mega gross und komisch",
+ *       gegen das Christians Satz gerichtet war.
+ *   (2) die Datei, die die Pflichtmitteilung TRAEGT, ist K1 und soll es
+ *       bleiben: sie ist die Stelle, an der die Verordnung (EU) 2025/1960
+ *       gepflegt wird, und zwar oben. Eine eigene Kakao-Fassung haette
+ *       genau diesen Pfad gekappt — vier Wochen vor dem Pflichttag
+ *       27.09.2026.
+ * Abstand, Schrift, Farbe und Zeichenhoehe sind GEERBT (kakao-seiten.css:
+ * `.CacaoBenefitList ul { gap }`, `li { font-size }`, `.eu-gwl__zeichen
+ * { height: 1em }`) — nachgebaute Zahlen laufen still auseinander.
  */
 function CacaoBenefitList() {
   return (
@@ -254,9 +277,7 @@ function CacaoBenefitList() {
         <li>🔄 100 % Geld-zurück-Garantie bei Unzufriedenheit</li>
         <li>🔬 Laboranalytisch geprüft (Dartsch Institut)</li>
         <li>🌿 Bio-zertifiziert nach DE-ÖKO-006</li>
-        <li>
-          ⚖️ <EuGewaehrleistungsHinweis />
-        </li>
+        <EuGewaehrleistungsListenpunkt />
       </ul>
     </div>
   );

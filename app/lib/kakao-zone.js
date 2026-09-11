@@ -294,6 +294,20 @@ export function markenOrganisation(knoten, {origin} = {}) {
  * Produkts ist Crystal Cacao®, verkauft wird es von der Qi Blanco UG
  * (haftungsbeschränkt).
  *
+ * DIE KNOTEN-KENNUNG WIRD MIT DEM NAMEN ENTFERNT (Nachzug 2026-09-11, Job
+ * 20260911-crystal-cacao-upstream-drift-…): die Vorlage klammert seit
+ * d1fcac3 den Marken-Knoten per `'@id': ORG_ID` an den Organization-Knoten
+ * derselben Seite — dort ist das richtig, weil Marke und Organisation
+ * DIESELBE Sache sind („Qi Blanco"). Hier sind sie es nicht. Bliebe die
+ * Kennung stehen, sagte die Seite einer Maschine: der Knoten
+ * `https://crystal-cacao.com/#organization` heisst „Crystal Cacao®" — und
+ * genau dieser Knoten traegt zwei Zeilen weiter oben `legalName: Qi Blanco UG
+ * (haftungsbeschränkt)` und die Registerangaben. Zwei Namen fuer eine
+ * Kennung ist schlechter als keine Kennung: ein Widerspruch im
+ * Wissensgraphen, den kein Mensch auf der Seite sieht.
+ * Ohne `@id` bleibt es ein anonymer Brand-Knoten — genau das, was er vor der
+ * Vorlagen-Aenderung war, und was er hier sachlich IST.
+ *
  * @param {object|null|undefined} knoten Product-Knoten
  * @returns {object|null|undefined}
  */
@@ -302,8 +316,12 @@ export function markenProdukt(knoten) {
     return knoten;
   }
   if (!knoten.brand) return knoten;
-  const marke = (m) =>
-    m && typeof m === 'object' ? {...m, name: ABSENDER_MARKE} : m;
+  const marke = (m) => {
+    if (!m || typeof m !== 'object') return m;
+    const eigen = {...m, name: ABSENDER_MARKE};
+    delete eigen['@id'];
+    return eigen;
+  };
   return {
     ...knoten,
     brand: Array.isArray(knoten.brand)
