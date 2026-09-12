@@ -14,6 +14,7 @@ import {
   AUSLOESER_TEXT_PDP,
   AUSLOESER_ZEICHEN,
   LABEL_ALT_DE,
+  eigeneWorteFuerSprache,
   RECHTE_LINK_TEXT,
 } from '~/lib/eu-gewaehrleistungslabel';
 
@@ -195,7 +196,19 @@ function useEuLabel() {
 function useEuLabelAsset() {
   const root = useRouteLoaderData('root');
   const sprache = root?.storefrontSprache ?? root?.consent?.language ?? 'de';
-  return useMemo(() => labelFuerSprache(sprache), [sprache]);
+  return useMemo(() => {
+    const l = labelFuerSprache(sprache);
+    /*
+     * UNSERE WORTE HÄNGEN AN DER ANGEFRAGTEN SPRACHE, NICHT AN `l.iso`.
+     * Das ist der Unterschied, der die Zusage hält: `labelFuerSprache`
+     * faellt für eine unbekannte Sprache auf Englisch zurück, damit die
+     * PFLICHTMITTEILUNG nie fehlt. Würden wir unsere Worte an dieses
+     * Ergebnis hängen, stuende bei jeder nicht gepflegten Sprache ein
+     * englischer Absatz -- genau das, was `eigeneWorteFuerSprache` vermeiden
+     * soll. Gefragt wird deshalb die Seitensprache selbst.
+     */
+    return {...l, eigeneWorte: eigeneWorteFuerSprache(sprache)};
+  }, [sprache]);
 }
 
 // forwardRef ist hier PFLICHT, nicht Stil: das Repo faehrt React 18.3
@@ -237,6 +250,48 @@ const EuLabelDialog = forwardRef(function EuLabelDialog({label, onClose}, ref) {
         >
           &times;
         </button>
+
+        {/*
+          UNSERE EIGENEN WORTE -- VOR der amtlichen Grafik, nie an ihrer
+          Stelle. Warum das zulaessig ist und wo die Grenze liegt, steht bei
+          EIGENE_WORTE in ~/lib/eu-gewaehrleistungslabel (VO (EU) 2025/1960
+          Art. 1 für die Mitteilung, UGP-RL Anhang I Nr. 10 für den Ton).
+
+          FEHLT DIE SPRACHE, FEHLT DIESER BLOCK -- und der Dialog ist genau
+          das, was er vor diesem Bau war. Die Pflicht hängt an der Grafik
+          darunter, nicht an diesem Absatz; ein fehlender Zusatz ist deshalb
+          kein Mangel, sondern der ehrliche Zustand.
+        */}
+        {label.eigeneWorte ? (
+          <div className="eu-gwl-dialog__wort">
+            <h2 className="eu-gwl-dialog__titel">{label.eigeneWorte.titel}</h2>
+            {label.eigeneWorte.absaetze.map((absatz) => (
+              <p className="eu-gwl-dialog__absatz" key={absatz.slice(0, 40)}>
+                {absatz}
+              </p>
+            ))}
+          </div>
+        ) : null}
+
+        {/*
+          DIE UEBERSCHRIFT ÜBER DER GRAFIK IST KEINE ZIERDE, SIE IST DIE
+          TRENNLINIE: sie weist die Mitteilung als fremde Rede der Kommission
+          aus. Ohne sie stuende unser Text unmittelbar vor einem amtlichen
+          Blatt und könnte als dessen Teil gelesen werden -- und das wäre
+          genau der Vorwurf, eine eigene Fassung an die Stelle der
+          harmonisierten Mitteilung gesetzt zu haben.
+
+          SIE HÄNGT AM SELBEN ZWEIG WIE DER TEXT, und das ist Absicht: eine
+          Trennlinie braucht zwei Seiten. Ohne unseren Text steht die Grafik
+          allein im Dialog und trennt sich von nichts -- dann wäre die
+          Ueberschrift nur eine weitere Zeile, und zwar eine in einer Sprache,
+          die der Leser dieser Sprachfassung womoeglich nicht spricht.
+        */}
+        {label.eigeneWorte ? (
+          <h3 className="eu-gwl-dialog__amtstitel">
+            {label.eigeneWorte.amtstitel}
+          </h3>
+        ) : null}
 
         {/*
           Die Buehne ist der einzige waagerecht scrollende Bereich. Sie liegt
