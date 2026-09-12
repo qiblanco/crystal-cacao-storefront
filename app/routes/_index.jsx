@@ -14,16 +14,10 @@ import {Kakao} from '~/components/product-pages/Kakao';
 import {PodcastEinstieg} from '~/components/reusables/PodcastEinstieg';
 import {waehleFassung} from '~/lib/startseite-fassung';
 import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
-import {entityGraph, ORG_ID, websiteSchema} from '~/lib/entity-schema';
 import {MockShopNotice} from '~/components/MockShopNotice';
-import {
-  ABSENDER_MARKE,
-  KAKAO_KOLLEKTION,
-  markenOrganisation,
-  SORTEN_PFADE,
-} from '~/lib/kakao-zone';
+import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
 import {SORTEN} from '~/lib/sorten-profil';
-import {teilbildSignale} from '~/lib/kakao-seo';
+import {markenGraph, teilbildSignale} from '~/lib/kakao-seo';
 
 /**
  * @type {Route.MetaFunction}
@@ -117,7 +111,7 @@ export const meta = () => {
     // byte-gleich zur Vorlage, und bleibt es. Diese Route gehoert crystal
     // allein und steht in keinem Manifest-Eintrag — der Anpassungspunkt ist
     // deshalb der AUFRUFER, nicht der Helfer.
-    {'script:ld+json': startseitenGraph()},
+    {'script:ld+json': markenGraph()},
   ];
 };
 
@@ -150,22 +144,6 @@ export const meta = () => {
  * DIE KORREKTUR STEHT WEITERHIN HIER AM AUFRUFER, weil entity-schema.js K1
  * ist (shared/UPSTREAM.json) und byte-gleich zur Vorlage bleibt.
  */
-function startseitenGraph() {
-  const graph = entityGraph();
-  const seite = websiteSchema();
-  return {
-    ...graph,
-    '@graph': graph['@graph'].map((knoten) => {
-      if (knoten['@id'] === seite['@id']) {
-        return {...knoten, name: ABSENDER_MARKE};
-      }
-      if (knoten['@id'] === ORG_ID) {
-        return markenOrganisation(knoten, {origin: CANONICAL_ORIGIN});
-      }
-      return knoten;
-    }),
-  };
-}
 
 /**
  * @param {Route.LoaderArgs} args

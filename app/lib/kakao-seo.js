@@ -40,8 +40,50 @@
  * sie haengt an, was fehlt, und fasst nicht an, was steht.
  */
 import {CANONICAL_ORIGIN, absoluteCanonical} from './seo.js';
-import {ORG_ID, SITE_ID} from './entity-schema.js';
-import {ABSENDER_MARKE} from './kakao-zone.js';
+import {ORG_ID, SITE_ID, entityGraph, websiteSchema} from './entity-schema.js';
+import {ABSENDER_MARKE, markenOrganisation} from './kakao-zone.js';
+
+/**
+ * Entitaets-Graph dieses Ladens: Organization UND WebSite, beide mit der
+ * RICHTIGEN Marke.
+ *
+ * WARUM ER HIER STEHT UND NICHT IN app/routes/_index.jsx, wo er bis zum
+ * 2026-09-12 stand: seit diesem Tag braucht ihn eine ZWEITE Seite. Die
+ * Kollektionsseite nennt in ihrer CollectionPage `isPartOf` und `publisher`
+ * per `@id` — und eine unabhaengige Gegenpruefung hat noch am selben Tag
+ * gemessen, dass beide Knoten in JENEM Dokument gar nicht ausgeliefert wurden.
+ * Ein Konsument, der das Einzeldokument liest (so wertet Google), sah einen
+ * leeren Verweis.
+ *
+ * Der Griff waere gewesen, den Graphen in der zweiten Route noch einmal zu
+ * bauen. Dann haette dieser Laden ZWEI Stellen, an denen seine Marke steht,
+ * und sie waeren beim naechsten Marken-Nachzug auseinandergelaufen — genau die
+ * Drift, gegen die ABSENDER_MARKE in kakao-zone.js angelegt wurde. Eine Marke,
+ * eine Stelle.
+ *
+ * entity-schema.js bleibt unberuehrt: sie ist im Vendoring-Manifest als K1
+ * gefuehrt, also byte-gleich zur Vorlage. `websiteSchema()` setzt `name` auf
+ * ORGANISATION.name, also „Qi Blanco" — in der Vorlage richtig, hier die
+ * fremde Absender-Marke. Der Anpassungspunkt ist deshalb der AUFRUFER.
+ *
+ * @returns {object} JSON-LD-Graph mit Organization und WebSite
+ */
+export function markenGraph() {
+  const graph = entityGraph();
+  const seite = websiteSchema();
+  return {
+    ...graph,
+    '@graph': graph['@graph'].map((knoten) => {
+      if (knoten['@id'] === seite['@id']) {
+        return {...knoten, name: ABSENDER_MARKE};
+      }
+      if (knoten['@id'] === ORG_ID) {
+        return markenOrganisation(knoten, {origin: CANONICAL_ORIGIN});
+      }
+      return knoten;
+    }),
+  };
+}
 
 /**
  * DAS Teilen-Bild dieses Ladens — eine Marke, ein Bild, eine Stelle.
@@ -251,6 +293,14 @@ export function kollektionSignale({
   }
 
   descriptoren.push({'script:ld+json': brotkrume({url, name: kurz})});
+  // DIE ANKER, AUF DIE `isPartOf` UND `publisher` OBEN ZEIGEN — im SELBEN
+  // Dokument. Eine unabhaengige Gegenpruefung hat am 2026-09-12 gemessen, dass
+  // die erste Fassung dieser Datei beide per `@id` nannte, ohne sie
+  // auszuliefern: sie standen nur auf der Startseite. Ein Konsument, der das
+  // Einzeldokument liest — und so wertet Google — sah einen leeren Verweis.
+  // Die doppelte Ausgabe desselben Knotens auf mehreren Seiten ist kein
+  // Widerspruch: die `@id` macht sie zur EINEN Entitaet.
+  descriptoren.push({'script:ld+json': markenGraph()});
   // og:title/og:url/og:description stehen bereits in der Route und werden
   // hier NICHT wiederholt — zwei Quellen fuer denselben Text driften
   // auseinander.
