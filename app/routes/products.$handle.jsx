@@ -7,7 +7,7 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
-import {ProductPrice} from '~/components/ProductPrice';
+import {ProductPriceKanon} from '~/components/ProductPrice';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
@@ -182,9 +182,17 @@ export default function Product() {
       <ProductImage image={selectedVariant?.image} />
       <div className="product-main">
         <h1>{title}</h1>
-        <ProductPrice
+        {/* KANON-FASSUNG, seit 2026-09-12: diese Route bekommt den ROHEN
+            Netto-Betrag der Storefront-API und muss ihn selbst auf den Betrag
+            umrechnen, den die Kasse belastet (76/122/159 statt
+            71,03/114,02/148,60). `handle` ist dabei tragend und kein Beiwerk —
+            er ist der Schluessel des Steuersatzes (7 % Lebensmittel fuer die
+            Kakao-Handles, 19 % sonst). Begruendung und Belege im Kopf von
+            app/components/ProductPrice.jsx. */}
+        <ProductPriceKanon
           price={selectedVariant?.price}
           compareAtPrice={selectedVariant?.compareAtPrice}
+          handle={product.handle}
         />
         <br />
         <ProductForm
