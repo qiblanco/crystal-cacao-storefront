@@ -289,6 +289,63 @@
   outline-offset: 2px;
 }
 
+/* ------------------------------------------------------------------ */
+/* Unsere eigenen Worte vor der amtlichen Mitteilung                   */
+/* ------------------------------------------------------------------ */
+
+/*
+ * DER ABSTAND ZUM SCHLIESSEN-KNOPF IST KEIN GESCHMACK, SONDERN PLATZ:
+ * der Knopf sitzt absolut oben rechts (siehe oben) und wuerde sonst auf der
+ * ersten Textzeile liegen.
+ */
+.eu-gwl-dialog__wort {
+  margin: 0 0 1.5rem;
+  padding-right: 2.5rem;
+}
+
+.eu-gwl-dialog__titel {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  color: #2c2a26;
+}
+
+.eu-gwl-dialog__absatz {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #2c2a26;
+
+  /*
+   * MAXIMALE ZEILENLAENGE: der Dialog ist bis 760 px breit, und eine Zeile
+   * über ~75 Zeichen liest sich schlecht. Der Text darf schmaler sein als
+   * die Grafik darunter -- die Grafik trägt den QR-Code und braucht ihre
+   * Mindestbreite, der Text nicht.
+   */
+  max-width: 62ch;
+}
+
+.eu-gwl-dialog__absatz:last-child {
+  margin-bottom: 0;
+}
+
+/*
+ * DIE UEBERSCHRIFT ÜBER DER GRAFIK IST DIE TRENNLINIE zwischen unserer
+ * Stimme und der der Kommission. Sie ist deshalb sichtbar abgesetzt: eigene
+ * Linie darueber, kleiner und ruhiger als unsere eigene Ueberschrift.
+ */
+.eu-gwl-dialog__amtstitel {
+  margin: 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(44, 42, 38, 0.15);
+
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  color: #6b665e;
+}
+
 /*
  * Die Buehne ist der einzige waagerecht scrollende Bereich.
  *

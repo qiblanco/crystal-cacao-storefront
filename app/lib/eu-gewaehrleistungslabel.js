@@ -347,3 +347,128 @@ export const AUSLOESER_ZEICHEN = {
   hoehe: 251,
   anzeigeBreite: 36,
 };
+
+/* ==================================================================== */
+/* UNSERE EIGENEN WORTE VOR DER AMTLICHEN MITTEILUNG                    */
+/* ==================================================================== */
+
+/**
+ * Anlass (Christian am 2026-09-12, mit Bildschirmfoto des Dialogs):
+ * "dieses Pop-up wirkt sehr befremdlich und nicht nett. Hier wuensche ich
+ * mir ein Statement von uns, dass wir dem folgen und Teil davon sind, und
+ * was der Kunde davon hat."
+ *
+ * --------------------------------------------------------------------
+ * WAS DIE RECHERCHE ERGEBEN HAT -- und warum der Text DAVOR steht und die
+ * Grafik NICHT ersetzt
+ * --------------------------------------------------------------------
+ * Die harmonisierte Mitteilung selbst ist verbindlich vorgegeben.
+ * Durchfuehrungsverordnung (EU) 2025/1960 der Kommission vom 25.09.2025,
+ * Artikel 1 woertlich: "Die Gestaltung und der Inhalt der harmonisierten
+ * Mitteilung nach Artikel 22a Absatz 1 der Richtlinie 2011/83/EU
+ * entsprechen den Angaben in Anhang I dieser Verordnung." Rechtsgrundlage
+ * ist Art. 22a Abs. 2 und 4 RL 2011/83/EU, eingefuegt durch die
+ * EmpCo-Richtlinie (EU) 2024/825. Anwendbar ab 27.09.2026 (Artikel 3).
+ *
+ * EINE EIGENE FORMULIERUNG ALS ERSATZ IST DAMIT NICHT ZULAESSIG. Die
+ * Verordnung regelt aber NUR die Mitteilung selbst und sagt
+ * nichts über begleitenden Text. Zusaetzliche eigene Erklaerungen sind
+ * nicht verboten -- die Fundstellen und die Abwaegung stehen im RESULT des
+ * Jobs 20260912-BAU-gewaehrleistung-in-eigenen-worten-statt-amtsblatt-als-bild.
+ *
+ * Gebaut ist deshalb genau die Form, die Christian beschrieben hat: unsere
+ * Erklaerung zuerst, die amtliche Grafik unveraendert dahinter und mit
+ * eigener Ueberschrift als fremde Rede ausgewiesen. Nichts daran ersetzt
+ * die Mitteilung, nichts kuerzt sie ab.
+ *
+ * --------------------------------------------------------------------
+ * DIE GRENZE, DIE DEN TEXT TRÄGT: ANHANG I NR. 10 DER UGP-RICHTLINIE
+ * --------------------------------------------------------------------
+ * Nr. 10 des Anhangs I der RL 2005/29/EG (in Deutschland über
+ * Par. 3 Abs. 3 UWG) verbietet PER SE, "Rechte, die dem Verbraucher
+ * gesetzlich zustehen, als Besonderheit des Angebots des Gewerbetreibenden
+ * darzustellen" -- Werbung mit Selbstverstaendlichkeiten, schwarze Liste,
+ * ohne Spuerbarkeitsschwelle.
+ *
+ * Der Text sagt deshalb im zweiten Satz, dass dieses Recht KRAFT GESETZES
+ * bei jedem Haendler in der EU gilt. Was wir als UNSERES ausweisen duerfen,
+ * ist allein die Art, wie wir damit umgehen (kein Formular, Bestellnummer
+ * genügt) -- nicht die Frist und nicht die Abhilfen. Wer diesen Text
+ * aendert, prueft jeden neuen Satz gegen genau diese Grenze.
+ *
+ * --------------------------------------------------------------------
+ * WARUM JE SPRACHE UND NICHT EINE KONSTANTE
+ * --------------------------------------------------------------------
+ * Die Mitteilung gibt es in 24 Amtssprachen. Unsere eigenen Worte gibt es
+ * heute in zwei. Eine Sprache ohne Eintrag bekommt KEINEN Ersatztext und
+ * KEINE maschinelle Uebersetzung, sondern nur die amtliche Grafik -- also
+ * genau den Zustand vor diesem Bau. Das ist rechtlich vollstaendig (die
+ * Pflicht hängt an der Mitteilung, nicht an unserem Zusatz) und ehrlich:
+ * ein unuebersetzter deutscher Absatz vor einem griechischen Amtsblatt
+ * wäre schlechter als gar keiner.
+ *
+ * HEUTIGE REICHWEITE, gemessen: `app/lib/context.js` verdrahtet
+ * `i18n.language` fest auf 'DE'; es gibt keine Sprach-Routen und keinen
+ * Sprachumschalter. Ausgeliefert wird deshalb ausschließlich 'de'. Der
+ * englische Eintrag ist der Rueckfall (RUECKFALL_SPRACHE) und wird erst
+ * sichtbar, wenn eine zweite Sprache dazukommt.
+ */
+export const EIGENE_WORTE = {
+  de: {
+    titel: 'Deine gesetzliche Gewährleistung',
+    absaetze: [
+      'In Europa gilt für jede Ware, die du kaufst, eine gesetzliche ' +
+        'Gewährleistung von mindestens zwei Jahren. Dieses Recht hast du ' +
+        'kraft Gesetzes, bei jedem Händler in der EU. Wir stehen dahinter.',
+      'Wenn dein Stück nicht das ist, was zugesagt war, oder nicht so ' +
+        'funktioniert, wie es soll, wende dich an uns. Du bekommst ' +
+        'kostenlos Nachbesserung oder Ersatz, und wenn das nicht trägt, ' +
+        'eine Preisminderung oder die volle Erstattung des Kaufpreises. ' +
+        'Maßgeblich ist, ob der Mangel schon bei der Lieferung vorlag.',
+      'Schreib uns, sobald dir etwas auffällt, und leg deinen Kaufnachweis ' +
+        'dazu. Deine Bestellnummer genügt, ein Formular gibt es nicht. Du ' +
+        'erreichst uns unter info@qiblanco.com. Kosten entstehen dir dabei ' +
+        'keine.',
+      'In manchen EU-Ländern ist die Frist länger als zwei Jahre. Dann ' +
+        'gilt die längere.',
+    ],
+    amtstitel: 'Die amtliche Mitteilung der Europäischen Union',
+  },
+  en: {
+    titel: 'Your legal guarantee',
+    absaetze: [
+      'In the European Union, every product you buy comes with a legal ' +
+        'guarantee of at least two years. This right is granted by law and ' +
+        'applies to every seller in the EU. We stand behind it.',
+      'If your piece is not what was described, or does not work the way ' +
+        'it should, get in touch with us. You are entitled to free repair ' +
+        'or replacement, and where that does not settle it, to a price ' +
+        'reduction or a full refund. What matters is whether the fault was ' +
+        'already there on delivery.',
+      'Write to us as soon as you notice something, and include your proof ' +
+        'of purchase. Your order number is enough, and there is no form to ' +
+        'fill in. You can reach us at info@qiblanco.com. This costs you ' +
+        'nothing.',
+      'In some EU countries the period is longer than two years. Where that ' +
+        'is the case, the longer period applies.',
+    ],
+    amtstitel: 'The official notice of the European Union',
+  },
+};
+
+/**
+ * Unsere eigenen Worte zur Sprachfassung -- oder `null`.
+ *
+ * `null` ist ein ZULAESSIGES Ergebnis und kein Fehler: der Dialog zeigt dann
+ * allein die amtliche Mitteilung. Es wird ausdrücklich NICHT auf Englisch
+ * zurueckgefallen, wie es `labelFuerSprache` für die Grafik tut -- ein
+ * englischer Absatz vor einem polnischen Amtsblatt hilft niemandem, waehrend
+ * die englische GRAFIK dort die Pflicht weiter erfuellt.
+ *
+ * @param {string|null|undefined} iso ISO-639-1 der Fassung
+ * @returns {{titel: string, absaetze: string[], amtstitel: string}|null}
+ */
+export function eigeneWorteFuerSprache(iso) {
+  const k = String(iso ?? '').trim().toLowerCase();
+  return EIGENE_WORTE[k] ?? null;
+}

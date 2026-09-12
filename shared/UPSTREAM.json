@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "cd7219c35ca09abd1c5ac1016ddd71862ad06194",
-  "erzeugt_utc": "2026-09-11T22:55:00Z",
-  "erzeuger": "von Hand gepflegt, Job 20260911-crystal-cacao-upstream-drift-21-befunde-je-datei-entscheiden (der Erzeuger erzeuge_upstream_manifest.py stuft K2 auf K1 herunter und loescht abweichung_grund -- er darf ueber dieses Manifest NICHT laufen). OXYGEN-BAU (Werkbank). Beide Baue tragen unter app/ denselben Stand; die lokalen Hashes sind gegen DIESEN Baum nachgemessen, nicht uebernommen.",
+  "upstream_commit": "59fbe30463bad2476e6b5a8bf3411db72ef86ac8",
+  "erzeugt_utc": "2026-09-12T20:01:44Z",
+  "erzeuger": "von Hand gepflegt, Job 20260911-crystal-cacao-upstream-drift-21-befunde-je-datei-entscheiden (der Erzeuger erzeuge_upstream_manifest.py stuft K2 auf K1 herunter und loescht abweichung_grund -- er darf ueber dieses Manifest NICHT laufen). OXYGEN-BAU (Werkbank). Beide Baue tragen unter app/ denselben Stand; die lokalen Hashes sind gegen DIESEN Baum nachgemessen, nicht uebernommen. NACHZUG 2026-09-12 (Job 20260912-BAU-gewaehrleistung-in-eigenen-worten-statt-amtsblatt-als-bild-s02, Segment s02): ZIELGERICHTETER Nachzug GENAU DER DREI EU-GEWAEHRLEISTUNGS-K1-DATEIEN aus PR #399 (qiblanco-storefront 9ca80e9, im gepinnten Ref 59fbe30 unveraendert enthalten) -- der Dialog sagt jetzt zuerst in unseren Worten, was der Kunde davon hat, und zeigt die amtliche Mitteilung unveraendert dahinter. Der Nachzug ist REIN ADDITIV, nachgemessen als Diff Bestand -> Vorlage: Label.jsx +52/-1 (die eine Loeschung ist die umgebaute useMemo-Zeile), lib +122/-0, css +49/-0; alle vier Exporte des Bausteins (EuLabelProvider, EuGewaehrleistungsHinweis, EuGewaehrleistungsListenpunkt, EuGewaehrleistungsLink) stehen unveraendert, die K2-Gestalt dieses Ladens (Ausloeser als Listenpunkt in der Vertrauensliste) ist damit unberuehrt. CacaoProductForm.jsx und jeder andere K2-Eintrag sind NICHT angefasst worden. WAS DIESER COMMIT AUSDRUECKLICH NICHT TUT -- und warum der gehobene upstream_commit KEINE Vollsynchronisierung behauptet: zum Zeitpunkt des Nachzugs meldete probe_crystal_cacao_drift.py 22 Befunde, von denen drei hier entschieden sind. Die uebrigen 19 (HUELLE-DRIFT ig-testimonials.css / ig-video-schema.js / seiten-beschreibung.js / seiten-seo.js, dateien_soll 32 gegen berechnet 38, UPSTREAM-DRIFT auf CacaoProductForm.jsx, produkt-schema.js, produkt-seo.js, seo.js und den drei Kakao-Routen) bleiben OFFEN und unentschieden -- sie gehoeren einem eigenen Auftrag. Der upstream_commit sagt: 'gegen diesen Ref wurde zuletzt GESCHAUT', nicht 'gegen diesen Ref ist alles abgeglichen'; die offene Liste fuehrt die Drift-Wache.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -230,19 +230,19 @@
     {
       "upstream": "app/components/EuGewaehrleistungsLabel.jsx",
       "klasse": "K1",
-      "sha256": "291c825bbbbbe7c02cf8d2e11f1c607019204f3e486bf59c121dd4c67117c354",
+      "sha256": "6208bd273d20d791a7f42f34a3e0ad2f809be4785bec104af34391735d2fc544",
       "nachzug_grund": "Nachgezogen 2026-09-05 (Job 20260904-…-vendoring-drift-sieben-befunde-hinter-messausfall-prio18). Teil der harmonisierten EU-Gewaehrleistungs-Mitteilung (Anhang I der Durchfuehrungsverordnung (EU) 2025/1960, anwendbar ab 27.09.2026). Kam ueber CacaoProductForm.jsx in die Import-Huelle der geteilten Kakao-Kaufseiten. Byte-gleich zur Vorlage uebernommen: die Datei traegt keinen Qi-Blanco-Bezug (gemessen: 0 Treffer auf qiblanco|qione|qibracelet|qihome|gitterchip), also gibt es hier nichts zu tilgen und keinen Grund fuer eine Abweichung."
     },
     {
       "upstream": "app/lib/eu-gewaehrleistungslabel.js",
       "klasse": "K1",
-      "sha256": "ead30c9c67991ff7728c5e7f4b3c080f360f54478cf096a9314bad74dc84d4d9",
+      "sha256": "5211c4325567af10dd526dc78d223f25bf4340b81240a57e8c7d2320a532aef7",
       "nachzug_grund": "Nachgezogen 2026-09-05 (Job 20260904-…-vendoring-drift-sieben-befunde-hinter-messausfall-prio18). Teil der harmonisierten EU-Gewaehrleistungs-Mitteilung (Anhang I der Durchfuehrungsverordnung (EU) 2025/1960, anwendbar ab 27.09.2026). Kam ueber CacaoProductForm.jsx in die Import-Huelle der geteilten Kakao-Kaufseiten. Byte-gleich zur Vorlage uebernommen: die Datei traegt keinen Qi-Blanco-Bezug (gemessen: 0 Treffer auf qiblanco|qione|qibracelet|qihome|gitterchip), also gibt es hier nichts zu tilgen und keinen Grund fuer eine Abweichung."
     },
     {
       "upstream": "app/styles/eu-gewaehrleistung.css",
       "klasse": "K1",
-      "sha256": "7e53811789f282e3ffce22dce2291ceeb69edc747624d02236797096279e5c11",
+      "sha256": "a206759415a31d82963ef6dff1e12d11bb59e94bc369003548323aeddd782b55",
       "nachzug_grund": "Nachgezogen 2026-09-05 (Job 20260904-…-vendoring-drift-sieben-befunde-hinter-messausfall-prio18). Teil der harmonisierten EU-Gewaehrleistungs-Mitteilung (Anhang I der Durchfuehrungsverordnung (EU) 2025/1960, anwendbar ab 27.09.2026). Kam ueber CacaoProductForm.jsx in die Import-Huelle der geteilten Kakao-Kaufseiten. Byte-gleich zur Vorlage uebernommen: die Datei traegt keinen Qi-Blanco-Bezug (gemessen: 0 Treffer auf qiblanco|qione|qibracelet|qihome|gitterchip), also gibt es hier nichts zu tilgen und keinen Grund fuer eine Abweichung. NICHT IN DER IMPORT-HUELLE UND DESHALB VON DER WACHE BAULICH NICHT SEHBAR: root.jsx laedt sie per `?url`-Import, das ist kein Modulimport und faellt aus jeder Huellenberechnung. Wer nur den zwei gemeldeten HUELLE-DRIFT-Befunden folgt, liefert den Pflichttext UNGESTYLT aus und die Wache meldet trotzdem gruen. Sie steht hier im Manifest, damit ihre Bewegung oben trotzdem auffaellt."
     },
     {
