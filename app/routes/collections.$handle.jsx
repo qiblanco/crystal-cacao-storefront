@@ -11,6 +11,7 @@ import {
 } from '~/lib/kakao-zone';
 import {KachelPreis} from '~/components/KachelPreis';
 import {canonicalLink, absoluteCanonical} from '~/lib/seo';
+import {kollektionSignale, produktEintraege} from '~/lib/kakao-seo';
 
 /**
  * @type {Route.MetaFunction}
@@ -40,6 +41,30 @@ export const meta = ({data}) => {
     property: 'og:url',
     content: absoluteCanonical(`/collections/${kollektion.handle}`),
   });
+  // TEILBILD UND STRUKTURIERTE DATEN, ergaenzt 2026-09-12 vom Grossjob-Segment
+  // s06. Gemessen am selben Tag an der Live-Auslieferung: diese Seite war die
+  // EINZIGE der zehn Sitemap-Seiten ohne jedes JSON-LD und eine von dreien
+  // ohne og:image. Fuer eine Suchmaschine war sie damit eine Produktliste,
+  // der niemand sagt, dass sie eine Kollektion ist.
+  //
+  // DIE EINTRAEGE KOMMEN AUS DEN GEZAUNTEN KNOTEN, nicht aus der rohen
+  // API-Antwort: `loadCriticalData` kappt `collection.products.nodes` ueber
+  // uebersichtAuswahl() von neun auf zwei Sorten. Eine ItemList aus der rohen
+  // Antwort haette sieben Adressen benannt, die auf dieser Seite niemand
+  // sieht — und ein Crawler folgt Adressen, die er im Markup findet.
+  //
+  // `ersteSeite` haengt an pageInfo: auf einer Cursor-Folgeseite gilt der
+  // canonical dieser Kollektion, und eine ItemList mit Position 1..n waere
+  // dort eine Reihenfolge-Aussage ueber eine andere Seite.
+  descriptoren.push(
+    ...kollektionSignale({
+      pfad: `/collections/${kollektion.handle}`,
+      name: kollektion.title,
+      beschreibung: beschreibung ?? null,
+      eintraege: produktEintraege(kollektion.products?.nodes),
+      ersteSeite: !kollektion.products?.pageInfo?.hasPreviousPage,
+    }),
+  );
   return descriptoren;
 };
 

@@ -23,6 +23,7 @@ import {
   SORTEN_PFADE,
 } from '~/lib/kakao-zone';
 import {SORTEN} from '~/lib/sorten-profil';
+import {teilbildSignale} from '~/lib/kakao-seo';
 
 /**
  * @type {Route.MetaFunction}
@@ -54,10 +55,31 @@ export const meta = () => {
     // entscheidet jedes Netzwerk selbst, welcher Text und welches Bild
     // erscheinen.
     //
-    // Bewusst OHNE og:image: es gibt hier kein gepflegtes Teilen-Bild, und
+    // DER ZAUN VON 2026-09-10 STAND HIER WOERTLICH SO: "Bewusst OHNE
+    // og:image: es gibt hier kein gepflegtes Teilen-Bild, und
     // `twitter:card: summary_large_image` ohne Bild waere eine Zusage ohne
     // Deckung (dieselbe Begruendung wie in produkt-seo.js). Lieber vier
-    // richtige Angaben als fuenf, von denen eine ins Leere zeigt.
+    // richtige Angaben als fuenf, von denen eine ins Leere zeigt."
+    //
+    // ER WIRD NICHT ENTFERNT, SONDERN AUFGELOEST — und zwar nur seine ERSTE
+    // Haelfte (Grossjob-Segment s06, 2026-09-12). Die zweite Haelfte gilt
+    // unveraendert weiter und ist in teilbildSignale() eingebaut: die
+    // Kartenangabe steht dort in DERSELBEN Bedingung wie das Bild, ohne Bild
+    // entsteht auch keine Karte.
+    //
+    // Die erste Haelfte war eine Tatsachenbehauptung ueber den Bildbestand,
+    // und sie ist nachgemessen worden statt geglaubt: die Startseite rendert
+    // zwei in Shopify gepflegte Packshots oberhalb der Falz, 2000x2000 und
+    // 2144x2133, echte Pixelmasse aus dem Dateikopf. Ein gepflegtes Bild
+    // existiert; es war nur nie eines fuers Teilen bestimmt worden. Welches
+    // es wird und warum, steht an MARKEN_TEILBILD in app/lib/kakao-seo.js.
+    //
+    // WAS OFFEN BLEIBT, ausdruecklich benannt statt zugedeckt: ein eigens
+    // gebautes Teilen-Bild im Querformat, das BEIDE Sorten zeigt, waere
+    // besser — die Startseite zeigt sie gleichgewichtig (12 zu 12
+    // Vorkommen). Das ist Gestaltungsarbeit und als eigener Vorgang
+    // gemeldet. Bis dahin gilt: ein echtes Bild ist Deckung, und heute zeigt
+    // jeder geteilte Link GAR NICHTS.
     {property: 'og:type', content: 'website'},
     {property: 'og:site_name', content: ABSENDER_MARKE},
     {property: 'og:locale', content: 'de_DE'},
@@ -68,6 +90,7 @@ export const meta = () => {
       content:
         'Crystal Cacao® – High Performance Cacao. Wach. Klar. Mineralisiert. 100 % reiner Premium-Naturkakao aus Peru.',
     },
+    ...teilbildSignale(),
     // ENTITAETS-GRAPH (Organization + WebSite), ergaenzt 2026-09-10 vom Job
     // 20260910-BAU-crystal-cacao-in-die-suchmessung-und-seo-nachziehen.
     //
