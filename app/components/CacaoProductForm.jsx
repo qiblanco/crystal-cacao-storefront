@@ -55,13 +55,25 @@ export function cacaoPricing(quantity, selectedVariant, handle) {
   let waehrung = selectedVariant?.price?.currencyCode || 'EUR';
   let einzel;
   let compareAt;
+  // NICHT-EUR-MAERKTE BEKOMMEN KEINE STAFFEL-BEHAUPTUNG (2026-09-12).
+  // Der Mengenrabatt ist seit dem 2026-09-12 ein FESTBETRAG in EUR; Shopify
+  // rechnet ihn je Markt per Wechselkurs um. Diesen Kurs kann die Kaufseite
+  // baulich nicht kennen (ein Automatikrabatt existiert erst mit einem
+  // Warenkorb) — jede hier gerechnete Prozentzahl waere geraten. Gemessen am
+  // Kundenrand war sie zu NIEDRIG geraten: US 3x bewarb 207,00 USD, die Kasse
+  // belastete 220,69 USD. Darum nennt die Seite ausserhalb des EUR-Markts den
+  // LISTENPREIS und verspricht keinen Staffelpreis; der Rabatt zeigt sich im
+  // Warenkorb. Im EUR-Markt bleibt die Rechnung unveraendert — dort trifft der
+  // Festbetrag den runden Bruttobetrag exakt.
+  const rabattProzent =
+    waehrung === 'EUR' ? staffel.rabattProzent : 0;
+  const rabattImWarenkorb = waehrung !== 'EUR' && staffel.rabattProzent > 0;
   if (Number.isFinite(netto)) {
     const satz = anzeigeSatz(handle, waehrung);
     const rabattProEinheit =
-      Math.floor(netto * (staffel.rabattProzent / 100) * 100) / 100;
+      Math.floor(netto * (rabattProzent / 100) * 100) / 100;
     einzel = Math.round((netto - rabattProEinheit) * (1 + satz));
-    compareAt =
-      staffel.rabattProzent > 0 ? Math.round(netto * (1 + satz)) : null;
+    compareAt = rabattProzent > 0 ? Math.round(netto * (1 + satz)) : null;
   } else {
     if (typeof console !== 'undefined') {
       console.warn(
@@ -80,7 +92,8 @@ export function cacaoPricing(quantity, selectedVariant, handle) {
     per100g: formatPer100g(einzel / (PACKUNG_GRAMM / 100), waehrung),
     badge: staffel.badge,
     badgeStyle: staffel.badgeStyle,
-    rabattProzent: staffel.rabattProzent,
+    rabattProzent,
+    rabattImWarenkorb,
   };
 }
 
@@ -92,9 +105,15 @@ export function cacaoSizeOptions(selectedVariant, handle) {
     const pricing = cacaoPricing(value, selectedVariant, handle);
     const rabatt =
       pricing.rabattProzent > 0 ? `${pricing.rabattProzent}% Rabatt | ` : '';
+    // Ausserhalb des EUR-Markts nennt die Zeile den Listenpreis und sagt, dass
+    // der Mengenrabatt im Warenkorb abgezogen wird — statt einen Staffelpreis
+    // zu versprechen, den die Kasse nicht einloest (siehe cacaoPricing).
+    const hinweis = pricing.rabattImWarenkorb
+      ? ' | Mengenrabatt im Warenkorb'
+      : '';
     return {
       value,
-      label: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}${pricing.price} pro Packung`,
+      label: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}${pricing.price} pro Packung${hinweis}`,
     };
   });
 }
