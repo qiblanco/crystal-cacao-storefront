@@ -59,7 +59,7 @@ export function cacaoPricing(quantity, selectedVariant, handle) {
   // Der Mengenrabatt ist seit dem 2026-09-12 ein FESTBETRAG in EUR; Shopify
   // rechnet ihn je Markt per Wechselkurs um. Diesen Kurs kann die Kaufseite
   // baulich nicht kennen (ein Automatikrabatt existiert erst mit einem
-  // Warenkorb) — jede hier gerechnete Prozentzahl waere geraten. Gemessen am
+  // Warenkorb) — jede hier gerechnete Prozentzahl ist geraten. Gemessen am
   // Kundenrand war sie zu NIEDRIG geraten: US 3x bewarb 207,00 USD, die Kasse
   // belastete 220,69 USD. Darum nennt die Seite ausserhalb des EUR-Markts den
   // LISTENPREIS und verspricht keinen Staffelpreis; der Rabatt zeigt sich im
