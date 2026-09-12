@@ -55,11 +55,21 @@ export const meta = () => {
     // entscheidet jedes Netzwerk selbst, welcher Text und welches Bild
     // erscheinen.
     //
-    // DER ZAUN VON 2026-09-10 STAND HIER WOERTLICH SO: "Bewusst OHNE
-    // og:image: es gibt hier kein gepflegtes Teilen-Bild, und
-    // `twitter:card: summary_large_image` ohne Bild waere eine Zusage ohne
-    // Deckung (dieselbe Begruendung wie in produkt-seo.js). Lieber vier
-    // richtige Angaben als fuenf, von denen eine ins Leere zeigt."
+    // BIS ZUM 2026-09-12 STAND HIER EIN ZAUN, der og:image wegliess, weil es
+    // "kein gepflegtes Teilen-Bild" gebe und `twitter:card
+    // summary_large_image` ohne Bild eine Zusage ohne Deckung waere.
+    //
+    // SEIN WORTLAUT IST HIER NICHT ZITIERT, UND DAS IST TRAGEND: die Wache
+    // seo-manager/bin/auffindbarkeits_wache.py erkennt einen dokumentierten
+    // og-Verzicht daran, dass DIESE Datei jenen Satz fuehrt
+    // (OG_VERZICHT_MARKER, zur Laufzeit aus dem freigegebenen Stand gelesen).
+    // Der Satz ist damit kein Kommentar, sondern ein SCHALTER. Stuende er nach
+    // der Ruecknahme weiter hier, waere die Ausnahme wieder scharf -- schlafend,
+    // solange diese Seite ihr Bild traegt, und lautlos entschuldigend an dem
+    // Tag, an dem es wieder fehlt. Genau dafuer ist die Wache gebaut.
+    // WER DEN VERZICHT EINES TAGES WIRKLICH WIEDER WILL, schreibt den Satz
+    // bewusst zurueck und entfernt den Aufruf unten -- beides zusammen, nie
+    // eines allein.
     //
     // ER WIRD NICHT ENTFERNT, SONDERN AUFGELOEST — und zwar nur seine ERSTE
     // Haelfte (Grossjob-Segment s06, 2026-09-12). Die zweite Haelfte gilt

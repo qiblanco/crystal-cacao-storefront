@@ -48,7 +48,17 @@ import {ABSENDER_MARKE} from './kakao-zone.js';
  *
  * WAS HIER ENTSCHIEDEN WURDE, und warum es keine Geschmacksfrage ist
  * (Grossjob-Segment s06, 2026-09-12): app/routes/_index.jsx trug bis heute
- * den Zaun "Bewusst OHNE og:image: es gibt hier kein gepflegtes Teilen-Bild".
+ * den Zaun, der og:image "bewusst" wegliess, weil es "kein gepflegtes
+ * Teilen-Bild" gebe.
+ *
+ * DER WORTLAUT JENES ZAUNS WIRD HIER ABSICHTLICH NICHT ZITIERT, und das ist
+ * keine Stil-, sondern eine Wirkungsfrage: seo-manager/bin/auffindbarkeits_
+ * wache.py erkennt einen dokumentierten og-Verzicht daran, dass die STATISCHE
+ * Routendatei genau diesen Satz fuehrt (OG_VERZICHT_MARKER). Der Satz ist also
+ * kein Kommentar, sondern ein SCHALTER. Wer ihn zitiert, nachdem der Verzicht
+ * zurueckgenommen wurde, stellt eine Ausnahme wieder her, die es nicht mehr
+ * gibt -- sie bleibt schlafend, solange die Seite ihr Bild hat, und entschuldigt
+ * lautlos den Tag, an dem es wieder verschwindet.
  * Der ZWEITE Halbsatz jenes Zauns — `twitter:card summary_large_image` ohne
  * Bild waere eine Zusage ohne Deckung — ist zeitlos richtig und gilt hier
  * unveraendert weiter: die Kartenangabe steht unten in DERSELBEN Bedingung
