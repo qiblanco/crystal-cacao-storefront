@@ -46,26 +46,49 @@
  * der Kanon verhindern soll. So zeigt das Schema exakt den Betrag, der auch
  * auf der Seite steht.
  *
- * KEIN KNOTEN OHNE PREIS-NACHWEIS (Nachtrag 2026-08-15, an allen 13
- * Produktseiten einzeln nachgemessen): Auf den Angebots-, Bundle- und
- * Mengenrabatt-Seiten weicht der angezeigte Preis vom Kanon-Wert ab. Belegt
- * an `crystal-cacao-angebot`: der Kanon rechnet 71,03 x 1,07 = 76 EUR (der
- * Handle steht in CACAO_HANDLES, und der 7-%-Satz ist dort an 41 realen
- * Bestellpositionen belegt), die Buybox der Seite zeigt aber "85,- EUR",
- * also 71,03 x 1,19. Auf den Bundle-Seiten war überhaupt kein Preis-Element
- * auffindbar, der angezeigte Wert also nicht messbar.
+ * KEIN KNOTEN OHNE PREIS-NACHWEIS — DER VORBEHALT IST AM 2026-09-12
+ * EINGELÖST UND DIE LISTE DESHALB LEER. Der Vollständigkeit halber, weil ein
+ * Zaun, der ohne Begründung verschwindet, beim nächsten Zweifel wieder
+ * erfunden wird:
  *
- * Beides führt zur selben Entscheidung: Wo nicht BEWIESEN ist, dass der
- * ausgezeichnete Preis dem angezeigten entspricht, entsteht KEIN Knoten. Ein
- * Rich Result, das weniger nennt als die Seite verlangt, ist gegenueber dem
- * Kunden irrefuehrend — und "nicht messbar" ist hier kein Freibrief, sondern
- * gilt wie ein Fehlschlag.
+ * ER ENTSTAND AM 2026-08-15 (an allen 13 Produktseiten einzeln nachgemessen):
+ * Auf den Angebots-, Bundle- und Mengenrabatt-Seiten wich der angezeigte
+ * Preis vom Kanon-Wert ab. Belegt an `crystal-cacao-angebot`: der Kanon
+ * rechnete 71,03 x 1,07 = 76 EUR, die Buybox zeigte "85,- EUR" (71,03 x
+ * 1,19). Auf den Bundle-Seiten war überhaupt kein Preis-Element auffindbar.
+ * Entscheidung damals: Wo nicht BEWIESEN ist, dass der ausgezeichnete Preis
+ * dem angezeigten entspricht, entsteht KEIN Knoten.
  *
- * DIE ABWEICHUNG SELBST IST NICHT HIER ZU HEILEN: ob die Buybox oder der
- * Kanon recht hat, ist eine Preis-Frage mit Wirkung bis in den Checkout und
- * gehört zum bestehenden preiswatch/Cacao-MwSt-Vorgang, nicht in eine
- * SEO-Auszeichnung. Diese Liste ist die konservative Zwischenlage, bis das
- * geklaert ist — sie schrumpft, sobald die Preise uebereinstimmen.
+ * EINGELÖST WURDE ER NICHT DURCH EINE NEUBEWERTUNG, SONDERN WEIL DIE
+ * ABWEICHUNG WEG IST (Job 20260912-crystal-fuenf-kaufseiten-zeigen-
+ * nettopreis-prio8). Die Sammelroute reichte den ROHEN Netto-Betrag der
+ * Storefront-API an die Buybox durch — am 2026-09-12 zeigte sie 71,03 /
+ * 114,02 / 148,60 EUR, während der Warenkorb 76 / 122 / 159 belastete. Seit
+ * `ProductPriceKanon` (app/components/ProductPrice.jsx) rechnet sie über
+ * denselben `bruttoAnzeige()`, den auch diese Datei benutzt.
+ *
+ * DER NACHWEIS, den der Zaun verlangte, liegt damit in DREI voneinander
+ * unabhängigen Formen vor, und keine davon ist "der Code sagt es":
+ *   1. `preis-ssot json`, Stand 2026-09-12T08:08:27Z: für alle sieben
+ *      Kakao-Handles `gegenprobe: ok` (Admin-API-Netto x (1+Satz) trifft den
+ *      Storefront-Wert), anzeige = 76 / 122 / 159.
+ *   2. Am öffentlichen Rand nach dem Deploy gemessen: alle fünf Seiten
+ *      zeigen genau diese Zahl.
+ *   3. Der stehende Wächter `proben/probe_seo_grundlagen.py`, Arm
+ *      `preisnaht` (rt-Task crystal-seo-grundlagen, täglich): er wird rot,
+ *      sobald ein Product-Knoten einen Betrag nennt, der auf der Seite nicht
+ *      sichtbar steht. Bis heute konnte er über diese fünf Seiten nichts
+ *      sagen — ohne Knoten gab es nichts zu vergleichen. Mit dem Öffnen des
+ *      Zauns übernimmt genau er die Bewachung, die der Zaun ersetzt hat.
+ *
+ * DIE REIHENFOLGE WAR TRAGEND und bleibt es, falls jemand das je rückgängig
+ * macht: erst die Anzeige heilen, dann den Zaun öffnen. Umgekehrt nennt das
+ * Suchergebnis dem Kunden einen Preis, den die Seite nicht zeigt.
+ *
+ * LEER STATT WEG: die Konstante bleibt als Mechanik bestehen. Wer morgen eine
+ * Seite findet, deren angezeigter Preis nicht belegbar ist, trägt sie hier
+ * ein und hat den Schutz sofort wieder — der Zaun ist der Bestand, die leere
+ * Liste nur sein heutiger Inhalt.
  *
  * ZUR SPRACHE DER BESCHREIBUNG: Es wird ausschließlich der in Shopify
  * gepflegte Text übernommen, nie ein hier formulierter. Damit sagt die
@@ -155,13 +178,7 @@ function verfuegbarkeit(verfuegbar) {
  * @param {object|undefined} produkt Shopify-Produkt aus PRODUCT_QUERY
  * @returns {object|null}
  */
-export const OHNE_PREIS_NACHWEIS = [
-  'crystal-cacao-angebot',
-  'bundle-2x-awake',
-  'bundle-3x-awake',
-  'mengenrabatt-2x',
-  'mengenrabatt-3x-create',
-];
+export const OHNE_PREIS_NACHWEIS = [];
 
 /**
  * Versandtabelle Deutschland — wörtlich aus /policies/shipping-policy
@@ -393,12 +410,14 @@ export function produktSchema(produkt) {
  *
  * WARUM SIE AUCH FÜR `OHNE_PREIS_NACHWEIS`-HANDLES ENTSTEHT — die einzige
  * Stelle, an der diese Funktion bewusst ANDERS urteilt als produktSchema():
- * Die fünf dort geführten Handles (Bundles, Mengenrabatte, das
- * Kakao-Angebot) tragen absichtlich KEIN Product-JSON-LD, weil ein
- * Product-Knoten ohne belastbaren Preis schlechter ist als keiner. Eine
- * Brotkrume trifft darüber gar keine Aussage: sie beschreibt den Weg zur
- * Seite, nicht ihren Preis, und kann deshalb auch nicht falsch werden, wenn
- * der Preis unklar ist. Alle fünf stehen ausserdem in
+ * Seit dem 2026-09-12 ist diese Liste LEER, der Unterschied also derzeit
+ * ohne Gegenstand; die Regel bleibt trotzdem stehen, weil die Liste jederzeit
+ * wieder gefüllt werden kann (siehe Kopf). Ein dort geführter Handle trägt
+ * absichtlich KEIN Product-JSON-LD, weil ein Product-Knoten ohne belastbaren
+ * Preis schlechter ist als keiner. Eine Brotkrume trifft darüber gar keine
+ * Aussage: sie beschreibt den Weg zur Seite, nicht ihren Preis, und kann
+ * deshalb auch nicht falsch werden, wenn der Preis unklar ist. Die fünf
+ * vormals dort geführten Seiten stehen ausserdem in
  * sitemap/products/1.xml (live gezählt 2026-09-05, 13 Einträge) — sie sind
  * genau die "indexierbaren Produktseiten", die die Zusage aus PR #100 nennt.
  * Der Preis-Vorbehalt bleibt davon unberührt.
