@@ -258,6 +258,60 @@
   --cc-sorte-awake-flaeche: #FFF0F5; /* --cc-text darauf 12,98:1 */
   --cc-sorte-create-flaeche: #F0F7FF;/* --cc-text darauf 13,27:1 */
 
+  /* ---- DIE WORTMARKEN-BILDER: DIE FRAGE IST GEMESSEN BEANTWORTET ----
+   * 2026-09-13, offener Vollzug ov3588271528. Er stand da, weil ein
+   * Vorgaenger gemeldet hatte, die zwei Schriftzug-GRAFIKEN wichen von der
+   * Verpackung ab: Awake_Schriftzug traegt #F5488E, das Create-Gegenstueck
+   * #67B9FF, waehrend die Tuete #D94076 bzw. #5BA3F8 traegt. Schluss damals:
+   * die Verpackung ist der Massstab, also ist das BILD die Abweichung.
+   *
+   * NACHGEMESSEN AM CDN-ORIGINAL STIMMT DIESER SCHLUSS NICHT, und der Grund
+   * sieht man dem Bild nicht an: BEIDE WORTMARKEN SIND VERLAEUFE, keine
+   * Flaechenfarben. Awake laeuft von #F5488E (hell, links) nach #C40064
+   * (dunkel, rechts), Create von #68B9FF nach etwa #1F98F9. Die zwei oben
+   * genannten Werte sind der HELLSTE PUNKT des Verlaufs - ein Messpunkt,
+   * kein Zustand. Sie wurden gegen einen k-means-SCHWERPUNKT gestellt; das
+   * sind zwei verschiedene Groessen auf derselben Sache.
+   *
+   * DAS LAB-MITTEL DER TINTE TRIFFT DEN TOKEN DAGEGEN FAST GENAU:
+   *   awake   Kunstwerk L* 51,85  gegen #D94076 L* 51,53  -> dL* 0,32
+   *   create  Kunstwerk L* 68,39  gegen #5BA3F8 L* 65,90  -> dL* 2,49
+   * Und das ist kein Zufall: die Token oben sind laut ihrer eigenen
+   * Ableitung "gemessen an der Wortmarke" - also am GLEICHEN Kunstwerk, nur
+   * ueber ein Foto der bedruckten Tuete. Bild und Token sind zwei Messungen
+   * derselben Sache, nicht zwei Farben.
+   *
+   * DER ABSTAND LIEGT INNERHALB DER STREUUNG DES MASSSTABS SELBST. Dieselbe
+   * Wortmarke wurde auf der Tuete dreimal gemessen (die drei Werte stehen
+   * oben bei der Sortenfarbe), und diese drei streuen untereinander staerker
+   * als das Kunstwerk vom gewaehlten Token abweicht:
+   *   awake   Spannweite der drei Messungen dE 13,28  -  Kunstwerk dE  8,70
+   *   create  Spannweite der drei Messungen dE 15,90  -  Kunstwerk dE  5,59
+   * Der Rest ist Chroma und faellt in die erwartete Richtung: gedruckte
+   * Farbe auf Papier erreicht die Saettigung eines leuchtenden Bildschirms
+   * nicht. Ehrlich zur Gegenrichtung: auf der FARBTON-Achse sitzt das
+   * Kunstwerk knapp neben den Verpackungswerten (awake 3,7 Grad, create 1,2
+   * Grad) - bei awake ist das weniger als der Verlauf in sich selbst
+   * schwankt (P10..P90 = 6,8 Grad).
+   *
+   * DER KUNDE KANN DEN UNTERSCHIED OHNEHIN NIRGENDS SEHEN, am gerenderten
+   * Rand nachgemessen: auf der Kaufseite steht die Wortmarke (313x112 px),
+   * dort malt aber KEIN Element den rohen Sortenton; auf der Startseite malt
+   * der rohe Ton (Kachelkante, Belege-Titel), dort steht aber KEINE
+   * Wortmarke. Die beiden begegnen sich auf keiner Seite.
+   *
+   * DESHALB WIRD HIER NICHTS GEAENDERT - und die Grafiken werden NICHT neu
+   * gerendert. Das hiesse, die QUELLE an ein Foto ihres eigenen Drucks
+   * anzupassen, und zwar auf BEIDEN Shops zugleich: qiblanco.com bindet
+   * dieselben Dateien als *_small.webp ein.
+   * WAS STATTDESSEN GEBAUT IST: pruefungen/probe_crystal_farbwelt.py ARM-E
+   * misst taeglich (rt-Task crystal-farbwelt), ob die zwei Dateien in den
+   * Shopify-Dateien noch den Ton ihrer Sorte tragen - gegen genau die
+   * Toleranz, die oben hergeleitet ist. Wer eine der Dateien austauscht,
+   * aendert die Marke auf beiden Laeden, ohne dass ein Commit es zeigt;
+   * genau das faengt der Arm. */
+
+
   /* ---- Dieselbe Ableitung fuer den Goldton ----
    * BEIM MESSEN DER SORTENFARBE MIT AUFGEFALLEN, und es ist derselbe Fehler
    * eine Etage hoeher: --cc-gold #F2BF72 ist ein FLAECHEN-Ton (auf
