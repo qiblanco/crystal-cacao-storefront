@@ -115,43 +115,71 @@ export function markenGraph() {
  * gepflegt, beide genau das, was der Laden verkauft. Ein gepflegtes Bild
  * EXISTIERT also; was fehlt, ist ein eigens fuers Teilen gebautes.
  *
- * DIE WAHL FOLGT EINEM KRITERIUM, NICHT DEM GESCHMACK: beide Packshots kommen
- * exakt 12x auf der Startseite vor — ohne Kriterium waere die Wahl arbitraer.
- * 7.png steht im Dokument zuerst (Position 32650 gegen 34678) und ist damit
- * das erste Produktbild, das ein Besucher sieht, wenn er dem geteilten Link
- * folgt. VERWORFEN wurde Black_Friday_Sale-Kakao.png (das Bild von
- * /products/crystal-cacao-angebot): nur 711x711 und saisonal gebunden — ein
- * Black-Friday-Banner als dauerhaftes Markenbild veraltet von selbst.
+ * SEIT DEM 2026-09-13 IST DAS BILD EIGENS GEBAUT — und der Absatz darueber
+ * beschreibt den Zwischenstand, der dafuer abgeloest wurde. Er lautete: nimm
+ * den Awake-Packshot, weil er das erste eager geladene Produktbild der
+ * Startseite ist. Das war ein Kriterium und kein Geschmack, aber es blieb eine
+ * Verlegenheit — die Startseite zeigt BEIDE Sorten gleichgewichtig (Awake und
+ * Create je genau 12 Vorkommen), und der geteilte Link sagte trotzdem „Awake".
+ * Dazu war das Bild quadratisch, also genau die Form, die Facebook, LinkedIn
+ * und X wegschneiden, und es war ein Packshot ohne Wortmarke und ohne Herkunft.
  *
- * WARUM EINE KONSTANTE UND NICHT "das Bild des ersten Produkts der
+ * WAS JETZT DASTEHT: repo/public/teilen/crystal-cacao-teilbild-1200x630.png,
+ * gebaut von bau/teilbild/teilbild-bauen.py aus den Token der Seite selbst
+ * (app/styles/kakao-seiten.css) und ihrer eigenen Schrift (Open Sans Variable).
+ * Beide Sorten in gleicher Groesse und gleichem Abstand, Wortmarke, Bewertung,
+ * je Sorte die EIGENE Herkunft. Nichts Saisonales: verworfen blieb
+ * Black_Friday_Sale-Kakao.png (711x711 und an ein Datum gebunden — ein
+ * Black-Friday-Banner als dauerhaftes Markenbild veraltet von selbst).
+ *
+ * DIE HERKUNFT STEHT JE SORTE GETRENNT, UND DAS IST KEINE FEINHEIT: Awake
+ * kommt aus dem Piura-Tal in Nordperu, Create aus dem Departamento Amazonas
+ * (app/lib/sorten-profil.js sagt das ausdruecklich, die Pruefzeugnisse heissen
+ * entsprechend „Piura Blanco" und „Amazonas Nativo"). Eine gemeinsame Zeile
+ * „aus dem Piura-Tal" waere fuer die eine Sorte wahr und fuer die andere
+ * falsch. Gemeinsam wahr ist allein „Peru".
+ *
+ * AUF DEM BILD STEHT NUR PRODUKTBESCHAFFENHEIT, keine gesundheitsbezogene
+ * Angabe (EU 1924/2006). Die Startseite traegt die Zeile „Zwei Sorten, ein
+ * Kakao: Awake fuer den Start in den Tag, Create fuer den klaren Kopf" — davon
+ * ist die ERSTE Haelfte uebernommen und die zweite bewusst weggelassen.
+ *
+ * DIE BEWERTUNG IST NICHT ABGETIPPT, SIE WIRD GELESEN. Der Generator parst
+ * KAKAO_KENNZAHLEN aus app/lib/kakao-zone.js; die Zahl hat sich schon einmal
+ * geaendert (5,0 -> 4,9 am 2026-08-24), und ein soziales Netz haelt ein
+ * Teilen-Bild monatelang im Cache. Waere sie hier eingebrannt und dort
+ * gepflegt, fuehrten zwei Stellen denselben Stand. Daneben liegt
+ * bau/teilbild/teilbild-manifest.json mit genau den verbauten Werten — daran
+ * kann eine Probe Bild gegen Konstante halten, ohne Pixel lesen zu muessen.
+ *
+ * WARUM EINE KONSTANTE UND NICHT „das Bild des ersten Produkts der
  * Kollektion": genau diese Ableitung war der Defekt, den eine unabhaengige
  * Gegenpruefung am 2026-09-12 im DACH-Laden gefunden hat — unter IDENTISCHEM
  * canonical lieferten zwei URLs zwei verschiedene Vorschaubilder, weil das
  * Bild aus den Seitendaten stammte. Ein Teilen-Bild muss stabil sein.
  *
- * MASSE SIND DIE DER AUSGELIEFERTEN VARIANTE, nicht die des Originals:
- * `?width=1200` liefert an diesem 2000er Original exakt 1200x1200 PNG
- * (530116 Byte, nachgefahren). Das ist eine HERUNTER-Skalierung und damit
- * zulaessig — `?width` skaliert NICHT hoch, es deckelt nur.
+ * MASSE SIND DIE DER AUSGELIEFERTEN DATEI, nicht die des Dateinamens: die PNG
+ * misst im IHDR-Kopf 1200x630, nachgemessen. Der Dateiname nennt dieselben
+ * Zahlen, aber er ist der Beleg nicht — im Schwester-Laden ist belegt, dass
+ * ein Dateiname ueber seine Masse luegt. Mit dem Wechsel auf die eigene
+ * Herkunft faellt nebenbei der Shopify-`?width=`-Deckel weg: er skalierte nie
+ * hoch, sondern nur herunter, und das Original musste deshalb mindestens die
+ * Zielgroesse haben.
  *
- * KEIN og:image:type: der Content-Type folgt bei Shopify nicht der
- * Dateiendung, er wird ueber den Accept-Header ausgehandelt. Ein Feld, das
- * sich nicht zuverlaessig vorhersagen laesst, ist als Zusage schlechter als
- * sein Fehlen.
+ * KEIN og:image:type: zwar liefert der eigene Adapter jetzt einen festen
+ * Content-Type (server.node.mjs, MIME-Tabelle), aber `teilbildSignale()`
+ * setzt das Feld nicht, und die taegliche Probe fordert es nicht. Ein Feld,
+ * dessen Zusage niemand prueft, ist Deko.
  *
- * DER alt-TEXT IST NICHT ERFUNDEN: er ist der Produkttitel, den die Storefront
- * an dieser Stelle ohnehin schon rendert (ProductItem: `altText ||
- * product.title`, und Shopify pflegt fuer dieses Bild keinen altText). Ein
- * dritter, hier formulierter Text waere eine weitere Wahrheit ueber dasselbe
- * Bild.
+ * DER alt-TEXT BENENNT, WAS ZU SEHEN IST — beide Sorten, nicht eine. Der alte
+ * Text („Crystal Cacao® Awake – Bio") war der Produkttitel des einen
+ * Packshots; auf diesem Bild waere er nur noch halb wahr.
  */
 export const MARKEN_TEILBILD = Object.freeze({
-  url:
-    'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/' +
-    '7.png?v=1765893911&width=1200',
+  url: `${CANONICAL_ORIGIN}/teilen/crystal-cacao-teilbild-1200x630.png`,
   breite: 1200,
-  hoehe: 1200,
-  alt: 'Crystal Cacao® Awake – Bio',
+  hoehe: 630,
+  alt: 'Crystal Cacao® – Awake und Create, Bio-Kakao aus Peru',
 });
 
 /**
