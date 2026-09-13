@@ -5,6 +5,7 @@ import {ABSENDER_MARKE, markenOrganisation} from '~/lib/kakao-zone';
 import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
 import {ORG_ID, ORGANISATION, organizationSchema} from '~/lib/entity-schema';
 import {MARKEN_TEILBILD, teilbildSignale} from '~/lib/kakao-seo';
+import {isoMitZone} from '~/lib/datum';
 
 /**
  * DIE ABSICHTSERKLÄRUNG von Crystal Cacao — warum es diesen Kakao gibt.
@@ -156,8 +157,15 @@ function absichtsGraph() {
         url: SEITEN_URL,
         mainEntityOfPage: {'@type': 'WebPage', '@id': SEITEN_URL},
         inLanguage: 'de-DE',
-        datePublished: VEROEFFENTLICHT,
-        dateModified: VEROEFFENTLICHT,
+        // MASCHINENLESBAR MIT ZONE, menschenlesbar unveraendert. Google legt
+        // ein Datum ohne Zone nach dem Standort seines eigenen Crawlers aus —
+        // der Kalendertag haengt dann an einem Fremden. `isoMitZone` setzt den
+        // Anfang dieses Kalendertages in der Hauszone und rechnet den Offset je
+        // Datum aus der Zone; ein fest getipptes "+02:00" waere im Winter der
+        // falsche Tag. Die Konstante darueber bleibt der Kalendertag — sie
+        // speist auch den sichtbaren Text.
+        datePublished: isoMitZone(VEROEFFENTLICHT),
+        dateModified: isoMitZone(VEROEFFENTLICHT),
         author: {'@id': AUTOR_ID},
         publisher: {'@id': ORG_ID},
         // DASSELBE Bild wie og:image, aus DERSELBEN Konstante. Stuende hier
