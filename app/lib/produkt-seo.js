@@ -267,6 +267,56 @@ export function produktTitel(pfad) {
 }
 
 /**
+ * `image` am Product-Knoten sicherstellen -- und den Knoten fallen lassen,
+ * wenn es kein Bild gibt.
+ *
+ * WARUM ES DIESE FUNKTION GIBT (Job 20260913-crystal-fuenf-productknoten-
+ * ohne-bild, an allen sieben Kakao-Kaufseiten live gemessen):
+ * `image` ist fuer Googles Product-Rich-Result eine PFLICHTEIGENSCHAFT. Ein
+ * Knoten ohne sie faellt nicht bloss aus dem Snippet -- er steht in der
+ * Search Console dauerhaft als FEHLERHAFTES Element, waehrend ein fehlender
+ * Knoten nur nichts bewirkt. Genau dieser Satz begruendet in
+ * app/lib/produkt-schema.js, warum produktSchema() bei fehlendem Preis
+ * `null` liefert; fuer das Bild zog die Datei die Folgerung nicht (sie
+ * haengt `image` nur an, wenn Bilder da sind).
+ *
+ * ZWEI SCHRITTE, UND DER ERSTE IST DER WICHTIGE:
+ *   1. FEHLT `image`, wird das Bild genommen, das diese Seite als og:image
+ *      ohnehin ausweist. Damit ziehen Product-Knoten und og:image
+ *      NACHWEISLICH dieselbe Quelle -- vorher war das eine Annahme, und sie
+ *      war falsch: an der Sammelroute kam og:image aus dem VARIANTEN-Bild,
+ *      der Knoten aus `produkt.images`, und nur das erste wurde abgefragt.
+ *      Die Naht ist damit geschlossen, statt beschrieben.
+ *   2. Gibt es auch dann kein Bild, entsteht KEIN Knoten. Das ist der
+ *      Rueckweg fuer den einen Fall, den Schritt 1 nicht heilen kann: ein
+ *      Produkt voellig ohne Medien.
+ *
+ * AN DER EIGENSCHAFT, NICHT AN EINER HANDLE-LISTE: der Vorgaenger-Zaun
+ * OHNE_PREIS_NACHWEIS war eine getippte Liste und erreichte das sechste
+ * Produkt nie. Diese Pruefung fragt nur, ob ein Bild da ist -- ein morgen
+ * angelegtes Bundle ist automatisch mitgemeint.
+ *
+ * WARUM HIER UND NICHT IN produkt-schema.js: dieselbe Begruendung wie bei
+ * der Marke weiter unten -- produkt-schema.js ist K1 (shared/UPSTREAM.json)
+ * und bleibt so nah wie moeglich an der Vorlage. Die Korrektur steht an der
+ * Datei, die die Besonderheiten dieses Ladens ohnehin fuehrt.
+ *
+ * @param {object|null|undefined} knoten
+ * @param {string|undefined} bildUrl
+ * @returns {object|null}
+ */
+function mitBild(knoten, bildUrl) {
+  if (!knoten || typeof knoten !== 'object') return null;
+  const roh = Array.isArray(knoten.image) ? knoten.image : [knoten.image];
+  const bilder = roh.filter((u) => typeof u === 'string' && u.trim());
+  if (bilder.length) return {...knoten, image: bilder};
+  if (typeof bildUrl === 'string' && bildUrl.trim()) {
+    return {...knoten, image: [bildUrl]};
+  }
+  return null;
+}
+
+/**
  * Vollständige meta-Descriptor-Liste einer Produktroute: Titel, Beschreibung,
  * Canonical und Open Graph in EINEM Aufruf.
  *
@@ -360,7 +410,9 @@ export function produktMeta({pfad, titel, bildUrl, produkt}) {
   // Organization-Knoten dieses Ladens. Dass Marke und Verkäuferin
   // auseinandergehen, ist der Punkt: die Marke ist Crystal Cacao®, verkauft
   // wird von der Qi Blanco UG (haftungsbeschränkt).
-  const schema = produkt ? markenProdukt(produktSchema(produkt)) : null;
+  const schema = produkt
+    ? mitBild(markenProdukt(produktSchema(produkt)), bildUrl)
+    : null;
   if (schema) {
     descriptoren.push({'script:ld+json': schema});
   }
