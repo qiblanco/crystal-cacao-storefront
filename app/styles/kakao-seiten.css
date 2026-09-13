@@ -291,27 +291,55 @@
    * erfundener Goldbraun-Ton haette zugleich akzent_farben_max UND die
    * Verpackungs-Vorgabe verletzt — durch den Versuch, sie zu erfuellen.
    *
-   * DIE WAHL IST EINE ZEILE. Aktiv ist genau eine der beiden Zuweisungen;
-   * die andere steht auskommentiert daneben. Es gibt zu keinem Zeitpunkt
-   * zwei goldbraune Toene gleichzeitig live.
+   * DIE WAHL IST GETROFFEN — 2026-09-13, offener Vollzug ov7966866291.
+   * Aktiv ist der Ton der Fassung B. Das ist eine Messung und keine
+   * Geschmacksnote, und die Kopplungsvorschrift von s03 ist dabei nicht
+   * gebrochen, sondern gegenstandslos geworden. Der Reihe nach:
+   *
+   * AM 2026-09-08 HAT SICH DER GEGENSTAND DER WAHL GEAENDERT (Commit
+   * f07edb3; Christian woertlich: "Der braune Kasten auf der Startseite
+   * verschluckt die Produktkacheln und wirkt wie ein Platzhalter"). Der Ton
+   * faerbt seither KEINE Flaeche mehr, sondern eine 3px-KANTE. s03 hatte die
+   * zwei Fassungen als FLAECHEN verglichen — diesen Vergleich gibt es nicht
+   * mehr, und damit auch das Argument nicht, mit dem s03 zu A riet.
    *
    *   FASSUNG A "Kraftpapier"  #BE9A77  waermer/heller
    *     Lab(66.05, 8.49, 23.44) · der DOMINANTESTE Ton der Verpackung
-   *     (32,8 % awake / 33,9 % create). Flaechenkontrast zu --cc-grund
-   *     2,46:1 — ein ruhiges Band, das das Papier-Kontinuum nicht bricht.
-   *     Schrift darauf: --cc-dunkel, 7,10:1.
+   *     (32,8 % awake / 33,9 % create) — als FLAECHE war genau das ihr
+   *     Argument. Als KANTE traegt sie 2,46:1 gegen --cc-grund.
    *
-   *   FASSUNG B "Kakaoschale"  #846142  dunkler/erdiger
+   *   FASSUNG B "Kakaoschale"  #846142  dunkler/erdiger — AKTIV
    *     Lab(44.02, 10.15, 23.17) · derselbe Farbton-Winkel, tiefer.
-   *     Flaechenkontrast zu --cc-grund 5,26:1 — ein deutlich gesetztes Band.
-   *     Schrift darauf: --cc-grund, 5,26:1 (--cc-dunkel traegt dort nur
-   *     3,32:1 und ist deshalb NICHT die Paarung).
+   *     Als KANTE 5,26:1 gegen --cc-grund.
    *
-   * WARUM DER PARTNER-TOKEN --cc-goldbraun-auf DAZUGEHOERT und nicht
-   * weggelassen werden kann: die beiden Fassungen kippen die Textrichtung.
-   * Auf A traegt nur DUNKLE Schrift, auf B nur HELLE. Wer nur die Flaeche
-   * tauscht, tauscht ein lesbares Band gegen ein unlesbares — die zwei
-   * Zeilen werden IMMER gemeinsam gewechselt.
+   * DER MASSSTAB IST NICHT MEHR DIE FLAECHENDOMINANZ, SONDERN DIE
+   * SICHTBARKEIT. Eine Kante ist ein grafisches Objekt, und die Grenze fuer
+   * Nicht-Text liegt bei 3:1: A verfehlt sie, B erfuellt sie. Der 09-08-Fix
+   * nennt seine Absicht selbst — "damit bleibt die Verwandtschaft zur
+   * Verpackung sichtbar". B ist die einzige Fassung, die sie einloest.
+   * Christians Einwand galt der FLAECHE, nicht dem Ton; eine 3 px breite
+   * Linie verschluckt nichts.
+   *
+   * DIE KOPPLUNG DER ZWEI ZEILEN IST GEGENSTANDSLOS, NICHT GEBROCHEN.
+   * s03 schrieb vor, --cc-goldbraun und --cc-goldbraun-auf IMMER gemeinsam
+   * zu wechseln, weil die Fassungen die Textrichtung AUF DER FUELLUNG
+   * kippten. Ohne Fuellung faerbt --cc-goldbraun-auf Text, der auf dem
+   * SEITENGRUND steht. Woertlich befolgt ergibt die Vorschrift heute
+   * --cc-grund auf --cc-grund = 1,00:1 — die Ueberschrift "Unsere Sorten"
+   * verschwindet vollstaendig. Am Live-Rand gerendert und als Bild belegt:
+   * homepage-bauer/exports/design-reviews/audits/cc-goldbraun-kante-20260913/
+   * (sektion-B-woertlich-beide-zeilen-desktop.png). --cc-goldbraun-auf
+   * bleibt deshalb dunkel.
+   *
+   * DIE REGEL IST SCHLAFEND, NICHT ABGESCHAFFT: wird je wieder eine FUELLUNG
+   * eingefuehrt, gilt die Kopplung sofort wieder — auf #846142 traegt
+   * --cc-dunkel nur 3,32:1, der Partner muss dann auf --cc-grund zurueck.
+   *
+   * KONSUMENTEN-ZENSUS ZUM VOLLZUGSZEITPUNKT, damit der Tonwechsel keine
+   * zweite Zusage still mitnimmt: --cc-goldbraun hat in beiden Baeumen UND
+   * im ausgelieferten Bundle GENAU EINEN Konsumenten (das border-top am Ende
+   * dieser Datei) und NULL Fuellungen; --cc-goldbraun-auf hat zwei, beide
+   * Text auf Papier. Ein Fuellungs-Konsument waere ein Veto gewesen.
    *
    * WAS DIE SORTENFARBE HIER NICHT DARF, nachgerechnet statt gefuehlt: auf
    * einer goldbraunen FUELLUNG traegt keiner der beiden Sortentoene Text
@@ -320,12 +348,13 @@
    * nie UEBEREINANDER — die Kacheln stehen auf hellem Papier IM Band, wo
    * beide Sortentoene 4,78:1 bzw. 4,80:1 erreichen. Siehe Abschnitt
    * "DAS SORTENBAND DER STARTSEITE" am Ende dieser Datei. */
-  --cc-goldbraun: #BE9A77;          /* FASSUNG A — aktiv */
+  --cc-goldbraun: #846142;          /* FASSUNG B "Kakaoschale" — aktiv seit 2026-09-13 */
   --cc-goldbraun-auf: var(--cc-dunkel);
-  /* FASSUNG B — den Bau auf sie umstellen heisst: die zwei Zeilen oben durch
-   * die zwei Zeilen hier ersetzen. Sonst aendert sich nichts.
-   *   --cc-goldbraun: #846142;
-   *   --cc-goldbraun-auf: var(--cc-grund);
+  /* RUECKWEG auf Fassung A — genau diese eine Zeile zurueckdrehen:
+   *   --cc-goldbraun: #BE9A77;
+   * --cc-goldbraun-auf bleibt dabei unveraendert, solange der Ton eine KANTE
+   * ist und keine Flaeche. Wer die Flaeche zurueckholt, liest den Absatz
+   * "DIE REGEL IST SCHLAFEND" oben, bevor er nur den Ton tauscht.
    */
 
   /* GEMESSEN, ABER BEWUSST NICHT EINGEBAUT: das Gold der Art-Deco-Zeichnung
