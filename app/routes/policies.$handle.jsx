@@ -1,14 +1,45 @@
 import {Link, redirect, useLoaderData} from 'react-router';
+import {canonicalLink} from '~/lib/seo';
+import {seitenSignale} from '~/lib/kakao-seo';
 import {ABSENDER_MARKE, rechtstextTitel} from '~/lib/kakao-zone';
 
 /**
+ * Selbst-Canonical, Teilbild und strukturierte Daten (Job 20260912-sieben-
+ * indexierbare-seiten-ohne-sitemap-und-ohne-auszeichnung-prio22).
+ *
+ * Die Rechtstexte sind eigenständige, indexierbare Seiten mit echtem Inhalt
+ * (`/policies/refund-policy` misst 741 eigene Wörter, am 2026-09-12 gemessen).
+ * Sie bleiben im Index; ihnen fehlte nur die Auszeichnung, weil diese Route nie
+ * eine setzte. Die Vorlage qiblanco-storefront führt den Canonical hier seit
+ * dem 2026-08-26, das Teilbild und die strukturierten Daten fehlten dort
+ * EBENFALLS — es war nie ein crystal-Defekt, sondern eine Lücke der geteilten
+ * Routenklasse in beiden Läden.
+ *
+ * DER CANONICAL HÄNGT AM ROUTEN-PARAMETER, NICHT AM GELADENEN TEXT: kommt die
+ * Shopify-Abfrage ohne Daten zurück, wirft der Loader 404 und `meta` liefert
+ * ohnehin nichts Indexierbares mehr. `params.handle` ist die Adresse, die der
+ * Besucher aufgerufen hat, und genau die soll kanonisiert werden.
+ *
+ * KEINE ZUSATZ-AUSZEICHNUNG FÜR `privacy-policy`: der Loader leitet diesen
+ * Handle mit 301 auf /pages/datenschutz um (der Shopify-Text gehört einer
+ * fremden Praxis-Vorlage). Eine Weiterleitung erreicht `meta` nie.
+ *
+ * DER RECHTSTEXT SELBST BLEIBT UNBERÜHRT — diese Änderung fasst den <head> an,
+ * nie den Text einer Pflichtangabe.
+ *
  * @type {Route.MetaFunction}
  */
-export const meta = ({data}) => {
-  const titel = data?.policy
+export const meta = ({data, params}) => {
+  const kurz = data?.policy
     ? rechtstextTitel(data.policy.handle, data.policy.title)
     : 'Rechtliches';
-  return [{title: `${titel} | ${ABSENDER_MARKE}`}];
+  const titel = `${kurz} | ${ABSENDER_MARKE}`;
+  const tags = [{title: titel}];
+  if (params?.handle) {
+    const pfad = `/policies/${params.handle}`;
+    tags.push(canonicalLink(pfad), ...seitenSignale({pfad, titel}));
+  }
+  return tags;
 };
 
 /**

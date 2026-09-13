@@ -326,3 +326,107 @@ export function produktEintraege(knoten) {
       name: p.title,
     }));
 }
+
+/**
+ * Der Seitenname ohne Marken-Suffix — für Brotkrume und schema.org-`name`.
+ * „Impressum | Crystal Cacao®" -> „Impressum". Bleibt nach dem Abschneiden
+ * nichts übrig, gewinnt der volle Titel.
+ *
+ * Bewusst dieselbe Bauform wie `kurzName()` in der Vorlage
+ * (qiblanco-storefront app/lib/seiten-seo.js): ein Titel, der in <title>,
+ * og:title und im Schema-`name` verschieden heißt, ist für Google nicht eine
+ * Seite mit drei Namen, sondern eine Seite ohne Namen.
+ *
+ * @param {string|undefined|null} titel
+ * @returns {string}
+ */
+export function kurzName(titel) {
+  const roh = (titel || '').trim();
+  if (!roh) return ABSENDER_MARKE;
+  const marke = ABSENDER_MARKE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const ohne = roh
+    .replace(new RegExp(`\\s*[|–—-]\\s*${marke}\\s*$`), '')
+    .replace(new RegExp(`^\\s*${marke}\\s*[|–—-]\\s*`), '')
+    .trim();
+  return ohne || roh;
+}
+
+/**
+ * Open Graph, Twitter-Karte und strukturierte Daten EINER einfachen Textseite
+ * dieses Ladens — Rechtstexte, Übersichten, Pflichtangaben.
+ *
+ * WARUM ES DIESE FUNKTION GIBT (Job 20260912-sieben-indexierbare-seiten-ohne-
+ * sitemap-und-ohne-auszeichnung-prio22, jede Zahl am selben Tag am Kundenrand
+ * gemessen): `kollektionSignale()` deckt die Kollektionsseite, `produkt-seo.js`
+ * die Kaufseiten — für die GETEILTE Routenklasse (/policies, /policies/<handle>)
+ * und die beiden Pflichtangaben-Routen gab es keinen Ort. Gemessen am
+ * 2026-09-12: sieben indexierbare Seiten dieses Ladens trugen kein og:image und
+ * keine strukturierten Daten, fünf keinen Canonical — und dieselben Pfade
+ * trugen sie auf qiblanco.com EBENFALLS nicht. Es ist also keine crystal-Lücke,
+ * sondern eine Lücke der geteilten Klasse in beiden Läden; der Fix-Ort ist
+ * je Laden eine Funktion und ihre Aufrufer, nicht sieben Seiten.
+ *
+ * WARUM NICHT `kollektionSignale()` MITBENUTZT: deren Hauptknoten ist eine
+ * `CollectionPage` mit `mainEntity` auf eine ItemList. Ein Rechtstext ist keine
+ * Sammlung und hat keine Liste; ein CollectionPage-Knoten über einem
+ * Widerrufstext ist eine falsche Aussage, nicht eine ungenaue.
+ *
+ * WAS SIE AUSDRÜCKLICH NICHT TUT: sie setzt weder <title> noch
+ * `name=description` noch den Canonical. Die stehen in der jeweiligen Route und
+ * folgen dort einer eigenen Begründung. Diese Funktion ist ADDITIV — sie hängt
+ * an, was fehlt, und fasst nicht an, was steht.
+ *
+ * `markenGraph()` WIRD MITGELIEFERT, und das ist kein Beiwerk: der Hauptknoten
+ * nennt `isPartOf` und `publisher` per `@id`. Genau diese beiden Anker fehlten
+ * am 2026-09-12 in der ersten Fassung der Kollektionsseite IM DOKUMENT — ein
+ * Konsument, der das Einzeldokument liest (so wertet Google), sah einen leeren
+ * Verweis. Die doppelte Ausgabe desselben Knotens auf mehreren Seiten ist kein
+ * Widerspruch: die `@id` macht sie zur EINEN Entität.
+ *
+ * @param {{pfad: string, titel?: string, beschreibung?: string|null}} args
+ * @returns {Array<object>} meta-Descriptoren für react-router 7
+ */
+export function seitenSignale({pfad, titel, beschreibung}) {
+  const url = absoluteCanonical(pfad);
+  const name = kurzName(titel);
+  const vollerTitel = (titel || '').trim() || `${name} | ${ABSENDER_MARKE}`;
+  const text = (beschreibung || '').trim();
+
+  const descriptoren = [
+    {property: 'og:type', content: 'website'},
+    {property: 'og:site_name', content: ABSENDER_MARKE},
+    {property: 'og:locale', content: 'de_DE'},
+    // Muss dem <title> der Route folgen, nicht einem eigenen Rohwert: sonst
+    // zeigt ein geteilter Link etwas anderes als das Suchergebnis.
+    {property: 'og:title', content: vollerTitel},
+    {property: 'og:url', content: url},
+    // Bild UND Twitter-Karte in einem Zug — die Karte ist vom Bild gedeckt,
+    // siehe teilbildSignale().
+    ...teilbildSignale(),
+  ];
+  if (text) descriptoren.push({property: 'og:description', content: text});
+
+  const knoten = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    // Eigene @id mit Fragment, damit der Knoten neben der Brotkrume desselben
+    // Dokuments eindeutig adressierbar bleibt.
+    '@id': `${url}#webpage`,
+    url,
+    name,
+    inLanguage: 'de-DE',
+    isPartOf: {'@id': SITE_ID},
+    publisher: {'@id': ORG_ID},
+    primaryImageOfPage: {
+      '@type': 'ImageObject',
+      url: MARKEN_TEILBILD.url,
+      width: MARKEN_TEILBILD.breite,
+      height: MARKEN_TEILBILD.hoehe,
+    },
+  };
+  if (text) knoten.description = text;
+  descriptoren.push({'script:ld+json': knoten});
+  descriptoren.push({'script:ld+json': brotkrume({url, name})});
+  descriptoren.push({'script:ld+json': markenGraph()});
+  return descriptoren;
+}
