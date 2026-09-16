@@ -301,16 +301,49 @@ export const RECHTE_LINK_TEXT =
  *
  * WARUM DIE BESCHRIFTUNGEN HIER STEHEN UND NICHT IM JSX: sie sind seit dem
  * 2026-09-08 wieder VERSCHIEDEN (Produktseite lang, Footer kurz -- der
- * Footer bleibt auf Anweisung unveraendert). Zwei Literale im JSX wären
+ * Footer bleibt auf Anweisung unverändert). Zwei Literale im JSX wären
  * genau die Sorte Dublette, die beim nächsten Textwunsch zur Haelfte
  * nachgezogen wird; als benannte Konstanten kann der Test beide Flaechen
  * gegeneinander prüfen.
  */
 
-/** Produktseite. Ersetzt den frueheren Linktext 'Gesetzliche Gewährleistung'. */
-export const AUSLOESER_TEXT_PDP = 'Garantierte gesetzliche Gewährleistung';
+/*
+ * ZURÜCK AUF DEN RECHTLICHEN BEGRIFF (2026-09-16, EL-20260810-b57a3e63).
+ *
+ * Hier stand vom 2026-09-08 bis heute 'Garantierte gesetzliche
+ * Gewährleistung'. Die Bewertung dieses Wortlauts (EL-20260909-dc1ffd5a,
+ * zweiter Teil) kam zu einem Befund, der seither offen lag:
+ *
+ *   Anhang I Nr. 10 der RL 2005/29/EG -- in Deutschland über Par. 3 Abs. 3
+ *   UWG -- verbietet PER SE, "Rechte, die dem Verbraucher gesetzlich
+ *   zustehen, als Besonderheit des Angebots des Gewerbetreibenden
+ *   darzustellen". Schwarze Liste, keine Spürbarkeitsschwelle, keine
+ *   Abwägung. Das Wort 'garantiert' vor einem gesetzlichen Recht macht aus
+ *   der Rechtslage ein Angebot -- und steht ausgerechnet als Überschrift
+ *   über einer Grafik, die im Fließtext erklärt, dass gewerbliche
+ *   Garantien "unabhängig von der gesetzlichen Gewährleistung" gelten.
+ *
+ * Zweiter Grund, aus derselben Quelle: die Durchfuehrungsverordnung (EU)
+ * 2025/1960 hält Mitteilung (Anhang I) und GARAN-Kennzeichnung (Anhang II)
+ * bewusst auseinander. Der alte Linktext fuehrte beide Woerter genau an der
+ * Stelle zusammen, an der die Verordnung sie trennt.
+ *
+ * DIE BEIDEN KONSTANTEN SIND DAMIT WIEDER GLEICH, und das ist kein
+ * Rückfall in die Dublette, die der Kommentar oben beschreibt: sie bleiben
+ * getrennt benannt, damit eine künftige Textentscheidung wieder nur EINE
+ * Flaeche treffen kann. Was der Test seit heute festhält, ist nicht mehr
+ * "die beiden sind verschieden", sondern die Invariante, die wirklich
+ * trägt: auf KEINER Flaeche darf ein Wort stehen, das die Rechtslage als
+ * Leistung ausgibt.
+ *
+ * RUECKWEG: Wer den alten Wortlaut zurück will, ändert diese eine
+ * Konstante -- und trägt den Befund oben dann bewusst.
+ */
 
-/** Footer, Punkt 4. Bleibt ausdrücklich wie er war. */
+/** Produktseite. Der rechtliche Begriff, ohne Versprechenswort. */
+export const AUSLOESER_TEXT_PDP = 'Gesetzliche Gewährleistung';
+
+/** Footer, Punkt 4. Unveraendert seit dem ersten Bau. */
 export const AUSLOESER_TEXT_FOOTER = 'Gesetzliche Gewährleistung';
 
 /**
