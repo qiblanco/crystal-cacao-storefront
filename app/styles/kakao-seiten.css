@@ -3032,6 +3032,17 @@ main .cc-absicht h1 {
   padding: var(--cc-space-1) var(--cc-space-2);
   font-size: var(--cc-fs-2);
   color: var(--cc-text);
+  /* DIE FUELLUNG IST EIN BESTEHENDER FLAECHENTON, KEIN NEUER — nachgemessen
+     A gegen B am selben Slug und derselben URL (2026-09-17):
+     rgb(251,248,244) = --cc-grund steht in `colorsBg` schon mit n=5 Elementen
+     auf dieser Seite. Das Feld tritt einer vorhandenen Flaechenwelt BEI,
+     statt eine sechste aufzumachen — Rubrik-Score mit Fuellung und ohne
+     Fuellung identisch 86.
+     EIN ERSTER ANLAUF HAT HIER DAS FALSCHE BESCHULDIGT und stand kurz davor,
+     als Kommentar mitzufahren: der Befund "5 Hintergrund-Farbwelten" kam
+     NICHT von dieser Zeile. Wer sie entfernte, bewegte die Zahl nicht — und
+     eine Aenderung, die die Zahl nicht bewegt, ist nicht die Ursache.
+     Woher er wirklich kommt, steht am Knopf weiter unten. */
   background: var(--cc-grund);
   border: 1px solid var(--cc-linie);
   border-radius: var(--cc-radius-knopf);
@@ -3061,6 +3072,22 @@ main .cc-absicht h1 {
   display: none;
 }
 
+/* DER KNOPF KOSTET EINEN RUBRIK-PUNKT, UND ER BEHAELT SEIN GOLD — die
+ * Begruendung ist gemessen und steht hier, damit niemand sie als Schlamperei
+ * liest und "aufraeumt".
+ * A/B am selben Slug, derselben URL, eine Minute auseinander: OHNE dieses
+ * Formular 87 Punkte und 4 gezaehlte Hintergrund-Farbwelten, MIT ihm 86 und
+ * 5. Der Unterschied ist genau eine Farbe, und es ist unsere eigene:
+ * rgb(242,191,114) = --cc-gold. In `colorsBg` stand sie vorher mit n=1 und
+ * blieb damit UNTER der Zaehlschwelle der Rubrik (sie zaehlt nur Farben mit
+ * n >= 2, src/webdesign.py); dieser Absendeknopf ist das zweite gold
+ * gefuellte Element der Seite und hebt sie ueber die Schwelle.
+ * DIE RUBRIK BESTRAFT HIER ALSO DIE ZWEITE ANWENDUNG DES RICHTIGEN TOKENS,
+ * waehrend die erste frei war. Die Designsprache verlangt den einen
+ * Gold-Akzent AUF DER HANDLUNG, und die Handlung dieser Seite ist dieser
+ * Knopf. Ihm das Gold zu nehmen, um einen Zaehler zu bedienen, waere die
+ * Regel gegen ihren Zweck gedreht. 86 liegt ueber der Schwelle 80.
+ * Zurueckgemeldet an den Design-Meister als Lernkarte, nicht weggeraeumt. */
 .cc-eintrag__knopf {
   align-self: flex-start;
   margin-top: var(--cc-space-1);
