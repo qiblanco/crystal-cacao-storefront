@@ -68,6 +68,55 @@ export default async function handleRequest(
      * des Sichtfensters kommt; www.youtube-nocookie.com erst nach dem
      * Klick. Eine CSP ERLAUBT, sie laedt nicht.
      */
+    /*
+     * ================================================================
+     * TRACKING-BAKON (2026-09-17) - EIN HOST, KEINER MEHR.
+     * ================================================================
+     * Ohne diese Zeile ist der Laden fuer die eigene Messung STUMM, und
+     * zwar in derselben stillen Bauart wie der Podcast-Fall darueber:
+     * die Seite antwortet HTTP 200, das Markup ist vollstaendig, jede
+     * Probe auf das Markup ist gruen. GEMESSEN am 2026-09-17, woertlich
+     * aus der Browser-Konsole:
+     *   Connecting to 'https://qpx.65-108-150-121.sslip.io/b' violates
+     *   the following Content Security Policy directive: "connect-src
+     *   'self' https://cdn.shopify.com/ ..."
+     * Bilanz der Stille: crystal-cacao.com ist seit dem 2026-09-08
+     * oeffentlich und hatte am 2026-09-17 NULL Zeilen in basis_hit und
+     * NULL in event - waehrend qiblanco.com 74836 und qi-blanco.com
+     * 17756 basis_hit-Zeilen trugen.
+     *
+     * WARUM HIER KEIN 'self' UND KEIN cdn.shopify.com STEHT, obwohl es
+     * beim imgSrc darueber ausdruecklich noetig war: connectSrc ist
+     * EINER der fuenf Schluessel, die Hydrogen selbst vorbelegt
+     * (baseUri, defaultSrc, frameAncestors, styleSrc, connectSrc).
+     * Fuer genau diese fuenf MISCHT createContentSecurityPolicy die
+     * eigene Liste vor die Vorgabe, statt sie zu ersetzen. Hermetisch
+     * nachgemessen am installierten Modul, nicht aus dem Quelltext
+     * geschlossen - Ergebnis dieser einen Zeile:
+     *   connect-src https://qpx.65-108-150-121.sslip.io 'self'
+     *   https://cdn.shopify.com/ https://monorail-edge.shopifysvc.com
+     *   https://checkout.qiblanco.com https://qi-blanco.myshopify.com
+     * Die Kasse und der Shopify-Kanal bleiben also unberuehrt. Bei
+     * imgSrc/frameSrc gilt das NICHT - die stehen nicht in der Vorgabe
+     * und ersetzen sie darum, weshalb dort jeder Host ausgeschrieben
+     * ist. Die zwei Bloecke sehen gleich aus und sind es nicht.
+     *
+     * EIN HOST DECKT BEIDE EBENEN: die cookielose Basis-Ebene sendet an
+     * /b, der einwilligungspflichtige qpx-Pixel an /collect - derselbe
+     * Ursprung, also dieselbe Erlaubnis. Heute laedt nur die Basis;
+     * PUBLIC_QPX_ENDPOINT und PUBLIC_COOKIEBOT_ID sind in .env bewusst
+     * ungesetzt, weil die Cookiebot-Domaingruppe crystal-cacao.com
+     * nicht deckt. Diese Zeile nimmt das nicht vorweg - sie erlaubt,
+     * sie laedt nicht.
+     *
+     * WAS BEWUSST NICHT MIT AUFGENOMMEN WURDE, obwohl es auf der
+     * Hauptseite steht: qiblanco.activehosted.com. Das Kursformular
+     * dieses Ladens ist seit dem 2026-09-17 server-gerendert und
+     * braucht keine Fremdverbindung (Commit 86e5396). Ein Eintrag
+     * dafuer waere eine Erlaubnis ohne Benutzer.
+     */
+    connectSrc: ['https://qpx.65-108-150-121.sslip.io'],
+
     imgSrc: [
       "'self'",
       'data:',
