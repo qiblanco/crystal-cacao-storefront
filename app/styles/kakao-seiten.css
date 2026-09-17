@@ -2626,13 +2626,29 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
  * `[data-cc-sorte] .items-center-justify-center > h2` weiter oben) und
  * verliert nur die Inline-Groesse, die bisher aus der Route kam.
  *
- * WARUM --cc-fs-5 UND NICHT --cc-fs-6 WIE BISHER: der Claim ist auf einer
- * KAUFSEITE nicht die Hauptueberschrift — das ist der Produktname darunter.
- * Bei 39,06 px stand er bis heute groesser da als die <h1> der Seite. Eine
- * Stufe tiefer stellt die Rangfolge her, ohne eine neue Groesse zu erfinden:
- * --cc-fs-5 ist die vorhandene Nachbarstufe derselben Skala. */
+ * ZURUECK AUF --cc-fs-6, DIE STUFE ALLER H2 DIESER SEITE — 2026-09-17, Job
+ * 20260917-kakao-kaufseiten-typo-skala-verloren-39-punkte.
+ *
+ * Hier stand --cc-fs-5, mit der Begruendung: „bei 39,06 px stand er
+ * groesser da als die <h1> der Seite". Die Beobachtung war richtig, die
+ * Ursache lag aber nicht beim Claim, sondern bei der H1 — die stand selbst
+ * auf --cc-fs-6, also auf der H2-Stufe (app.css, `main h1`). Gemessen am
+ * 2026-09-17: H1 und alle sechs Sektions-H2 rendern identisch bei
+ * 39,0624 px. Der Claim wich also einer Ueberschrift aus, die ihren eigenen
+ * Platz verloren hatte.
+ *
+ * Die H1 hat ihre Stufe zurueck (--cc-fs-7). Damit ist die Rangfolge
+ * hergestellt, OHNE dass der Claim ausweichen muss — und die Seite traegt
+ * wieder EINEN H2-Stil statt zweier. Genau das misst die Rubrik-Regel
+ * `h2_stil_kombis_max: 1`; die Ausweichbewegung hatte sie 20 Punkte
+ * gekostet.
+ *
+ * DIE SCHMALE LAGE BLEIBT UNBERUEHRT: unter 30em steht der Claim weiter auf
+ * --cc-fs-4 (Stelle weiter unten). Der dort gemessene Grund — auf 390 px
+ * schiebt ein zweizeiliger Claim den Kaufweg unter den Falz — ist von
+ * dieser Aenderung nicht beruehrt und gilt unveraendert. */
 .cc-sortenaufmacher h2 {
-  font-size: var(--cc-fs-5);
+  font-size: var(--cc-fs-6);
   line-height: 1.15;
   /* Die Abstaende stehen HIER und nur hier — das ist der ganze Punkt von
    * „einmal bauen, zweimal verwenden". `main h2` bringt 48/24 px mit; das

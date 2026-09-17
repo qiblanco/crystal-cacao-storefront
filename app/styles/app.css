@@ -1271,7 +1271,25 @@ body > main {
  * Design-Doktrin als Ursache von "sieht von AI gemacht aus" benennt. */
 main h1,
 .route-error h1 {
-  font-size: var(--cc-fs-6, 2.44rem);
+  /* DIE H1 HAT IHRE EIGENE STUFE — 2026-09-17, Job
+   * 20260917-kakao-kaufseiten-typo-skala-verloren-39-punkte.
+   *
+   * Sie stand auf --cc-fs-6, also auf DERSELBEN Stufe wie `main h2`. Damit
+   * gab es ueber den Sektionstiteln keinen Platz mehr, und der Claim des
+   * Sorten-Aufmachers musste auf --cc-fs-5 ausweichen, um nicht mit der H1
+   * gleichzuziehen (kakao-seiten.css, Stelle `.cc-sortenaufmacher h2`). Aus
+   * dieser einen Ausweichbewegung wurde ein ZWEITER H2-Stil, und die
+   * Rubrik-Regel `h2_stil_kombis_max: 1` zog dafuer 20 Punkte ab.
+   *
+   * GEMESSEN, nicht vermutet: am 2026-09-17 rendern H1 und alle sechs
+   * Sektions-H2 der Kaufseite identisch bei 39,0624 px.
+   *
+   * WARUM DAS GEFAHRLOS IST: --cc-fs-7 traegt seit dem 2026-09-09 die
+   * Viewport-Deckelung min(3.0518rem, 12.6vw) (kakao-seiten.css Z.119) —
+   * genau die Schranke, die der damalige Repair gegen den 8-px-Ueberlauf
+   * bei 320 px eingezogen hat. Die Startseite laeuft ueber `text-6xl!`
+   * bereits auf dieser Stufe; die Kaufseite zieht hier nach. */
+  font-size: var(--cc-fs-7, 3.05rem);
   line-height: 1.15;
   letter-spacing: -0.01em;
   margin: var(--cc-space-5, 3rem) 0 var(--cc-space-2, 1rem);
