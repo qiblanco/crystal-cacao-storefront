@@ -1,9 +1,149 @@
-import LazyImage from '../reusables/LazyImage';
+import {bildQuelle} from '../reusables/shopifyBildQuellen';
 import {Belege} from '../reusables/Belege';
 import {AbsichtHinweis} from '../reusables/AbsichtHinweis';
 import {KAKAO_KENNZAHLEN} from '~/lib/kakao-zone';
 import {ActiveCampaignForm} from '../reusables/ActiveCampaignForm';
 import {SwipeTable} from '../reusables/SwipeTable';
+
+/* ======================================================================
+ * BILDLAST DER STARTSEITE — gemessene Leiter je Datei, nicht geraten.
+ * Job 20260917-erst-schnell-dann-scharf-ladeverhalten-beider-laeden, s05.
+ * ======================================================================
+ *
+ * DER GEMESSENE ANLASS (2026-09-17, crystal-cacao.com, 25-s-Fenster,
+ * gedrosselt 1,6 Mbit/150 ms, Median aus 3 Laeufen):
+ *   mobil    LCP 10 112 ms · CLS 0,1019 · 4 312 879 Bildbytes auf 21 Ressourcen
+ *   desktop  LCP  1 724 ms · CLS 0,0023 · 4 200 492 Bildbytes auf 23 Ressourcen
+ * DAS TELEFON LUD MEHR ALS DER RECHNER. Genau das ist die Signatur einer
+ * Seite ohne responsive Auslieferung: jedes <img> hier trug eine nackte
+ * CDN-Adresse ohne `srcset`, ohne `sizes` und ohne `loading` — also die
+ * MASTERDATEI, in voller Groesse, und zwar alle gleichzeitig beim ersten
+ * Blick. Am gerenderten DOM gemessen kamen mobil 6000 px in eine 358-px-
+ * Flaeche (2024-06-qiblanco-bali-06610, 1 655 856 B) und 568 px in eine
+ * 50-px-Flaeche (kakao-bean-logo).
+ *
+ * WARUM DIE LEITER JE DATEI STEHT UND NICHT EINE PAUSCHALE IST
+ * Das Shopify-CDN kodiert bei einem Breiten-Parameter NEU — und eine
+ * Sprosse kann dabei GROESSER werden als der Master. Je Datei und je
+ * Sprosse am CDN nachgemessen (curl, Accept: image/avif,image/webp,
+ * Belege in homepage-bauer/ladeverhalten/belege_s05/cdn_leiter.json):
+ * bei den 1000–1024-px-Mastern liegt `width=840` um 4,7 bis 6,4 Prozent
+ * UEBER der Masterdatei. Solche Sprossen stehen hier deshalb NICHT in der
+ * Leiter — sonst macht ausgerechnet der Fix das Bild schwerer. Aufgenommen
+ * ist nur, was gemessen KLEINER ist als der Master, plus der Master selbst
+ * als oberste Sprosse. Wer eine Sprosse ergaenzt, misst sie vorher nach.
+ *
+ * WARUM DER MASTER BEI DREI DATEIEN FEHLT
+ * bali-06610 (6000 px, 1,66 MB), DSC01925 (3827 px, 1,20 MB) und
+ * kakao-bean-logo (568 px fuer eine 50-px-Flaeche) sind fuer JEDE Flaeche
+ * dieser Seite zu gross. Ihre Leiter endet unter dem Master; die oberste
+ * Sprosse deckt noch DPR 2 auf dem breitesten gemessenen Aufbau.
+ *
+ * DIE `sizes`-WERTE SIND GEMESSEN, NICHT GESCHAETZT: die Boxbreiten wurden
+ * an neun Viewport-Breiten (360…1920) am gerenderten DOM abgelesen
+ * (belege_s05/boxbreiten_sweep.json). Zwei Familien:
+ *   HALBSPALTE  bis 639 px volle Spalte (100vw − 64), darueber halbe
+ *               Spalte ((100vw − 96)/2), ab 1280 gedeckelt auf 548.
+ *   BANNER      volle Breite (100vw − 32), ab 1184 gedeckelt auf 1152.
+ *
+ * FAIL-SOFT: `bild()` gibt eine unbekannte Adresse UNVERAENDERT zurueck —
+ * ein neues Bild verhaelt sich dann genau wie vorher, statt auf eine
+ * geratene Leiter zu fallen.
+ */
+const SIZES_HALBSPALTE =
+  '(min-width: 1280px) 548px, (min-width: 640px) calc((100vw - 96px) / 2), calc(100vw - 64px)';
+const SIZES_BANNER = '(min-width: 1184px) 1152px, calc(100vw - 32px)';
+const SIZES_LOGO = '50px';
+
+const B_HERO =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001273-v2b-min.jpg_1.webp?v=1669001851';
+const B_SNIPPET =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-snippet.jpg?v=1771790329';
+const B_SNIPPET_BEANS =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-snippet-beans.jpg?v=1771790303';
+const B_LOGO_KAKAO =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-bean-logo.png?v=1764252027';
+const B_LOGO_KAFFEE =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/coffee-logo.png?v=1763976173';
+const B_LOGO_ENERGY =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/energy-logo.png?v=1763976173';
+const B_CHART =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/chart-kakao.webp?v=1763974217';
+const B_BANNER_FLOW =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06610.jpg?v=1763050714';
+const B_BANNER_NATURREIN =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC00308_Kopie.webp?v=1763062180';
+const B_SETZLING =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-image.webp?v=1759153567';
+const B_MUSTER =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-muster.webp?v=1759179332';
+const B_BAUER_FRUCHT =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01510_Kopie.webp?v=1759179020';
+const B_BAUER_TONNE =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01925.jpg?v=1764116026';
+const B_KURS_MOCKUP =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/Mockup-Kakao-Zeremonie-Kurs-v2-2x-1024x599.jpg_1_1.webp?v=1760876274';
+const B_RITUAL_HOCH =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06493.webp?v=1764201756';
+const B_RITUAL_QUADRAT =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06493-1x1.webp?v=1764201756';
+const KURS_VIDEO_1 =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001190-Kopie-1024x589_jpg.webp?v=1666617198';
+const KURS_VIDEO_2 =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001239-Kopie-1024x591.jpg_1_cf7bfbf2-2e9f-4654-a51a-e0f2b618501f.webp?v=1679327538';
+const KURS_VIDEO_3 =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-ad-01_2.1.1-min.jpg_1_2b439bb6-ccde-4801-a43f-d36eb669cee5.webp?v=1679327670';
+const KURS_VIDEO_4 =
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-ad-03_4.2.1-min.jpg_1_329aa829-10d5-4d95-a779-1dd0a92d0397.webp?v=1679328304';
+
+/**
+ * Gemessene Leiter, `sizes` und Eigenmasse je Datei.
+ * `breite`/`hoehe` sind die INTRINSISCHEN Masse der Masterdatei (am DOM
+ * abgelesen, belege_s05/dom_vorher_*.json). Sie stehen als width/height am
+ * <img> und reservieren den Platz, bevor das Bild da ist — das ist die
+ * Haelfte gegen das Nachrutschen (CLS 0,1019 mobil).
+ */
+const BILDER = new Map([
+  [B_HERO, {leiter: [300, 420, 550, 660, 1000], sizes: SIZES_HALBSPALTE, breite: 1000, hoehe: 1000}],
+  [B_SNIPPET, {leiter: [300, 420, 550, 660, 840, 935], sizes: SIZES_HALBSPALTE, breite: 935, hoehe: 935}],
+  [B_SNIPPET_BEANS, {leiter: [300, 420, 550, 660, 840, 953], sizes: SIZES_HALBSPALTE, breite: 953, hoehe: 953}],
+  [B_LOGO_KAKAO, {leiter: [50, 100, 150], sizes: SIZES_LOGO, breite: 568, hoehe: 568}],
+  [B_LOGO_KAFFEE, {leiter: [50, 126], sizes: SIZES_LOGO, breite: 126, hoehe: 126}],
+  [B_LOGO_ENERGY, {leiter: [50, 125], sizes: SIZES_LOGO, breite: 125, hoehe: 125}],
+  [B_CHART, {leiter: [300, 420, 550, 660, 840, 1100, 1404], sizes: SIZES_HALBSPALTE, breite: 1404, hoehe: 963}],
+  [B_BANNER_FLOW, {leiter: [360, 480, 620, 740, 1000, 1160, 1500, 2320], sizes: SIZES_BANNER, breite: 6000, hoehe: 4000}],
+  [B_BANNER_NATURREIN, {leiter: [360, 480, 620, 740, 937], sizes: SIZES_BANNER, breite: 937, hoehe: 528}],
+  [B_SETZLING, {leiter: [300, 420, 550, 660, 766], sizes: SIZES_HALBSPALTE, breite: 766, hoehe: 1002}],
+  [B_MUSTER, {leiter: [300, 420, 550, 660, 766], sizes: SIZES_HALBSPALTE, breite: 766, hoehe: 766}],
+  [B_BAUER_FRUCHT, {leiter: [300, 420, 550, 660, 840, 1000], sizes: SIZES_HALBSPALTE, breite: 1000, hoehe: 1500}],
+  [B_BAUER_TONNE, {leiter: [300, 420, 550, 660, 840, 1100, 1650], sizes: SIZES_HALBSPALTE, breite: 3827, hoehe: 5740}],
+  [B_KURS_MOCKUP, {leiter: [300, 420, 550, 660, 840, 1024], sizes: SIZES_HALBSPALTE, breite: 1024, hoehe: 599}],
+  [B_RITUAL_HOCH, {leiter: [300, 420, 550, 660, 840, 1000], sizes: SIZES_HALBSPALTE, breite: 1000, hoehe: 1500}],
+  [B_RITUAL_QUADRAT, {leiter: [300, 420, 550, 660, 840, 1000], sizes: SIZES_HALBSPALTE, breite: 1000, hoehe: 1000}],
+  [KURS_VIDEO_1, {leiter: [300, 420, 550, 660, 1024], sizes: SIZES_HALBSPALTE, breite: 1024, hoehe: 589}],
+  [KURS_VIDEO_2, {leiter: [300, 420, 550, 660, 1024], sizes: SIZES_HALBSPALTE, breite: 1024, hoehe: 591}],
+  [KURS_VIDEO_3, {leiter: [300, 420, 550, 660, 1000], sizes: SIZES_HALBSPALTE, breite: 1000, hoehe: 563}],
+  [KURS_VIDEO_4, {leiter: [300, 420, 550, 660, 1000], sizes: SIZES_HALBSPALTE, breite: 1000, hoehe: 563}],
+]);
+
+/**
+ * Bildquellen als Spread ins <img>: src + srcSet + sizes + width + height.
+ *
+ * Eine Adresse, die hier nicht steht, kommt UNVERAENDERT zurueck. Das ist
+ * Absicht und keine Nachlaessigkeit: ein falsch geratener Breiten-Parameter
+ * an einem fremden Host waere ein 404 statt eines nur nicht optimierten
+ * Bildes, und eine geratene Leiter ist keine gemessene.
+ */
+function bild(url) {
+  const e = BILDER.get(url);
+  if (!e) return {src: url};
+  return {
+    ...bildQuelle(url, e.leiter),
+    sizes: e.sizes,
+    width: e.breite,
+    height: e.hoehe,
+  };
+}
 
 /**
  * DIE UEBERSICHTSSEITE — und seit dem 2026-09-08 die STARTSEITE.
@@ -64,7 +204,7 @@ export function Kakao({stimmen = null, sorten = null, podcast = null} = {}) {
       {stimmen}
       <HerobannerWithText
         text="Wach. Klar. Im Flow."
-        src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06610.jpg?v=1763050714"
+        src={B_BANNER_FLOW}
         imgAlt="Zwei Menschen an einem Cafétisch, sie mit einem Tablet, er am Laptop, daneben zwei Tassen"
       />
       <div className="flex flex-col NormalSectionSize gap-3 items-center justify-center">
@@ -87,7 +227,7 @@ export function Kakao({stimmen = null, sorten = null, podcast = null} = {}) {
       {sorten}
       <HerobannerWithText
         text="100% naturrein"
-        src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC00308_Kopie.webp?v=1763062180"
+        src={B_BANNER_NATURREIN}
         imgAlt="Hände schneiden eine reife Kakaofrucht mit einer Gartenschere direkt vom Baum"
       />
       <SparSection />
@@ -116,9 +256,20 @@ function Hero() {
     <div className="flex flex-col gap-10 NormalSectionSize items-center sm:flex-row mt-[50px]!">
       <div className="flex-1 justify-center self-stretch flex flex-col">
         <div className="block sm:hidden">
-          <LazyImage
-            highQualityLink="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001273-v2b-min.jpg_1.webp?v=1669001851"
-            compressedLink="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001273-v2b-min_small.jpg_1.webp?v=1669001851"
+          {/* DAS ERSTE SICHTBARE BILD DER SEITE — `eager` und
+              fetchPriority="high" statt `lazy`, weil es der LCP-Kandidat
+              ist: was oben steht, darf nicht hinten anstehen. Beide
+              Aufmacher-Fassungen (diese und die sm:-Fassung weiter unten)
+              zeigen DIESELBE Datei; der Browser holt sie einmal.
+              VORHER stand hier <LazyImage/>, das eine zweite, kleinere Datei
+              (…_small…) als Vorstufe NACHLUD — zwei Anfragen fuer ein Bild.
+              Die Vorstufe ist mit `srcset` gegenstandslos: die passende
+              Sprosse ist bereits klein. */}
+          <img
+            {...bild(B_HERO)}
+            alt="Tasse Crystal Cacao neben der Kakaotafel auf hellem Holz"
+            loading="eager"
+            fetchPriority="high"
           />
         </div>
         <h2 className="text-2xl">Crystal Cacao® - Bio</h2>
@@ -174,9 +325,11 @@ function Hero() {
         </div>
       </div>
       <div className="flex-1 rounded-xl overflow-hidden sm:block hidden">
-        <LazyImage
-          highQualityLink="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001273-v2b-min.jpg_1.webp?v=1669001851"
-          compressedLink="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001273-v2b-min_small.jpg_1.webp?v=1669001851"
+        <img
+          {...bild(B_HERO)}
+          alt="Tasse Crystal Cacao neben der Kakaotafel auf hellem Holz"
+          loading="eager"
+          fetchPriority="high"
         />
       </div>
     </div>
@@ -226,13 +379,15 @@ function Benefits() {
         </div>
       </div>
       <div className="flex-1 flex flex-col gap-2">
-        <LazyImage
-          highQualityLink="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-snippet.jpg?v=1771790329"
-          compressedLink="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-snippet_small.jpg?v=1771790329"
+        <img
+          {...bild(B_SNIPPET)}
+          alt="Crystal Cacao in der Tasse, daneben gebrochene Kakaostuecke"
+          loading="lazy"
         />
-        <LazyImage
-          highQualityLink="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-snippet-beans.jpg?v=1771790303"
-          compressedLink="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-snippet-beans_small.jpg?v=1771790303"
+        <img
+          {...bild(B_SNIPPET_BEANS)}
+          alt="Geoeffnete Kakaofrucht mit den hellen Bohnen im Fruchtfleisch"
+          loading="lazy"
         />
       </div>
     </div>
@@ -324,9 +479,10 @@ function ComparisonTable() {
                 <th className="py-3 px-3 border-b border-gray-200" />
                 <th className="py-3 px-3 text-center! border-b border-gray-200">
                   <img
+                    {...bild(B_LOGO_KAKAO)}
                     width={50}
-                    src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-bean-logo.png?v=1764252027"
                     alt=""
+                    loading="lazy"
                     className="mx-auto! mb-1"
                   />
                   {/* s03 2026-09-02: war der freie Wert '#cab581' — ein
@@ -345,9 +501,10 @@ function ComparisonTable() {
                 </th>
                 <th className="py-3 px-3 text-center border-b border-gray-200">
                   <img
+                    {...bild(B_LOGO_KAFFEE)}
                     width={50}
-                    src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/coffee-logo.png?v=1763976173"
                     alt=""
+                    loading="lazy"
                     className="mx-auto! mb-1"
                   />
                   {/* s03, 2026-09-04: war das Literal #5b3b26. Die dritte
@@ -377,9 +534,10 @@ function ComparisonTable() {
                 </th>
                 <th className="py-3 px-3 text-center border-b border-gray-200">
                   <img
+                    {...bild(B_LOGO_ENERGY)}
                     width={50}
-                    src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/energy-logo.png?v=1763976173"
                     alt=""
+                    loading="lazy"
                     className="mx-auto! mb-1"
                   />
                   <h3
@@ -462,7 +620,8 @@ function SideToSideWithTable() {
         <h2 className="text-3xl font-bold">Wach. Klar. Ohne Koffein-Crash.</h2>
         <img
           className="block sm:hidden! mb-4"
-          src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/chart-kakao.webp?v=1763974217"
+          {...bild(B_CHART)}
+          loading="lazy"
           alt="Diagramm Fokus und Energie über die Wirkdauer: Kaffee und Energy-Drinks steigen steil an und fallen schnell wieder ab, Crystal Cacao® steigt flacher an und hält lange"
         />
         <p>
@@ -487,7 +646,8 @@ function SideToSideWithTable() {
       <div className="hidden sm:flex items-center">
         <img
           className="w-full"
-          src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/chart-kakao.webp?v=1763974217"
+          {...bild(B_CHART)}
+          loading="lazy"
           alt="Diagramm Fokus und Energie über die Wirkdauer: Kaffee und Energy-Drinks steigen steil an und fallen schnell wieder ab, Crystal Cacao® steigt flacher an und hält lange"
         />
       </div>
@@ -509,7 +669,12 @@ function SideToSideWithTable() {
 function HerobannerWithText({src, text, imgAlt = ''}) {
   return (
     <div className="my-[10vh]! relative">
-      <img className="w-full h-auto rounded-xl block" src={src} alt={imgAlt} />
+      <img
+        className="w-full h-auto rounded-xl block"
+        {...bild(src)}
+        alt={imgAlt}
+        loading="lazy"
+      />
       <h2 className="absolute top-10 left-0 right-0 text-center text-white! text-5xl!">
         {text}
       </h2>
@@ -535,7 +700,8 @@ function SparSection() {
       <div className="aspect-square overflow-hidden rounded-xl mb-[10vh]">
         <img
           className="w-full h-full object-cover"
-          src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-image.webp?v=1759153567"
+          {...bild(B_SETZLING)}
+          loading="lazy"
           alt="Kakaobäuerin in einer Baumschule, in den Händen einen jungen Kakaosetzling"
         />
       </div>
@@ -580,7 +746,8 @@ function MusterSection() {
       <div className="flex items-center">
         <img
           className="w-full h-auto rounded-xl sm:mt-2"
-          src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-muster.webp?v=1759179332"
+          {...bild(B_MUSTER)}
+          loading="lazy"
           alt="Nahaufnahme der Kakaomasse: dicht an dicht liegende, hell umrandete Kristallstrukturen"
         />
       </div>
@@ -605,7 +772,8 @@ function WurzelnSection() {
         <div className="aspect-square overflow-hidden rounded-xl mt-2 mb-[10vh]">
           <img
             className="w-full h-full object-cover"
-            src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01510_Kopie.webp?v=1759179020"
+            {...bild(B_BAUER_FRUCHT)}
+            loading="lazy"
             alt="Kakaobauer mit Machete im Kakaowald, in der Hand eine geerntete Kakaofrucht"
           />
         </div>
@@ -614,7 +782,8 @@ function WurzelnSection() {
         <div className="aspect-square overflow-hidden rounded-xl">
           <img
             className="w-full h-full object-cover bottom-[20px]!"
-            src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01925.jpg?v=1764116026"
+            {...bild(B_BAUER_TONNE)}
+            loading="lazy"
             alt="Kakaobauer trägt eine große Erntetonne auf der Schulter durch die Plantage"
           />
         </div>
@@ -665,7 +834,8 @@ function OnlineKurs() {
         <div className="aspect-video overflow-hidden rounded-xl">
           <img
             className="w-full h-auto"
-            src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/Mockup-Kakao-Zeremonie-Kurs-v2-2x-1024x599.jpg_1_1.webp?v=1760876274"
+            {...bild(B_KURS_MOCKUP)}
+            loading="lazy"
             alt="Kurs Kakao Zeremonie" 
           />
         </div>
@@ -690,7 +860,8 @@ function KursRegistration() {
         <div className="aspect-video overflow-hidden rounded-xl">
           <img 
             className="w-full h-full object-cover"
-            src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/Mockup-Kakao-Zeremonie-Kurs-v2-2x-1024x599.jpg_1_1.webp?v=1760876274"
+            {...bild(B_KURS_MOCKUP)}
+            loading="lazy"
             alt="Kurs Kakao Zeremonie"
           />
         </div>
@@ -701,7 +872,7 @@ function KursRegistration() {
 
 const videos = [
   {
-    src: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001190-Kopie-1024x589_jpg.webp?v=1666617198',
+    src: KURS_VIDEO_1,
     alt: 'Titelbild zum Video „Intuition erfahren“',
     title:
       'Video 1: Intuition erfahren - Raus aus dem Kopf, rein ins Herz! – 9 min',
@@ -712,7 +883,7 @@ const videos = [
     ],
   },
   {
-    src: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2022-07-26-qiblanco-berlin-1001239-Kopie-1024x591.jpg_1_cf7bfbf2-2e9f-4654-a51a-e0f2b618501f.webp?v=1679327538',
+    src: KURS_VIDEO_2,
     alt: 'Kakao auf Brett',
     title: 'Video 2: Zeremonie Kakao – Was ist das?! – 8 min',
     items: [
@@ -722,7 +893,7 @@ const videos = [
     ],
   },
   {
-    src: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-ad-01_2.1.1-min.jpg_1_2b439bb6-ccde-4801-a43f-d36eb669cee5.webp?v=1679327670',
+    src: KURS_VIDEO_3,
     alt: 'Kakao Kochen',
     title: 'Video 3: Die ZeremonieKakao Kur in der Anwendung – 8 min',
     items: [
@@ -732,7 +903,7 @@ const videos = [
     ],
   },
   {
-    src: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-ad-03_4.2.1-min.jpg_1_329aa829-10d5-4d95-a779-1dd0a92d0397.webp?v=1679328304',
+    src: KURS_VIDEO_4,
     alt: 'Ureinwohner Kakao',
     title:
       'Video 4: Einen Schritt tiefer – mit Zeremonie Kakao meditieren – 4 min',
@@ -758,8 +929,9 @@ function KursInhalt() {
             <div className="aspect-video overflow-hidden rounded-xl">
               <img
                 className="w-full h-full object-cover"
-                src={v.src}
+                {...bild(v.src)}
                 alt={v.alt}
+                loading="lazy"
               />
             </div>
             <div className="flex flex-col gap-2 sm:p-5">
@@ -786,7 +958,8 @@ function RitualSection() {
           <div className="aspect-square overflow-hidden rounded-xl mt-2 block sm:hidden">
             <img
               className="w-full h-full object-cover"
-              src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06493-1x1.webp?v=1764201756"
+              {...bild(B_RITUAL_QUADRAT)}
+              loading="lazy"
               alt="Lächelnde Frau im weißen Hemd, das Kinn auf die Hand gestützt"
             />
           </div>
@@ -803,7 +976,8 @@ function RitualSection() {
         <div className="hidden sm:block aspect-square overflow-hidden rounded-xl">
           <img
             className="w-full h-full object-cover"
-            src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06493.webp?v=1764201756"
+            {...bild(B_RITUAL_HOCH)}
+            loading="lazy"
             alt="Lächelnde Frau im weißen Hemd, das Kinn auf die Hand gestützt"
           />
         </div>
