@@ -481,6 +481,7 @@ function ComparisonTable() {
                   <img
                     {...bild(B_LOGO_KAKAO)}
                     width={50}
+                    height={50}
                     alt=""
                     loading="lazy"
                     className="mx-auto! mb-1"
@@ -503,6 +504,7 @@ function ComparisonTable() {
                   <img
                     {...bild(B_LOGO_KAFFEE)}
                     width={50}
+                    height={50}
                     alt=""
                     loading="lazy"
                     className="mx-auto! mb-1"
@@ -536,6 +538,7 @@ function ComparisonTable() {
                   <img
                     {...bild(B_LOGO_ENERGY)}
                     width={50}
+                    height={50}
                     alt=""
                     loading="lazy"
                     className="mx-auto! mb-1"
