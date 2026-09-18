@@ -189,8 +189,20 @@ function bild(url) {
 export function Kakao({stimmen = null, sorten = null, podcast = null} = {}) {
   return (
     <div className="ProductPageKakao">
-      <h1 className="text-6xl! text-center mb-[0px]!">High Performance Cacao</h1>
-      <h2 className="text-5xl! text-center mt-5!">Wach. Klar. Mineralisiert.</h2>
+      {/* EINE grosse Ueberschrift, nicht zwei. Die Referenz, an die Christian
+          am 2026-09-17 verwiesen hat (qiblanco.com, HerobannerFeatured), setzt
+          ueber den Aufmacher genau EIN zentriertes h1 und danach sofort die
+          zwei Spalten. Hier standen zwei Grossueberschriften uebereinander
+          (48,83 px + 39,06 px), die auf dem Telefon BEIDE ihre volle Groesse
+          behielten — gemessen 167 px Ueberschrift vor dem ersten Bild, wo die
+          Referenz 28 px braucht. Der Text bleibt woertlich stehen; die zweite
+          Zeile ist jetzt die Unterzeile des Aufmachers statt einer zweiten
+          Ueberschrift. Groessen und Abstieg: kakao-seiten.css,
+          Abschnitt "DER AUFMACHER DER STARTSEITE". */}
+      <div className="cc-kakao-aufmacher">
+        <h1>High Performance Cacao</h1>
+        <p className="cc-kakao-aufmacher__unterzeile">Wach. Klar. Mineralisiert.</p>
+      </div>
       <Hero />
       <Benefits />
       {podcast}
@@ -253,8 +265,8 @@ export function Kakao({stimmen = null, sorten = null, podcast = null} = {}) {
 
 function Hero() {
   return (
-    <div className="flex flex-col gap-10 NormalSectionSize items-center sm:flex-row mt-[50px]!">
-      <div className="flex-1 justify-center self-stretch flex flex-col">
+    <div className="cc-kakao-hero flex flex-col gap-10 NormalSectionSize items-center sm:items-start sm:flex-row">
+      <div className="flex-1 justify-start self-stretch flex flex-col">
         <div className="block sm:hidden">
           {/* DAS ERSTE SICHTBARE BILD DER SEITE — `eager` und
               fetchPriority="high" statt `lazy`, weil es der LCP-Kandidat
@@ -296,7 +308,7 @@ function Hero() {
           Erfahre jetzt die Vorteile von Kristall Kakao
         </div>
         <div>
-          <ul className="m-[22px]!">
+          <ul className="cc-kakao-hero__vorteile">
             <li className="list-disc">
               Für 28 Tage - Klarheit, Fokus & Energie
             </li>
@@ -320,7 +332,7 @@ function Hero() {
             Analyse anzeigen
           </a>
         </div>
-        <div className="text-center mt-2 m-auto self-center">
+        <div className="cc-kakao-hero__garantie mt-2">
           <b>100% Zufriedenheitsgarantie · Geprüfte Bio-Qualität</b>
         </div>
       </div>
@@ -810,14 +822,91 @@ function WurzelnSection() {
   );
 }
 
+/* DIE SCHRITTE STEHEN SO AUF DER RUECKSEITE DER VERPACKUNG — WORTLAUT DES
+ * HERSTELLERS, NICHT NEU GESCHRIEBEN.
+ *
+ * CHRISTIAN, 2026-09-17: "Top-Fehler auf Crystal Kakao, das ja laecherlich,
+ * die Darstellung. Da kannst du das von der Rueckseite der Verpackung nehmen."
+ *
+ * VORLAGE: vorlagen/verpackung-rueckseite.png (Doypack Create, Rueckseite;
+ * Bezugsquelle Shopify-CDN files/Doypack_Mockup__v3_back-min.png?v=1766919082).
+ * Die Probe worker-pool/pruefungen/probe_crystal_cacao_optik__20260918.py
+ * haelt eine EIGENE Abschrift derselben Vorlage samt sha256 — sie liest ihren
+ * Soll bewusst NICHT aus dieser Datei, sonst waeren Seite und Pruefer zwei
+ * Ausgaben derselben Formel.
+ *
+ * WAS HIER VORHER STAND, und warum das kein Darstellungsfehler allein war:
+ * drei Schritte mit "75 ml" und "15 g". Die Verpackung nennt "ca. 150 ml" und
+ * "20-30 g" und hat SECHS Schritte. Die Seite widersprach damit der Angabe
+ * des Herstellers; Christians Anweisung loest das auf. Umformuliert wird
+ * nichts - die Mengen sind die der Verpackung. */
+const ZUBEREITUNG_SCHRITTE = [
+  {
+    titel: 'Kakao portionieren',
+    text: 'Breche dir deine gewünschte Menge Kakao ab – für tiefen Fokus ' +
+      'empfehlen wir 20–30 g – und zerbrösele sie grob.',
+  },
+  {
+    titel: 'Tasse vorwärmen',
+    text: 'Fülle deine Lieblingstasse kurz mit heißem Wasser, leere sie – so ' +
+      'bleibt dein Kakao länger warm und aromatisch.',
+  },
+  {
+    titel: 'Aufgießen',
+    text: 'Übergieße den Kakao mit ca. 150 ml heißem Wasser oder ' +
+      '(pflanzlicher) Milch (max. 85 °C) – das bewahrt die wertvollen Aromen ' +
+      'und Inhaltsstoffe des Kakaos.',
+  },
+  {
+    titel: 'Aroma erwachen lassen',
+    text: 'Warte etwa 1 Minute und spüre, wie sich das volle Bouquet entfaltet.',
+  },
+  {
+    titel: 'Verfeinern & Aufschäumen',
+    text: 'Rühre den geschmolzenen Kakao cremig – ideal mit einem ' +
+      'Milchaufschäumer. Nach Belieben mit Honig süßen und mit Blue-Lotus-Öl, ' +
+      'Safran, Muskat, Cayennepfeffer, Vanille oder Himalaya-Salz veredeln.',
+  },
+  {
+    titel: 'Genießen',
+    text: 'Nimm dir Zeit. Trinke langsam, atme den Duft ein – und spüre, wie ' +
+      'jeder Schluck dein Herz öffnet und dir neue Kraft schenkt.',
+  },
+];
+
 function Zubereitung() {
   return (
-    <div className="NormalSectionSize mt-[10vh]! mb-[10vh]!">
+    <div className="cc-zubereitung NormalSectionSize">
       <h2>Zubereitung</h2>
-      <p>
-        1. 75 ml heißes Wasser oder Milch (max. 85 °C) <br />
-        2. 15 g Crystal Cacao® dazugeben <br />
-        3. Mit Milchaufschäumer schaumig rühren – fertig!
+      <p className="cc-zubereitung__lead">Dein Ritual in 6 Schritten</p>
+      {/* Eine echte <ol>: der vorige Absatz trug seine Nummern als Text und
+          harte <br>. Damit schrumpfte er ueber `margin-inline: auto` auf seine
+          laengste harte Zeile und trieb mittig im Block — auf 1440 gemessen
+          margin-left 245px. Eine Liste kann das baulich nicht. */}
+      <ol className="cc-zubereitung__schritte">
+        {ZUBEREITUNG_SCHRITTE.map((s) => (
+          <li key={s.titel}>
+            <b>{s.titel}:</b> {s.text}
+          </li>
+        ))}
+      </ol>
+      {/* DIE DOSIERANLEITUNG STEHT AUF DERSELBEN RUECKSEITE UND GEHOERT HIER
+          HIN, WEIL SIE EINEN SONST ENTSTEHENDEN WIDERSPRUCH AUFLOEST.
+          Schritt 1 nennt 20-30 g "fuer tiefen Fokus"; die Kaufseiten
+          (SortenSeite.jsx) und die FAQ (app/data/product-faqs.js) nennen 15 g,
+          und daran haengt die 28-Tage-Zusage (420 g / 15 g). Ohne diese
+          Tabelle lesen sich die beiden Zahlen als Widerspruch — mit ihr sind
+          es die drei Dosierstufen des Herstellers, und "Daily Focus-Dosis:
+          15 g pro Tasse = 28 Rituale" ist genau die Zeile, die die
+          28-Tage-Zusage traegt. Wortlaut der Verpackung, nicht umformuliert. */}
+      <dl className="cc-zubereitung__dosis">
+        <dt>Dosieranleitung</dt>
+        <dd>Schamanische Dosis: 38 g pro Tasse ≈ 11 Rituale</dd>
+        <dd>Deep Focus-Dosis: 30 g pro Tasse ≈ 14 Rituale</dd>
+        <dd>Daily Focus-Dosis: 15 g pro Tasse ≈ 28 Rituale</dd>
+      </dl>
+      <p className="cc-zubereitung__quelle">
+        Wortlaut von der Rückseite der Verpackung.
       </p>
     </div>
   );
