@@ -3001,3 +3001,207 @@ main .cc-absicht h1 {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* ==========================================================================
+ * DER AUFMACHER DER STARTSEITE — 2026-09-18
+ * Job 20260918-crystal-cacao-zubereitung-und-hero-an-qiblanco-anlehnen
+ * ==========================================================================
+ * CHRISTIAN, 2026-09-17: "Auch dieser Bereich ist optisch sehr gruselig. Da
+ * ist das Original auf qiblanco.com deutlich besser - bitte daran anlehnen."
+ *
+ * WAS DIE REFERENZ TUT, am gerenderten Rand gemessen statt aus dem Quelltext
+ * gelesen (qiblanco.com, HerobannerFeatured, 1440x900 und 390x844):
+ *   - GENAU EINE grosse zentrierte Ueberschrift ueber dem Aufmacher, und sie
+ *     STEIGT AUF DEM TELEFON AB: 40 px auf 1440, 28 px auf 390.
+ *   - Darunter zwei Spalten, die OBEN BUENDIG beginnen - Textspalte (x=61)
+ *     und Bild (x=725) starten beide bei y=280.
+ *   - In der Textspalte ist ALLES linksbuendig (computed text-align: start),
+ *     von der Produkt-H2 bis zur Garantiezeile. Nichts steht mittig.
+ *   - Die Produkt-H2 ist eine Stufe KLEINER als die H1: 32 gegen 40 px.
+ *
+ * WAS HIER STAND, ebenso gemessen (crystal-cacao.com, 2026-09-18):
+ *   - ZWEI Grossueberschriften uebereinander, 48,83 px H1 und 39,06 px H2,
+ *     und BEIDE behalten auf dem Telefon ihre volle Groesse: --cc-fs-7 deckelt
+ *     ueber min(3.0518rem, 12.6vw) erst unterhalb von rund 387 px Breite. Auf
+ *     390 px standen damit 167 px Ueberschrift vor dem ersten Bild (H1 y=166,
+ *     H2 y=333, Bild y=525); die Referenz braucht dafuer 28 px.
+ *   - Die Produkt-H2 "Crystal Cacao(R) - Bio" lief ueber `main h2` auf
+ *     text-align:center - mittiger Text in einer linksbuendigen Spalte. Ihr
+ *     `text-2xl` im Markup war wirkungslos, weil `.ProductPageKakao h2` die
+ *     hoehere Spezifitaet hat; gemeint waren 24 px, gerendert wurden 39,06.
+ *   - Die Zeile "Wissenschaftlich geprueft" trieb ueber
+ *     `.ProductPageKakao p { margin-inline: auto }` auf x=255 statt x=160,
+ *     die Garantiezeile ueber `m-auto self-center` ebenso.
+ *   - Bild (y=419) und Textspalte (y=454) begannen nicht auf einer Hoehe,
+ *     weil `items-center` die kuerzere Spalte mittig setzt.
+ *
+ * KEIN NEUER FARBWERT, KEINE NEUE SCHRIFT, KEINE NEUE GROESSENSTUFE: alles
+ * unten benutzt die vorhandenen Stufen --cc-fs-4..7 und die vorhandenen
+ * Abstands-Token. Der Abstieg auf dem Telefon ist woertlich derselbe Griff,
+ * den `.cc-aufmacher h1` (app.css, Abschnitt 7) schon macht, samt seiner
+ * Grenze 47.99em - eine zweite Grenze waere ein zweiter Bruchpunkt. */
+
+.cc-kakao-aufmacher {
+  text-align: center;
+  margin-block: var(--cc-space-5) var(--cc-space-2);
+}
+
+.cc-kakao-aufmacher h1 {
+  font-size: var(--cc-fs-7);
+  line-height: 1.15;
+  margin-block: 0 var(--cc-space-1);
+}
+
+/* Die Unterzeile ist eine Stufe unter der H1 und KEINE zweite Ueberschrift.
+ * `margin-inline: auto` kommt aus `.ProductPageKakao p` und ist hier richtig:
+ * der Aufmacher ist mittig, die Zeile soll unter der H1 stehen. */
+.cc-kakao-aufmacher__unterzeile {
+  font-size: var(--cc-fs-5);
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--cc-dunkel);
+  margin-block: 0;
+}
+
+@media (max-width: 47.99em) {
+  .cc-kakao-aufmacher h1 {
+    font-size: var(--cc-fs-6);
+  }
+  .cc-kakao-aufmacher__unterzeile {
+    font-size: var(--cc-fs-4);
+  }
+}
+
+/* --- Die Textspalte des Aufmachers: eine Kante, links ---------------------
+ * Die Referenz haelt jede Zeile der Spalte auf derselben Kante. Die drei
+ * Regeln unten holen genau die drei Elemente zurueck, die hier ausgeschert
+ * sind - H2 (mittig), Absatz (margin-inline:auto), Garantiezeile (m-auto).
+ * Sie greifen NUR im Aufmacher: die uebrigen Sektionen der Seite sind
+ * bewusst mittig gesetzt und bleiben unberuehrt. */
+.ProductPageKakao .cc-kakao-hero h2 {
+  font-size: var(--cc-fs-5);
+  text-align: start;
+  text-wrap: pretty;
+  margin-block: 0 var(--cc-space-1);
+}
+
+.ProductPageKakao .cc-kakao-hero p,
+.ProductPageKakao .cc-kakao-hero li {
+  margin-inline: 0;
+  text-align: start;
+}
+
+.cc-kakao-hero__garantie {
+  text-align: start;
+}
+
+/* Die Aufzaehlung sitzt auf der Spaltenkante; der Einzug traegt nur noch die
+ * Punkte selbst, statt den ganzen Block um einen Freiwert zu schieben. */
+.cc-kakao-hero__vorteile {
+  margin: var(--cc-space-2) 0;
+  padding-inline-start: 1.25rem;
+}
+
+/* Oben buendig wie in der Referenz - der Abstand nach oben kommt aus dem
+ * Aufmacher darueber, nicht aus einem Freiwert am Aufmacher-Block. */
+.cc-kakao-hero {
+  margin-top: var(--cc-space-3);
+}
+
+/* Das erste Element der Textspalte setzt oben keinen Abstand: `main h2` bringt
+ * var(--cc-space-5) mit, und der schiebt die Spalte unter die Oberkante des
+ * Bildes daneben. Die Referenz laesst beide Spalten auf derselben Hoehe
+ * beginnen (gemessen y=280 / y=280). */
+.ProductPageKakao .cc-kakao-hero > div > :first-child {
+  margin-top: 0;
+}
+
+/* ==========================================================================
+ * DER ZUBEREITUNGSBLOCK — 2026-09-18
+ * Job 20260918-crystal-cacao-zubereitung-und-hero-an-qiblanco-anlehnen
+ * ==========================================================================
+ * CHRISTIAN, 2026-09-17: "Top-Fehler auf Crystal Kakao, das ja laecherlich,
+ * die Darstellung. Da kannst du das von der Rueckseite der Verpackung nehmen."
+ *
+ * WAS "LAECHERLICH" WAR, gemessen statt vermutet (crystal-cacao.com,
+ * 2026-09-18, 1440x900): unter einer 39,06-px-Ueberschrift standen drei
+ * 16-px-Zeilen, und der Absatz begann bei x=405 statt bei x=160 der
+ * Blockkante — computed margin-left 245px, margin-right 245px. Ursache ist
+ * die Kette `.ProductPageKakao p { margin-inline: auto }` mal harte <br>:
+ * ein Absatz mit hartem Umbruch hat als max-content-Breite seine LAENGSTE
+ * HARTE ZEILE (630 px), und `auto` zentriert genau diese Breite im 1152 px
+ * breiten Block. Der Kommentar bei `margin-inline: auto` weiter oben in
+ * dieser Datei sagt das seit dem 2026-09-09 voraus; hier ist der Fall.
+ * Dazu 10vh Aussenabstand oben UND unten, also auf 900 px Hoehe zweimal
+ * 90 px Leere um drei Textzeilen.
+ *
+ * DIE ABHILFE IST BAULICH, NICHT KOSMETISCH: eine echte <ol> kann nicht auf
+ * max-content schrumpfen und nicht mittig treiben. Der Block braucht danach
+ * keine Sonderregel gegen das Zentrieren - er hat das Problem nicht mehr.
+ *
+ * KEIN NEUER FARBWERT, KEINE NEUE SCHRIFT: nur vorhandene Token. */
+
+.cc-zubereitung {
+  margin-block: var(--cc-space-6) var(--cc-space-6);
+}
+
+/* Die Zeile unter der Ueberschrift ist die Zeile der Verpackung
+ * ("Dein Ritual in 6 Schritten"), nicht eine zweite Ueberschrift. */
+.ProductPageKakao .cc-zubereitung__lead {
+  text-align: center;
+  font-size: var(--cc-fs-4);
+  line-height: 1.3;
+  color: var(--cc-dunkel);
+  margin-block: 0 var(--cc-space-3);
+}
+
+.ProductPageKakao .cc-zubereitung__schritte {
+  list-style: decimal;
+  max-width: var(--cc-zeile-max);
+  margin-inline: auto;
+  padding-inline-start: 1.6rem;
+  text-align: start;
+}
+
+.ProductPageKakao .cc-zubereitung__schritte li {
+  margin-block: 0 var(--cc-space-2);
+  line-height: 1.65;
+  padding-inline-start: 0.25rem;
+}
+
+.ProductPageKakao .cc-zubereitung__schritte li::marker {
+  font-weight: 700;
+  color: var(--cc-dunkel);
+}
+
+/* Die Quellenangabe ist eine Herkunftsauskunft, keine Fussnote zum
+ * Wegschauen: sie sagt dem Leser, dass der Wortlaut der der Dose ist. */
+.ProductPageKakao .cc-zubereitung__quelle {
+  max-width: var(--cc-zeile-max);
+  margin-inline: auto;
+  margin-block: var(--cc-space-3) 0;
+  text-align: start;
+  font-size: 0.9375rem;
+  color: var(--cc-dunkel);
+  opacity: 0.75;
+}
+
+/* Die Dosieranleitung der Verpackung — sie loest den Widerspruch zwischen
+ * "20-30 g fuer tiefen Fokus" (Schritt 1) und den 15 g der Kaufseiten auf.
+ * Begruendung im Markup, Kakao.jsx. */
+.ProductPageKakao .cc-zubereitung__dosis {
+  max-width: var(--cc-zeile-max);
+  margin-inline: auto;
+  margin-block: var(--cc-space-3) 0;
+  text-align: start;
+  line-height: 1.65;
+}
+
+.ProductPageKakao .cc-zubereitung__dosis dt {
+  font-weight: 700;
+  margin-bottom: var(--cc-space-1);
+}
+
+.ProductPageKakao .cc-zubereitung__dosis dd {
+  margin-inline-start: 0;
+}
