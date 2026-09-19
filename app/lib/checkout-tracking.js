@@ -27,6 +27,33 @@
 export const ATTRIBUTION_STORAGE_KEY = 'qiblanco_checkout_attribution';
 export const ATTRIBUTION_COOKIE_NAME = ATTRIBUTION_STORAGE_KEY;
 
+/**
+ * WELCHER LADEN HAT VERKAUFT — der Herkunfts-Wert dieser Storefront.
+ *
+ * Bis zum 2026-09-19 schrieb diese Fassung zeichengleich 'qiblanco_hydrogen',
+ * also denselben Wert wie qiblanco.com. Beide Laeden laufen gegen dieselbe
+ * Shopify-Domain (eigene Auslieferung, kein eigener Shop), und im Bestellstrom
+ * war eine crystal-Bestellung von einer qiblanco-Bestellung deshalb nicht zu
+ * unterscheiden (gemessen an orders.jsonl: shop dach 231 / usa 34, kein
+ * crystal-Wert). Die Entscheidung war hier als "gehoert entschieden, nicht
+ * nebenbei" geparkt — Christian hat sie am 2026-09-19 zu Bestellung #13518
+ * gestellt ("versteht das Tracking, ob die Dame ueber crystal-cacao.com kam
+ * oder ueber qiblanco.com gekauft hat?"), und seine Frage ist die Entscheidung.
+ *
+ * WARUM EIN EIGENER WERT UND KEIN ZUSATZFELD (gemessen, nicht gemeint): kein
+ * produktiver Leser vergleicht den Wert. own_source, identitaets_luecke,
+ * shop-ankunft, capi-rueckspeisung und google-rueckspeisung pruefen nur die
+ * ANWESENHEIT von `attribution_source` ("instrumentierte Kasse gelaufen");
+ * tracking-linkage/config/tracking-soll.yaml pinnt 'qiblanco_hydrogen' allein
+ * an das qiblanco-Repo. Ein zweites Feld haette denselben Sachverhalt an zwei
+ * Stellen gefuehrt. Schema: <laden>_<technik>, wie qiblanco_hydrogen und
+ * qiblanco_us_liquid. Auf der Gegenseite leitet die Orders-Bruecke
+ * (worker-pool/bin/attribution_orders_bridge.py) daraus shop=crystal ab.
+ *
+ * Consent-frei wie bisher: der Wert nennt den LADEN, nicht die Person.
+ */
+export const ATTRIBUTION_SOURCE = 'crystal_cacao_hydrogen';
+
 const TRACKING_PRODUCTION_HOSTS = new Set([
   'crystal-cacao.com',
   'www.crystal-cacao.com',
@@ -265,11 +292,10 @@ export function buildAttributionCartAttributes({
     );
   }
 
-  // BEWUSST UNVERAENDERT beim Nachzug: der Wert bleibt 'qiblanco_hydrogen'.
-  // Ihn hier auf einen eigenen Wert zu setzen waere eine Aenderung an einer
-  // FREMDEN Naht — die Backend-Parser (own_source, capi-rueckspeisung,
-  // funnel-substrat) lesen ihn. Das gehoert entschieden, nicht nebenbei.
-  addCartAttribute(attributes, 'attribution_source', 'qiblanco_hydrogen');
+  // Seit 2026-09-19 der EIGENE Laden-Wert (siehe ATTRIBUTION_SOURCE oben).
+  // Bis dahin stand hier 'qiblanco_hydrogen' mit dem Vermerk "gehoert
+  // entschieden, nicht nebenbei" — entschieden ist es jetzt.
+  addCartAttribute(attributes, 'attribution_source', ATTRIBUTION_SOURCE);
 
   return attributes;
 }
@@ -563,11 +589,12 @@ function safeDecode(value) {
 // Begruendung, mit der die Vorlage ihrerseits `ua_klasse()` aus
 // hyros-eigenbau/receiver/src/basis.py zeichengleich uebernommen hat.
 //
-// `attribution_source` BLEIBT 'qiblanco_hydrogen' -- unveraendert und bewusst,
-// wortgleich zur Begruendung an buildAttributionCartAttributes weiter oben:
-// den Wert hier auf einen eigenen zu setzen waere eine Aenderung an einer
-// FREMDEN Naht (own_source, capi-rueckspeisung, funnel-substrat lesen ihn).
-// Das gehoert entschieden, nicht nebenbei.
+// `attribution_source` traegt seit 2026-09-19 den EIGENEN Laden-Wert
+// ATTRIBUTION_SOURCE ('crystal_cacao_hydrogen'). Bis dahin stand hier
+// 'qiblanco_hydrogen' mit dem Vermerk "gehoert entschieden, nicht nebenbei";
+// die Begruendung der Entscheidung steht an der Konstante am Dateianfang.
+// Die drei anderen Marker (consent_state, ua_class) bleiben zeichengleich zur
+// Vorlage -- die Ankunfts-Wache prueft ihre Anwesenheit, nicht den Laden.
 //
 // KEINE AUSWEITUNG DER DATENMENGE, und das ist die Bedingung, unter der dieser
 // Block an einer K3-Datei ueberhaupt zulaessig ist: gelesen werden
@@ -719,7 +746,7 @@ export function consentStateFromCookies(cookieHeader) {
  */
 export function buildOriginCartAttributes({userAgent, cookieHeader} = {}) {
   const attributes = [];
-  addCartAttribute(attributes, 'attribution_source', 'qiblanco_hydrogen');
+  addCartAttribute(attributes, 'attribution_source', ATTRIBUTION_SOURCE);
   addCartAttribute(
     attributes,
     'consent_state',
