@@ -123,6 +123,33 @@ if (!globalThis.caches) {
 }
 
 // ---------------------------------------------------------------------------
+// 5. fetch mit Strom-Rumpf — Node verlangt `duplex: 'half'`, workerd nicht
+// ---------------------------------------------------------------------------
+// Hydrogen reicht `/api/(unstable|YYYY-MM)/graphql.json` per
+// `storefront.forward()` an Shopify weiter und uebergibt dabei den Rumpf der
+// Browser-Anfrage als ReadableStream: `fetch(url, {method, body: g.body})`.
+// Auf Oxygen laeuft das. Node (undici) wirft ohne `duplex: 'half'`
+// "RequestInit: duplex option is required when sending a body." — server.js
+// faengt das und antwortet 500. Gemessen 2026-09-23: 500 auf allen 10 Seiten,
+// dieselbe Anfrage an qiblanco.com (Oxygen) 200. Aufrufer im Browser ist
+// `useShopifyCookies` (Anfrage `ensureCookies`), also die Tracking-Werte von
+// Shopify Analytics — der Warenkorb laeuft serverseitig und war nicht betroffen.
+// Der Fix gehoert hierher und nicht nach node_modules oder app/: es ist dieselbe
+// Art Zulieferung wie `caches`, eine Eigenschaft der Laufzeit, nicht der App.
+const ursprungsFetch = globalThis.fetch;
+globalThis.fetch = function fetchMitDuplex(eingabe, init) {
+  if (
+    init &&
+    init.duplex === undefined &&
+    init.body != null &&
+    typeof init.body.getReader === 'function'
+  ) {
+    init = {...init, duplex: 'half'};
+  }
+  return ursprungsFetch(eingabe, init);
+};
+
+// ---------------------------------------------------------------------------
 // Das gebaute Bundle
 // ---------------------------------------------------------------------------
 if (!fs.existsSync(BUILD_PFAD)) {
@@ -311,9 +338,18 @@ function nodeAnfrageZuRequest(req, url) {
 }
 
 async function antwortSchreiben(response, res) {
+  // content-encoding/content-length fallen weg: kommt der Koerper aus einem
+  // Node-`fetch` (Storefront-Weiterleitung, Zulieferung 5), hat undici ihn
+  // bereits ENTpackt, die Kopfzeile sagt aber weiter `gzip`. Der Browser
+  // scheitert dann am Entpacken (curl --compressed: rc=61), und Caddy packt
+  // nichts nach, was schon eine Kodierung behauptet. Ohne die Kopfzeile
+  // komprimiert Caddy (`encode zstd gzip`) selbst. Eigene Antworten der App
+  // tragen keine Kodierung; fuer sie aendert sich nichts.
   const kopfzeilen = {};
   response.headers.forEach((wert, name) => {
-    if (name.toLowerCase() !== 'set-cookie') kopfzeilen[name] = wert;
+    const n = name.toLowerCase();
+    if (n === 'set-cookie' || n === 'content-encoding' || n === 'content-length') return;
+    kopfzeilen[name] = wert;
   });
 
   // set-cookie darf nicht zu EINER Zeile zusammengefaltet werden — sonst
