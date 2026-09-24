@@ -33,7 +33,12 @@ import {UpPromoteTracking} from './components/UpPromoteTracking';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
 import {strictRegions} from '~/lib/consent-policy';
 import {sorteZuPfad} from '~/lib/kakao-zone';
-import {preismodusStand, setzePreismodus} from '~/lib/preismodus';
+import {
+  preismodusStand,
+  rootDatenGesehen,
+  rootDatenZuAlt,
+  setzePreismodus,
+} from '~/lib/preismodus';
 import '@fontsource-variable/open-sans';
 
 /**
@@ -59,6 +64,11 @@ const QPX_BASIS_ENDPOINT_DEFAULT = 'https://qpx.65-108-150-121.sslip.io/b';
  * @type {ShouldRevalidateFunction}
  */
 export const shouldRevalidate = ({formMethod, currentUrl, nextUrl}) => {
+  // PREISMODUS (s02 Grossjob 20260924-kasse-zeigt-bruttopreise-...): der
+  // Client kennt den Modus nur aus den root-Daten. Ohne Altersdeckel rechnete
+  // ein vor dem Kipp geöffneter Tab bei Client-Navigation mit dem alten Modus
+  // weiter. Deshalb höchstens PREISMODUS_MAX_ALTER_MS alt, dann neu laden.
+  if (rootDatenZuAlt()) return true;
   // revalidate when a mutation is performed e.g add to cart, login...
   if (formMethod && formMethod !== 'GET') return true;
 
@@ -251,6 +261,7 @@ export function Layout({children}) {
   // Client: den Preismodus des Servers übernehmen, BEVOR ein Kind rechnet.
   if (typeof window !== 'undefined' && data?.preismodus?.modus) {
     setzePreismodus(data.preismodus.modus, data.preismodus.quelle);
+    rootDatenGesehen(data.preismodus);
   }
 
   return (

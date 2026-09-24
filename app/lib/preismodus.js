@@ -90,6 +90,8 @@ export function setzePreismodus(modus, quelle = 'gesetzt') {
 export function preismodusZuruecksetzen() {
   aktuell = {modus: PREISMODUS_VORGABE, quelle: 'vorgabe'};
   zuletztGelesen = null;
+  rootDatenObjekt = null;
+  rootDatenSeit = 0;
 }
 
 /**
@@ -163,4 +165,29 @@ export function vorschauModus(requestUrl) {
   } catch {
     return null;
   }
+}
+
+/**
+ * ALTERSDECKEL DER ROOT-DATEN IM BROWSER. root.jsx lädt die root-Daten bei
+ * Client-Navigation sonst nie neu (shouldRevalidate false), und nur sie tragen
+ * den Modus. Nach dem Kipp hielte ein offener Tab den alten Modus bis zum
+ * vollen Neuladen. Zwei Minuten sind der Preis dafür: höchstens ein root-
+ * Neuladen je zwei Minuten und Besucher (Header-Query CacheLong, Bewertung 6 h
+ * gecacht). Gemessen wird am Objekt, nicht an der Uhrzeit der Hydration: jeder
+ * neue root-Datensatz (auch nach POST) setzt die Uhr zurück.
+ */
+export const PREISMODUS_MAX_ALTER_MS = 120000;
+let rootDatenObjekt = null;
+let rootDatenSeit = 0;
+
+/** @param {object} objekt das preismodus-Feld der root-Daten */
+export function rootDatenGesehen(objekt, jetzt = Date.now()) {
+  if (objekt !== rootDatenObjekt) {
+    rootDatenObjekt = objekt;
+    rootDatenSeit = jetzt;
+  }
+}
+
+export function rootDatenZuAlt(jetzt = Date.now()) {
+  return rootDatenSeit > 0 && jetzt - rootDatenSeit > PREISMODUS_MAX_ALTER_MS;
 }
