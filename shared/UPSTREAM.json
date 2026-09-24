@@ -86,8 +86,7 @@
     {
       "upstream": "app/lib/datum.js",
       "klasse": "K1",
-      "sha256": "29fbfe87fb1870d30aabcf33666af934d169d1ec5fc0c1a01eab459417722b46",
-      "abweichung_grund": "Unveraendert aus qiblanco uebernommen, Job 20260913-REPAIR-uploaddate-ohne-uhrzeit-und-zeitzone-google-meldet-unser-eigenes-markup, Segment s02. WARUM K1 UND KEINE EIGENE FASSUNG: die Datei fuehrt HAUS_ZEITZONE = 'Europe/Berlin' samt ausgeschriebener Herleitung (ein Erscheinungsdatum ist ein Kalendertag, kein Zeitpunkt). Eine zweite Fassung hier waere eine zweite Zonen-Wahrheit fuer denselben Sprachraum. UND DER OFFSET MUSS GERECHNET WERDEN, NICHT GETIPPT: Europe/Berlin hat Sommerzeit, ein festes '+02:00' macht aus dem 5. Februar den 4. Februar 23:00 Berlin, also bei jedem Winter-Datum den falschen Kalendertag. Einziger Verwender in diesem Laden ist app/routes/pages.warum-crystal-cacao.jsx (datePublished/dateModified). Die Datei gehoert NICHT zur berechneten Import-Huelle der drei geteilten Seiten - sie aendert dateien_soll nicht; gegengemessen mit homepage-bauer/pruefungen/probe_crystal_cacao_drift.py vor und nach dem Eintrag (26 Befunde, Huelle 41/32 - unveraendert). sha256 ist der Stand von qiblanco origin/main am 2026-09-13, also nach dem hier gepinnten upstream_commit: die Datei entstand erst an diesem Tag (PR #429) und steht in 59fbe30 noch nicht."
+      "sha256": "29fbfe87fb1870d30aabcf33666af934d169d1ec5fc0c1a01eab459417722b46"
     },
     {
       "upstream": "app/lib/entity-schema.js",
