@@ -2,6 +2,7 @@ import {createHydrogenContext} from '@shopify/hydrogen';
 import {AppSession} from '~/lib/session';
 import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
 import {resolveCountry} from '~/lib/markt-pricing';
+import {ladePreismodus} from '~/lib/preismodus';
 
 // Define the additional context object
 const additionalContext = {
@@ -68,6 +69,13 @@ export async function createHydrogenRouterContext(
     },
     additionalContext,
   );
+
+  // PREISMODUS netto|brutto (Grossjob 20260924-kasse-zeigt-bruttopreise-wie-
+  // produktseite-prio10, s02): HIER und nicht im root-Loader, weil Kind-Loader
+  // parallel zum root-Loader laufen und sonst mit dem alten Modus rechneten.
+  // Derselbe Träger wie qiblanco.com (Shop-Metafeld qb_preis.modus), damit
+  // beide Läden in derselben Minute kippen.
+  hydrogenContext.preismodus = await ladePreismodus(hydrogenContext.storefront);
 
   return hydrogenContext;
 }

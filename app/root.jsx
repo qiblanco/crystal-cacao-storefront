@@ -33,6 +33,7 @@ import {UpPromoteTracking} from './components/UpPromoteTracking';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
 import {strictRegions} from '~/lib/consent-policy';
 import {sorteZuPfad} from '~/lib/kakao-zone';
+import {preismodusStand, setzePreismodus} from '~/lib/preismodus';
 import '@fontsource-variable/open-sans';
 
 /**
@@ -159,6 +160,10 @@ export async function loader(args) {
     // Cookiebot-Domaingruppe dieser Domain. Ohne sie kein Consent-Banner —
     // und damit (fail-closed) auch kein marketing-Consent und kein Tracking.
     cookiebotId: env.PUBLIC_COOKIEBOT_ID || '',
+    // PREISMODUS netto|brutto (s02, Grossjob 20260924-kasse-zeigt-brutto-
+    // preise-wie-produktseite-prio10): gelesen in lib/context.js, hier nur an
+    // den Client gereicht, damit die Hydration denselben Modus rechnet.
+    preismodus: args.context.preismodus ?? preismodusStand(),
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -243,6 +248,10 @@ export function Layout({children}) {
   // ohne eine Zeile in den K1-geschuetzten Produktrouten anzufassen.
   const {pathname} = useLocation();
   const ccSorte = sorteZuPfad(pathname);
+  // Client: den Preismodus des Servers übernehmen, BEVOR ein Kind rechnet.
+  if (typeof window !== 'undefined' && data?.preismodus?.modus) {
+    setzePreismodus(data.preismodus.modus, data.preismodus.quelle);
+  }
 
   return (
     <html
@@ -251,6 +260,8 @@ export function Layout({children}) {
       data-qiblanco-tracking-preview={isTrackingPreview ? 'true' : undefined}
       data-qb-region={data?.buyerCountry || undefined}
       data-qb-consent-strict={data?.consentStrictRegions || undefined}
+      data-qb-preismodus={data?.preismodus?.modus || undefined}
+      data-qb-preismodus-quelle={data?.preismodus?.quelle || undefined}
     >
       <head>
         <meta charSet="utf-8" />

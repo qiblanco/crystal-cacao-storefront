@@ -1,3 +1,5 @@
+import {istBrutto} from './preismodus.js';
+
 const SALE_CACAO_HANDLES = new Set(['37cr378n', 'aw783hfn', 'awcr37shyj']);
 // Lebensmittel-Satz statt Regelsatz. Alle Cacao-Produkte liegen in der
 // Shopify-Collection Zeremonie Kakao (524038045964), die den 7%-Override
@@ -112,6 +114,14 @@ function bruttoZeileRoh(line) {
   if (!Number.isFinite(net)) return 0;
 
   if (getCurrencyCode(line) !== 'EUR') {
+    return net;
+  }
+
+  // PREISMODUS brutto (Grossjob 20260924-kasse-zeigt-bruttopreise-wie-
+  // produktseite-prio10, s02): der Zeilenbetrag IST der Kassenbetrag, auch für
+  // den Sale-Kakao -- die Kasse belastet, was Shopify liefert, nicht die
+  // Konstante darunter. Kein Aufschlag, kein Ersatzwert.
+  if (istBrutto()) {
     return net;
   }
 
