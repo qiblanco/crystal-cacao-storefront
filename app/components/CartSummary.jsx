@@ -3,6 +3,8 @@ import {Preis} from './Preis';
 import {getCartLineGrossDisplayTotalExact} from '~/lib/cart-display-pricing';
 import {useEffect, useId, useRef, useState} from 'react';
 import {useFetcher} from 'react-router';
+import {cartLineContentIds} from '~/lib/pixel-content';
+import {buildInitiateCheckoutEvent, qpxTrack} from '~/lib/qpx-commerce';
 
 /**
  * @param {CartSummaryProps}
@@ -75,7 +77,12 @@ export function CartSummary({cart, layout}) {
           giftCardInputId={giftCardInputId}
         />
       </CodeFalz>
-      <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+      <CartCheckoutActions
+        checkoutUrl={cart?.checkoutUrl}
+        subtotal={{amount: bruttoSumme.toFixed(2), currencyCode: waehrung}}
+        numItems={zeilen.length}
+        contentIds={cartLineContentIds(zeilen)}
+      />
     </div>
   );
 }
@@ -101,9 +108,14 @@ function CodeFalz({layout, children}) {
 }
 
 /**
- * @param {{checkoutUrl?: string}}
+ * @param {{
+ *   checkoutUrl?: string;
+ *   subtotal?: {amount: string, currencyCode: string};
+ *   numItems?: number;
+ *   contentIds?: string[];
+ * }}
  */
-function CartCheckoutActions({checkoutUrl}) {
+function CartCheckoutActions({checkoutUrl, subtotal, numItems, contentIds}) {
   if (!checkoutUrl) return null;
 
   // DER KASSENKNOPF IST DER KERN (Christian 2026-09-10): "Jetzt sicher zur
@@ -120,9 +132,27 @@ function CartCheckoutActions({checkoutUrl}) {
   // reisen auf diesem Laden bereits als Cart-Attribute mit
   // (persistAttributionOnCartResult in cart.jsx und cart.$lines.jsx).
   // Die Knopf-Gestalt ist Darstellung; der Weg bleibt derselbe.
+  //
+  // INITIATE_CHECKOUT (Job 20260926-growth-crystal-laden-messbar-und-
+  // zulauf): der eigene Pixel erfährt den Schritt in die Kasse über den
+  // Klick-Hörer unten, wie in der Vorlage (dort am onSubmit des Formulars).
+  // Er verhindert nichts und ändert den Weg nicht: kein preventDefault, das
+  // href bleibt cart.checkoutUrl. qpxTrack schluckt jeden Fehler und puffert
+  // nur; gesendet wird erst, wenn qpx.js nach Einwilligung geladen ist.
+  // Der Wert ist die angezeigte Brutto-Zwischensumme (Vorlage: taxedSubtotal).
   return (
     <div className="cartSummaryWrapper">
-      <a className="cc-knopf cart-kasse" href={checkoutUrl} target="_self">
+      <a
+        className="cc-knopf cart-kasse"
+        href={checkoutUrl}
+        target="_self"
+        onClick={() =>
+          qpxTrack(
+            'initiate_checkout',
+            buildInitiateCheckoutEvent({subtotal, numItems, contentIds}),
+          )
+        }
+      >
         <p>Jetzt sicher zur Kasse</p>
       </a>
     </div>
