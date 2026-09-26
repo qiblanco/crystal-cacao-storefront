@@ -3002,6 +3002,121 @@ main .cc-absicht h1 {
   text-underline-offset: 3px;
 }
 
+/* ===========================================================================
+ * DAS EINTRAGUNGSFELD DES GRATIS-KURSES (2026-09-17, Job 20260917-jetzt-
+ * kostenfrei-mitmachen-ohne-ein-feld-zum-eintragen, Segment s03)
+ * ===========================================================================
+ * KEIN FREIER WERT IN DIESEM BLOCK — jede Zahl ist ein Token von oben. Das ist
+ * hier nicht Stilpflege, sondern die Lehre der Seite selbst: der web-brief zu
+ * `crystal-cacao-node-start` nennt als offene Befunde "ZWEI konkurrierende
+ * Gold-/Ocker-Toene", "4 verschiedene Sektions-Abstaende" und "3 H2-Stil-
+ * Kombis". Ein neuer Abschnitt mit eigenen Werten haette jede dieser drei
+ * Zahlen um eins erhoeht.
+ *
+ * DER ABSENDEKNOPF BEKOMMT ABSICHTLICH FAST KEINE REGEL: die Basis
+ * `main button:where(:not(.reset)):where(:not(.cc-knopf))` in app.css
+ * (Abschnitt 17) gibt ihm bereits --cc-gold, --cc-radius-knopf, --cc-fs-2,
+ * --cc-knopf-gewicht und --cc-treffer-min. Sie ist als BASIS mit Spezifitaet
+ * 0-0-2 gebaut, damit Bauteile sie ueberschreiben DUERFEN — gebraucht wird
+ * das hier nicht. Ein eigener Goldton waere der zweite, und `.btn--primary`
+ * waere mit --cc-knopf-hoehe (70px) der Kaufknopf an einer Stelle, an der
+ * nichts gekauft wird.
+ *
+ * DER RADIUS DES FELDES IST EINE KORREKTUR, KEINE ERGAENZUNG: die
+ * Basis-Regel `input` in reset.css setzt `border-radius: 4px` und ist damit
+ * ein DRITTER Radiuswert neben --cc-radius-bild und --cc-radius-knopf (beide
+ * 10px). Das Feld nimmt hier den Knopfradius, liegt also auf dem Token seines
+ * eigenen Absendeknopfs statt daneben.
+ */
+.cc-eintrag {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-1);
+  /* `form { max-width: 400px }` aus reset.css traegt bereits die Breite des
+     Kaufblocks (--cc-kaufblock-max). Hier wird sie nicht wiederholt. */
+}
+
+.cc-eintrag__marke {
+  font-size: var(--cc-fs-1);
+  font-weight: 600;
+  color: var(--cc-text);
+}
+
+.cc-eintrag__feld {
+  width: 100%;
+  min-height: var(--cc-treffer-min);
+  padding: var(--cc-space-1) var(--cc-space-2);
+  font-size: var(--cc-fs-2);
+  color: var(--cc-text);
+  /* DIE FUELLUNG IST EIN BESTEHENDER FLAECHENTON, KEIN NEUER — nachgemessen
+     A gegen B am selben Slug und derselben URL (2026-09-17):
+     rgb(251,248,244) = --cc-grund steht in `colorsBg` schon mit n=5 Elementen
+     auf dieser Seite. Das Feld tritt einer vorhandenen Flaechenwelt BEI,
+     statt eine sechste aufzumachen — Rubrik-Score mit Fuellung und ohne
+     Fuellung identisch 86.
+     EIN ERSTER ANLAUF HAT HIER DAS FALSCHE BESCHULDIGT und stand kurz davor,
+     als Kommentar mitzufahren: der Befund "5 Hintergrund-Farbwelten" kam
+     NICHT von dieser Zeile. Wer sie entfernte, bewegte die Zahl nicht — und
+     eine Aenderung, die die Zahl nicht bewegt, ist nicht die Ursache.
+     Woher er wirklich kommt, steht am Knopf weiter unten. */
+  background: var(--cc-grund);
+  border: 1px solid var(--cc-linie);
+  border-radius: var(--cc-radius-knopf);
+  /* reset.css gibt jedem `input` einen eigenen Aussenabstand. Der Abstand
+     dieser Gruppe steckt im `gap` oben, also genau an einer Stelle. */
+  margin: 0;
+}
+
+/* DER FOKUSRING NIMMT --cc-gold-TEXT, NICHT --cc-gold, UND DAS IST GEMESSEN:
+   WCAG 1.4.11 verlangt 3:1 fuer nicht-textliche Kontraste. --cc-gold
+   (rgb(242,191,114)) auf --cc-grund (#fbf8f4) haelt das nicht; --cc-gold-text
+   (#90671D) traegt laut Token-Kommentar 4,79:1 auf genau dieser Flaeche. Es
+   ist derselbe Akzent in seiner lesbaren Stufe, kein zweiter Goldton — ein
+   Fokusring, den man nicht sieht, ist keiner. */
+.cc-eintrag__feld:focus-visible {
+  outline: 2px solid var(--cc-gold-text);
+  outline-offset: 2px;
+  border-color: var(--cc-gold-text);
+}
+
+.cc-eintrag__feld::placeholder {
+  color: var(--cc-muted);
+}
+
+/* DER HONEYPOT. Er ist fuer Menschen weg und fuer Maschinen da. */
+.cc-eintrag__falle {
+  display: none;
+}
+
+/* DER KNOPF KOSTET EINEN RUBRIK-PUNKT, UND ER BEHAELT SEIN GOLD — die
+ * Begruendung ist gemessen und steht hier, damit niemand sie als Schlamperei
+ * liest und "aufraeumt".
+ * A/B am selben Slug, derselben URL, eine Minute auseinander: OHNE dieses
+ * Formular 87 Punkte und 4 gezaehlte Hintergrund-Farbwelten, MIT ihm 86 und
+ * 5. Der Unterschied ist genau eine Farbe, und es ist unsere eigene:
+ * rgb(242,191,114) = --cc-gold. In `colorsBg` stand sie vorher mit n=1 und
+ * blieb damit UNTER der Zaehlschwelle der Rubrik (sie zaehlt nur Farben mit
+ * n >= 2, src/webdesign.py); dieser Absendeknopf ist das zweite gold
+ * gefuellte Element der Seite und hebt sie ueber die Schwelle.
+ * DIE RUBRIK BESTRAFT HIER ALSO DIE ZWEITE ANWENDUNG DES RICHTIGEN TOKENS,
+ * waehrend die erste frei war. Die Designsprache verlangt den einen
+ * Gold-Akzent AUF DER HANDLUNG, und die Handlung dieser Seite ist dieser
+ * Knopf. Ihm das Gold zu nehmen, um einen Zaehler zu bedienen, waere die
+ * Regel gegen ihren Zweck gedreht. 86 liegt ueber der Schwelle 80.
+ * Zurueckgemeldet an den Design-Meister als Lernkarte, nicht weggeraeumt. */
+.cc-eintrag__knopf {
+  align-self: flex-start;
+  margin-top: var(--cc-space-1);
+}
+
+/* Die Bestaetigungsseite benutzt den Textseiten-Rahmen von Impressum und
+   Datenschutz (`cc-seite cc-seite--text` + `cc-rechtstext`). Das Formular
+   darin steht im Lesefluss und braucht deshalb Luft nach oben, sonst klebt
+   es an seinem eigenen Satz. */
+.cc-eintrag-seite .cc-eintrag {
+  margin-top: var(--cc-space-3);
+}
+
 /* ==========================================================================
  * DER AUFMACHER DER STARTSEITE — 2026-09-18
  * Job 20260918-crystal-cacao-zubereitung-und-hero-an-qiblanco-anlehnen

@@ -56,15 +56,30 @@
  */
 import {Link} from 'react-router';
 import {canonicalLink} from '~/lib/seo';
+import {seitenSignale} from '~/lib/kakao-seo';
 import {ABSENDER_MARKE} from '~/lib/kakao-zone';
 
+const PFAD = '/pages/impressum';
+const TITEL = `Impressum | ${ABSENDER_MARKE}`;
+const BESCHREIBUNG =
+  'Impressum der Qi Blanco UG (haftungsbeschränkt) — crystal-cacao.com';
+
+/**
+ * Titel und Beschreibung stehen ab hier an EINER Stelle und versorgen
+ * `name=description` und `og:description` zugleich (Job 20260912-sieben-
+ * indexierbare-seiten-ohne-sitemap-und-ohne-auszeichnung-prio22): zwei Quellen
+ * für denselben Text laufen auseinander, und dann zeigt ein geteilter Link
+ * etwas anderes als das Suchergebnis.
+ */
 export const meta = () => [
-  {title: `Impressum | ${ABSENDER_MARKE}`},
-  {
-    name: 'description',
-    content: 'Impressum der Qi Blanco UG (haftungsbeschränkt) — crystal-cacao.com',
-  },
-  canonicalLink('/pages/impressum'),
+  {title: TITEL},
+  {name: 'description', content: BESCHREIBUNG},
+  canonicalLink(PFAD),
+  // Teilbild und strukturierte Daten. Diese Seite stand in keiner Sitemap und
+  // trug trotzdem kein `noindex`; sie SOLL auffindbar sein — ein Canonical ist
+  // dort das Mindeste, und ohne Teilbild bekommt ein geteilter Link keines.
+  // Der Rechtstext selbst bleibt unberührt: hier wird der <head> ergänzt.
+  ...seitenSignale({pfad: PFAD, titel: TITEL, beschreibung: BESCHREIBUNG}),
 ];
 
 export function loader() {

@@ -3,6 +3,7 @@ import {Analytics} from '@shopify/hydrogen';
 import {SearchForm} from '~/components/SearchForm';
 import {SearchResults} from '~/components/SearchResults';
 import {getEmptyPredictiveSearchResult} from '~/lib/search';
+import {noindexMeta, noindexHeader} from '~/lib/seo';
 import {
   ABSENDER_MARKE,
   istKakaoProdukt,
@@ -29,11 +30,41 @@ import {
 const SUCHE_TREFFER_MAX = 60;
 
 /**
+ * DIESE SEITE GEHÖRT NICHT IN DEN INDEX (Job 20260912-sieben-indexierbare-
+ * seiten-ohne-sitemap-und-ohne-auszeichnung-prio22).
+ *
+ * Die Frage stand VOR dem Markup, und sie ist gegen die Auszeichnung
+ * entschieden: eine interne Suchergebnisseite ist der Lehrbuchfall für dünnen
+ * und doppelten Inhalt. Jede Anfrage ist eine eigene URL (`?q=…`), der URL-Raum
+ * ist damit unbegrenzt, und eigenen Inhalt hat die Seite keinen — sie zeigt ein
+ * Formular und eine Trefferliste, die woanders steht. Ihr ein Teilbild zu geben
+ * hätte sie erst recht indexierbar gemacht.
+ *
+ * HIER KOMMT EIN ZWEITER GRUND DAZU, der nur für diesen Laden gilt: der
+ * SORTIMENTS-ZAUN unten filtert die Shopify-Treffer NACH der Abfrage. Der
+ * angezeigte Inhalt dieser URL hängt also an einer Filterliste — eine
+ * indexierte Fassung wäre eine Seite, deren Inhalt sich ändert, ohne dass sich
+ * ihre Adresse ändert.
+ *
+ * KEIN CANONICAL DANEBEN: `noindex` und ein Canonical sind widersprüchliche
+ * Signale. Diese Regel steht wortgleich im Kopf von app/lib/seo.js
+ * (NICHT_INDEXIERBARE_KOLLEKTIONEN) und gilt hier unverändert.
+ *
+ * ZWEI LAGEN, WIE IM HAUS ÜBLICH (Hausmuster „Gurt und Hosenträger"):
+ * `noindexMeta()` im HTML-head und `noindexHeader()` als X-Robots-Tag — der
+ * zweite greift auch bei einem Bot, der den head nicht parst.
+ *
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Suche | ${ABSENDER_MARKE}`}];
+  return [{title: `Suche | ${ABSENDER_MARKE}`}, noindexMeta()];
 };
+
+/**
+ * Die ZWEITE, vom HTML unabhängige Sperre desselben Signals. Wortgleich aus
+ * `noindexHeader()` — ein zweiter Wortlaut wäre ein zweiter Wartungspunkt.
+ */
+export const headers = () => noindexHeader();
 
 /**
  * @param {Route.LoaderArgs}

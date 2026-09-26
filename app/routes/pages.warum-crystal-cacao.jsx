@@ -4,6 +4,8 @@ import {Belege} from '~/components/reusables/Belege';
 import {ABSENDER_MARKE, markenOrganisation} from '~/lib/kakao-zone';
 import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
 import {ORG_ID, ORGANISATION, organizationSchema} from '~/lib/entity-schema';
+import {MARKEN_TEILBILD, teilbildSignale} from '~/lib/kakao-seo';
+import {isoMitZone} from '~/lib/datum';
 
 /**
  * DIE ABSICHTSERKLÄRUNG von Crystal Cacao — warum es diesen Kakao gibt.
@@ -155,10 +157,26 @@ function absichtsGraph() {
         url: SEITEN_URL,
         mainEntityOfPage: {'@type': 'WebPage', '@id': SEITEN_URL},
         inLanguage: 'de-DE',
-        datePublished: VEROEFFENTLICHT,
-        dateModified: VEROEFFENTLICHT,
+        // MASCHINENLESBAR MIT ZONE, menschenlesbar unveraendert. Google legt
+        // ein Datum ohne Zone nach dem Standort seines eigenen Crawlers aus —
+        // der Kalendertag haengt dann an einem Fremden. `isoMitZone` setzt den
+        // Anfang dieses Kalendertages in der Hauszone und rechnet den Offset je
+        // Datum aus der Zone; ein fest getipptes "+02:00" waere im Winter der
+        // falsche Tag. Die Konstante darueber bleibt der Kalendertag — sie
+        // speist auch den sichtbaren Text.
+        datePublished: isoMitZone(VEROEFFENTLICHT),
+        dateModified: isoMitZone(VEROEFFENTLICHT),
         author: {'@id': AUTOR_ID},
         publisher: {'@id': ORG_ID},
+        // DASSELBE Bild wie og:image, aus DERSELBEN Konstante. Stuende hier
+        // ein zweites, zeigte die Suchmaschine ein anderes Vorschaubild als
+        // das soziale Netzwerk — und beide waeren fuer sich richtig.
+        image: {
+          '@type': 'ImageObject',
+          url: MARKEN_TEILBILD.url,
+          width: MARKEN_TEILBILD.breite,
+          height: MARKEN_TEILBILD.hoehe,
+        },
         about: [
           {'@type': 'Thing', name: 'Mineralmedizin'},
           {'@type': 'Thing', name: 'Zeremonieller Kakao'},
@@ -169,17 +187,48 @@ function absichtsGraph() {
   };
 }
 
+/**
+ * Titel und Beschreibung stehen als Konstanten, weil sie seit dem 2026-09-12
+ * je ZWEIMAL gebraucht werden — einmal fuer die Suchmaschine
+ * (`title`/`name=description`) und einmal fuers Teilen (`og:title`/
+ * `og:description`). Zwei getrennt gepflegte Quellen fuer denselben Text
+ * driften auseinander, und dann zeigt ein geteilter Link etwas anderes als
+ * das Suchergebnis: zwei Versprechen fuer eine Seite.
+ */
+const SEITEN_TITEL = `Warum es Crystal Cacao gibt | ${ABSENDER_MARKE}`;
+const SEITEN_BESCHREIBUNG =
+  'Christian Bernd Bauer, Gründer von Crystal Cacao, über seine Absicht: ' +
+  'Mineralmedizin etablieren, Kaffee ablösen, Kakao als Medium — und ' +
+  'woran man das nachprüfen kann.';
+
+/**
+ * OPEN GRAPH, ergaenzt 2026-09-12 vom Grossjob-Segment s06.
+ *
+ * GEMESSENER ANLASS (Vollzensus der lebenden Sitemap, 2026-09-12): diese
+ * Seite trug NULL og-Tags — nicht bloss kein Bild. Sie ist der erste
+ * zurechenbare Text dieser Domain und genau der, den man weitergibt; ohne
+ * diese Angaben entscheidet jedes Netzwerk selbst, was in der Vorschau steht.
+ * Der Auftrag dieses Segments kannte die Seite noch nicht: sie ist erst am
+ * 2026-09-11 entstanden (Commit 13c2322) und hat den Laden von neun auf zehn
+ * Sitemap-Seiten wachsen lassen. Ein gepinnter Nenner haette sie verschluckt.
+ *
+ * `og:type: article` und nicht `website`: die Seite IST ein zurechenbarer
+ * Text mit Autor und Datum, und der Article-Knoten unten sagt genau das schon.
+ */
 export const meta = () => [
-  {title: `Warum es Crystal Cacao gibt | ${ABSENDER_MARKE}`},
-  {
-    name: 'description',
-    content:
-      'Christian Bernd Bauer, Gründer von Crystal Cacao, über seine Absicht: ' +
-      'Mineralmedizin etablieren, Kaffee ablösen, Kakao als Medium — und ' +
-      'woran man das nachprüfen kann.',
-  },
+  {title: SEITEN_TITEL},
+  {name: 'description', content: SEITEN_BESCHREIBUNG},
   {name: 'author', content: 'Christian Bernd Bauer'},
   canonicalLink(PFAD),
+  {property: 'og:type', content: 'article'},
+  {property: 'og:site_name', content: ABSENDER_MARKE},
+  {property: 'og:locale', content: 'de_DE'},
+  {property: 'og:title', content: SEITEN_TITEL},
+  {property: 'og:url', content: SEITEN_URL},
+  {property: 'og:description', content: SEITEN_BESCHREIBUNG},
+  {property: 'article:author', content: 'Christian Bernd Bauer'},
+  {property: 'article:published_time', content: VEROEFFENTLICHT},
+  ...teilbildSignale(),
   {'script:ld+json': absichtsGraph()},
 ];
 

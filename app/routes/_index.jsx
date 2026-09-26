@@ -14,15 +14,10 @@ import {Kakao} from '~/components/product-pages/Kakao';
 import {PodcastEinstieg} from '~/components/reusables/PodcastEinstieg';
 import {waehleFassung} from '~/lib/startseite-fassung';
 import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
-import {entityGraph, ORG_ID, websiteSchema} from '~/lib/entity-schema';
 import {MockShopNotice} from '~/components/MockShopNotice';
-import {
-  ABSENDER_MARKE,
-  KAKAO_KOLLEKTION,
-  markenOrganisation,
-  SORTEN_PFADE,
-} from '~/lib/kakao-zone';
+import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
 import {SORTEN} from '~/lib/sorten-profil';
+import {markenGraph, teilbildSignale} from '~/lib/kakao-seo';
 
 /**
  * @type {Route.MetaFunction}
@@ -54,10 +49,41 @@ export const meta = () => {
     // entscheidet jedes Netzwerk selbst, welcher Text und welches Bild
     // erscheinen.
     //
-    // Bewusst OHNE og:image: es gibt hier kein gepflegtes Teilen-Bild, und
-    // `twitter:card: summary_large_image` ohne Bild waere eine Zusage ohne
-    // Deckung (dieselbe Begruendung wie in produkt-seo.js). Lieber vier
-    // richtige Angaben als fuenf, von denen eine ins Leere zeigt.
+    // BIS ZUM 2026-09-12 STAND HIER EIN ZAUN, der og:image wegliess, weil es
+    // "kein gepflegtes Teilen-Bild" gebe und `twitter:card
+    // summary_large_image` ohne Bild eine Zusage ohne Deckung waere.
+    //
+    // SEIN WORTLAUT IST HIER NICHT ZITIERT, UND DAS IST TRAGEND: die Wache
+    // seo-manager/bin/auffindbarkeits_wache.py erkennt einen dokumentierten
+    // og-Verzicht daran, dass DIESE Datei jenen Satz fuehrt
+    // (OG_VERZICHT_MARKER, zur Laufzeit aus dem freigegebenen Stand gelesen).
+    // Der Satz ist damit kein Kommentar, sondern ein SCHALTER. Stuende er nach
+    // der Ruecknahme weiter hier, waere die Ausnahme wieder scharf -- schlafend,
+    // solange diese Seite ihr Bild traegt, und lautlos entschuldigend an dem
+    // Tag, an dem es wieder fehlt. Genau dafuer ist die Wache gebaut.
+    // WER DEN VERZICHT EINES TAGES WIRKLICH WIEDER WILL, schreibt den Satz
+    // bewusst zurueck und entfernt den Aufruf unten -- beides zusammen, nie
+    // eines allein.
+    //
+    // ER WIRD NICHT ENTFERNT, SONDERN AUFGELOEST — und zwar nur seine ERSTE
+    // Haelfte (Grossjob-Segment s06, 2026-09-12). Die zweite Haelfte gilt
+    // unveraendert weiter und ist in teilbildSignale() eingebaut: die
+    // Kartenangabe steht dort in DERSELBEN Bedingung wie das Bild, ohne Bild
+    // entsteht auch keine Karte.
+    //
+    // Die erste Haelfte war eine Tatsachenbehauptung ueber den Bildbestand,
+    // und sie ist nachgemessen worden statt geglaubt: die Startseite rendert
+    // zwei in Shopify gepflegte Packshots oberhalb der Falz, 2000x2000 und
+    // 2144x2133, echte Pixelmasse aus dem Dateikopf. Ein gepflegtes Bild
+    // existiert; es war nur nie eines fuers Teilen bestimmt worden. Welches
+    // es wird und warum, steht an MARKEN_TEILBILD in app/lib/kakao-seo.js.
+    //
+    // WAS OFFEN BLEIBT, ausdruecklich benannt statt zugedeckt: ein eigens
+    // gebautes Teilen-Bild im Querformat, das BEIDE Sorten zeigt, waere
+    // besser — die Startseite zeigt sie gleichgewichtig (12 zu 12
+    // Vorkommen). Das ist Gestaltungsarbeit und als eigener Vorgang
+    // gemeldet. Bis dahin gilt: ein echtes Bild ist Deckung, und heute zeigt
+    // jeder geteilte Link GAR NICHTS.
     {property: 'og:type', content: 'website'},
     {property: 'og:site_name', content: ABSENDER_MARKE},
     {property: 'og:locale', content: 'de_DE'},
@@ -68,6 +94,7 @@ export const meta = () => {
       content:
         'Crystal Cacao® – High Performance Cacao. Wach. Klar. Mineralisiert. 100 % reiner Premium-Naturkakao aus Peru.',
     },
+    ...teilbildSignale(),
     // ENTITAETS-GRAPH (Organization + WebSite), ergaenzt 2026-09-10 vom Job
     // 20260910-BAU-crystal-cacao-in-die-suchmessung-und-seo-nachziehen.
     //
@@ -84,7 +111,7 @@ export const meta = () => {
     // byte-gleich zur Vorlage, und bleibt es. Diese Route gehoert crystal
     // allein und steht in keinem Manifest-Eintrag — der Anpassungspunkt ist
     // deshalb der AUFRUFER, nicht der Helfer.
-    {'script:ld+json': startseitenGraph()},
+    {'script:ld+json': markenGraph()},
   ];
 };
 
@@ -117,22 +144,6 @@ export const meta = () => {
  * DIE KORREKTUR STEHT WEITERHIN HIER AM AUFRUFER, weil entity-schema.js K1
  * ist (shared/UPSTREAM.json) und byte-gleich zur Vorlage bleibt.
  */
-function startseitenGraph() {
-  const graph = entityGraph();
-  const seite = websiteSchema();
-  return {
-    ...graph,
-    '@graph': graph['@graph'].map((knoten) => {
-      if (knoten['@id'] === seite['@id']) {
-        return {...knoten, name: ABSENDER_MARKE};
-      }
-      if (knoten['@id'] === ORG_ID) {
-        return markenOrganisation(knoten, {origin: CANONICAL_ORIGIN});
-      }
-      return knoten;
-    }),
-  };
-}
 
 /**
  * @param {Route.LoaderArgs} args

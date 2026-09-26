@@ -2,7 +2,7 @@ import {bildQuelle} from '../reusables/shopifyBildQuellen';
 import {Belege} from '../reusables/Belege';
 import {AbsichtHinweis} from '../reusables/AbsichtHinweis';
 import {KAKAO_KENNZAHLEN} from '~/lib/kakao-zone';
-import {ActiveCampaignForm} from '../reusables/ActiveCampaignForm';
+import {KursEintragung} from '../reusables/KursEintragung';
 import {SwipeTable} from '../reusables/SwipeTable';
 
 /* ======================================================================
@@ -942,7 +942,16 @@ function KursRegistration() {
       <div className="NormalSectionSize grid grid-cols-1 sm:grid-cols-2 gap-8 items-center">
         <div className="flex flex-col gap-4">
           <h2>Jetzt kostenfrei mitmachen!</h2>
-          <ActiveCampaignForm formId="21" />
+          {/*
+            HIER STAND BIS ZUM 2026-09-17 EIN FREMD-EMBED, DAS DIE EIGENE CSP
+            DIESES LADENS BLOCKT — der Abschnitt versprach eine Eintragung und
+            bot keine (0 `<form>`, 0 `<input>` am gerenderten Rand bei HTTP 200).
+            Jetzt steht das Feld im ausgelieferten HTML. Der Weg dahinter ist
+            derselbe wie vorher: Formular 21, gleiche Liste, gleiche Automation
+            — nur serverseitig weitergereicht statt im Browser nachgeladen.
+            Einzelheiten und Messwerte in app/lib/kurs-eintragung.js.
+          */}
+          <KursEintragung />
           <p className="text-sm! text-gray-500">
             *Deine Eintragung ist absolut unverbindlich. Wenn dir der Kurs nicht
             gefällt, kannst du dich jederzeit mit nur einem Klick wieder

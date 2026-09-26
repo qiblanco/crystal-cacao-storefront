@@ -1,11 +1,33 @@
 import {useLoaderData, Link} from 'react-router';
+import {canonicalLink} from '~/lib/seo';
+import {seitenSignale} from '~/lib/kakao-seo';
 import {ABSENDER_MARKE, rechtstextTitel} from '~/lib/kakao-zone';
 
+const PFAD = '/policies';
+const BESCHREIBUNG =
+  'Widerruf, Versand und Zahlung, AGB und Datenschutz von Crystal Cacao® im Überblick.';
+
 /**
+ * Selbst-Canonical, Teilbild und strukturierte Daten (Job 20260912-sieben-
+ * indexierbare-seiten-ohne-sitemap-und-ohne-auszeichnung-prio22).
+ *
+ * DIESE SEITE STEHT IN KEINER SITEMAP und trug trotzdem kein `noindex` — ein
+ * Crawler erreicht sie über die Fußzeile. Sie SOLL auffindbar sein: wer den
+ * Widerruf sucht, soll die Übersicht finden. Darum Canonical statt noindex.
+ * Die Beschreibung fehlte hier ganz; sie steht jetzt an EINER Stelle und
+ * versorgt `name=description` und `og:description` zugleich — zwei Quellen für
+ * denselben Text laufen auseinander.
+ *
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Rechtliche Hinweise | ${ABSENDER_MARKE}`}];
+  const titel = `Rechtliche Hinweise | ${ABSENDER_MARKE}`;
+  return [
+    {title: titel},
+    {name: 'description', content: BESCHREIBUNG},
+    canonicalLink(PFAD),
+    ...seitenSignale({pfad: PFAD, titel, beschreibung: BESCHREIBUNG}),
+  ];
 };
 
 /**

@@ -6,12 +6,46 @@ import {anzeigeSatz, formatPreis} from '~/lib/markt-pricing';
 /**
  * Mengenstaffel Crystal Cacao® — GESCHAEFTSREGEL (Prozente + Badges), KEINE
  * Preiszahlen (M2, Auftrag 20260718-lp-preise-dynamisch-binden-gestuft).
- * Die Prozente spiegeln die Shopify-Automatik "Mengenrabatt 2x/3x Crystal
- * Cacao®" (Cart-Probe 2026-07-18: Rabatt pro Einheit centgenau
- * abgeschnitten, 71,03 x 20 % = 14,206 -> 14,20). Der Packungspreis wird
- * aus dem API-Preis der Variante abgeleitet:
+ * Der Packungspreis wird aus dem API-Preis der Variante abgeleitet:
  *   round((netto - trunc2(netto * rabatt)) * (1 + satz))
- * — reproduziert exakt 76/61/53 beim heutigen Netto 71,03 (satz 7 %).
+ * — ergibt 76/61/53 beim Netto 71,03 (satz 7 %).
+ *
+ * ACHTUNG, SEIT 2026-09-12 IST rabattProzent NICHT MEHR DIE MECHANIK DES
+ * LADENS, SONDERN NUR NOCH EIN MODELL DAVON — und ein Modell, dessen
+ * Uebereinstimmung mit der Kasse an einer Rundung haengt. Bis zu diesem Tag
+ * waren die Shopify-Automatiken "Mengenrabatt 2x/3x Crystal Cacao®" echte
+ * PROZENTrabatte (percentage 0.2 / 0.3), und dieser Nachbau war deshalb die
+ * Mechanik selbst. Der Job
+ * 20260912-BAU-runde-preise-bis-zur-kasse-festbetrag-statt-prozent hat sie auf
+ * FESTBETRAEGE umgestellt, damit der Bruttobetrag an der Kasse rund aufgeht
+ * (Christian: "wir zeigen im Shop keine Preise mit Cent an"). Gemessen am
+ * 2026-09-12 in der Storefront-API: der Rabatt ist jetzt 28,04 bzw. 64,49 EUR
+ * FEST — also 19,74 % bzw. 30,26 % und nicht 20 / 30 %.
+ *
+ * WARUM DIE PROZENTE TROTZDEM STEHEN BLEIBEN: der Prozentsatz ist die
+ * UEBERSCHRIFT (Christian ausdruecklich im Auftrag jenes Jobs: "Der
+ * Prozentsatz bleibt die Ueberschrift ... der Rabatt selbst wird als
+ * Festbetrag gesetzt"), und die Anzeige trifft die Kasse heute exakt
+ * (gemessen, 6 von 6 Zellen: 2 Sorten x Menge 1/2/3, Drift 0,00 EUR).
+ * Sie trifft sie aber aus ZWEI Rechnungen, die sich nur im selben
+ * Rundungsfenster treffen: unser Modell rechnet 49,73 netto je Packung
+ * (53,2111 brutto), die Kasse 49,5333 (53,0006) — beide runden auf 53.
+ *
+ * WORAN ES BRECHEN WIRD, und es wird STILL brechen: ein Festbetrag skaliert
+ * NICHT mit dem Preis. Aendert sich das Variantennetto (heute 71,03; preiswatch
+ * fuehrt es), rechnet diese Funktion weiter 20/30 % und die Kasse zieht
+ * weiter 28,04/64,49 EUR ab — ab dann bewirbt die Seite einen anderen Betrag
+ * als die Kasse belastet, ohne dass hier etwas rot wird. Die Funktion kann den
+ * Festbetrag baulich nicht lesen: ein Automatikrabatt zeigt sich erst, wenn ein
+ * Warenkorb existiert, und auf der Kaufseite gibt es keinen. Der Schutz ist
+ * deshalb NICHT hier, sondern eine Wache am Kundenrand — Stand und offene
+ * Flanke in devlog D-050 / F-033.
+ *
+ * UND IN CHF/USD STIMMT ES HEUTE SCHON NICHT: Shopify rechnet den EUR-Festbetrag
+ * je Markt per Wechselkurs um, wo er nicht mehr rund landet. Gemessen
+ * 2026-09-12: US-Dreier bewirbt 207,00 USD, die Kasse belastet 220,69 USD.
+ * Eigener Auftrag
+ * 20260912-kakao-staffel-festbetrag-nicht-rund-in-chf-und-usd-prio4.
  */
 export const CACAO_STAFFEL = {
   '1': {rabattProzent: 0, badge: 'Exklusiv', badgeStyle: 'gold'},

@@ -7,7 +7,7 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
-import {ProductPrice} from '~/components/ProductPrice';
+import {ProductPriceKanon} from '~/components/ProductPrice';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
@@ -42,12 +42,19 @@ import {produktMeta} from '~/lib/produkt-seo';
  * nicht importierte. Genau dieser Import ist der Fix; es entsteht KEIN
  * zweiter Emitter und keine zweite Beschreibungs-Karte.
  *
- * WAS produktMeta() HIER BEWUSST NICHT TUT: alle fuenf Handles stehen in
- * OHNE_PREIS_NACHWEIS (app/lib/produkt-schema.js), deshalb liefert
- * produktSchema() fuer sie weiterhin `null` und es entsteht KEIN
- * Product-JSON-LD. Das ist ein Zaun, kein Versaeumnis: ein Product-Knoten ohne
- * belastbaren Preis steht dauerhaft als Fehler in der Search Console. Die
- * BreadcrumbList entsteht trotzdem — sie sagt ueber den Preis nichts aus.
+ * WAS HIER FRUEHER STAND UND SEIT 22c412b NICHT MEHR STIMMT (nachgezogen am
+ * 2026-09-13): "alle fuenf Handles stehen in OHNE_PREIS_NACHWEIS, deshalb
+ * liefert produktSchema() fuer sie weiterhin `null` und es entsteht KEIN
+ * Product-JSON-LD". Der Preis-Vorbehalt ist eingeloest, die Liste ist leer,
+ * und alle fuenf Seiten tragen seitdem einen Product-Knoten. Der Satz blieb
+ * stehen und beschrieb einen Zaun, den es nicht mehr gab -- wer ihm folgte,
+ * haette die fehlenden Bilder fuer beabsichtigt gehalten.
+ *
+ * DAS OEFFNEN DES ZAUNS HAT EINE ZWEITE BEDINGUNG SICHTBAR GEMACHT, die
+ * vorher niemanden betraf: der Knoten braucht ausser dem Preis auch ein
+ * Bild. Begruendung und Messung stehen am `images`-Feld des Fragments unten.
+ * Die BreadcrumbList entsteht unabhaengig davon -- sie sagt weder ueber den
+ * Preis noch ueber das Bild etwas aus.
  */
 export const meta = ({data}) => {
   const produkt = data?.product;
@@ -182,9 +189,17 @@ export default function Product() {
       <ProductImage image={selectedVariant?.image} />
       <div className="product-main">
         <h1>{title}</h1>
-        <ProductPrice
+        {/* KANON-FASSUNG, seit 2026-09-12: diese Route bekommt den ROHEN
+            Netto-Betrag der Storefront-API und muss ihn selbst auf den Betrag
+            umrechnen, den die Kasse belastet (76/122/159 statt
+            71,03/114,02/148,60). `handle` ist dabei tragend und kein Beiwerk —
+            er ist der Schluessel des Steuersatzes (7 % Lebensmittel fuer die
+            Kakao-Handles, 19 % sonst). Begruendung und Belege im Kopf von
+            app/components/ProductPrice.jsx. */}
+        <ProductPriceKanon
           price={selectedVariant?.price}
           compareAtPrice={selectedVariant?.compareAtPrice}
+          handle={product.handle}
         />
         <br />
         <ProductForm
@@ -274,6 +289,32 @@ const PRODUCT_FRAGMENT = `#graphql
     description
     encodedVariantExistence
     encodedVariantAvailability
+    # DIE PRODUKTBILDER -- ohne sie liefert produktSchema() einen
+    # Product-Knoten OHNE image, und image ist fuer Googles
+    # Product-Rich-Result eine PFLICHTEIGENSCHAFT: der Knoten faellt nicht
+    # bloss aus dem Snippet, er steht in der Search Console dauerhaft als
+    # FEHLERHAFTES Element.
+    #
+    # GEMESSEN AM 2026-09-13 an allen sieben Kakao-Kaufseiten: die fuenf
+    # Seiten dieser Sammelroute trugen einen Product-Knoten ohne image,
+    # die beiden eigenen Routen (products.crystal-cacao-awake/create.jsx)
+    # trugen je fuenf Bilder. Der Unterschied lag NICHT an fehlenden Medien
+    # in Shopify -- das og:image derselben fuenf Seiten loeste live auf
+    # echte CDN-Bilder auf, weil es aus dem VARIANTEN-Bild kommt, das dieses
+    # Fragment sehr wohl abfragt. Gefehlt hat allein dieses Feld hier.
+    #
+    # first: 10 wie in den beiden eigenen Routen, nicht knapper: derselbe
+    # Wert an derselben Frage, damit die drei Produktrouten nicht
+    # auseinanderlaufen. produktSchema() schneidet selbst auf fuenf zu.
+    images(first: 10) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
     options {
       name
       optionValues {
