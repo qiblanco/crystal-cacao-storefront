@@ -5,6 +5,7 @@ import {
   useContext,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import {useRouteLoaderData} from 'react-router';
 import {bildQuellen} from '~/components/reusables/shopifyBildQuellen';
@@ -149,8 +150,19 @@ const EuLabelKontext = createContext(null);
 export function EuLabelProvider({children}) {
   const dialogRef = useRef(null);
   const label = useEuLabelAsset();
+  /*
+   * EINWEG-SCHALTER: einmal true, bleibt true. Er entscheidet, ob die
+   * amtliche Grafik ueberhaupt im DOM steht (Begründung am <img> im Dialog).
+   * Er wird beim Öffnen gesetzt und nie zurueckgenommen -- ein zweites
+   * Öffnen soll das Bild nicht noch einmal aus dem Netz holen müssen.
+   */
+  const [grafikGebraucht, setGrafikGebraucht] = useState(false);
 
   const open = useCallback(() => {
+    // Der Zustand zuerst: showModal() läuft synchron, das Bild montiert im
+    // unmittelbar folgenden Rendern. Weil grafikVorwaermen() die Datei bei
+    // der ersten Absichtsgeste geholt hat, kommt sie dabei aus dem Cache.
+    setGrafikGebraucht(true);
     // showModal() wirft, wenn der Dialog bereits offen ist (z.B. Doppelklick
     // oder zweiter Ausloeser). Ohne den Schutz reißt das die Seite ab.
     const d = dialogRef.current;
@@ -167,7 +179,12 @@ export function EuLabelProvider({children}) {
   return (
     <EuLabelKontext.Provider value={wert}>
       {children}
-      <EuLabelDialog ref={dialogRef} label={label} onClose={close} />
+      <EuLabelDialog
+        ref={dialogRef}
+        label={label}
+        onClose={close}
+        grafikGebraucht={grafikGebraucht}
+      />
     </EuLabelKontext.Provider>
   );
 }
@@ -215,7 +232,10 @@ function useEuLabelAsset() {
 // (package.json). Die React-19-Schreibweise "ref als normales Prop" wäre
 // hier still `undefined` -- showModal() liefe nie, das Overlay bliebe tot,
 // und der Fehler zeigte sich erst im Browser.
-const EuLabelDialog = forwardRef(function EuLabelDialog({label, onClose}, ref) {
+const EuLabelDialog = forwardRef(function EuLabelDialog(
+  {label, onClose, grafikGebraucht},
+  ref,
+) {
   // Klick auf den dunklen Rand schließt. Der <dialog> selbst IST der
   // zentrierte Kasten (der Rand ist ::backdrop), deshalb lässt sich der Rand
   // nicht direkt beklicken -- die Trefferpruefung läuft über die Geometrie
@@ -237,6 +257,14 @@ const EuLabelDialog = forwardRef(function EuLabelDialog({label, onClose}, ref) {
     <dialog
       ref={ref}
       className="eu-gwl-dialog"
+      /*
+       * Die Sprachfassung steht AM DIALOG, nicht nur an der Grafik: seit die
+       * Grafik erst beim Öffnen ins DOM kommt (PR #623), trüge sonst keine
+       * Seite ohne eigene Hinweisfläche die Kennung im ausgelieferten Markup
+       * -- gemessen an /pages/qione-2-pro-details (Probe eulabel_de_en_scanbar
+       * exit 4). Der Dialog wird immer mitgerendert, also trägt er sie immer.
+       */
+      data-eu-label-iso={label.iso}
       aria-label="Gesetzliches Gewährleistungsrecht"
       onClick={aufRandKlick}
       onCancel={onClose}
@@ -292,7 +320,7 @@ const EuLabelDialog = forwardRef(function EuLabelDialog({label, onClose}, ref) {
           diesen Titel auf 35,2 px -- im schmalen Modal. Dort fiel er der
           Rubrik nicht auf, WEIL er die Seitengröße angenommen hatte. Als
           <h3> trägt er wieder seine eigene, entworfene Größe
-          (--qs-t-groß, 20 px) aus eu-gewaehrleistung.css.
+          (die Titelstufe der Typo-Skala, 20 px) aus eu-gewaehrleistung.css.
 
           DIE GROESSE IST NICHT GEÄNDERT WORDEN. Die Klasse bleibt, die CSS-
           Regel bleibt, der Text bleibt, die Sichtbarkeit bleibt -- allein die
@@ -336,14 +364,57 @@ const EuLabelDialog = forwardRef(function EuLabelDialog({label, onClose}, ref) {
           geschoben wird.
         */}
         <div className="eu-gwl-dialog__buehne">
-          <img
-            className="eu-gwl-dialog__bild"
-            src={label.url}
-            alt={LABEL_ALT_DE}
-            width={label.breite}
-            height={label.hoehe}
-            data-eu-label-iso={label.iso}
-          />
+          {/*
+            DIE GRAFIK STEHT ERST IM DOM, WENN DER DIALOG ZUM ERSTEN MAL
+            GEÖFFNET WURDE -- und der Umweg dorthin ist die eigentliche
+            Lehre dieser Stelle.
+
+            BEFUND (2026-09-18, live, mobil 390x844 DPR2): dieses Bild lag in
+            einem GESCHLOSSENEN <dialog>, seine Box misst 0x0 Pixel -- und es
+            wurde trotzdem vollständig geholt: 259 314 Byte, responseEnd bei
+            t=267 ms. Das sind 39,3 Prozent aller Bildbytes der Hülle, und
+            weil der Fuss auf JEDER Seite steht, wurde das auf JEDEM
+            Seitenaufruf des Ladens bezahlt.
+
+            DER ERSTE VERSUCH WAR `loading="lazy"`, UND ER IST GEMESSEN
+            GESCHEITERT. Die Begründung dafür klang zwingend: ein
+            geschlossener <dialog> ist `display: none`, ein lazy-Bild darin
+            bekommt nie einen Schnittbereich, also wird es nicht geholt.
+            A/B an zwei Dev-Servern derselben Anwendung mit genau diesem
+            einen Unterschied sagt etwas anderes -- A (ohne Attribut)
+            259 314 Byte bei t=215 ms, B (mit `lazy`) DIESELBEN 259 314 Byte
+            bei t=798 ms. Verschoben, nicht vermieden. Für ein Element ohne
+            Layout-Box kann der Browser nicht entscheiden, ob es je in den
+            Blick kommt, und lädt im Zweifel. `loading` ist eine Bitte über
+            die Reihenfolge, kein Riegel gegen den Abruf.
+
+            Ein Riegel über Bytes muss deshalb am DOM ansetzen: kein <img>,
+            keine Anfrage. Sobald es gebraucht wird, soll es dagegen sofort
+            laden -- es steht dann im Blick, ein `lazy` wäre hier genau
+            falsch herum.
+
+            DASS DER KASTEN NICHT LEER BLEIBT, TRÄGT NICHT DIESE ZEILE sondern
+            grafikVorwaermen() weiter unten: die Datei wird bei Zeigerkontakt,
+            Fokus oder erstem Fingerkontakt geholt, also bevor der Klick
+            überhaupt fällt. Beim Öffnen kommt sie aus dem Cache.
+
+            AUSDRÜCKLICH NICHT GEBAUT: eine Bildleiter oder ein
+            `width=`-Parameter an dieser Grafik. LABEL_MINDESTBREITE_PX
+            schützt die Ablesbarkeit des QR-Codes (Anhang I Nr. 3); die Datei
+            geht unverändert raus, nur später. Die Auflagen aus Anhang I
+            Nr. 1 und Nr. 5 bleiben unberührt.
+          */}
+          {grafikGebraucht ? (
+            <img
+              className="eu-gwl-dialog__bild"
+              src={label.url}
+              alt={LABEL_ALT_DE}
+              width={label.breite}
+              height={label.hoehe}
+              decoding="async"
+              data-eu-label-iso={label.iso}
+            />
+          ) : null}
         </div>
 
         <p className="eu-gwl-dialog__fuss">
@@ -367,9 +438,13 @@ const EuLabelDialog = forwardRef(function EuLabelDialog({label, onClose}, ref) {
  * BIS ZUM 2026-09-08 trugen Produktseite und Footer denselben Text und
  * unterschieden sich nur in der Messmarke (Elina EL-20260906-0380455b: der
  * Zusatz "amtliche Mitteilung ansehen" auf der Produktseite war gestrichen).
- * SEITDEM gehen sie wieder auseinander (Elina EL-20260908-d8349a01): die
- * Produktseite bekommt ein Zeichen davor und den laengeren Text, der Footer
- * bleibt ausdrücklich unveraendert.
+ * Vom 2026-09-08 bis zum 2026-09-16 gingen sie auseinander (Elina
+ * EL-20260908-d8349a01: laengerer Text auf der Produktseite).
+ * SEIT DEM 2026-09-16 TRAGEN SIE WIEDER DENSELBEN TEXT, und der Unterschied
+ * ist nur noch das Zeichen davor: Elina EL-20260906-0380455b hat den Zusatz
+ * auf der Produktseite erneut gestrichen, der Footer bleibt ausdrücklich
+ * unveraendert. Warum der laengere Text nicht blosser Geschmack war, steht bei
+ * den Konstanten in app/lib/eu-gewaehrleistungslabel.js (UWG Par. 3 Abs. 3).
  *
  * DIE PFLICHT BERUEHRT DAS NICHT -- in keine der beiden Richtungen. Verlangt
  * ist ein SATZ, der über das Gewaehrleistungsrecht informiert ("Your legal
@@ -386,6 +461,49 @@ const EuLabelDialog = forwardRef(function EuLabelDialog({label, onClose}, ref) {
  * AUSSERHALB des <button> und ist für Screenreader unsichtbar (alt="",
  * aria-hidden) -- der Knopf daneben sagt bereits, was es zeigt.
  */
+/*
+ * DIE ZWEITE HÄLFTE DES `loading="lazy"` OBEN -- ohne sie wäre der Bau ein
+ * Tausch von Ladezeit gegen Wartezeit an genau der Stelle, an der die
+ * Verordnung eine Zusage macht.
+ *
+ * Die Pflicht ist ein SATZ auf der Seite und die Mitteilung "on the first
+ * mouse click" (Leitlinien der Kommission, Abschnitt 2.3, wörtlich zitiert
+ * im Kopf dieser Datei). Ein lazy geladenes Bild beginnt seinen Abruf erst,
+ * wenn der Dialog öffnet -- auf einer gedrosselten Mobilleitung sind das
+ * für 259 kB rund 1,3 Sekunden, in denen der Kasten leer steht.
+ *
+ * Deshalb wird die Grafik geholt, sobald der Mensch ABSICHT zeigt, und
+ * nicht erst, wenn er sie schon sehen will: Zeigerkontakt, Tastaturfokus
+ * oder der erste Fingerkontakt. Zwischen diesem Moment und dem Klick liegen
+ * erfahrungsgemäss einige hundert Millisekunden -- der Abruf läuft dann
+ * bereits, und im Regelfall steht das Bild beim Öffnen im Cache.
+ *
+ * WARUM `new Image()` UND KEIN ZUSTANDSWECHSEL AM <img>: ein nachträglich
+ * von `lazy` auf `eager` gedrehtes `loading`-Attribut ist kein verlässlicher
+ * Auslöser -- der Browser hat die Entscheidung für dieses Element dann
+ * schon getroffen. Ein eigener Abruf füllt dagegen den HTTP-Cache, und das
+ * <img> im Dialog bedient sich beim Öffnen daraus. Es ist derselbe URL,
+ * also derselbe Cache-Eintrag.
+ *
+ * Mehr als einmal je URL muss das nicht geschehen; `vorgewaermt` hält das
+ * fest. Ein Fehlschlag ist bewusst folgenlos: gelingt die Vorwärmung nicht,
+ * lädt das <img> beim Öffnen ganz normal selbst. Die Vorwärmung ist eine
+ * Beschleunigung, nie die Bedingung dafür, dass die Mitteilung erscheint.
+ */
+const vorgewaermt = new Set();
+
+function grafikVorwaermen(url) {
+  if (typeof window === 'undefined' || !url || vorgewaermt.has(url)) return;
+  vorgewaermt.add(url);
+  try {
+    const img = new window.Image();
+    img.decoding = 'async';
+    img.src = url;
+  } catch {
+    // Folgenlos: das <img> im Dialog lädt beim Öffnen weiterhin selbst.
+  }
+}
+
 function EuLabelAusloeser({
   flaeche,
   beschriftung,
@@ -395,12 +513,21 @@ function EuLabelAusloeser({
   const kontext = useEuLabel();
   if (!kontext) return null;
 
+  // Absicht statt Klick: siehe grafikVorwaermen() oben. Bewusst KEIN
+  // useCallback -- oberhalb steht ein `if (!kontext) return null`, ein Hook
+  // an dieser Stelle wäre ein bedingter Hook. Für drei DOM-Handler an einem
+  // Knopf ist die Neuerzeugung je Rendern ohnehin ohne Belang.
+  const vorwaermen = () => grafikVorwaermen(kontext.label?.url);
+
   const knopf = (
     <button
       type="button"
       className="eu-gwl__link"
       data-eu-gewaehrleistungslabel={flaeche}
       onClick={kontext.open}
+      onPointerEnter={vorwaermen}
+      onFocus={vorwaermen}
+      onTouchStart={vorwaermen}
     >
       {beschriftung}
     </button>
@@ -595,10 +722,37 @@ function EuLabelListenpunktFlaeche() {
 /**
  * FOOTER. Punkt 4 unter "3. Bezahlmethoden" -- reiner Textlink.
  *
- * DERZEIT NIRGENDS MONTIERT: Elina EL-20260901-3fb38a2a stellt den
- * Footer-Teil ausdrücklich zurück ("jetzt bewusst weglassen und für
- * spaeter zurueckstellen"). Der Baustein bleibt deshalb erhalten -- er ist
- * zurueckgestellt, nicht entfernt.
+ * MONTIERT IN Footer.jsx. Bis zum 2026-09-13 stand hier "DERZEIT NIRGENDS
+ * MONTIERT" mit Verweis auf Elina EL-20260901-3fb38a2a. Das war seit dem
+ * Wiedereinhaengen falsch und hat den Fehler unten gedeckt: wer den Kopf
+ * liest, prueft den Baustein nicht weiter, weil er ihn für totes Holz hält.
+ *
+ * DIE ZEILE <p> GEHÖRT HIERHER UND NICHT ZUM AUFRUFER -- das ist die
+ * eigentliche Lehre dieses Bausteins, und sie hat uns einen Monat
+ * Hydrations-Fehler auf JEDER Seite gekostet.
+ *
+ * EuLabelProvider rendert {children} UND den <dialog> als GESCHWISTER (der
+ * Kontext-Provider selbst erzeugt kein DOM-Element). Stand der Aufrufer also
+ * so da --
+ *     <p>4. <EuGewaehrleistungsLink /></p>
+ * -- dann landete der <dialog> INNERHALB des <p>. Ein <dialog> ist
+ * Flow-Content und in <p> nicht erlaubt; der HTML-Parser schließt das <p>
+ * davor selbsttaetig und hebt den Dialog heraus. Der Server schrieb den einen
+ * Baum, der Browser las den anderen, und React fand beim Hydrieren ab dieser
+ * Stelle alles verschoben: gemessen am 2026-09-13 auf qiblanco.com/search
+ * 15x "Minified React error #418" plus 1x #423 an der Suspense-Grenze, je
+ * Viewport -- und weil der Fuß auf jeder Seite steht, auf JEDER Seite.
+ *
+ * Das ist DIESELBE Naht, die bei EuGewaehrleistungsListenpunkt schon
+ * beschrieben ist (dort: <dialog> als direktes Kind von <ul>). Dort wurde sie
+ * geschlossen, indem die <li> AUSSERHALB des Providers steht. Hier geht das
+ * nicht -- <p> darf den Dialog ueberhaupt nicht enthalten, auch nicht als
+ * letztes Kind. Der Provider muss also UM das <p> herum stehen, damit
+ * <p> und <dialog> Geschwister werden:
+ *     <p>4. <button/></p><dialog>...</dialog>
+ * Deshalb bringt dieser Baustein sein <p> selbst mit und nimmt den Vorsatz
+ * ("4. ") als Text entgegen, statt ihn sich vom Aufrufer umwickeln zu lassen.
+ * Ein Aufrufer, der das <p> wieder selbst setzt, baut den Fehler zurück.
  *
  * GEAENDERT gegenueber der Vorfassung, und das ist kein Schoenheitsfehler:
  * früher stand hier "gleiches Overlay, kein zweiter Dialog", weil ein
@@ -609,13 +763,16 @@ function EuLabelListenpunktFlaeche() {
  * genau dann, wenn niemand mehr mit ihm rechnet. Der Provider steht deshalb
  * hier drin.
  */
-export function EuGewaehrleistungsLink() {
+export function EuGewaehrleistungsLink({vorsatz = null}) {
   return (
     <EuLabelProvider>
-      <EuLabelAusloeser
-        flaeche="footer"
-        beschriftung={AUSLOESER_TEXT_FOOTER}
-      />
+      <p>
+        {vorsatz}
+        <EuLabelAusloeser
+          flaeche="footer"
+          beschriftung={AUSLOESER_TEXT_FOOTER}
+        />
+      </p>
     </EuLabelProvider>
   );
 }
