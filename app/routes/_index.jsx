@@ -329,6 +329,18 @@ const PODCAST_DAUER = '33 Min.';
  *     von Schokolade. „Stundenlang" ist deshalb die ehrliche Wiedergabe;
  *     „36 Stunden" waere eine Praezision, die die Quelle nicht hergibt.
  *   - KEIN Gaestename als Autoritaet und kein „Talking Vibes"-Vorspann.
+ *
+ * NACHTRAG 2026-09-26 (Job 20260926-GROSSJOB-crystal-cacao-seitendurchgang-
+ * videos-pruefdokumente-texte-gruenderbild): IN CHRISTIANS STIMME. Christian
+ * hat an diesem Tag gefragt, warum wir noch Texte schreiben, die nach KI
+ * klingen, und die ganze Seite darauf pruefen lassen. Die Fassung davor trug
+ * drei Gedankenstriche in 60 Woertern und endete mit „— und von dort aus,
+ * wenn du magst, die ganze Folge", einem Satz ohne Verb. Jetzt spricht der,
+ * der in der Folge erklaert: Christian, in der ersten Person. Inhaltlich
+ * bleibt es bei dem, was die Folge ab 8:30 sagt (Entoelen, stundenlanges
+ * Walzen, was dabei von der Bohne verloren geht); keine Wirkzusage, keine
+ * Zahl, die die Quelle nicht hergibt. Die Anfuehrungszeichen der Ueberschrift
+ * schliessen jetzt typografisch („…“) statt mit einem geraden Zoll-Zeichen.
  */
 function PodcastAbschnitt() {
   return (
@@ -338,15 +350,18 @@ function PodcastAbschnitt() {
       dauerWort={PODCAST_DAUER}
       titel="Crystal Cacao® — die Kraft des Amazonas. In deiner Tasse."
     >
-      <h2 id="cc-podcast-titel">Vier Dinge heißen „Kakao"</h2>
+      <h2 id="cc-podcast-titel">Vier Dinge heißen „Kakao“</h2>
       <p>
-        Kakaopulver, Schokolade, Zeremoniekakao, Kristallkakao — im Regal steht
-        auf allen vieren dasselbe Wort. Ab Minute 8:30 gehen wir sie im Podcast
-        der Reihe nach durch: was beim Entölen aus dem Pulver verschwindet,
-        warum Schokolade stundenlang gewalzt wird, und was danach von der Bohne
-        noch übrig ist.
+        Kakaopulver, Schokolade, Zeremoniekakao und Kristallkakao: Im Regal
+        steht auf allen vieren dasselbe Wort. Ab Minute 8:30 erkläre ich im
+        Podcast, was sie unterscheidet. Beim Pulver wird die Bohne entölt,
+        Schokolade wird stundenlang gewalzt, und dabei geht viel von dem
+        verloren, was die Bohne so spannend macht.
       </p>
-      <p>Gut drei Minuten — und von dort aus, wenn du magst, die ganze Folge.</p>
+      <p>
+        Das dauert gut drei Minuten. Wenn du danach mehr wissen willst, schau
+        dir die ganze Folge an.
+      </p>
     </PodcastEinstieg>
   );
 }

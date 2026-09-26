@@ -2180,113 +2180,179 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
    eigene Klasse überschreiben darf.
 --------------------------------------------------------------------------- */
 /* ==========================================================================
- * PRUEFDOKUMENTE — SORTENREIN, TABELLARISCH (2026-09-10, Job 20260910-BAU-
- * pruefdokumente-sortenrein-create-vor-awake-je-drei-und-zwei-mineralstoff-
- * analysen-fehlen)
+ * PRUEFDOKUMENTE — KARTEN (2026-09-26, Job 20260926-GROSSJOB-crystal-cacao-
+ * seitendurchgang-videos-pruefdokumente-texte-gruenderbild; Vorfassung
+ * 2026-09-10 „sortenrein, tabellarisch")
  * ==========================================================================
- * Christian: „das sollte wirklich noch schoener sortenrein angezeigt werden
- * … Der Abschnitt soll wie eine Tabelle wirken und nicht wie eine Linkliste."
+ * Christian am 2026-09-26: „Sehr hässliche Darstellung ⇒ muss optisch
+ * optimiert werden."
  *
- * NUR LAYOUT. Diese Schicht fuehrt KEINE neue Schriftgroesse, KEINEN neuen
- * Farbwert und KEINEN zweiten Radius ein — jede Groesse unten ist ein
- * bestehender Token. Die Vorfassung stand mit drei rohen Werten hier
- * (1.125rem, 0.8125rem, rgba(0,0,0,0.08)); sie sind durch --cc-fs-3,
- * --cc-fs-1 und --cc-linie ersetzt, weil genau das ihre Rolle war.
+ * GEMESSEN VORHER (Kundenrand, 1366 px, /pages/warum-crystal-cacao): der
+ * Block stand als 400 px schmale Spalte (--cc-kaufblock-max, der Wert des
+ * KAUFBLOCKS) in einer 1350 px breiten Seite, kleinste Schrift 12,8 px
+ * (--cc-fs-1), vier Textfarben (Gold-Text, Kraft-Tief, Muted, Text), sechsmal
+ * dieselben fuenf Beschriftungen untereinander.
  *
- * DIE TABELLENWIRKUNG ENTSTEHT AUS EINER EINZIGEN REGEL: `.cc-belege__daten`
- * ist ein Raster mit `max-content 1fr`. Alle Bezeichnungen einer Sorte stehen
- * damit auf derselben Kante, und die Werte beginnen buendig. Es gibt bewusst
- * KEIN <table>: sechs Belege mit je fuenf Angaben ergaeben in einer 400px
- * breiten Spalte eine Tabelle, die auf dem Handy scrollt statt umbricht.
+ * DIE MINDESTMASSE, an denen er jetzt gebaut und gemessen ist
+ * (worker-pool/pruefungen/probe_crystal_pruefdokumente_lesbar__20260926.py):
+ * jede Schrift >= 14 px (hier 16 px, --cc-fs-2, Ueberschriften darueber);
+ * hoechstens drei Textfarben (hier ZWEI: --cc-dunkel und --cc-muted);
+ * Kontrast >= 4,5:1 (--cc-dunkel 16,4:1, --cc-muted 5,07:1 auf --cc-flaeche);
+ * keine Handtuchspalte: der Block nimmt die Inhaltsbreite bis 72rem, dieselbe
+ * Obergrenze wie `.cc-seite`.
  *
- * DER SORTEN-BALKEN ist der einzige Farbeinsatz und nimmt die vorhandenen
- * --cc-sorte-Token (Christian 2026-09-01, „dezent entsprechend nutzen"). Die
- * SCHRIFT bleibt in beiden Gruppen dieselbe — „gleiche Schrift" war Vorgabe.
+ * DIE KARTE IST KEINE NEUE BAUFORM: Flaeche --cc-flaeche, Kante --cc-linie,
+ * EIN Bildradius, Innenabstand --cc-space-3 — wie `.cc-va-vorteil`; dazu die
+ * 3-px-Oberkante im rohen Sortenton wie `.cc-sortenkachel`. Das Gold sitzt
+ * nur auf der Unterstreichung dessen, was man anklicken kann (Handlung).
+ *
+ * HANDY ZUERST: die Grundregeln sind das Telefon (eine Spalte), ab 60em
+ * stehen die drei Belege einer Sorte nebeneinander. Die Schwelle ist nicht
+ * gegriffen: unter 60em (960 px) bliebe je Karte weniger als 17rem, und dann
+ * bricht „Mineralstoffe und Spurenelemente (ICP-MS)" in drei Zeilen.
+ *
+ * SPEZIFITAET: die Regeln tragen `.cc-belege` als Vorsatz (0-2-0). Sie
+ * muessen `main h3` (0-0-2), `.cc-absicht a` (0-1-1) und die Zeilenlaengen-
+ * Regel `html[data-cc-sorte] main :is(p, li, dd, …)` (0-1-3) schlagen — ohne
+ * `!important`, das auch gegen jede spaetere, gewollte Regel gewaenne.
  * ======================================================================== */
 
 .cc-belege {
-  max-width: var(--cc-kaufblock-max, 400px);
-  margin: 6vh auto;
-  padding: 0 1rem;
+  width: 100%;
+  max-width: 72rem;
+  margin: var(--cc-space-6) auto;
+  padding: 0 var(--cc-space-2);
+  color: var(--cc-dunkel);
+}
+@media (min-width: 48em) {
+  .cc-belege {
+    margin-block: var(--cc-space-7);
+  }
 }
 
-.cc-belege__titel {
-  font-size: var(--cc-fs-3) !important;
-  margin-bottom: var(--cc-space-2) !important;
-  color: var(--cc-kraft-tief, #846142);
+.cc-belege .cc-belege__titel {
+  font-size: var(--cc-fs-5);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 var(--cc-space-4);
+  color: var(--cc-dunkel);
+  text-align: center;
+  text-wrap: balance;
 }
 
-.cc-belege__sorte + .cc-belege__sorte {
-  margin-top: var(--cc-space-3);
+/* Die Sortengruppe ist ein <section>, und Abschnitte bringen auf einigen
+   Seiten eigenen Innenabstand mit (gemessen auf der Warum-Seite: 32 px oben
+   und unten). Hier gilt allein der Abstand darunter — sonst stand zwischen
+   den Create- und den Awake-Karten 112 px Luft statt 48 px. */
+.cc-belege .cc-belege__sorte {
+  padding-block: 0;
 }
 
-/* Der Balken traegt die Sorte. Er ist 3px schmal und steht links neben der
-   Ueberschrift, nicht darunter: eine farbige Linie ueber der ganzen Breite
-   waere ein zweiter Trenner neben den Zeilenlinien der Tabelle. */
-.cc-belege__sorten-titel {
-  font-size: var(--cc-fs-2) !important;
+.cc-belege .cc-belege__sorte + .cc-belege__sorte {
+  margin-top: var(--cc-space-5);
+}
+
+.cc-belege .cc-belege__sorten-titel {
+  font-size: var(--cc-fs-3);
   font-weight: 600;
-  margin: 0 0 var(--cc-space-1) !important;
-  padding-left: var(--cc-space-1);
-  border-left: 3px solid var(--cc-sorte);
-  color: var(--cc-text);
+  line-height: 1.3;
+  margin: 0 0 var(--cc-space-2);
+  color: var(--cc-dunkel);
 }
 
-.cc-belege__liste {
+.cc-belege .cc-belege__liste {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cc-space-3);
+}
+@media (min-width: 60em) {
+  .cc-belege .cc-belege__liste {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.cc-belege__zeile {
-  padding: var(--cc-space-1) 0 var(--cc-space-2);
-  border-bottom: 1px solid var(--cc-linie);
+.cc-belege .cc-belege__zeile {
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-3);
+  background: var(--cc-flaeche);
+  border: 1px solid var(--cc-linie);
+  border-top: 3px solid var(--cc-sorte);
+  border-radius: var(--cc-radius-bild);
 }
 
-/* Die letzte Zeile einer Sorte braucht keinen Trenner — darunter kommt
-   ohnehin die naechste Ueberschrift oder der Schlusssatz. */
-.cc-belege__zeile:last-child {
-  border-bottom: none;
-}
-
-.cc-belege__link {
-  display: inline-block;
-  margin-bottom: var(--cc-space-1);
-  color: var(--cc-gold-text, #90671D);
+.cc-belege .cc-belege__link,
+.cc-belege .cc-belege__datei {
+  color: var(--cc-dunkel);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: var(--cc-gold-text);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
 }
 
-.cc-belege__link:hover {
+.cc-belege .cc-belege__link {
+  font-size: var(--cc-fs-3);
+  font-weight: 600;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.cc-belege .cc-belege__link:hover,
+.cc-belege .cc-belege__datei:hover {
   text-decoration-thickness: 2px;
 }
 
-/* Labor, Datum und Zertifikatsnummer stehen absichtlich VOR dem Klick da:
-   die Dokumente sind von 2025 und 2026, und niemand soll Aktualitaet
-   annehmen muessen. */
-.cc-belege__daten {
+/* Der Titel steht in zwei Zeilen (Belege.jsx, titelTeile): Art, dann
+   Gegenstand. Der Mittelpunkt dazwischen bleibt im Markup, damit der Titel
+   dort wörtlich wie im Zeugnis-Vertrag steht, wird aber nicht gezeigt —
+   sonst begann die zweite Zeile mit „·". */
+.cc-belege .cc-belege__trenner {
+  display: none;
+}
+
+.cc-belege .cc-belege__gegenstand {
+  display: block;
+}
+
+/* Die Tabellenwirkung bleibt eine einzige Regel: Beschriftung und Wert stehen
+   im Raster `max-content 1fr`, alle Werte einer Karte beginnen auf derselben
+   Kante. Labor, Datum und Nummer stehen VOR dem Klick da: die Dokumente sind
+   von 2025 und 2026, und niemand soll Aktualitaet annehmen muessen. */
+.cc-belege .cc-belege__daten {
   display: grid;
-  grid-template-columns: max-content 1fr;
-  column-gap: var(--cc-space-2);
-  row-gap: 0.15rem;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--cc-space-1) var(--cc-space-2);
   margin: 0;
-  font-size: var(--cc-fs-1);
+  font-size: var(--cc-fs-2);
+  line-height: 1.5;
 }
 
-.cc-belege__daten dt {
+.cc-belege .cc-belege__daten dt {
   margin: 0;
-  color: var(--cc-muted, #6b665d);
+  color: var(--cc-muted);
 }
 
-.cc-belege__daten dd {
+.cc-belege .cc-belege__daten dd {
+  max-width: none;
   margin: 0;
-  color: var(--cc-text);
+  color: var(--cc-dunkel);
+  /* „Bericht 202510143565-engl.-E" ist ein einziges Wort ohne Trennstelle;
+     auf 320 px liefe es sonst aus der Karte. */
+  overflow-wrap: anywhere;
 }
 
-.cc-belege__grenze {
-  margin-top: var(--cc-space-2);
-  font-size: var(--cc-fs-1);
-  color: var(--cc-muted, #6b665d);
+.cc-belege .cc-belege__grenze {
+  max-width: var(--cc-zeile-max);
+  margin: var(--cc-space-4) auto 0;
+  font-size: var(--cc-fs-2);
+  line-height: 1.6;
+  color: var(--cc-muted);
+  text-align: center;
 }
 
 /* ==========================================================================
@@ -2352,11 +2418,27 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   width: 100%;
   height: 100%;
   border: 0;
-  /* hqdefault ist 4:3 — ohne cover stuenden schwarze Balken im Rahmen. */
+  /* Das Standbild ist 16:9 wie die Buehne; cover haelt das auch dann, wenn
+   * eine Sprosse um einen Pixel vom Seitenverhaeltnis abweicht. */
   object-fit: cover;
   /* Der Rahmen rundet bereits; ein zweiter Radius auf dem Bild waere die
    * Radien-Streuung, die s07 abgestellt hat. */
   border-radius: 0;
+}
+
+/* DIE VORSTUFE (2026-09-26) — dasselbe Motiv in 24x14 Pixeln, als data-URI
+ * im HTML. Sie fuellt die Buehne, bevor das Standbild da ist: statt einer
+ * dunklen Flaeche mit goldenem Knopf steht vom ersten Bildaufbau an die
+ * Szene, grob, und das Standbild wird darueber scharf. Kein `filter: blur()`:
+ * die Glaettung des Browsers macht eine so kleine Flaeche ohnehin weich, und
+ * ein Filter kostete je Kachel eine eigene Compositing-Ebene (dieselbe
+ * Abwaegung wie VORSTUFE_STYLE in qiblanco-storefront YoutubeTimestamp.jsx). */
+.cc-podcast__vorstufe {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .cc-podcast__play {
@@ -2849,32 +2931,39 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
 /* Der Autorenblock. Er traegt die ganze Zurechenbarkeit dieser Seite: ohne ihn
    ist der Text ein Werbetext, mit ihm die Aussage eines benannten Menschen.
    Deshalb steht er UEBER dem Lead und nicht als Fussnote darunter. */
+/* SEIT 2026-09-26 MIT FOTO: Christians Porträt links, Name und Datum rechts
+   daneben — die Form einer Autorenzeile, wie man sie aus Zeitungen kennt.
+   Vorher stand hier eine Zeile in 12,8 px mit Mittelpunkten; jetzt 16 px.
+   Das Foto traegt den einen Bildradius wie in AbsichtHinweis. */
 .cc-absicht__urheber {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--cc-space-1) var(--cc-space-2);
+  align-items: center;
+  gap: var(--cc-space-2);
   margin: var(--cc-space-2) 0 var(--cc-space-4);
-  padding-bottom: var(--cc-space-2);
+  padding-bottom: var(--cc-space-3);
   border-bottom: 1px solid var(--cc-linie);
-  font-size: var(--cc-fs-1);
+}
+
+.cc-absicht__foto {
+  flex: none;
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: cover;
+  object-position: 50% 15%;
+}
+
+.cc-absicht .cc-absicht__urheber-text {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: var(--cc-fs-2);
+  line-height: 1.4;
   color: var(--cc-muted);
 }
 
-.cc-absicht__autor {
-  font-size: var(--cc-fs-2);
+.cc-absicht__wer {
   font-weight: 600;
   color: var(--cc-dunkel);
-}
-
-/* Zwei Angaben auf einer Zeile brauchen eine Trennung, die kein Zeichen ist —
-   ein Mittelpunkt waere ein weiteres Glyph in einer Zeile, die schon drei
-   Informationen traegt. */
-.cc-absicht__rolle::before,
-.cc-absicht time::before {
-  content: '·';
-  margin-right: var(--cc-space-1);
-  color: var(--cc-linie);
 }
 
 /* DIE ZWISCHENUEBERSCHRIFTEN EINES LESETEXTES SIND LINKSBUENDIG UND KLEINER
@@ -2926,10 +3015,23 @@ main .cc-absicht h1 {
 }
 
 .cc-absicht__zitat p {
-  font-size: var(--cc-fs-3);
-  line-height: 1.5;
+  font-size: var(--cc-fs-4);
+  line-height: 1.45;
   color: var(--cc-dunkel);
   margin-bottom: 0;
+}
+
+/* DER VORSPANN UND CHRISTIANS SATZ STEHEN EINE STUFE GROESSER (--cc-fs-4,
+   2026-09-26). Beides sind die zwei Stellen, an denen er selbst am
+   deutlichsten spricht: was er will (Vorspann) und wozu (sein Satz). Die
+   Stufe schliesst dazu die Luecke der Skala zwischen Zwischentitel (20 px)
+   und Abschnittstitel (31,25 px) — gemessen hatte design-rubrik genau diesen
+   Sprung (1,56) als „keine modulare Skala" angekreidet, sobald die 12,8 px
+   der alten Pruefdokumente wegfielen. Die Leiter lautet jetzt 16 / 20 / 25 /
+   31,25 / 48,8 — ein Schritt 1,25 je Stufe, H1 ausgenommen. */
+.cc-absicht .cc-lead {
+  font-size: var(--cc-fs-4);
+  line-height: 1.45;
 }
 
 /* Die Absaetze, in denen der Text seine eigenen Grenzen benennt (fehlender
@@ -2949,53 +3051,119 @@ main .cc-absicht h1 {
   border-top: 1px solid var(--cc-linie);
 }
 
+/* Der Gruss unter der letzten Zeile: sein Name, leiser gesetzt, damit der
+   Text mit ihm endet und nicht mit einer Verwaltungsangabe. */
+.cc-absicht .cc-absicht__gruss {
+  margin-top: var(--cc-space-3);
+  color: var(--cc-muted);
+}
+
+/* DIE PRUEFDOKUMENTE TRETEN AUS DER LESESPALTE HERAUS (2026-09-26): die
+   Spalte ist 70ch schmal, die drei Karten einer Sorte brauchen eine Reihe.
+   Der Block nimmt dieselbe Breite wie auf den Kaufseiten (72rem) und bleibt
+   auf die Mitte der Spalte zentriert; am Telefon faellt die Rechnung auf
+   einen Rand von 1rem zurueck, wie ihn der Seitenrahmen ohnehin hat. */
+.cc-absicht .cc-belege {
+  width: min(72rem, calc(100vw - 2rem));
+  max-width: none;
+  margin-inline: calc(50% - min(36rem, 50vw - 1rem));
+  padding-inline: 0;
+}
+
+.cc-absicht .cc-belege .cc-belege__titel {
+  font-size: var(--cc-fs-4);
+  text-align: left;
+}
+
+.cc-absicht .cc-belege .cc-belege__grenze {
+  margin-inline: 0;
+  text-align: left;
+}
+
 .cc-absicht a {
   color: var(--cc-gold-text);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-/* --- Der Verweis auf den drei Kundenflaechen --- */
-
+/* --- Christians Zeile auf den drei Kundenflaechen (neu 2026-09-26) ---
+ *
+ * Christian: „Das klingt nach einem Rechtsstaat, nicht nach einer
+ * persoenlichen Einladung. Ausserdem fehlt mein Bild dazu." Die Karte ist
+ * deshalb eine Nachricht mit Absender: sein Foto, zwei Saetze, sein Name, ein
+ * Weg zur ganzen Geschichte. Der Versalien-Kicker ist weg.
+ *
+ * HANDY ZUERST: Foto ueber dem Text, mittig. Ab 40em steht das Foto links
+ * neben dem Text (dort ist die Zeile breit genug fuer beides, ohne dass der
+ * Satz unter 30 Zeichen je Zeile faellt).
+ *
+ * DAS FOTO TRAEGT DEN EINEN BILDRADIUS (--cc-radius-bild ueber
+ * `.ProductPageKakao img, main img`), keinen eigenen: ein rundes Portraet
+ * waere der zweite Bildradius der Seite, und genau diese Streuung hat s07 als
+ * Befund abgestellt. Der Zuschnitt sitzt oben (object-position 50% 15%): im
+ * Master 1200x1535 liegt das Gesicht im oberen Drittel, ein mittiger
+ * Zuschnitt zeigte vor allem den Pullover. */
 .cc-absicht-hinweis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cc-space-3);
   max-width: var(--cc-zeile-max);
   margin: var(--cc-space-6) auto;
-  padding: var(--cc-space-4);
+  padding: var(--cc-space-4) var(--cc-space-3);
   background: var(--cc-flaeche);
   border: 1px solid var(--cc-linie);
   border-radius: var(--cc-radius-bild);
   text-align: center;
 }
-
-.cc-absicht-hinweis__kicker {
-  font-size: var(--cc-fs-1);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--cc-muted);
-  margin-bottom: var(--cc-space-2);
+@media (min-width: 40em) {
+  .cc-absicht-hinweis {
+    flex-direction: row;
+    gap: var(--cc-space-4);
+    padding: var(--cc-space-4);
+    text-align: left;
+  }
 }
 
-.cc-absicht-hinweis__satz {
-  font-size: var(--cc-fs-4);
-  line-height: 1.4;
+.cc-absicht-hinweis__foto {
+  flex: none;
+  width: 6rem;
+  height: 6rem;
+  object-fit: cover;
+  object-position: 50% 15%;
+}
+@media (min-width: 48em) {
+  .cc-absicht-hinweis__foto {
+    width: 7.5rem;
+    height: 7.5rem;
+  }
+}
+
+.cc-absicht-hinweis .cc-absicht-hinweis__satz {
+  font-size: var(--cc-fs-3);
+  line-height: 1.5;
   color: var(--cc-dunkel);
-  margin-bottom: var(--cc-space-1);
+  margin: 0 0 var(--cc-space-1);
 }
 
-.cc-absicht-hinweis__wer {
-  font-size: var(--cc-fs-1);
+.cc-absicht-hinweis .cc-absicht-hinweis__wer {
+  font-size: var(--cc-fs-2);
   color: var(--cc-muted);
-  margin-bottom: var(--cc-space-3);
+  margin: 0;
+}
+
+.cc-absicht-hinweis .cc-absicht-hinweis__weg {
+  margin: 0;
 }
 
 /* Ein Textlink, kein Knopf — aber mit der Trefferflaeche eines Knopfes.
    WCAG 2.5.5 AAA gilt auch fuer Links, und ein 16px hoher Link ist auf einem
-   Telefon nicht zuverlaessig zu treffen. */
+   Telefon nicht zuverlaessig zu treffen. Ohne Innenabstand links, damit er
+   auf derselben Kante steht wie der Satz darueber. */
 .cc-absicht-hinweis__link {
   display: inline-flex;
   align-items: center;
   min-height: var(--cc-treffer-min);
-  padding: 0 var(--cc-space-1);
   font-size: var(--cc-fs-2);
   font-weight: 600;
   color: var(--cc-gold-text);

@@ -253,9 +253,13 @@ export function Kakao({stimmen = null, sorten = null, podcast = null} = {}) {
 
       <div className="my-[10vh]! NormalSectionSize">
         <h2>Wusstest du?</h2>
-        <p>Nach dem Vermahlen bekommt unser Kakao Zeit statt Tempo: Er ruht,
-        bis er langsam auskristallisiert – daher das feine Kristallmuster, das
-        du im Bruch der Tafel siehst.</p>
+        {/* 2026-09-26 (Job 20260926-GROSSJOB-crystal-cacao-seitendurchgang-…):
+            „Zeit statt Tempo" war eine Formel, kein Satz. Jetzt steht da, was
+            passiert — wie Christian es im Podcast erzaehlt: der Kakao reift
+            nach und kristallisiert dabei aus. */}
+        <p>Nach dem Vermahlen lassen wir unserem Kakao Zeit. Er reift in Ruhe
+        nach und kristallisiert dabei langsam aus. Daher kommt das feine
+        Kristallmuster, das du im Bruch der Tafel siehst.</p>
         <p>👉 Wie du ihn zubereitest und welche Sorte zu dir passt, findest du
         bei AWAKE und CREATE.</p>
       </div>
@@ -905,8 +909,12 @@ function Zubereitung() {
         <dd>Deep Focus-Dosis: 30 g pro Tasse ≈ 14 Rituale</dd>
         <dd>Daily Focus-Dosis: 15 g pro Tasse ≈ 28 Rituale</dd>
       </dl>
+      {/* 2026-09-26: vorher „Wortlaut von der Rückseite der Verpackung." —
+          eine Quellenangabe in Amtsdeutsch. Die Aussage bleibt dieselbe (die
+          Schritte stehen woertlich so auf der Packung), gesagt wird sie dem
+          Kunden in seiner Lage: er hat die Packung gleich in der Hand. */}
       <p className="cc-zubereitung__quelle">
-        Wortlaut von der Rückseite der Verpackung.
+        So steht es auch auf der Rückseite deiner Packung.
       </p>
     </div>
   );
