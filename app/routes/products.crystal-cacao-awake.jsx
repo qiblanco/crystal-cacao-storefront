@@ -31,6 +31,7 @@ export const meta = ({data}) => {
   return produktMeta({
     // Product-Auszeichnung (Preis/Verfügbarkeit) — siehe produkt-seo.js
     produkt: data?.product,
+    marktLand: data?.marktLand,
     pfad: '/products/crystal-cacao-awake',
     titel: `${data?.product?.title ?? ''} | ${MARKE}`,
     bildUrl:
@@ -75,7 +76,14 @@ async function loadCriticalData({context, request}, handle) {
 
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
-  return {product, aufmacherFassung: waehleAufmacherFassung(request)};
+  return {
+    product,
+    aufmacherFassung: waehleAufmacherFassung(request),
+    // Markt-Land für die Produkt-Auszeichnung: `meta()` hat keinen Kontext,
+    // und der ausgezeichnete Preis muss derselbe sein wie der sichtbare
+    // (AT 10 statt 7 % beim Kakao). Vorlage c5941ee (#422).
+    marktLand: storefront.i18n.country,
+  };
 }
 
 /**

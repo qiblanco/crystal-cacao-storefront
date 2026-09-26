@@ -144,6 +144,33 @@ export function bildLeiterFuer(anzeigeBreite, opt = {}) {
   return [...new Set(geklemmt)].sort((a, b) => a - b);
 }
 
+/*
+ * ZUSATZ-SPROSSEN (Job 20260924-header-menue-mobil-sprosse-dach-arm-prio45)
+ *
+ * Die dpr-Leiter oben kennt nur EINE Fläche: die größte (`anzeigeBreite`).
+ * Eine Kachel, die mit dem Fenster STETIG schrumpft, hat aber am Telefon eine
+ * viel kleinere Fläche — und weil die kleinste Sprosse die 1x-Sprosse der
+ * GRÖSSTEN Fläche ist, gibt es darunter nichts, was der Browser wählen könnte.
+ * Gemessen 2026-09-24 am Mega-Menü: Kachel 80 CSS-px (390 px, dpr 2), kleinste
+ * Sprosse 325 px -> 2,02-fach.
+ *
+ * Zusatz-Sprossen sind GEMESSENE Breiten, die der Aufrufer nennt und
+ * begründet; sie werden wie die übrigen an Master und Mindestbreite geklemmt.
+ * Ohne den Parameter bleibt die Leiter byte-gleich zur bisherigen.
+ */
+function mitZusatzSprossen(leiter, opt = {}) {
+  const {zusatzSprossen, mindestBreite = 0, masterBreite = null} = opt;
+  if (!Array.isArray(zusatzSprossen) || zusatzSprossen.length === 0) return leiter;
+  const zusatz = zusatzSprossen
+    .filter((w) => Number.isFinite(w) && w > 0)
+    .map((w) => {
+      let x = Math.max(Math.ceil(w), mindestBreite);
+      if (masterBreite) x = Math.min(x, masterBreite);
+      return x;
+    });
+  return [...new Set([...leiter, ...zusatz])].sort((a, b) => a - b);
+}
+
 /**
  * Vollstaendiger Satz Bildquellen für eine Shopify-CDN-URL.
  *
@@ -160,7 +187,8 @@ export function bildLeiterFuer(anzeigeBreite, opt = {}) {
  *
  * @param {string} url
  * @param {{anzeigeBreite: number, dprStufen?: number[], mindestBreite?: number,
- *          masterBreite?: number|null, sizes?: string}} opt
+ *          masterBreite?: number|null, sizes?: string,
+ *          zusatzSprossen?: number[]}} opt
  * @returns {{src: string, srcSet: string|undefined, sizes: string|undefined}}
  */
 export function bildQuellen(url, opt) {
@@ -168,7 +196,7 @@ export function bildQuellen(url, opt) {
   if (!url || !CDN_RX.test(url) || !anzeigeBreite) {
     return {src: url, srcSet: undefined, sizes: undefined};
   }
-  const leiter = bildLeiterFuer(anzeigeBreite, opt);
+  const leiter = mitZusatzSprossen(bildLeiterFuer(anzeigeBreite, opt), opt);
   const trenner = url.includes('?') ? '&' : '?';
   const mitBreite = (w) => `${url}${trenner}width=${w}`;
 

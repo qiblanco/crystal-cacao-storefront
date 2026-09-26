@@ -66,6 +66,7 @@ export const meta = ({data}) => {
   }
   return produktMeta({
     produkt,
+    marktLand: data?.marktLand,
     pfad: `/products/${produkt.handle}`,
     titel: `${produkt.title ?? 'Produkt'} | ${ABSENDER_MARKE}`,
     bildUrl:
@@ -146,6 +147,10 @@ async function loadCriticalData({context, params, request}) {
 
   return {
     product,
+    // Markt-Land für die Produkt-Auszeichnung: `meta()` hat keinen Kontext,
+    // und der ausgezeichnete Preis muss derselbe sein wie der sichtbare
+    // (AT 10 statt 7 % beim Kakao). Vorlage c5941ee (#422).
+    marktLand: storefront.i18n.country,
   };
 }
 

@@ -1,5 +1,6 @@
 import {Preis} from './Preis';
 import {bruttoAnzeige, formatPreis} from '~/lib/markt-pricing';
+import {useMarktLand} from '~/lib/markt-land';
 
 /**
  * @param {{
@@ -85,8 +86,11 @@ export function ProductPrice({price, compareAtPrice}) {
  */
 export function ProductPriceKanon({price, compareAtPrice, handle}) {
   const waehrung = price?.currencyCode || compareAtPrice?.currencyCode;
+  // Der Satz haengt am aufgeloesten Markt (AT 10 statt 7 %, Vorlage #422);
+  // aus den root-Loaderdaten, nicht als Prop.
+  const marktLand = useMarktLand();
   const anzeige = formatPreis(
-    bruttoAnzeige(price?.amount, handle, waehrung),
+    bruttoAnzeige(price?.amount, handle, waehrung, marktLand),
     waehrung,
     'pdp',
   );

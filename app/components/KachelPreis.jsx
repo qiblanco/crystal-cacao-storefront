@@ -1,4 +1,5 @@
 import {cacaoPricing} from './CacaoProductForm';
+import {useMarktLand} from '~/lib/markt-land';
 
 /**
  * DER PREISBLOCK EINER SORTENKACHEL — EINE Implementierung, ZWEI Leser.
@@ -55,10 +56,14 @@ const KACHEL_MENGE = '3';
  * waere „53,- €" auf einer Kachel ohne Mengenwahl eine halbe Wahrheit.
  */
 export function KachelPreis({produkt}) {
+  // Derselbe Markt wie auf der Kaufseite (AT 10 statt 7 %, Vorlage #422) --
+  // sonst liefen Kachel und Kaufseite in AT auseinander.
+  const marktLand = useMarktLand();
   const preis = cacaoPricing(
     KACHEL_MENGE,
     {price: produkt?.priceRange?.minVariantPrice},
     produkt?.handle,
+    marktLand,
   );
   return (
     <div className="cc-kachel-preis">

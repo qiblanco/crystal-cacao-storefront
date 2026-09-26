@@ -340,7 +340,7 @@ function mitBild(knoten, bildUrl) {
  * @param {{pfad: string, titel: string, bildUrl?: string, produkt?: object}} args
  * @returns {Array<object>} meta-Descriptoren für react-router 7
  */
-export function produktMeta({pfad, titel, bildUrl, produkt}) {
+export function produktMeta({pfad, titel, bildUrl, produkt, marktLand}) {
   const beschreibung = produktBeschreibung(pfad);
   // Der Überschreiber gewinnt, wenn es einen gibt — sonst bleibt es exakt
   // beim Titel der Route. Bewusst hier und nicht in der Route: sonst trägt
@@ -410,8 +410,12 @@ export function produktMeta({pfad, titel, bildUrl, produkt}) {
   // Organization-Knoten dieses Ladens. Dass Marke und Verkäuferin
   // auseinandergehen, ist der Punkt: die Marke ist Crystal Cacao®, verkauft
   // wird von der Qi Blanco UG (haftungsbeschränkt).
+  // DER MARKT MUSS MIT: produktSchema rechnet den Bruttopreis, und der Satz
+  // hängt am Markt (AT 10 statt 7 % beim Kakao). Ohne diesen Parameter
+  // zeichnete die Vorlage am 2026-09-13 den deutschen Preis aus, während die
+  // Seite darunter den österreichischen zeigte (Vorlage c5941ee, #422).
   const schema = produkt
-    ? mitBild(markenProdukt(produktSchema(produkt)), bildUrl)
+    ? mitBild(markenProdukt(produktSchema(produkt, marktLand)), bildUrl)
     : null;
   if (schema) {
     descriptoren.push({'script:ld+json': schema});

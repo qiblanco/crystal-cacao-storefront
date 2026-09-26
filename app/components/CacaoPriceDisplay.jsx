@@ -1,4 +1,5 @@
 import {cacaoPricing} from './CacaoProductForm';
+import {useMarktLand} from '~/lib/markt-land';
 
 /**
  * Preis-Anzeige der Kakao-Mengenstaffel — DYNAMISCH aus dem API-Preis der
@@ -6,7 +7,8 @@ import {cacaoPricing} from './CacaoProductForm';
  * fail-closed auf den letzten bekannten guten Stand (cacaoPricing).
  */
 export function CacaoPriceDisplay({quantity, selectedVariant, handle}) {
-  const pricing = cacaoPricing(quantity, selectedVariant, handle);
+  const marktLand = useMarktLand();
+  const pricing = cacaoPricing(quantity, selectedVariant, handle, marktLand);
 
   return (
     <div className="Bestseller-Price">

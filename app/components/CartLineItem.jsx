@@ -4,6 +4,7 @@ import {Link} from 'react-router';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
 import {getCartLinePriceDisplayExact} from '~/lib/cart-display-pricing';
+import {useMarktLand} from '~/lib/markt-land';
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -36,7 +37,9 @@ export function CartLineItem({layout, line, childrenMap}) {
   // Hier wird deshalb NICHT gerechnet und NICHT formatiert, sondern der
   // vorhandene Kanon gefragt — sonst laufen die beiden Zahlen beim naechsten
   // Mal wieder auseinander.
-  const anzeigePreis = getCartLinePriceDisplayExact(line);
+  // Der Satz haengt am aufgeloesten Markt (AT 10 statt 7 %, Vorlage #422).
+  const marktLand = useMarktLand();
+  const anzeigePreis = getCartLinePriceDisplayExact(line, marktLand);
 
   return (
     <li key={id} className="cart-line">
