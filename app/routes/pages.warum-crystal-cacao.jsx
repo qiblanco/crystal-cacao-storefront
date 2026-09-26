@@ -462,10 +462,31 @@ export default function WarumCrystalCacaoPage() {
             Meine Adresse und alle Kontaktwege findest du im{' '}
             <Link to="/pages/impressum">Impressum</Link>.
           </p>
-          <p className="cc-absicht__gruss">
-            Christian Bernd Bauer, Gründer und Geschäftsführer der{' '}
-            {ORGANISATION.legalName} in Maßbach
-          </p>
+          {/* Die Schlusszeile traegt dasselbe Foto wie die Autorenzeile oben.
+              Christian, 26.09.: "es fehlt mein Bild dazu" -- ueberall, wo
+              seine Zeile steht; qiblanco.com setzt es ebenso direkt neben die
+              Unterschrift. alt="": der Name steht direkt daneben, ein
+              Screenreader laese ihn sonst zweimal. Unter dem ersten
+              Bildschirm: lazy. Gefunden hat die Luecke der unabhaengige
+              Gegenpruefer, nicht die eigene Wache (die kannte nur die
+              Autorenzeile oben). */}
+          <div className="cc-absicht__gruss-zeile">
+            <img
+              className="cc-absicht__foto"
+              src={foto.src}
+              srcSet={foto.srcSet}
+              sizes={foto.sizes}
+              width={72}
+              height={72}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <p className="cc-absicht__gruss">
+              Christian Bernd Bauer, Gründer und Geschäftsführer der{' '}
+              {ORGANISATION.legalName} in Maßbach
+            </p>
+          </div>
         </section>
       </article>
     </div>

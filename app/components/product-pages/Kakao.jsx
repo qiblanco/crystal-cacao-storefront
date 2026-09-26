@@ -224,10 +224,10 @@ export function Kakao({stimmen = null, sorten = null, podcast = null} = {}) {
         <p>
           <b>Crystal Cacao®</b> liefert dir ein{' '}
           <b>besseres Gefühl, mehr Klarheit und stabile Energie.</b> Wenn nicht,
-          bekommst du dein Geld zurück – ohne Diskussion.
+          bekommst du dein Geld zurück. Ohne Diskussion.
         </p>
         <p>
-          <b>20 Tage testen - komplett risikofrei</b>
+          <b>20 Tage testen, komplett risikofrei</b>
         </p>
         <p>
           <b>100 % Geld-zurück-Garantie, selbst bei geöffneter Packung.</b>
@@ -314,7 +314,7 @@ function Hero() {
         <div>
           <ul className="cc-kakao-hero__vorteile">
             <li className="list-disc">
-              Für 28 Tage - Klarheit, Fokus & Energie
+              Für 28 Tage: Klarheit, Fokus & Energie
             </li>
             <li className="list-disc">11x mehr Antioxidantien als Kakao</li>
             <li className="list-disc">24 Mineralstoffe & Spurenelemente</li>
@@ -323,7 +323,7 @@ function Hero() {
         </div>
         <p className="font-bold">
           {' '}
-          ✅ Wissenschaftlich geprüft - direkt spürbar!{' '}
+          ✅ Wissenschaftlich geprüft und direkt spürbar!{' '}
         </p>
         <div className="flex gap-3 mt-2">
           <a href="/products/crystal-cacao-create" className="btn--primary">
@@ -374,7 +374,7 @@ function Benefits() {
         <div>
           <h2>Mineralisiert.</h2>
           <p>
-            Ein unkomplizierter Begleiter für jeden Tag – mit 24 natürlich
+            Ein unkomplizierter Begleiter für jeden Tag, mit 24 natürlich
             enthaltenen Mineralstoffen und Spurenelementen.
           </p>
         </div>
@@ -382,7 +382,7 @@ function Benefits() {
           <h2>Antioxidantien-Boost.</h2>
           <p>
             Reine Pflanzenkraft, ganz ohne Zucker. Eine Tasse Kristall Kakao®
-            liefert viele natürlich enthaltene Antioxidantien – pur,
+            liefert viele natürlich enthaltene Antioxidantien: pur,
             unverfälscht und ohne Zusätze.
           </p>
         </div>
@@ -620,8 +620,8 @@ function ComparisonTable() {
           unseren Nutzern als klar{' '}
           <b>
             fokussierend, kreativitätsfördernd und lang anhaltend beschrieben
-          </b>{' '}
-          – und das gleichzeitig bei einer ruhigen und stabilen Energie.
+          </b>
+          , und das gleichzeitig bei einer ruhigen und stabilen Energie.
           <br />
           &nbsp;
           <br />
@@ -705,9 +705,9 @@ function SparSection() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 NormalSectionSize mt-[100px]!">
       <div className="flex flex-col justify-center">
-        <h2>Jetzt sparen - bis zu 30%!</h2>
+        <h2>Jetzt sparen: bis zu 30 %!</h2>
         <p>
-          <b>Spare bis zu 30 % – sortenübergreifend kombinierbar.</b>
+          <b>Spare bis zu 30 %, sortenübergreifend kombinierbar.</b>
         </p>
         <p>
           <b>2 Packungen = 20 % Rabatt + Gratisversand innerhalb Deutschlands</b>
@@ -735,7 +735,7 @@ function MusterSection() {
         <h2>Der Unterschied zeigt sich im Muster:</h2>
         <p className="mt-2">
           Das charakteristische Leopardenmuster von Crystal Cacao® ist
-          sichtbarer Beweis der kristallinen Struktur – entstanden durch
+          sichtbarer Beweis der kristallinen Struktur. Sie entsteht durch
           naturbelassene Verarbeitung.
           <br />
           Diese Struktur bewahrt die volle Pflanzenkraft:
@@ -759,7 +759,7 @@ function MusterSection() {
           <li>frei von Zucker, frei von Zusätzen, 100% Kakao</li>
         </ul>
         <p className="mt-4">
-          <b>Erlebe Fokus, Tiefe &amp; Präsenz – bei jeder Tasse.</b>
+          <b>Erlebe Fokus, Tiefe &amp; Präsenz bei jeder Tasse.</b>
         </p>
       </div>
       <div className="flex items-center">
@@ -808,16 +808,16 @@ function WurzelnSection() {
         </div>
         <div className="flex flex-col justify-center">
           <ol className="list-decimal ml-6 flex flex-col gap-2">
-            <li>Direkt &amp; fair gehandelt – von kleinen Familienbetrieben</li>
+            <li>Direkt &amp; fair gehandelt, von kleinen Familienbetrieben</li>
             <li>Nachhaltig angebaut in biodiverser Agroforstwirtschaft</li>
             <li>
-              Verarbeitet bei niedrigen Temperaturen – für maximale
+              Verarbeitet bei niedrigen Temperaturen für maximale
               Pflanzenkraft
             </li>
           </ol>
           <p className="mt-4">
             Jeder Schluck verbindet dich mit einer{' '}
-            <b>6.000-jährigen Kakaotradition</b> – und mit den{' '}
+            <b>6.000-jährigen Kakaotradition</b> und mit den{' '}
             <b>Menschen, die ihn mit Hingabe anbauen.</b>
           </p>
         </div>
@@ -887,7 +887,14 @@ function Zubereitung() {
           harte <br>. Damit schrumpfte er ueber `margin-inline: auto` auf seine
           laengste harte Zeile und trieb mittig im Block — auf 1440 gemessen
           margin-left 245px. Eine Liste kann das baulich nicht. */}
-      <ol className="cc-zubereitung__schritte">
+      {/* data-qb-wortlaut: diese Schritte und die Dosieranleitung darunter
+          stehen WOERTLICH so auf der gedruckten Rueckseite (vorlagen/
+          verpackung-rueckseite.png, dort mit denselben Strichen). Sie werden
+          deshalb nicht umformuliert, und die Stil-Wache des Ladens
+          (probe_durchgang_christian_streng.py, Arm S) misst sie nicht als
+          unsere Prosa. Wer hier umformuliert, loest die Zusage „So steht es
+          auch auf der Rückseite deiner Packung.“ auf. */}
+      <ol className="cc-zubereitung__schritte" data-qb-wortlaut="verpackung">
         {ZUBEREITUNG_SCHRITTE.map((s) => (
           <li key={s.titel}>
             <b>{s.titel}:</b> {s.text}
@@ -903,7 +910,7 @@ function Zubereitung() {
           es die drei Dosierstufen des Herstellers, und "Daily Focus-Dosis:
           15 g pro Tasse = 28 Rituale" ist genau die Zeile, die die
           28-Tage-Zusage traegt. Wortlaut der Verpackung, nicht umformuliert. */}
-      <dl className="cc-zubereitung__dosis">
+      <dl className="cc-zubereitung__dosis" data-qb-wortlaut="verpackung">
         <dt>Dosieranleitung</dt>
         <dd>Schamanische Dosis: 38 g pro Tasse ≈ 11 Rituale</dd>
         <dd>Deep Focus-Dosis: 30 g pro Tasse ≈ 14 Rituale</dd>
@@ -984,7 +991,7 @@ const videos = [
     src: KURS_VIDEO_1,
     alt: 'Titelbild zum Video „Intuition erfahren“',
     title:
-      'Video 1: Intuition erfahren - Raus aus dem Kopf, rein ins Herz! – 9 min',
+      'Video 1: Intuition erfahren. Raus aus dem Kopf, rein ins Herz! (9 min)',
     items: [
       'Was ist Intuition?',
       'Welchen Vorteil bringt dir das im Alltag?',
@@ -994,7 +1001,7 @@ const videos = [
   {
     src: KURS_VIDEO_2,
     alt: 'Kakao auf Brett',
-    title: 'Video 2: Zeremonie Kakao – Was ist das?! – 8 min',
+    title: 'Video 2: Zeremonie Kakao. Was ist das?! (8 min)',
     items: [
       'Warum enthält er so viele Inhaltsstoffe?',
       'Wo kommt er her?',
@@ -1004,7 +1011,7 @@ const videos = [
   {
     src: KURS_VIDEO_3,
     alt: 'Kakao Kochen',
-    title: 'Video 3: Die ZeremonieKakao Kur in der Anwendung – 8 min',
+    title: 'Video 3: Die ZeremonieKakao Kur in der Anwendung (8 min)',
     items: [
       'Wie erwärmt man ihn richtig?',
       'Wie schont man die Inhaltsstoffe?',
@@ -1015,7 +1022,7 @@ const videos = [
     src: KURS_VIDEO_4,
     alt: 'Ureinwohner Kakao',
     title:
-      'Video 4: Einen Schritt tiefer – mit Zeremonie Kakao meditieren – 4 min',
+      'Video 4: Einen Schritt tiefer, mit Zeremonie Kakao meditieren (4 min)',
     items: [
       'Warum überhaupt meditieren?',
       'Wie und wie lange?',
@@ -1074,7 +1081,7 @@ function RitualSection() {
           </div>
           <p>
             Mit nur <b>einer Tasse Crystal Cacao® am Tag</b> schaffst du dir
-            einen festen Anker im Alltag – für mehr Achtsamkeit, Fokus und
+            einen festen Anker im Alltag: für mehr Achtsamkeit, Fokus und
             innere Balance.
           </p>
           <p>
@@ -1095,7 +1102,7 @@ function RitualSection() {
         <p>
           <b>☕ Dein Ritual:</b>
           <br /> Täglich 15 g <b>Crystal Cacao®</b> mit heißem Wasser oder
-          Milch zubereiten und bewusst genießen.
+          Milch zubereiten und in Ruhe genießen.
         </p>
         <p>
           <b>🌀 Dein Moment:</b>
@@ -1122,7 +1129,7 @@ function RitualSection() {
           <br />
           ✔️ Wissenschaftlich analysiert
           <br />
-          ✔️ Rückgabe innerhalb von 20 Tagen – auch angebrochen
+          ✔️ Rückgabe innerhalb von 20 Tagen, auch angebrochen
           <br />
           ✔️ Bio-zertifiziert &amp; aromasicher verpackt
         </b>

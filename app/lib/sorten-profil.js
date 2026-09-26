@@ -191,15 +191,15 @@ export const SORTEN = Object.freeze({
       ]),
       fazit:
         '**Crystal Cacao® Awake** kombiniert sanfte Aktivierung mit dem ' +
-        '**höchsten L-Tryptophan-Gehalt aller Kristall Kakao® Sorten – für ' +
+        '**höchsten L-Tryptophan-Gehalt aller Kristall Kakao® Sorten: für ' +
         'präsente Klarheit, emotionale Tiefe und ein Gefühl innerer Weite.**',
     }),
     herkunft: Object.freeze([
       {
         absaetze: [
           'Aus den **goldenen Flusstälern des Piura-Tals im Norden Perus** ' +
-            'stammt eine heilige Pflanze – in ihrer reinsten Form: unser ' +
-            'bio-zertifizierter **Awake – Kristall Kakao®.**',
+            'stammt eine heilige Pflanze in ihrer reinsten Form: unser ' +
+            'bio-zertifizierter **Awake Kristall Kakao®.**',
           'Die hellen Kakaobohnen aus dieser Region zählen zu den seltensten und ' +
             'aromatischsten der Welt. Sie stammen aus nachhaltigem Anbau, werden ' +
             'von lokalen Kleinbauern mit großer Sorgfalt geerntet und bewahren ' +
@@ -211,7 +211,7 @@ export const SORTEN = Object.freeze({
       {
         absaetze: [
           'Schonend bei niedriger Temperatur vermahlen, gießen wir sie ' +
-            'anschließend in eine elegante, quadratische 420 g-Tafel – ein purer ' +
+            'anschließend in eine elegante, quadratische 420 g-Tafel: ein purer ' +
             'Block **Bio Kristall Kakao®.**',
           'Nach der Formung geben wir dem Kakao die Zeit, die er braucht: In ' +
             'Ruhe kristallisiert er langsam aus und entfaltet dabei sein ' +
@@ -226,7 +226,7 @@ export const SORTEN = Object.freeze({
             'bleiben das volle Bouquet frischer Fruchtnoten, feiner Kokosnuancen ' +
             'und alle wertvollen Bestandteile optimal bewahrt.',
           '**Brich dir ein Stück ab, bereite ein warmes Elixier zu und tauche ein ' +
-            'in dein persönliches Ritual – mit Achtsamkeit, Herzöffnung und ' +
+            'in dein persönliches Ritual mit Achtsamkeit, Herzöffnung und ' +
             'tiefer Verbindung zu dir selbst.**',
         ],
         bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01401.jpg?v=1766919672',
@@ -280,7 +280,7 @@ export const SORTEN = Object.freeze({
       ]),
       fazit:
         '**Crystal Cacao® Create** enthält das ' +
-        '**stärkste aktivierende Profil aller Kristall Kakao® Sorten** – für ' +
+        '**stärkste aktivierende Profil aller Kristall Kakao® Sorten**: für ' +
         '**sanfte Wachheit, kognitive Klarheit und stabile innere Ausrichtung.**',
     }),
     herkunft: Object.freeze([
@@ -292,7 +292,7 @@ export const SORTEN = Object.freeze({
             'nachhaltigem Anbau in den ' +
             '**Bergwäldern des peruanischen Departamento Amazonas**. Sie werden ' +
             'behutsam bei niedriger Temperatur vermahlen und anschließend in eine ' +
-            'elegante, quadratische 420 g-Tafel gegossen – ein purer Block ' +
+            'elegante, quadratische 420 g-Tafel gegossen: ein purer Block ' +
             '**Bio Kristall Kakao®.**',
         ],
         bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01491_Kopie.webp?v=1759179615',
@@ -301,20 +301,20 @@ export const SORTEN = Object.freeze({
         absaetze: [
           'Nach der Formung geben wir dem Kakao die Zeit, die er braucht: In Ruhe ' +
             'kristallisiert er langsam und entwickelt dabei sein charakteristisches ' +
-            'Kristallmuster – Sinnbild für naturbelassene Qualität, aromatische Tiefe ' +
+            'Kristallmuster. Es ist ein Sinnbild für naturbelassene Qualität, aromatische Tiefe ' +
             'und unsere tiefe Achtung vor dem Ursprung.',
         ],
         bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC02183_1.jpg?v=1764259399',
       },
       {
         absaetze: [
-          'So entsteht unser unverwechselbarer **Kristall Kakao®** – mit ' +
+          'So entsteht unser unverwechselbarer **Kristall Kakao®** mit ' +
             'feiner Struktur, voller Kraft und lebendigem Geschmack. Versiegelt im ' +
             'Aroma-Schutzpack bleiben das volle Bouquet tropischer Früchte, feiner ' +
             'Kokosnoten und Zitrusnuancen sowie alle wertvollen Bestandteile ' +
             'optimal bewahrt.',
           '**Brich dir ein Stück ab, bereite ein warmes Elixier zu und tauche ein ' +
-            'in dein persönliches Ritual – voller Achtsamkeit, Herzöffnung und ' +
+            'in dein persönliches Ritual voller Achtsamkeit, Herzöffnung und ' +
             'tiefer Verbundenheit.**',
         ],
         bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01953.jpg?v=1766919764',

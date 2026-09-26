@@ -348,7 +348,7 @@ function PodcastAbschnitt() {
       videoId={PODCAST_VIDEO}
       startSekunde={PODCAST_START_S}
       dauerWort={PODCAST_DAUER}
-      titel="Crystal Cacao® — die Kraft des Amazonas. In deiner Tasse."
+      titel="Crystal Cacao®: die Kraft des Amazonas. In deiner Tasse."
     >
       <h2 id="cc-podcast-titel">Vier Dinge heißen „Kakao“</h2>
       <p>
