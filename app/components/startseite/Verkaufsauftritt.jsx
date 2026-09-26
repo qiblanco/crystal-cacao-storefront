@@ -40,6 +40,13 @@ import {
  * MESSBAR ist: Inhalt, Menge, Herkunft, Pruefung, Preis, Rueckgaberecht.
  */
 
+/**
+ * Sprungziel der Sterne im Kopfbanner (app/components/Header.jsx). EINE
+ * Stelle fuer den Namen: Banner und Abschnitt lesen dieselbe Konstante, damit
+ * ein Umbenennen den Sprung nicht still ins Leere laufen laesst.
+ */
+export const KUNDENSTIMMEN_ANKER = 'kundenstimmen';
+
 const ANALYSE_PDF =
   'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/Test_report_Create_27.10.2025_english_language.pdf?v=1763061829';
 
@@ -200,7 +207,12 @@ export function Herkunft() {
  */
 export function Stimmen() {
   return (
-    <section className="cc-va-stimmen" aria-labelledby="cc-va-stimmen-titel">
+    <section
+      className="cc-va-stimmen"
+      id={KUNDENSTIMMEN_ANKER}
+      data-qb-reviews-section=""
+      aria-labelledby="cc-va-stimmen-titel"
+    >
       <h2 id="cc-va-stimmen-titel">Was Kundinnen und Kunden schreiben</h2>
       <div className="cc-va-stimmen-gitter">
         {KAKAO_STIMMEN.map((s) => (

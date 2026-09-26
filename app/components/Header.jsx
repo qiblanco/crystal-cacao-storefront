@@ -1,7 +1,8 @@
 import {Suspense} from 'react';
-import {Await, NavLink, useAsyncValue} from 'react-router';
+import {Await, Link, NavLink, useAsyncValue} from 'react-router';
 import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
 import {useAside} from '~/components/Aside';
+import {KUNDENSTIMMEN_ANKER} from '~/components/startseite/Verkaufsauftritt';
 import {
   ABSENDER_MARKE,
   KAKAO_KENNZAHLEN,
@@ -71,11 +72,29 @@ export function Header({header, cart, publicStoreDomain}) {
  * (KAKAO_KENNZAHLEN in app/lib/kakao-zone.js: 4,9/5,0 und 1.000) — sie sind
  * ABGELEITET, nicht danebengeschrieben. Sie gehoeren bewusst NICHT ins
  * JSON-LD; die Begruendung steht im Kopf jener Konstante.
+ *
+ * WOHIN DIE STERNE FUEHREN (Job 20260926-growth-crystal-laden-messbar-und-
+ * zulauf, s03): bis hierher auf die Startseite selbst — eine Sterne-Ansicht,
+ * die zu keiner Bewertung fuehrt, also keine der drei Klassen des Sterne-
+ * Vertrags (Christian 2026-08-20: S Sprung, G Google-Profil, D deklariert
+ * darstellend). Jetzt springt der Balken zu den drei echten Google-Stimmen
+ * der Startseite (Verkaufsauftritt.jsx, Abschnitt #kundenstimmen, mit Quelle
+ * und Link zum Profil): auf der Startseite ein Sprung auf derselben Seite,
+ * von jeder anderen Seite dorthin. Christians Angabe 4,9 / 1.000 bleibt
+ * unveraendert; sichtbar wird, worauf sich die Sterne beziehen lassen.
+ * Den Sprung selbst macht ScrollRestoration (root.jsx) ueber den Hash;
+ * der Abstand zur klebenden Kopfzeile steht als scroll-margin-top in
+ * kakao-seiten.css. Die Sterne der Kaufseiten bleiben reiner Text (dort
+ * gibt es keinen Bewertungsabschnitt, Christian 2026-09-10).
  */
 function CacaoAnnouncementBanner() {
   return (
     <div className="Header-AnnouncementBanner">
-      <NavLink prefetch="intent" to="/">
+      <Link
+        prefetch="intent"
+        to={`/#${KUNDENSTIMMEN_ANKER}`}
+        data-qb-rating="s"
+      >
         <p>
           <span className="banner-line">
             {KAKAO_KENNZAHLEN.bewertungSkala} ⭐⭐⭐⭐⭐ - Über{' '}
@@ -84,7 +103,7 @@ function CacaoAnnouncementBanner() {
           <span className="banner-offer-sep"> - </span>
           <span className="banner-line">jetzt mit Zufriedenheitsgarantie!</span>
         </p>
-      </NavLink>
+      </Link>
     </div>
   );
 }
