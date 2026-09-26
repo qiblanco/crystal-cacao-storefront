@@ -24,11 +24,25 @@ import {waehleAufmacherFassung} from '~/lib/sortenaufmacher-fassung';
 
 import {produktMeta, MARKE} from '~/lib/produkt-seo';
 import {StarRating} from '~/components/reusables/StarRating';
+import {IgTestimonialSlideshow} from '~/components/reusables/IgTestimonialSlideshow';
+import igStyles from '~/styles/ig-testimonials.css?url';
+import {igVideoDescriptor} from '~/lib/ig-video-schema';
+
+/**
+ * IG-STIMMEN (2026-09-26, Job
+ * 20260926-crystal-kakao-zwei-vorlagen-features-ig-stimmen-und-kasse-im-browser):
+ * die Sektion der Vorlage (#376), hier mit der laden-eigenen Datenschicht
+ * app/data/ig-testimonials.js. Das Token-CSS sitzt auf `.qb-igt`, nicht auf
+ * :root, und wird deshalb nur auf den beiden Kakao-Kaufseiten geladen.
+ */
+export function links() {
+  return [{rel: 'stylesheet', href: igStyles}];
+}
 /** 
  * @type {MetaFunction<typeof loader>}
  */
 export const meta = ({data}) => {
-  return produktMeta({
+  const basis = produktMeta({
     // Product-Auszeichnung (Preis/Verfügbarkeit) — siehe produkt-seo.js
     produkt: data?.product,
     marktLand: data?.marktLand,
@@ -38,6 +52,14 @@ export const meta = ({data}) => {
       data?.product?.selectedOrFirstAvailableVariant?.image?.url ??
       data?.product?.images?.nodes?.[0]?.url,
   });
+  // VideoObject je Stimme MIT Video (ig-video-schema.js, byte-gleich zur
+  // Vorlage). Kein Video in der Reihe: kein Knoten.
+  const videos = igVideoDescriptor({
+    produkt: 'Kakao',
+    pfad: '/products/crystal-cacao-awake',
+    produktTitel: data?.product?.title,
+  });
+  return videos ? [...basis, videos] : basis;
 };
 
 /**
@@ -235,6 +257,13 @@ export default function Product() {
           }}
         />
       </div>
+      {/*
+        DIE INSTAGRAM-STIMME, weit oben: direkt nach dem Kaufblock und vor dem
+        langen Inhaltsteil, wie in der Vorlage. Dort entsteht der Zweifel vor
+        dem Kauf. Dieselbe Kachel auf beiden Sorten: der Beitrag nennt keine
+        Sorte, er zeigt beide Tueten.
+      */}
+      <IgTestimonialSlideshow produkt="Kakao" />
       <Awake />
     </>
   );
