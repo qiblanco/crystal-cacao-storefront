@@ -1,6 +1,7 @@
-import {useId, useState} from 'react';
+import {useState} from 'react';
 import {ChevronDown, ChevronUp} from 'lucide-react';
 import {faqPageJsonLdString} from '~/lib/faq-schema';
+import {FaqListe} from './reusables/FaqListe';
 
 /**
  * FAQ accordion component for product pages.
@@ -16,8 +17,6 @@ import {faqPageJsonLdString} from '~/lib/faq-schema';
  */
 export function ProductFAQ({items}) {
   const [sectionOpen, setSectionOpen] = useState(true);
-  const [openIndex, setOpenIndex] = useState(null);
-  const baseId = useId();
 
   // Reine Datenauszeichnung — nur saubere Items (Rest wartet auf Christian-Go).
   const jsonLd = faqPageJsonLdString(items);
@@ -39,43 +38,7 @@ export function ProductFAQ({items}) {
         {sectionOpen ? <ChevronUp size={28} /> : <ChevronDown size={28} />}
       </div>
 
-      {sectionOpen && (
-        <div className="ProductFAQ__list">
-          {items.map((item, i) => {
-            const isOpen = openIndex === i;
-            const answerId = `${baseId}-faq-answer-${i}`;
-            return (
-              <div key={i} className="ProductFAQ__item">
-                <button
-                  className="ProductFAQ__question"
-                  onClick={() => setOpenIndex(isOpen ? null : i)}
-                  aria-expanded={isOpen}
-                  aria-controls={answerId}
-                >
-                  <span>{item.q}</span>
-                  <ChevronDown
-                    size={20}
-                    style={{
-                      transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.25s ease',
-                      flexShrink: 0,
-                    }}
-                  />
-                </button>
-                {/* Antwort IMMER im DOM (SSR/crawlbar); nur visuell per hidden geklappt. */}
-                <div
-                  id={answerId}
-                  className="ProductFAQ__answer"
-                  role="region"
-                  hidden={!isOpen}
-                >
-                  {item.a}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {sectionOpen && <FaqListe items={items} />}
     </div>
   );
 }
