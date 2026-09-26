@@ -2780,7 +2780,8 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
  * `scroll-margin-top` ist nicht Kosmetik: die Kopfzeile steht `sticky` und
  * verdeckt sonst die obersten Pixel des Ziels. Der Wert ist die gemessene
  * Kopfhoehe (ca. 72 px) plus eine Zeile Luft aus dem 8er-Raster. */
-#cc-kaufen {
+#cc-kaufen,
+#kundenstimmen {
   scroll-margin-top: calc(72px + var(--cc-space-2));
 }
 
