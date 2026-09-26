@@ -1,69 +1,11 @@
-/* eslint-disable no-unused-vars, no-empty, object-shorthand */
-/*!
- * qpx.js — Qi-Blanco First-Party Tracking-Pixel (v2.4)
- *
- * NEU in v2.4 (Google-Kampagnen-Capture, Job 20260726-storefront-tracking-
- * deploy): CLICK_KEYS zusaetzlich gad_campaignid (Google-Auto-Tagging-
- * Kampagnen-ID) + h_ad_id (Ad-ID aus unserem Tracking-Template). KEINE
- * Klick-IDs im Receiver-Sinn (CLICK_PARAM_PLATFORM unberuehrt, kein
- * click_kind/is_paid-Einfluss) — reine Metadaten im click_ids-Payload,
- * damit die Kampagnen-/Ad-Ebene nicht mehr an der Pixel-Grenze verloren
- * geht (Befund Tracking-Debug: 117/123 Google-Klicks ohne Kampagne).
- * Payload sonst byte-strukturgleich v2.3; kein neues Cookie, keine PII.
- *
- * NEU in v2.3 (Sektionsmessung, Job 20260721-sektionsmessung-usa-exposure-
- * rueckkopplung): (a) Tall-Section-Fix — sichtbar = >=50% Element ODER >=50%
- * Viewport-Deckung (threshold-Leiter 0..1/20 statt fix 0.5); (b) Nach-
- * registrierung spaet gemounteter Anker (MutationObserver, rAF-throttled);
- * (c) Anker-Fallback [data-section-type] fuer Liquid/GemPages (USA). KEIN
- * neues Feld/Event — Payload byte-strukturgleich v2.2.
- * ====================================================
- * Erst-Party (laeuft auf eigener Domain, sendet an den eigenen Receiver).
- * Erfasst: anon_id (First-Party-Cookie+localStorage), Klick-IDs (gclid/fbclid/
- * msclid/ttclid...), UTM, Referrer-Host, Events (page_view/view_content/
- * add_to_cart/initiate_checkout/purchase/lead/identify). Versand via
- * navigator.sendBeacon (Fallback fetch keepalive).
- *
- * NEU in v2.0 (Verhaltens-Schicht, E1 2026-07-10): Sektions-Tracker —
- * data-section-Anker (IntersectionObserver 50%, seen ab 1s kumulativ),
- * Scroll-Marken 25/50/75/100, attention_ms (sichtbar + aktiv), device.
- * EIN kumulatives 'behavior'-Event je Pageview (pv_id, wachsende seq),
- * Flush alle 15s nur bei Aenderung + IMMER bei hidden/pagehide.
- * Abschaltbar via window.QPX_CONFIG = { behavior: false }. Keine neue PII,
- * kein neuer Speicher (kein zusaetzliches Cookie). v1-Verhalten unveraendert.
- *
- * NEU in v2.1 (Frustrations-Signale, T2 2026-07-14): dead_click (Klick ohne
- * DOM-/Scroll-Reaktion binnen 3s), rage_click (>=3 Klicks <=1s/<=30px = EIN
- * Event/Burst), error_click/js_error (window error + unhandledrejection;
- * <=1s nach Klick = error_click, msg auf 120 Zeichen gekappt). ELEMENT-basierte
- * Verortung (section_id + kurzer Selektor + rx/ry relativ 0..1 im Element),
- * NIE Seiten-x/y. Kumulativ im bestehenden behavior-Flush mitgesendet. Keine
- * Feld-INHALTE, keine neue ID. Abschaltbar via QPX_CONFIG.frust=false.
- *
- * NEU in v2.2 (Storefront-Pixel-Fix, Job 20260718-storefront-pixel-tracking-
- * vertiefung): (1) MATCH-SIGNALE — liest vorhandene _fbp/_fbc-First-Party-
- * Cookies (nur LESEN, gesetzt werden sie von fbevents.js/Click-Capture) und
- * sendet sie mit jedem Event -> events.db fbp/fbc, click_vault/Stitching.
- * (2) CONSENT-REPORT — Cookiebot-Status (marketing) als consent.ad_storage/
- * ad_user_data + region (QPX_CONFIG.region oder html[data-qb-region]) im
- * Payload; der Receiver speichert das schon (event_model.py). (3) IDENTIFY-
- * AUTO-HOOK — Form-Submit mit ausgefuelltem E-Mail-Feld sendet identify an
- * den EIGENEN Receiver (der hasht mit Salt und verwirft den Klartext,
- * privacy.hash_email); Dedupe je Session via nicht-umkehrbarem Kurz-Hash.
- * Kill-Schalter je Feature: QPX_CONFIG = { match:false, consent_report:false,
- * identity:false }. v2.1-Verhalten sonst byte-gleich.
- *
- * EINBAU = CHRISTIAN-HAND (Website). Diese Datei ist fertig + ausgeliefert.
- * Konfiguration via window.QPX_CONFIG = { endpoint: "https://t.qiblanco.com/collect" }.
- * Standard-Endpoint unten ist ein PLATZHALTER, bis die Domain/Proxy steht.
- */
+/* qpx.js — ERZEUGT aus receiver/pixel/qpx.js (bin/qpx-ausliefern). NICHT VON HAND AENDERN. */
 (function (w, d) {
   "use strict";
   var CFG = w.QPX_CONFIG || {};
-  var ENDPOINT = CFG.endpoint || "/collect"; // gleicher Origin via Reverse-Proxy
+  var ENDPOINT = CFG.endpoint || "/collect";
   var COOKIE = "_qpx_anon";
   var SES = "_qpx_ses";
-  var STORE = "_qpx_attr"; // persistiertes erstes Klick-Attribut (first-touch)
+  var STORE = "_qpx_attr";
   var DAYS = 365;
   var CLICK_KEYS = ["gclid","gbraid","wbraid","fbclid","msclid","msclkid","ttclid","twclid","epik","sccid","gad_campaignid","h_ad_id"];
 
@@ -96,21 +38,31 @@
   function sessionStorageGet(k){ try { return w.sessionStorage.getItem(k);}catch(e){return null;} }
   function sessionStorageSet(k,v){ try { w.sessionStorage.setItem(k,v);}catch(e){} }
 
+  var EH = "_qpx_eh";
+  var EH_RX = /^[0-9a-f]{16}$/;
+  function mailZeiger() {
+    try {
+      var roh = String(params()["qpx_eh"] || "").toLowerCase();
+      if (EH_RX.test(roh)) { sessionStorageSet(EH, roh); return roh; }
+    } catch (e) {}
+    var gespeichert = String(sessionStorageGet(EH) || "").toLowerCase();
+    return EH_RX.test(gespeichert) ? gespeichert : "";
+  }
+
   function params() {
     var q = {}, s = w.location.search.replace(/^\?/, "");
     if (s) s.split("&").forEach(function (p) { var kv = p.split("="); if (kv[0]) q[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || ""); });
     return q;
   }
   function captureAttr() {
-    // First-touch-Attribut persistieren: erste bekannte Klick-ID/UTM gewinnt.
     var existing; try { existing = JSON.parse(ls(STORE) || "null"); } catch (e) { existing = null; }
     var q = params(), click_ids = {}, utm = {}, found = false;
     CLICK_KEYS.forEach(function (k) { if (q[k]) { click_ids[k] = q[k]; found = true; } });
     ["source","medium","campaign","content","term"].forEach(function (k) { if (q["utm_" + k]) { utm[k] = q["utm_" + k]; } });
     if (found || Object.keys(utm).length) {
       var attr = { click_ids: click_ids, utm: utm, ts: Date.now() };
-      if (!existing) { ls(STORE, JSON.stringify(attr)); existing = attr; } // first-touch bleibt
-      return { click_ids: click_ids, utm: utm }; // aktueller Touch (last-touch fuer dieses Event)
+      if (!existing) { ls(STORE, JSON.stringify(attr)); existing = attr; }
+      return { click_ids: click_ids, utm: utm };
     }
     return existing ? { click_ids: existing.click_ids || {}, utm: existing.utm || {} } : { click_ids: {}, utm: {} };
   }
@@ -118,10 +70,7 @@
     try { return d.referrer ? new URL(d.referrer).host : ""; } catch (e) { return ""; }
   }
 
-  // ---- v2.2: Match-Signale, Consent-Report, Region ------------------------
   function matchSignals() {
-    // _fbp/_fbc werden NIE von qpx gesetzt — nur mitgelesen, wenn fbevents.js
-    // bzw. das Storefront-Click-Capture sie als First-Party-Cookie angelegt hat.
     if (CFG.match === false) return {};
     var out = {};
     try {
@@ -149,6 +98,43 @@
     } catch (e) { return ""; }
   }
 
+  var FP_MODI = /*__QPX_FP_MODI_START__*/{"DACH":"aus","USA":"aus","notaus":true}/*__QPX_FP_MODI_END__*/;
+
+  function fpMarkt() {
+    var h = "";
+    try { h = String(w.location.hostname || "").toLowerCase(); } catch (e) { return ""; }
+    if (h === "qi-blanco.com" || h === "www.qi-blanco.com") return "USA";
+    if (h === "qiblanco.com" || h === "www.qiblanco.com" || h === "qi-blanco.de" ||
+        h === "www.qi-blanco.de" || h === "t.qiblanco.com") return "DACH";
+    return "";
+  }
+
+  function fpErlaubt() {
+    try {
+      if (FP_MODI && FP_MODI.notaus) return false;
+      var stufe = (FP_MODI && FP_MODI[fpMarkt()]) || "aus";
+      if (stufe === "full") return true;
+      if (stufe !== "konservativ") return false;
+      var cs = consentState();
+      return !!(cs && cs.ad_storage === "granted");
+    } catch (e) { return false; }
+  }
+
+  function fpSignals() {
+    if (!fpErlaubt()) return null;
+    var o = {};
+    try { if (w.screen) o.sr = String(w.screen.width) + "x" + String(w.screen.height); } catch (e) {}
+    try { if (w.screen && w.screen.colorDepth) o.sd = String(w.screen.colorDepth); } catch (e) {}
+    try { o.tz = String(new Date().getTimezoneOffset()); } catch (e) {}
+    try { if (navigator.language) o.lang = String(navigator.language); } catch (e) {}
+    try { if (navigator.platform) o.plat = String(navigator.platform); } catch (e) {}
+    try { if (navigator.hardwareConcurrency) o.hc = String(navigator.hardwareConcurrency); } catch (e) {}
+    try { if (navigator.deviceMemory) o.dm = String(navigator.deviceMemory); } catch (e) {}
+    try { o.tp = String(navigator.maxTouchPoints || 0); } catch (e) {}
+    for (var k in o) { if (Object.prototype.hasOwnProperty.call(o, k)) return o; }
+    return null;
+  }
+
   function base(name, props) {
     props = props || {};
     var attr = captureAttr();
@@ -164,7 +150,6 @@
       utm: attr.utm,
       referrer_host: refHost()
     };
-    // v2.2: Match-Signale + Consent + Region additiv (Receiver kennt die Felder).
     var ms = matchSignals();
     if (ms.fbp) ev.fbp = ms.fbp;
     if (ms.fbc) ev.fbc = ms.fbc;
@@ -172,6 +157,10 @@
     if (cs) ev.consent = cs;
     var rg = region();
     if (rg) ev.region = rg;
+    var fps = fpSignals();
+    if (fps) ev.fp = fps;
+    var eh = mailZeiger();
+    if (eh) ev.email_hash = eh;
     for (var k in props) { if (Object.prototype.hasOwnProperty.call(props, k)) ev[k] = props[k]; }
     return ev;
   }
@@ -189,7 +178,6 @@
   function track(name, props) { send(base(name, props)); }
   function identify(email, props) { props = props || {}; if (email) props.email = email; send(base("identify", props)); }
 
-  // Queue-Replay (falls qpx vor Laden aufgerufen wurde: window.qpx.q)
   var q = (w.qpx && w.qpx.q) || [];
   function api() {
     var args = [].slice.call(arguments), cmd = args.shift();
@@ -200,44 +188,52 @@
   w.qpx = api; w.qpx.track = track; w.qpx.identify = identify;
   q.forEach(function (a) { api.apply(null, a); });
 
-  // ---- Verhaltens-Schicht (v2.0): Sektions-Tracker -----------------------
-  // EIN kumulativer Snapshot je Pageview (pv_id, seq waechst je Flush).
-  // KOMPLETT in try/catch — ein Pixel-Fehler darf die Seite NIE brechen.
-  // Alle Listener passive. Kein neuer Speicher: pv_id lebt nur im RAM.
   function initBehavior() {
-    if (CFG.behavior === false) return;                 // Tracker-Flag (Konzept E1)
-    var PV_ID = uuid();                                  // Pageview-UUID (kein Cookie)
-    var seq = 0;                                         // waechst je Flush, Server: letzter Stand gewinnt
-    var scrollMax = 0;                                   // erreichte Marke 25/50/75/100
-    var attentionMs = 0;                                 // sichtbar + aktiv (5s-Raster)
+    if (CFG.behavior === false) return;
+    var PV_ID = uuid();
+    var seq = 0;
+    var scrollMax = 0;
+    var attentionMs = 0;
     var lastActivity = Date.now();
-    var sections = {};                                   // id -> {seen,dwellAcc,visibleSince,clicks}
-    var lastSent = "";                                   // Signatur des letzten Flushs
-    // ---- Frustrations-Signale (v2.1, T2): dead/rage/error_click -----------
-    // Additiv im bestehenden behavior-Flush; kumulativ je Pageview. ELEMENT-
-    // basierte Verortung (sel + rx/ry relativ 0..1), NIE Seiten-x/y. Keine
-    // Feld-Inhalte. Abschaltbar via QPX_CONFIG.frust=false.
+    var sections = {};
+    var lastKey = "";
+    var lastVoll = "";
+    var hiddenUnterdrueckt = 0;
     var FRUST_ON = CFG.frust !== false;
     var DEAD_MS = 3000, RAGE_MS = 1000, RAGE_PX = 30, RAGE_MIN = 3, FRUST_MAX = 40;
-    var frust = [];                                      // im Snapshot mitgesendet
-    var lastClick = null;                                // {t,x,y,el} fuer error_click
-    var rageChain = [], rageEmitted = false;             // Burst-Erkennung
+    var frust = [];
+    var lastClick = null;
+    var rageChain = [], rageEmitted = false;
     var lastMutation = 0, lastScrollTs = 0, unloading = false;
 
     function sec(id) {
-      if (!sections[id]) sections[id] = { seen: 0, dwellAcc: 0, visibleSince: 0, clicks: 0 };
+      if (!sections[id]) sections[id] = { seen: 0, dwellAcc: 0, visibleSince: 0, clicks: 0, vis: 0 };
       return sections[id];
     }
     function dwellOf(s, now) { return s.dwellAcc + (s.visibleSince ? now - s.visibleSince : 0); }
+    function tabSichtbar() {
+      try { return d.visibilityState !== "hidden"; } catch (e) { return true; }
+    }
+    function dwellAnhalten(now) {
+      for (var id in sections) {
+        if (!Object.prototype.hasOwnProperty.call(sections, id)) continue;
+        var s = sections[id];
+        if (s.visibleSince) { s.dwellAcc += now - s.visibleSince; s.visibleSince = 0; }
+      }
+    }
+    function dwellFortsetzen(now) {
+      for (var id in sections) {
+        if (!Object.prototype.hasOwnProperty.call(sections, id)) continue;
+        var s = sections[id];
+        if (s.vis && !s.visibleSince) s.visibleSince = now;
+      }
+    }
     function device() {
       try { return (w.matchMedia && w.matchMedia("(pointer:coarse)").matches) ? "mobile" : "desktop"; }
       catch (e) { return "desktop"; }
     }
-    // ---- Frust-Helfer: kurzer Selektor + relative Position + Puffer ---------
     function clamp01(n) { return n < 0 ? 0 : (n > 1 ? 1 : n); }
     function selOf(el) {
-      // id > data-section > tag:nth-child. Klassen bewusst WEG: Hydrogen/Vite
-      // liefert gehashte, build-instabile Klassennamen -> kein tragfaehiger Anker.
       try {
         if (!el || el.nodeType !== 1) return "";
         if (el.id) return "#" + el.id;
@@ -267,7 +263,7 @@
       frust.push({ typ: typ, section_id: sectionOf(el), sel: selOf(el),
                    rx: rp.rx, ry: rp.ry, meta: meta || {} });
     }
-    function exempt(el) {                                 // Nav/Download taeuscht keinen "toten" Klick vor
+    function exempt(el) {
       try {
         if (el.tagName === "A") {
           var h = el.getAttribute("href") || "";
@@ -278,46 +274,382 @@
       } catch (e) {}
       return false;
     }
-    function onError(msg, src) {
+    function onError(msg, src, ch, san, tr) {
       if (!FRUST_ON) return;
       try {
-        msg = ("" + (msg || "")).slice(0, 120);          // msg gekappt (keine PII-Leaks)
+        msg = ("" + (msg || "")).slice(0, 120);
         src = ("" + (src || "")).slice(0, 120);
+        var meta = { msg: msg, src: src };
+        if (ch) meta.ch = ch;
+        if (san != null) meta.san = san;
+        if (tr != null) meta.tr = tr;
         if (lastClick && Date.now() - lastClick.t <= RAGE_MS)
-          pushFrust("error_click", lastClick.el, lastClick.x, lastClick.y, { msg: msg, src: src });
+          pushFrust("error_click", lastClick.el, lastClick.x, lastClick.y, meta);
         else if (frust.length < FRUST_MAX)
-          frust.push({ typ: "js_error", section_id: "", sel: "", rx: null, ry: null, meta: { msg: msg, src: src } });
+          frust.push({ typ: "js_error", section_id: "", sel: "", rx: null, ry: null, meta: meta });
       } catch (e) {}
+    }
+    var MEDIEN_ON = CFG.medien !== false;
+    var MED_MRC_MS = 2000;
+    var MED_SEG_MAX = 6 * 3600000;
+    var MED_VIDEO_MAX = 20, MED_BILD_MAX = 40, MED_EINTRAG_MAX = 55;
+    var MED_UMKEHR_PCT = 5, MED_UMKEHR_MAX = 20, MED_BILD_MIN_MS = 500;
+    var MED_EXTERN_MAX = 40;
+    var MED_EXTERN_STAND = { video_stand: 1, video_scrub: 1, bild_gesehen: 1, ausstieg: 1 };
+    var MED_FAMILIEN = { imgix: 1, youtube: 1, scrub: 1, "360": 1, unbekannt: 1 };
+    var MED_ARTEN = { video_start: 1, video_quartil: 1, video_stand: 1,
+                      video_scrub: 1, bild_gesehen: 1, scroll_umkehr: 1, ausstieg: 1 };
+    var medien = {};
+    var medN = 0, medBildN = 0;
+    var medIo = null, medObserved = [];
+    var medExtern = [];
+    var medExternVerworfen = 0;
+    var scrollPct = 0, scrollWende = null, scrollUmkehrN = 0, scrollUmkehrListe = [];
+    var letzterAnker = "";
+    var ausstiegAn = 0;
+    var MED_T0 = Date.now();
+
+    function medSanit(s) {
+      try {
+        s = String(s || "").toLowerCase().replace(/[^a-z0-9_.:-]+/g, "-")
+             .replace(/^-+|-+$/g, "");
+        return s.slice(0, 64);
+      } catch (e) { return ""; }
+    }
+    function medBasename(u) {
+      try {
+        u = String(u || "");
+        if (!u || u.indexOf("blob:") === 0 || u.indexOf("data:") === 0) return "";
+        u = u.split("?")[0].split("#")[0];
+        return medSanit(u.substring(u.lastIndexOf("/") + 1));
+      } catch (e) { return ""; }
+    }
+    function medObjekt(el) {
+      var v = el.getAttribute && el.getAttribute("data-video");
+      if (v) return { id: medSanit(v), q: "anker" };
+      var b = medBasename(el.currentSrc || el.src);
+      if (b) return { id: b, q: "quelle" };
+      b = medBasename(el.getAttribute && el.getAttribute("poster"));
+      if (b) return { id: b, q: "poster" };
+      try {
+        var sc = el.closest ? el.closest("[data-section]") : null;
+        if (sc) { var sid = medSanit(sc.getAttribute("data-section"));
+                  if (sid) return { id: sid, q: "sektion" }; }
+      } catch (e) {}
+      return { id: "", q: "" };
+    }
+    function medFamilie(el) {
+      var f = el.getAttribute && el.getAttribute("data-video-familie");
+      if (f && MED_FAMILIEN[f]) return { f: f, q: "anker" };
+      return { f: "unbekannt", q: "abgeleitet" };
+    }
+    function medTon(el, k) {
+      if (!k.tonBekannt || !k.tonHoerbar) return false;
+      try {
+        if (el.muted) return false;
+        if (typeof el.volume === "number" && el.volume <= 0) return false;
+      } catch (e) { return false; }
+      return true;
+    }
+    function medCt(el) {
+      try { var c = el.currentTime; return (typeof c === "number" && c >= 0) ? c : 0; }
+      catch (e) { return 0; }
+    }
+    function medDauer(el) {
+      try { var dd = el.duration; return (typeof dd === "number" && dd > 0 && dd < 86400) ? dd : 0; }
+      catch (e) { return 0; }
+    }
+    function medZustand(k, el) {
+      if (!tabSichtbar()) return "hintergrund";
+      var ton = medTon(el, k);
+      if (k.vis) return ton ? "sichtbar_ton" : "sichtbar_stumm";
+      return ton ? "unsichtbar_ton" : "unsichtbar_stumm";
+    }
+    function medLauf(k, el, now) {
+      if (!k.spielt || !k.seit) return 0;
+      if (k.zustand === "hintergrund") {
+        var c = medCt(el);
+        return (c > k.ctSeit) ? Math.round((c - k.ctSeit) * 1000) : 0;
+      }
+      var ms = now - k.seit;
+      return ms > 0 ? ms : 0;
+    }
+    function medBuche(k, el, now) {
+      var ms = medLauf(k, el, now);
+      if (ms > 0 && ms <= MED_SEG_MAX) k.konten[k.zustand] = (k.konten[k.zustand] || 0) + ms;
+      k.seit = 0; k.ctSeit = medCt(el);
+    }
+    function medKonten(k, el, now) {
+      var o = {}, id;
+      for (id in k.konten) { if (k.konten[id]) o[id] = k.konten[id]; }
+      var lauf = medLauf(k, el, now);
+      if (lauf > 0 && lauf <= MED_SEG_MAX) o[k.zustand] = (o[k.zustand] || 0) + lauf;
+      return o;
+    }
+    function medSumme(o) { var s = 0, id; for (id in o) s += o[id]; return s; }
+    function medMrc(k, el, now) {
+      if (k.mrc) return;
+      if (!k.spielt || !k.vis || !tabSichtbar()) { k.sichtSeit = 0; return; }
+      if (!k.sichtSeit) { k.sichtSeit = now; return; }
+      if (now - k.sichtSeit >= MED_MRC_MS) { k.mrc = 1; k.startOff = now - MED_T0; k.start = 1; }
+    }
+    function medQuartile(k, el, now) {
+      if (!k.mrc) return;
+      var dur = medDauer(el); if (!dur) return;
+      var ct = medCt(el), p = ct / dur;
+      if (k.letztP > 0.9 && p < 0.1) p = 1;
+      var m = [25, 50, 75, 100], i;
+      for (i = 0; i < m.length; i++) {
+        if (p * 100 >= m[i] && !k.q[m[i]]) {
+          k.q[m[i]] = { t: now - MED_T0, z: k.zustand, kn: medKonten(k, el, now) };
+        }
+      }
+      k.letztP = p;
+    }
+    function medEval(el) {
+      if (!MEDIEN_ON) return;
+      var k = el && el.__qpxMed; if (!k) return;
+      var now = Date.now();
+      medBuche(k, el, now);
+      var lief = k.spielt;
+      try { k.spielt = !!(!el.paused && !el.ended && el.readyState > 1); }
+      catch (e) { k.spielt = false; }
+      var ct = medCt(el);
+      if (!k.spielt && !lief && k.letztCt >= 0 && Math.abs(ct - k.letztCt) > 0.05) {
+        var durS = medDauer(el);
+        if (durS) {
+          var pct = Math.round(ct / durS * 100);
+          if (pct > k.scrubMax) k.scrubMax = pct;
+          if (ct < k.letztCt - 0.05) k.scrubUmkehr++;
+          k.scrubN++;
+          if (k.famQ !== "anker") { k.fam = "scrub"; k.famQ = "laufzeit"; }
+        }
+      } else if (k.spielt && k.famQ !== "anker" && k.fam === "unbekannt") {
+        k.fam = "imgix";
+        k.famQ = "laufzeit";
+      }
+      k.letztCt = ct;
+      k.zustand = medZustand(k, el);
+      if (k.spielt) { k.seit = now; k.ctSeit = ct; }
+      medMrc(k, el, now);
+      medQuartile(k, el, now);
+    }
+    function medRegistriere(el, art) {
+      if (!MEDIEN_ON || !el || el.__qpxMed) return;
+      if (art === "bild") { if (medBildN >= MED_BILD_MAX) return; }
+      else if (medN >= MED_VIDEO_MAX) return;
+      var o = medObjekt(el);
+      if (!o.id) return;
+      var k = medien[o.id];
+      if (!k) {
+        var f = art === "bild" ? { f: null, q: null } : medFamilie(el);
+        var ton = el.getAttribute && el.getAttribute("data-video-ton");
+        k = { art: art, id: o.id, objQ: o.q, fam: f.f, famQ: f.q, el: el,
+              tonBekannt: ton === "hoerbar" || ton === "stumm",
+              tonHoerbar: ton === "hoerbar",
+              konten: {}, zustand: "sichtbar_stumm", spielt: false, vis: 0,
+              seit: 0, ctSeit: 0, letztCt: medCt(el), letztP: 0,
+              mrc: 0, sichtSeit: 0, start: 0, startOff: 0, q: {},
+              scrubMax: 0, scrubUmkehr: 0, scrubN: 0,
+              dwell: 0, dwellSeit: 0 };
+        medien[o.id] = k;
+        if (art === "bild") medBildN++; else medN++;
+      }
+      el.__qpxMed = k;
+      if (art === "bild") return;
+      var evs = ["play", "playing", "pause", "ended", "volumechange", "seeked", "emptied"];
+      for (var i = 0; i < evs.length; i++) {
+        el.addEventListener(evs[i], function () { try { medEval(el); } catch (e) {} },
+                            { passive: true });
+      }
+      el.addEventListener("timeupdate", function () {
+        var n = Date.now();
+        if (n - (el.__qpxTu || 0) < 1000) return;
+        el.__qpxTu = n;
+        try { medEval(el); } catch (e) {}
+      }, { passive: true });
+    }
+    function medObserve() {
+      if (!MEDIEN_ON || !w.IntersectionObserver) return;
+      if (!medIo) {
+        medIo = new w.IntersectionObserver(function (entries) {
+          var now = Date.now();
+          for (var i = 0; i < entries.length; i++) {
+            var en = entries[i], el = en.target, k = el.__qpxMed;
+            if (!k) continue;
+            var vis = en.isIntersecting && visEnough(en);
+            if (k.art === "bild") {
+              if (vis && tabSichtbar()) { if (!k.dwellSeit) k.dwellSeit = now; }
+              else if (k.dwellSeit) { k.dwell += now - k.dwellSeit; k.dwellSeit = 0; }
+              k.vis = vis ? 1 : 0;
+              continue;
+            }
+            if (k.vis !== (vis ? 1 : 0)) { k.vis = vis ? 1 : 0; medEval(el); }
+          }
+        }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+      }
+      var nodes = d.querySelectorAll("video, [data-bild]"), i2;
+      for (i2 = 0; i2 < nodes.length; i2++) {
+        var n2 = nodes[i2], bekannt = false, j;
+        for (j = 0; j < medObserved.length; j++) { if (medObserved[j] === n2) { bekannt = true; break; } }
+        if (bekannt) continue;
+        medRegistriere(n2, n2.hasAttribute("data-bild") && n2.tagName !== "VIDEO" ? "bild" : "video");
+        medObserved.push(n2);
+        if (n2.__qpxMed) medIo.observe(n2);
+      }
+    }
+    function medTabWechsel() {
+      if (!MEDIEN_ON) return;
+      var id;
+      for (id in medien) {
+        var k = medien[id];
+        if (k.art === "bild") {
+          var now = Date.now();
+          if (!tabSichtbar()) { if (k.dwellSeit) { k.dwell += now - k.dwellSeit; k.dwellSeit = 0; } }
+          else if (k.vis && !k.dwellSeit) { k.dwellSeit = now; }
+          continue;
+        }
+        try { medEval(k.el); } catch (e) {}
+      }
+    }
+    function medScroll(pct) {
+      if (!MEDIEN_ON) return;
+      if (pct > scrollPct + 0.5) { scrollWende = null; }
+      else if (pct < scrollPct - 0.5) {
+        if (scrollWende === null) scrollWende = scrollPct;
+        if (scrollWende - pct >= MED_UMKEHR_PCT && scrollUmkehrN < MED_UMKEHR_MAX) {
+          scrollUmkehrN++;
+          scrollUmkehrListe.push({ nr: scrollUmkehrN, von: Math.round(scrollWende),
+                                   bis: Math.round(pct), anker: letzterAnker,
+                                   t: Date.now() - MED_T0 });
+          scrollWende = null;
+        }
+      }
+      scrollPct = pct;
+    }
+    function medienExtern(e) {
+      try {
+        if (!MEDIEN_ON || !e || !MED_ARTEN[e.art]) return false;
+        var obj = medSanit(e.obj); if (!obj) return false;
+        var fam = MED_FAMILIEN[e.fam] ? e.fam : "unbekannt";
+        var eintrag = { art: e.art, obj: obj, fam: fam, toff: Date.now() - MED_T0 };
+        if (typeof e.wert === "number" && isFinite(e.wert)) eintrag.wert = e.wert;
+        if (typeof e.zus === "string") eintrag.zus = e.zus;
+        if (e.meta && typeof e.meta === "object") eintrag.meta = e.meta;
+        var stand = MED_EXTERN_STAND[e.art] === 1, i;
+        for (i = 0; i < medExtern.length; i++) {
+          var v = medExtern[i];
+          if (v.art !== eintrag.art || v.obj !== eintrag.obj) continue;
+          if (stand) { medExtern[i] = eintrag; return true; }
+          if (v.wert === eintrag.wert) return true;
+        }
+        if (medExtern.length >= MED_EXTERN_MAX) { medExternVerworfen++; return false; }
+        medExtern.push(eintrag);
+        return true;
+      } catch (e2) { return false; }
+    }
+    function medienListe(now) {
+      if (!MEDIEN_ON) return [];
+      var out = [], id, i;
+      for (id in medien) {
+        if (!Object.prototype.hasOwnProperty.call(medien, id)) continue;
+        var k = medien[id], el = k.el;
+        if (k.art === "bild") {
+          var dw = k.dwell + (k.dwellSeit ? now - k.dwellSeit : 0);
+          if (dw >= MED_BILD_MIN_MS)
+            out.push({ art: "bild_gesehen", obj: id, wert: Math.round(dw),
+                       toff: 0, meta: { obj_q: k.objQ } });
+          continue;
+        }
+        if (k.start)
+          out.push({ art: "video_start", obj: id, fam: k.fam, wert: 1, toff: k.startOff,
+                     meta: { obj_q: k.objQ, fam_q: k.famQ, dauer_s: Math.round(medDauer(el)),
+                             ton_bekannt: k.tonBekannt ? 1 : 0 } });
+        for (i in k.q) {
+          if (!Object.prototype.hasOwnProperty.call(k.q, i)) continue;
+          var qq = k.q[i], mq = { zustand_marke: qq.z };
+          for (var zk in qq.kn) mq[zk] = qq.kn[zk];
+          out.push({ art: "video_quartil", obj: id, fam: k.fam, wert: Number(i),
+                     zus: qq.z, toff: qq.t, meta: mq });
+        }
+        var kn = medKonten(k, el, now), summe = medSumme(kn);
+        if (summe > 0 || k.start) {
+          var mm = { mrc: k.mrc ? 1 : 0, obj_q: k.objQ, fam_q: k.famQ,
+                     ton_bekannt: k.tonBekannt ? 1 : 0 };
+          for (var zk2 in kn) mm[zk2] = kn[zk2];
+          out.push({ art: "video_stand", obj: id, fam: k.fam, wert: summe,
+                     zus: k.zustand, toff: 0, meta: mm });
+        }
+        if (k.scrubN)
+          out.push({ art: "video_scrub", obj: id, fam: k.fam, wert: k.scrubMax, toff: 0,
+                     meta: { umkehr: k.scrubUmkehr, schritte: k.scrubN, obj_q: k.objQ } });
+      }
+      for (i = 0; i < scrollUmkehrListe.length; i++) {
+        var u = scrollUmkehrListe[i];
+        out.push({ art: "scroll_umkehr", obj: u.anker || "seite", nr: u.nr,
+                   wert: u.bis, toff: u.t, meta: { von_pct: u.von, bis_pct: u.bis } });
+      }
+      if (ausstiegAn && letzterAnker)
+        out.push({ art: "ausstieg", obj: letzterAnker, wert: Math.round(scrollPct),
+                   toff: Date.now() - MED_T0, meta: { scroll_pct: Math.round(scrollPct) } });
+      for (i = 0; i < medExtern.length; i++) out.push(medExtern[i]);
+      if (medExternVerworfen)
+        out.push({ art: "video_stand", obj: "naht-deckel", fam: "unbekannt",
+                   wert: 0, toff: 0, meta: { extern_verworfen: medExternVerworfen } });
+      return out.slice(0, MED_EINTRAG_MAX);
+    }
+    function medSchluessel(liste) {
+      var k = [], i;
+      for (i = 0; i < liste.length; i++) {
+        var e = liste[i], stufe = 0;
+        if (e.art === "video_quartil") stufe = e.wert;
+        else if (e.art === "video_start") stufe = 1;
+        else if (e.art === "video_scrub") stufe = Math.round((e.wert || 0) / 5);
+        else if (e.art === "scroll_umkehr") stufe = e.nr;
+        else if (e.art === "ausstieg") stufe = 1;
+        k.push({ a: e.art, o: e.obj, s: stufe, z: e.zus || "" });
+      }
+      return k;
     }
     function snapshot() {
       var now = Date.now(), list = [];
       for (var id in sections) {
         if (!Object.prototype.hasOwnProperty.call(sections, id)) continue;
         var s = sections[id], dw = Math.round(dwellOf(s, now));
-        if (dw >= 1000) s.seen = 1;                      // seen ab >=1s kumulativ sichtbar
+        if (dw >= 1000) s.seen = 1;
         list.push({ id: id, seen: s.seen, dwell_ms: dw, clicks: s.clicks });
       }
       list.sort(function (a, b) { return a.id < b.id ? -1 : 1; });
       return { attention_ms: attentionMs, scroll_max_pct: scrollMax,
-               device: device(), sections: list, frust: frust };
+               device: device(), sections: list, frust: frust,
+               medien: medienListe(now) };
     }
-    function flush(force) {
+    function schluessel(snap) {
+      var kern = [];
+      for (var i = 0; i < snap.sections.length; i++) {
+        var s = snap.sections[i];
+        kern.push({ id: s.id, seen: s.seen, clicks: s.clicks });
+      }
+      return JSON.stringify({ attention_ms: snap.attention_ms, scroll_max_pct: snap.scroll_max_pct,
+                              device: snap.device, sections: kern, frust: snap.frust,
+                              medien: medSchluessel(snap.medien || []) });
+    }
+    function flush(force, url) {
+      if (force) ausstiegAn = 1;
       var snap = snapshot();
       var sig = JSON.stringify(snap);
-      if (!force && sig === lastSent) return;            // 15s-Flush nur bei Aenderung
-      lastSent = sig;
-      snap.pv_id = PV_ID; snap.seq = seq++;              // kumulativer Stand, Server-Upsert monoton
+      var key = schluessel(snap);
+      if (force ? (sig === lastVoll) : (key === lastKey)) {
+        if (force) hiddenUnterdrueckt++;
+        return;
+      }
+      lastKey = key; lastVoll = sig;
+      snap.pv_id = PV_ID; snap.seq = seq++;
+      if (hiddenUnterdrueckt) snap.hidden_unterdrueckt = hiddenUnterdrueckt;
+      if (url) snap.url = url;
       track("behavior", snap);
     }
 
-    // Sektionen (v2.3): Anker [data-section]; Fallback [data-section-type]
-    // fuer Themes ohne kuratierte Anker (USA-Liquid/GemPages) — KEIN neues
-    // Feld/Event, nur Anker-Aufloesung. "Sichtbar" = >=50% des ELEMENTS ODER
-    // Deckung >=50% des VIEWPORTS (Tall-Section-Fix: fixe threshold 0.5
-    // feuerte bei Sektionen hoeher ~2x Viewport strukturell nie, Beleg
-    // mikroskop-video 1/1279 seen). Spaet gemountete Anker (Hydration/Lazy)
-    // werden nachregistriert (Beleg gitterchip-video: nur 492/1280 pv
-    // ueberhaupt beobachtet). Job 20260721-sektionsmessung-usa-exposure.
     var secIo = null, secObserved = [];
     function anchorId(el) {
       return el.getAttribute("data-section") ||
@@ -344,7 +676,9 @@
             var en = entries[i], id = anchorId(en.target);
             if (!id) continue;
             var s = sec(id), vis = en.isIntersecting && visEnough(en);
-            if (vis) { if (!s.visibleSince) s.visibleSince = now; }
+            s.vis = vis ? 1 : 0;
+            if (vis) letzterAnker = id;
+            if (vis && tabSichtbar()) { if (!s.visibleSince) s.visibleSince = now; }
             else if (s.visibleSince) { s.dwellAcc += now - s.visibleSince; s.visibleSince = 0; }
           }
         }, { threshold: thr });
@@ -358,7 +692,8 @@
       }
     }
     observeSections();
-    try {                                    // Nachregistrierung (rAF-throttled)
+    try { medObserve(); } catch (e) {}
+    try {
       if (w.MutationObserver) {
         var secScanPending = false;
         new w.MutationObserver(function () {
@@ -367,35 +702,31 @@
           (w.requestAnimationFrame || w.setTimeout)(function () {
             secScanPending = false;
             try { observeSections(); } catch (e) {}
+            try { medObserve(); } catch (e) {}
           });
         }).observe(d.documentElement, { childList: true, subtree: true });
       }
     } catch (e) {}
 
-    // Klicks: delegiert (capture, passive) -> naechster data-section-Vorfahr.
     d.addEventListener("click", function (e) {
       lastActivity = Date.now();
       try {
         var el = e.target && e.target.closest ? e.target.closest("[data-section]") : null;
         if (el) { var id = el.getAttribute("data-section"); if (id) sec(id).clicks++; }
       } catch (e2) {}
-      // ---- Frust-Erkennung (v2.1): rage_click + dead_click + lastClick ----
       if (!FRUST_ON) return;
       try {
         var now = Date.now(), tgt = e.target, cx = e.clientX, cy = e.clientY;
         lastClick = { t: now, x: cx, y: cy, el: tgt };
-        // rage_click: >=RAGE_MIN Klicks je <=RAGE_MS und <=RAGE_PX -> EIN Event/Burst
         rageChain = rageChain.filter(function (c) {
           return now - c.t <= RAGE_MS && Math.abs(c.x - cx) <= RAGE_PX && Math.abs(c.y - cy) <= RAGE_PX;
         });
         rageChain.push({ t: now, x: cx, y: cy });
-        if (rageChain.length === 1) rageEmitted = false;   // neuer Burst
+        if (rageChain.length === 1) rageEmitted = false;
         if (rageChain.length >= RAGE_MIN && !rageEmitted) {
           pushFrust("rage_click", tgt, cx, cy, { clicks: rageChain.length, span_ms: now - rageChain[0].t });
           rageEmitted = true;
         }
-        // dead_click: actionable Element (closest filtert = actionable), danach
-        // 3s kein DOM-/Scroll-/Nav-Effekt. Nav/Download/mailto/tel ausgenommen.
         var act = tgt && tgt.closest ? tgt.closest("button,input,a,[role=button]") : null;
         if (act && !exempt(act)) {
           var t0 = now, a0 = act, ax = cx, ay = cy;
@@ -409,7 +740,6 @@
       } catch (e4) {}
     }, { passive: true, capture: true });
 
-    // DOM-Mutations-Beobachter fuer dead_click (setzt NUR einen Zeitstempel).
     try {
       if (w.MutationObserver && FRUST_ON) {
         new w.MutationObserver(function () { lastMutation = Date.now(); })
@@ -417,15 +747,21 @@
       }
     } catch (e) {}
 
-    // JS-Fehler: window error + unhandledrejection (<=1s nach Klick = error_click).
     w.addEventListener("error", function (ev) {
-      try { onError(ev && ev.message, ev && ev.filename); } catch (e) {}
+      try {
+        onError(ev && ev.message, ev && ev.filename, "e",
+                (ev && ev.error == null) ? 1 : 0,
+                (ev && ev.isTrusted === false) ? 0 : 1);
+      } catch (e) {}
     }, { passive: true });
     w.addEventListener("unhandledrejection", function (ev) {
-      try { var r = ev && ev.reason; onError(r && (r.message || r), ""); } catch (e) {}
+      try {
+        var r = ev && ev.reason;
+        onError(r && (r.message || r), "", "r", null,
+                (ev && ev.isTrusted === false) ? 0 : 1);
+      } catch (e) {}
     }, { passive: true });
 
-    // Scroll-Marken 25/50/75/100 (passive + rAF-throttled).
     var scrollPending = false;
     function measureScroll() {
       scrollPending = false;
@@ -435,38 +771,114 @@
         var pct = ((w.pageYOffset || de.scrollTop || 0) + (w.innerHeight || de.clientHeight || 0)) / h * 100;
         var marks = [25, 50, 75, 100];
         for (var i = 0; i < marks.length; i++) { if (pct >= marks[i] && marks[i] > scrollMax) scrollMax = marks[i]; }
+        medScroll(Math.max(0, Math.min(100, pct)));
       } catch (e) {}
     }
     w.addEventListener("scroll", function () {
-      lastActivity = lastScrollTs = Date.now();          // lastScrollTs: dead_click-Ausschluss
+      lastActivity = lastScrollTs = Date.now();
       if (!scrollPending) { scrollPending = true; (w.requestAnimationFrame || w.setTimeout)(measureScroll); }
     }, { passive: true });
-    measureScroll();                                     // initiale Marke (kurze Seiten = 100)
+    measureScroll();
 
-    // Aktivitaets-Signale fuer attention (nur Zeitstempel, keine Inhalte/PII).
     var acts = ["keydown", "mousemove", "touchstart"];
     for (var a = 0; a < acts.length; a++) {
       w.addEventListener(acts[a], function () { lastActivity = Date.now(); }, { passive: true });
     }
-    // attention_ms: alle 5s +5000, wenn Tab sichtbar UND Aktivitaet <30s her.
     w.setInterval(function () {
       try {
         if (d.visibilityState === "visible" && Date.now() - lastActivity < 30000) attentionMs += 5000;
       } catch (e) {}
     }, 5000);
 
-    // Flush: alle 15s nur bei Aenderung; bei hidden/pagehide IMMER.
     w.setInterval(function () { try { flush(false); } catch (e) {} }, 15000);
     d.addEventListener("visibilitychange", function () {
-      if (d.visibilityState === "hidden") { try { flush(true); } catch (e) {} }
+      var now = Date.now();
+      if (d.visibilityState === "hidden") {
+        dwellAnhalten(now);
+        try { medTabWechsel(); } catch (e) {}
+        try { flush(true); } catch (e) {}
+      } else {
+        dwellFortsetzen(now);
+        try { medTabWechsel(); } catch (e) {}
+      }
     });
-    w.addEventListener("pagehide", function () { unloading = true; try { flush(true); } catch (e) {} });
+    w.addEventListener("pagehide", function () {
+      unloading = true; dwellAnhalten(Date.now());
+      try { medTabWechsel(); } catch (e) {}
+      try { flush(true); } catch (e) {}
+    });
+    function medienRouteReset() {
+      var now = Date.now(), id, i, keep = [];
+      for (id in medien) {
+        if (!Object.prototype.hasOwnProperty.call(medien, id)) continue;
+        var k = medien[id], tot = false;
+        try { tot = !!(k.el && k.el.isConnected === false); } catch (e) {}
+        if (tot) {
+          try { k.el.__qpxMed = null; } catch (e) {}
+          delete medien[id];
+          if (k.art === "bild") { if (medBildN > 0) medBildN--; }
+          else if (medN > 0) medN--;
+          continue;
+        }
+        k.konten = {}; k.q = {}; k.mrc = 0; k.start = 0; k.startOff = 0;
+        k.sichtSeit = k.vis ? now : 0;
+        k.dwell = 0; k.dwellSeit = (k.art === "bild" && k.vis && tabSichtbar()) ? now : 0;
+        k.scrubMax = 0; k.scrubUmkehr = 0; k.scrubN = 0;
+        k.seit = k.spielt ? now : 0; k.letztP = 0;
+      }
+      for (i = 0; i < medObserved.length; i++) {
+        var n = medObserved[i];
+        if (n && n.isConnected !== false) keep.push(n);
+      }
+      medObserved = keep;
+      medExtern = []; medExternVerworfen = 0;
+      scrollPct = 0; scrollWende = null; scrollUmkehrN = 0; scrollUmkehrListe = [];
+      letzterAnker = ""; ausstiegAn = 0;
+      MED_T0 = now;
+    }
+    var lastPath = w.location.pathname, lastHref = w.location.href;
+    function routeChanged() {
+      try {
+        var p = w.location.pathname, altHref = lastHref;
+        lastHref = w.location.href;
+        if (p === lastPath) return;
+        lastPath = p;
+        try { flush(true, altHref); } catch (e) {}
+        PV_ID = uuid(); seq = 0; lastKey = ""; lastVoll = ""; hiddenUnterdrueckt = 0;
+        scrollMax = 0; attentionMs = 0; lastActivity = Date.now();
+        sections = {}; frust = []; lastClick = null;
+        rageChain = []; rageEmitted = false;
+        var keep = [];
+        for (var i = 0; i < secObserved.length; i++) {
+          var n = secObserved[i];
+          if (n && n.isConnected !== false) keep.push(n);
+        }
+        secObserved = keep;
+        try { medienRouteReset(); } catch (e) {}
+        track("page_view");
+        try { observeSections(); } catch (e) {}
+        try { medObserve(); } catch (e) {}
+      } catch (e) {}
+    }
+    var histM = ["pushState", "replaceState"];
+    for (var hm = 0; hm < histM.length; hm++) {
+      (function (m) {
+        try {
+          var orig = w.history && w.history[m];
+          if (typeof orig !== "function") return;
+          w.history[m] = function () {
+            var r = orig.apply(this, arguments);
+            try { routeChanged(); } catch (e) {}
+            return r;
+          };
+        } catch (e) {}
+      })(histM[hm]);
+    }
+    w.addEventListener("popstate", function () { routeChanged(); });
+
+    try { w.qpx.medien = medienExtern; } catch (e) {}
   }
 
-  // ---- v2.2: identify-Auto-Hook (Form-Submit mit E-Mail-Feld) --------------
-  // Sendet an den EIGENEN First-Party-Receiver; dort wird die E-Mail sofort
-  // gesalzen-gehasht und der Klartext verworfen (privacy.hash_email). Dedupe
-  // je Session ueber nicht-umkehrbaren djb2-Kurz-Hash (keine PII im Storage).
   function initIdentify() {
     if (CFG.identity === false) return;
     function djb2(s) {
@@ -492,7 +904,6 @@
     }, { passive: true, capture: true });
   }
 
-  // Auto page_view (v1-Verhalten unveraendert) + Verhaltens-Tracker (v2.0).
   function boot() { track("page_view"); try { initBehavior(); } catch (e) {} try { initIdentify(); } catch (e) {} }
   if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", boot);
   else boot();

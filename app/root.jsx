@@ -29,6 +29,7 @@ import swipetabStyles from '~/styles/qb-swipetab.css?url';
 import euGewaehrleistungStyles from '~/styles/eu-gewaehrleistung.css?url';
 import {PageLayout} from './components/PageLayout';
 import {MetaPixel} from './components/MetaPixel';
+import {QpxCommerce} from './components/QpxCommerce';
 import {UpPromoteTracking} from './components/UpPromoteTracking';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
 import {strictRegions} from '~/lib/consent-policy';
@@ -423,6 +424,17 @@ export default function App() {
             zusätzlich in der Komponente selbst (trackingAllowed()).
           */}
           <UpPromoteTracking />
+          {/*
+            FIRST-PARTY-TRICHTER (Job 20260926-growth-crystal-laden-messbar-
+            und-zulauf): view_content und add_to_cart an den eigenen Pixel,
+            aus denselben Hydrogen-Ereignissen, die MetaPixel liest. Bis zu
+            diesem Bau fehlte die Komponente auf diesem Laden ganz; events.db
+            kannte von crystal-cacao.com kein einziges Ereignis. Byte-gleich
+            aus der Vorlage (K1). Sie sendet nichts selbst: qpxTrack puffert,
+            und qpx.js lädt erst nach Einwilligung (qiblanco-qpx-loader.js).
+            initiate_checkout feuert am Kassenknopf in CartSummary.jsx.
+          */}
+          <QpxCommerce />
         </>
       )}
     </Analytics.Provider>
