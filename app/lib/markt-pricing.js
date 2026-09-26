@@ -20,7 +20,7 @@
 // diese Dateien gibt (siehe Kopf von produkt-seo.js). Vite loest den
 // relativen Pfad identisch auf; cart-display-pricing importiert selbst
 // nichts, die Kette ist damit vollstaendig node-aufloesbar.
-import {taxRateForHandle} from './cart-display-pricing.js';
+import {STEUER_LAND_DEFAULT, taxRateForHandle} from './cart-display-pricing.js';
 import {istBrutto} from './preismodus.js';
 
 /**
@@ -62,7 +62,50 @@ export function anzeigeSatz(handle, currencyCode, land) {
 export function bruttoAnzeige(amount, handle, currencyCode, land) {
   const zahl = Number.parseFloat(amount);
   if (!Number.isFinite(zahl)) return null;
-  return Math.round(zahl * (1 + anzeigeSatz(handle, currencyCode, land)));
+  return ganzEuroAnzeige(
+    zahl * (1 + anzeigeSatz(handle, currencyCode, land)),
+    land,
+  );
+}
+
+/**
+ * GANZ-EURO-ANZEIGE: aus dem Kundenbetrag die Zahl, die die Seite nennt.
+ *
+ * ZWEI REGELN, GETRENNT AM LAND (Job 20260926-at-kakao-einzelpackung-78-
+ * beworben-kasse-78-13-beide-laeden):
+ * - DE (Heimat- und Kalibrierland, STEUER_LAND_DEFAULT): kaufmännisch
+ *   gerundet, wie bisher. Hier sind die Preise so gesetzt, dass der ganze
+ *   Euro der offizielle Preis ist (Kakao 76,00, Staffel 61/53 mit den auf DE
+ *   kalibrierten Festbetragsrabatten). Aufrunden hieße dort, Preise zu nennen,
+ *   die die Kasse gar nicht nimmt: QiOne 1087,0055 zeigte mit ceil 1088
+ *   (deshalb wurde ceil in ProductPrice einmal entfernt), die Kakao-Staffel
+ *   3x rechnet im Modell 53,21 und kassiert 53,00.
+ * - JEDES ANDERE LAND: auf den nächsten ganzen Euro AUFgerundet (auf Cent
+ *   gerechnet, damit 76,00 nicht zu 77 wird). Dort ist nichts kalibriert,
+ *   und kaufmännisch gerundet verspricht die Seite zu wenig. Gemessen am
+ *   2026-09-26 in AT: netto 71,03 x 1,10 = 78,13 an der Kasse, die Seite
+ *   nannte 78. Aufgerundet nennt sie 79, und der Kunde zahlt 78,13, also nie
+ *   mehr als versprochen. CH/US gilt dasselbe: dort ist der Markets-Preis
+ *   heute ganzzahlig und bleibt es, ein umgerechneter Cent-Preis würde
+ *   ebenso nach oben genannt.
+ *
+ * Die Regel hängt NICHT am Preismodus: nach dem Brutto-Kipp liefert Shopify
+ * für AT mit "Dynamisch" wieder 78,13, und die Regel greift gleich.
+ * Der Warenkorb zeigt cent-genau (getCartLinePriceDisplayExact) und ist davon
+ * nicht berührt. Dieselbe Regel rechnet preiswatch nach
+ * (homepage-bauer/src/preiswatch.py, anzeige_ganz_euro).
+ *
+ * @param {number} betrag Kundenbetrag, ungerundet
+ * @param {string} [land] ISO-Land des aufgelösten Marktes (Default DE)
+ * @returns {number|null} ganzer Anzeigewert
+ */
+export function ganzEuroAnzeige(betrag, land) {
+  const zahl = Number(betrag);
+  if (!Number.isFinite(zahl)) return null;
+  const l = String(land || STEUER_LAND_DEFAULT).toUpperCase();
+  if (l === STEUER_LAND_DEFAULT) return Math.round(zahl);
+  const cent = Math.round(zahl * 100);
+  return Math.ceil(cent / 100);
 }
 
 /**
