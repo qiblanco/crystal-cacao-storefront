@@ -33,6 +33,23 @@ import {belegeNachSorte} from '~/lib/kakao-belege';
  * „PDF, englisch · englisch". `dateiZeile` ist jetzt die EINZIGE Stelle, an
  * der Format, Sprache und Umfang zu Text werden — eine Sprache kann baulich
  * nicht mehr zweimal erscheinen, weil sie nur an einer Stelle geschrieben wird.
+ *
+ * ============ KARTEN STATT HANDTUCHSPALTE (2026-09-26) ======================
+ * Christian zum Abschnitt: „Sehr hässliche Darstellung ⇒ muss optisch
+ * optimiert werden." Gemessen am Kundenrand (1366 px): eine 400 px schmale
+ * Spalte in einer 1350 px breiten Seite, Schrift 12,8 px, vier Textfarben,
+ * sechsmal dieselben fünf Beschriftungen untereinander.
+ * Jetzt ist jeder Beleg eine Karte in der Bauform, die dieser Laden für
+ * Sortenkacheln und Vorteile schon hat (Fläche, feine Kante, EIN Bildradius,
+ * oben 3 px im Sortenton). Am Telefon stehen die Karten untereinander, ab
+ * 60em drei nebeneinander: eine Sorte, eine Reihe. Alles liest sich in
+ * 16 px, es gibt zwei Textfarben, und das Gold sitzt nur auf der
+ * Unterstreichung dessen, was man anklicken kann.
+ *
+ * DIE BELEGE SELBST SIND UNVERÄNDERT: dieselben sechs Dokumente, dieselben
+ * fünf Angaben je Dokument, dieselbe Reihenfolge (Create vor Awake). Die
+ * Datei-Angabe ist zusätzlich selbst ein Link auf das PDF — wer „PDF,
+ * englisch, 9 Seiten" liest, will genau dort klicken.
  */
 
 /** Sprachnamen für den Leser. Ein unbekannter Code wird GENANNT, nicht
@@ -53,14 +70,29 @@ export function dateiZeile(beleg) {
   return teile.join(', ');
 }
 
-/** Die Felder je Beleg, in fester Reihenfolge — das ist die „Tabelle". */
+/**
+ * Der Titel in zwei Zeilen: Art des Dokuments, dann sein Gegenstand.
+ * Der Vertrag schreibt beides in EINE Zeichenkette („Schadstoff-Prüfzeugnis ·
+ * Amazonas Nativo"). Auf einer Karte brach der Browser genau vor dem
+ * Mittelpunkt um, und die zweite Zeile begann mit „·". Getrennt wird deshalb
+ * hier, beim Anzeigen — der Mittelpunkt bleibt im Markup stehen (unsichtbar),
+ * damit der Titel dort weiterhin wörtlich so steht wie im Vertrag:
+ * probe_belege_abrufbar.py zerlegt den Abschnitt an genau diesen Titeln.
+ */
+export function titelTeile(titel) {
+  const i = (titel || '').indexOf(' · ');
+  return i < 0 ? [titel, null] : [titel.slice(0, i), titel.slice(i + 3)];
+}
+
+/** Die Felder je Beleg, in fester Reihenfolge — das ist die „Tabelle".
+ *  Das dritte Element sagt, ob der Wert selbst auf das Dokument verlinkt. */
 function felderVon(beleg) {
   return [
-    ['Geprüft', beleg.geprueft],
-    ['Labor', beleg.labor],
-    ['Datum', beleg.datum],
-    ['Nummer', beleg.kennung],
-    ['Datei', dateiZeile(beleg)],
+    ['Geprüft', beleg.geprueft, false],
+    ['Labor', beleg.labor, false],
+    ['Datum', beleg.datum, false],
+    ['Nummer', beleg.kennung, false],
+    ['Datei', dateiZeile(beleg), true],
   ].filter(([, wert]) => Boolean(wert));
 }
 
@@ -85,9 +117,10 @@ export function Belege({sorte, titel = 'Prüfdokumente zum Nachlesen', id}) {
         // data-cc-sorte ist die bestehende Sortensprache dieser Seite
         // (kakao-seiten.css, Christian 2026-09-01: „zwei unterschiedliche
         // Farbgebungen … dezent entsprechend nutzen"). Sie faerbt hier NUR
-        // den schmalen Balken an der Überschrift — die Schrift bleibt in
-        // beiden Gruppen dieselbe, weil Christian „gleiche Schrift" verlangt
-        // hat. Der Sortenakzent übernimmt nirgends die Rolle des Goldes.
+        // die 3-px-Oberkante jeder Karte, wie bei den Sortenkacheln — die
+        // Schrift bleibt in beiden Gruppen dieselbe, weil Christian „gleiche
+        // Schrift" verlangt hat. Der Sortenakzent übernimmt nirgends die
+        // Rolle des Goldes.
         <section
           className="cc-belege__sorte"
           key={gruppe.key}
@@ -108,7 +141,17 @@ export function Belege({sorte, titel = 'Prüfdokumente zum Nachlesen', id}) {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {b.titel}
+                  {titelTeile(b.titel)[0]}
+                  {titelTeile(b.titel)[1] ? (
+                    <>
+                      <span className="cc-belege__trenner" aria-hidden="true">
+                        {' · '}
+                      </span>
+                      <span className="cc-belege__gegenstand">
+                        {titelTeile(b.titel)[1]}
+                      </span>
+                    </>
+                  ) : null}
                 </a>
                 {/* dt/dd sind DIREKTE Kinder der dl und liegen damit selbst
                     im Raster — das ist die „Tabelle". Ein Wrapper-<div> je
@@ -116,10 +159,23 @@ export function Belege({sorte, titel = 'Prüfdokumente zum Nachlesen', id}) {
                     die Stelle, an der Vorleseprogramme historisch die
                     Listen-Semantik verlieren. */}
                 <dl className="cc-belege__daten">
-                  {felderVon(b).map(([bezeichnung, wert]) => (
+                  {felderVon(b).map(([bezeichnung, wert, verlinkt]) => (
                     <Fragment key={bezeichnung}>
                       <dt>{bezeichnung}</dt>
-                      <dd>{wert}</dd>
+                      <dd>
+                        {verlinkt ? (
+                          <a
+                            className="cc-belege__datei"
+                            href={b.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {wert}
+                          </a>
+                        ) : (
+                          wert
+                        )}
+                      </dd>
                     </Fragment>
                   ))}
                 </dl>
@@ -129,11 +185,15 @@ export function Belege({sorte, titel = 'Prüfdokumente zum Nachlesen', id}) {
         </section>
       ))}
 
+      {/* Der Schlusssatz bleibt der LETZTE Knoten des Abschnitts:
+          crystal-cacao-node/proben/probe_belege_abrufbar.py grenzt den
+          Abschnitt an `cc-belege` und `cc-belege__grenze` ab. Stünde er oben,
+          fiele jede Sortengruppe aus ihrer Messung. */}
       <p className="cc-belege__grenze">
-        Die Prüfzeugnisse von Primoris untersuchen Schadstoffe an der rohen
-        Bohne. Die Nährstoff-Analysen von Dartsch Scientific messen die
-        Nährstoffe der fertigen Mischung, die Mineralstoff-Analysen ihre
-        Mineralstoffe und Spurenelemente. Jedes Dokument trägt sein Prüfdatum.
+        Primoris Belgium prüft die rohe Bohne auf Schadstoffe. Dartsch
+        Scientific misst an der fertigen Mischung die Nährstoffe, die
+        Mineralstoff-Analysen dazu Mineralstoffe und Spurenelemente. Jedes
+        Dokument trägt sein Prüfdatum.
       </p>
     </div>
   );

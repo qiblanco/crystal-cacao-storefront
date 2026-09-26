@@ -1,5 +1,88 @@
 import {useEffect, useRef, useState} from 'react';
 
+import {bildQuellen} from './shopifyBildQuellen';
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ÄNDERUNG 2026-09-26 (Job 20260926-GROSSJOB-crystal-cacao-seitendurchgang-
+ * videos-pruefdokumente-texte-gruenderbild, Christian): EIGENES STANDBILD,
+ * VORSTUFE, KEINE ANFRAGE AN YOUTUBE VOR DEM KLICK.
+ *
+ * Christian: „da wird noch ein goldenes Ladebild angezeigt, bin mir sicher,
+ * dass es hier schon einen neuen Standard gibt."
+ *
+ * GEMESSEN VOR DEM UMBAU (Headless-Chromium, Browser stumm, 2026-09-26):
+ * das Vorschaubild kam von i.ytimg.com (sddefault bzw. hqdefault), also eine
+ * Anfrage an YouTube vor jedem Klick. Mit gesperrtem YouTube — Tracking-
+ * Schutz, Erweiterung, Firmennetz — blieb vom Kasten nur die leere Bühne mit
+ * dem goldenen Abspielknopf: naturalWidth 0, ein kaputtes Bildsymbol oben
+ * links. Und das Motiv war das Kanal-Vorschaubild, eine Werbegrafik mit
+ * Goldrahmen, keine Szene aus der Folge.
+ *
+ * DER STANDARD, DEN ES GIBT, UND WAS HIER DAVON ANKOMMT:
+ *   1. Die Vorstufe (qiblanco-storefront YoutubeTimestamp.jsx, #498 vom
+ *      2026-09-18, „erst unscharf, dann scharf"): ein 24x14-WebP als
+ *      data-URI, vollflächig, als unterste Schicht. Sie steht im HTML und ist
+ *      ohne Anfrage und ohne Skript mit dem ersten Bildaufbau da. Erzeugt mit
+ *      denselben Vorgaben wie homepage-bauer/ladeverhalten/bin/
+ *      lqip_erzeuge.py (24x14, WebP q65, auf 16:9 beschnitten) — 328 B.
+ *   2. Das eigene Standbild (`thumbnail` im DACH-Baustein): es ersetzt die
+ *      YouTube-Posterkette ganz. Im DACH-Laden schaltet ein eigenes
+ *      Standbild die Vorstufe ab; hier gehören beide zusammen, weil beide
+ *      aus derselben Datei stammen.
+ *   3. Überblenden, Zeitmarke, Ladezeichen und der <noscript>-Ausweg bleiben
+ *      unverändert (Umbau vom 2026-09-11, unten).
+ *
+ * DAS STANDBILD IST EINE SZENE AUS DER FOLGE, KEINE GRAFIK: YouTubes eigenes
+ * Standbild 1 dieser Folge (maxres1.jpg, 1280x720, rund ein Viertel der
+ * Laufzeit, also kurz vor der Einstiegsstelle 8:30) — Christian und Anna mit
+ * ihren Tassen und der Create-Tüte. Es liegt jetzt in UNSEREN Shopify-Dateien
+ * (gid://shopify/MediaImage/77272116756748) und kommt über cdn.shopify.com,
+ * wie jedes andere Bild dieses Ladens. Das CDN verhandelt WebP selbst
+ * (gemessen: &width=640 -> 74 250 B image/webp) — dafür braucht es den
+ * Breitenparameter, den `bildQuellen` setzt.
+ *
+ * FEHLT FÜR EIN VIDEO DAS STANDBILD, GIBT ES KEINE BÜHNE — und das ist
+ * Absicht: lieber der Text mit dem Link zur ganzen Folge als ein Kasten, der
+ * wieder auf YouTube angewiesen wäre oder einfarbig dasteht.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/**
+ * Die eigenen Standbilder, je YouTube-Kennung.
+ *
+ * `breite`/`hoehe` sind die Maße der Masterdatei, gemessen am Kopf der
+ * ausgelieferten Datei (nicht an naturalWidth — SKILL-VIDEO-LADESTRATEGIE.md
+ * 4.2). `vorstufe` ist aus GENAU DIESER Datei erzeugt, sonst sähe man beim
+ * Scharfwerden ein anderes Bild einrasten.
+ */
+const EIGENE_STANDBILDER = {
+  'kd7Z-ITKYDo': {
+    url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/crystal-cacao-podcast-standbild-vier-dinge-kakao-1280x720.jpg?v=1790452169',
+    breite: 1280,
+    hoehe: 720,
+    vorstufe:
+      'data:image/webp;base64,UklGRu4AAABXRUJQVlA4IOIAAAAQBQCdASoYAA4APqlCnEkmI6KhMAgAwBUJZgCdMoHggFP0MvVbNZdfuD6kbt5i2dQAAP7zr84iE70awP5ZUjXyZPRDL5e+FwL2KrtB57a9a9aAyQZRN/lJ6ZE7D7NHHPK7dN5lhhRFLXtkb8GFdNI/8yyKAHmoc0Nu3H6PNa47itpAfvBGGJ4Djm35YPjaje7QdvbaKYnTmRMQ5fLmlauNGfdUYwQVyRC7Qx1ERQXtPWb8Bw5GJ5UaEk+T5WdPyEWP3u5/hmY60G0kMcX9zzkhybbS3ZYGRFvJfGTmV1OTKgAA',
+  },
+};
+
+/*
+ * DIE BREITEN-LEITER DES STANDBILDS, an der gerenderten Bühne GEMESSEN und
+ * nicht geschätzt (Vorschau-Bau, 2026-09-26): 256 px bei 320, 326 bei 390,
+ * 703 bei 767 (eine Spalte, 32 px Rand je Seite); ab 48em zwei Spalten mit
+ * 328 px bei 768, 456 bei 1024 und höchstens 536 px ab 1184 (die Startseite
+ * begrenzt auf 72rem). `sizes` sagt dem Browser genau das. Die Zusatz-
+ * Sprossen decken die gängigen Telefone bei dpr 2 und 3 ab; über dem Master
+ * (1280) gibt es nichts.
+ */
+const STANDBILD_SIZES =
+  '(min-width: 1184px) 536px, (min-width: 48em) calc(50vw - 56px), calc(100vw - 64px)';
+const STANDBILD_LEITER = {
+  anzeigeBreite: 704,
+  dprStufen: [1, 2],
+  zusatzSprossen: [360, 480, 640, 960, 1100],
+};
+
 /*
  * ═══════════════════════════════════════════════════════════════════════════
  * ÄNDERUNG 2026-09-11 (Job 20260911-BAU-videoumschaltung-seite-bricht-beim-
@@ -124,9 +207,9 @@ function spielMelderAnbinden(iframe, beiSpielt) {
  * (Job 20260718-lp-gesamt-relaunch; Skill-Doc homepage-bauer/
  * SKILL-VIDEO-LADESTRATEGIE.md). Dort ist das Muster „Vorschaubild,
  * Klick-zu-Play, Start ab Zeitstempel" seit Wochen live. Uebernommen sind:
- * die Fassaden-Bauweise, die Poster-Kette maxres -> sd -> hq mit
- * onError-Abstieg (GL-DES-0009), der youtube-nocookie-Ursprung und der
- * <noscript>-Ausweg.
+ * die Fassaden-Bauweise, der youtube-nocookie-Ursprung und der
+ * <noscript>-Ausweg. Die YouTube-Poster-Kette maxres -> sd -> hq ist seit
+ * dem 2026-09-26 durch das eigene Standbild ersetzt (Kopf dieser Datei).
  *
  * WAS BEWUSST NICHT MITKAM, jeweils mit Grund:
  *   - `~/lib/video-watchtime` (enablejsapi + Meta-Medien-Erfassung). Diese
@@ -152,9 +235,10 @@ function spielMelderAnbinden(iframe, beiSpielt) {
  * cdn.shopify.com, activehosted und monorail. NULL an YouTube.
  *
  * Diese Komponente laedt vor dem Klick GENAU EINE zusaetzliche Anfrage: das
- * Vorschaubild von i.ytimg.com, `loading="lazy"`, also erst wenn es in die
- * Naehe des Sichtfensters kommt. Kein Player, kein Skript, kein Autoplay
- * (WCAG 1.4.2). Der Player entsteht erst im Klick-Handler.
+ * eigene Standbild von cdn.shopify.com, `loading="lazy"`, also erst wenn es
+ * in die Naehe des Sichtfensters kommt. Bis dahin steht die Vorstufe aus dem
+ * HTML. Kein Player, kein Skript, kein Autoplay (WCAG 1.4.2), keine Anfrage
+ * an YouTube. Der Player entsteht erst im Klick-Handler.
  *
  * ======================================================================
  * EINWILLIGUNG — DIE VORHANDENE REGEL, NICHT EINE NEUE
@@ -168,40 +252,22 @@ function spielMelderAnbinden(iframe, beiSpielt) {
  * Ausnahme hinzu und fragt sie auch nicht ab — sie hat vor dem Klick nichts
  * zu fragen.
  *
- * OFFEN UND GEMELDET, NICHT ENTSCHIEDEN (der Auftrag sagt woertlich: „melden,
- * nicht entscheiden — es faehrt keine Rechtspruefung ohne Christians
- * ausdruecklichen Auftrag"): das Vorschaubild kommt von i.ytimg.com, also von
- * einem fremden Host. Es setzt keine Kennung und laedt kein Skript, aber es
- * ist eine Verbindung zu Google, bevor der Besucher etwas anklickt — genau
- * so, wie es die Vorlage auf qiblanco.com seit Wochen tut. Ob das der
- * Einwilligung bedarf, ist eine Bewertungsfrage und steht im RESULT.
- * DER RUECKWEG DAFUER IST SCHON GEBAUT: `posterUrl` nimmt jede eigene
- * Bild-URL entgegen (z.B. von cdn.shopify.com) und schaltet die
- * YouTube-Poster-Kette komplett ab — eine Zeile, kein Umbau.
+ * SEIT DEM 2026-09-26 GESCHLOSSEN: bis dahin kam das Vorschaubild von
+ * i.ytimg.com, also eine Verbindung zu Google, bevor der Besucher etwas
+ * anklickt. Das eigene Standbild (Kopf dieser Datei) nimmt diese Verbindung
+ * weg; vor dem Klick spricht die Seite mit keinem YouTube-Host mehr.
  *
  * @param {{
  *   videoId: string,
  *   startSekunde?: number,
  *   titel: string,
- *   posterUrl?: string,
  *   dauerWort?: string,
  * }} props
  */
-
-/* Poster-Kette: [Datei, Breite, Hoehe]. hqdefault existiert immer, deshalb
- * ist der Abstieg endlich und idempotent. hqdefault ist 4:3 — object-fit:
- * cover verhindert die Balkenraender. */
-const POSTER_STUFEN = [
-  ['maxresdefault', 1280, 720],
-  ['sddefault', 640, 480],
-  ['hqdefault', 480, 360],
-];
-
 export function PodcastEinstieg({
   videoId,
   startSekunde = 0,
   titel,
-  posterUrl,
   dauerWort = '',
   children,
 }) {
@@ -210,7 +276,6 @@ export function PodcastEinstieg({
    * Der Unterschied zwischen beidem ist genau das Schwarz, um das es geht. */
   const [zeigt, setZeigt] = useState(false);
   const rahmen = useRef(null);
-  const [stufe, setStufe] = useState(0);
 
   useEffect(() => {
     if (!laeuft || !rahmen.current) return undefined;
@@ -224,7 +289,6 @@ export function PodcastEinstieg({
     return () => clearTimeout(t);
   }, [laeuft, zeigt]);
   const start = Math.max(0, Math.floor(startSekunde || 0));
-  const [datei, breite, hoehe] = POSTER_STUFEN[stufe];
 
   /* Der Weg zur ganzen Folge. Er zeigt bewusst auf DIESELBE Sekunde: wer
    * hier weiterklickt, soll dort weitermachen, wo er aufgehoert hat, nicht
@@ -232,96 +296,110 @@ export function PodcastEinstieg({
    * fuer den Knopf (siehe <noscript> unten). */
   const ganzeFolge = folgeUrl(videoId, start);
 
-  const poster = posterUrl
-    ? {src: posterUrl, width: 1280, height: 720}
-    : {
-        src: `https://i.ytimg.com/vi/${videoId}/${datei}.jpg`,
-        srcSet: POSTER_STUFEN.slice(stufe)
-          .map(([d, b]) => `https://i.ytimg.com/vi/${videoId}/${d}.jpg ${b}w`)
-          .join(', '),
-        sizes: '(min-width: 48em) 46vw, 92vw',
-        width: breite,
-        height: hoehe,
-        onError: () => setStufe((s) => Math.min(s + 1, POSTER_STUFEN.length - 1)),
-      };
+  const standbild = EIGENE_STANDBILDER[videoId] || null;
+  const quellen = standbild
+    ? bildQuellen(standbild.url, {
+        ...STANDBILD_LEITER,
+        masterBreite: standbild.breite,
+        sizes: STANDBILD_SIZES,
+      })
+    : null;
 
   return (
     <section className="cc-podcast NormalSectionSize" aria-labelledby="cc-podcast-titel">
       <div className="cc-podcast__raster">
-        <div
-          className="cc-podcast__buehne"
-          data-qb-video-zustand={laeuft ? (zeigt ? 'spielt' : 'laedt') : 'vorschau'}
-        >
-          {/* SCHICHT 1 — die Vorschau. Sie wird NIE entfernt. Sie liegt auch
-              während des Ladens und danach unter dem Player: puffert er
-              später nach, fällt er auf ein Bild zurück statt auf Schwarz.
-              Sie kostet nichts, sie ist längst geladen. */}
-          <img
-            {...poster}
-            className="cc-podcast__fuellung"
-            alt=""
-            loading="lazy"
-            aria-hidden={laeuft ? 'true' : undefined}
-          />
-
-          {/* SCHICHT 2 — der Player. Erst ab dem Klick im Dokument (die
-              schlanke Ladeweise bleibt), sichtbar erst wenn er Bild hat. */}
-          {laeuft ? (
-            <iframe
-              ref={rahmen}
-              className="cc-podcast__fuellung"
-              src={`https://www.youtube-nocookie.com/embed/${videoId}?start=${start}&autoplay=1&enablejsapi=1`}
-              title={titel}
-              style={{opacity: zeigt ? 1 : 0, transition: 'opacity 240ms ease-out'}}
-              onLoad={() => setTimeout(() => setZeigt(true), GNADENFRIST_MS)}
-              allow="autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
+        {standbild ? (
+          <div
+            className="cc-podcast__buehne"
+            data-qb-video-zustand={laeuft ? (zeigt ? 'spielt' : 'laedt') : 'vorschau'}
+          >
+            {/* SCHICHT 0 — die Vorstufe. Grob, vollflächig, sofort da: sie
+                steht als data-URI im HTML und braucht weder eine Anfrage noch
+                ein Skript. Sie liegt VOR dem Standbild im Baum und damit
+                darunter (beide absolut, ohne z-index). */}
+            <span
+              className="cc-podcast__vorstufe"
+              aria-hidden="true"
+              data-qb-video-vorstufe=""
+              style={{backgroundImage: `url(${standbild.vorstufe})`}}
             />
-          ) : null}
 
-          {/* SCHICHT 3 — die Bedienung. Vor dem Klick der Knopf mit dem
-              Play-Zeichen; während des Ladens bleibt an derselben Stelle ein
-              Ladezeichen stehen: „wer klickt und eine Sekunde nichts sieht,
-              klickt nochmal" (Christian). Der Knopf selbst ist dann weg, er
-              läge sonst über dem Player und finge dessen Klicks ab. */}
-          {laeuft ? null : (
-            <button
-              type="button"
-              className="cc-podcast__knopf"
-              onClick={() => setLaeuft(true)}
-              aria-label={`Podcast ab Minute ${minuteWort(start)} abspielen: ${titel}`}
-            >
+            {/* SCHICHT 1 — die Vorschau. Sie wird NIE entfernt. Sie liegt auch
+                während des Ladens und danach unter dem Player: puffert er
+                später nach, fällt er auf ein Bild zurück statt auf Schwarz.
+                Sie kostet nichts, sie ist längst geladen. */}
+            <img
+              src={quellen.src}
+              srcSet={quellen.srcSet}
+              sizes={quellen.sizes}
+              width={standbild.breite}
+              height={standbild.hoehe}
+              className="cc-podcast__fuellung"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              aria-hidden={laeuft ? 'true' : undefined}
+            />
+
+            {/* SCHICHT 2 — der Player. Erst ab dem Klick im Dokument (die
+                schlanke Ladeweise bleibt), sichtbar erst wenn er Bild hat. */}
+            {laeuft ? (
+              <iframe
+                ref={rahmen}
+                className="cc-podcast__fuellung"
+                src={`https://www.youtube-nocookie.com/embed/${videoId}?start=${start}&autoplay=1&enablejsapi=1`}
+                title={titel}
+                style={{opacity: zeigt ? 1 : 0, transition: 'opacity 240ms ease-out'}}
+                onLoad={() => setTimeout(() => setZeigt(true), GNADENFRIST_MS)}
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
+            ) : null}
+
+            {/* SCHICHT 3 — die Bedienung. Vor dem Klick der Knopf mit dem
+                Play-Zeichen; während des Ladens bleibt an derselben Stelle ein
+                Ladezeichen stehen: „wer klickt und eine Sekunde nichts sieht,
+                klickt nochmal" (Christian). Der Knopf selbst ist dann weg, er
+                läge sonst über dem Player und finge dessen Klicks ab. */}
+            {laeuft ? null : (
+              <button
+                type="button"
+                className="cc-podcast__knopf"
+                onClick={() => setLaeuft(true)}
+                aria-label={`Podcast ab Minute ${minuteWort(start)} abspielen: ${titel}`}
+              >
+                <span className="cc-podcast__play" aria-hidden="true">
+                  <span className="cc-podcast__play-scheibe">▶</span>
+                </span>
+                <span className="cc-podcast__marke" aria-hidden="true">
+                  ab {minuteWort(start)}
+                </span>
+              </button>
+            )}
+            {laeuft && !zeigt ? (
               <span className="cc-podcast__play" aria-hidden="true">
-                <span className="cc-podcast__play-scheibe">▶</span>
+                <span className="cc-podcast__play-scheibe">
+                  <span className="cc-video-spinner" />
+                </span>
               </span>
-              <span className="cc-podcast__marke" aria-hidden="true">
-                ab {minuteWort(start)}
-              </span>
-            </button>
-          )}
-          {laeuft && !zeigt ? (
-            <span className="cc-podcast__play" aria-hidden="true">
-              <span className="cc-podcast__play-scheibe">
-                <span className="cc-video-spinner" />
-              </span>
-            </span>
-          ) : null}
-          {/*
-            OHNE AKTIVES SKRIPT passiert bei einem <button> nichts. Das ist
-            eine echte Schwaeche der Fassade gegenueber einem festen <iframe>,
-            und sie wird hier geschlossen statt verschwiegen: das Vorschaubild
-            steht ohnehin serverseitig da, und <noscript> traegt einen echten
-            Link auf die Folge — inklusive Startsekunde. Ohne Skript fuehrt der
-            Klick also zum Video, nur auf YouTube statt eingebettet.
-            Als GESCHWISTER und nicht im Knopf, weil ein <a> nicht in einem
-            <button> stehen darf.
-          */}
-          <noscript>
-            <a className="cc-podcast__ohne-skript" href={ganzeFolge}>
-              Folge ab {minuteWort(start)} auf YouTube ansehen
-            </a>
-          </noscript>
-        </div>
+            ) : null}
+            {/*
+              OHNE AKTIVES SKRIPT passiert bei einem <button> nichts. Das ist
+              eine echte Schwaeche der Fassade gegenueber einem festen <iframe>,
+              und sie wird hier geschlossen statt verschwiegen: das Vorschaubild
+              steht ohnehin serverseitig da, und <noscript> traegt einen echten
+              Link auf die Folge — inklusive Startsekunde. Ohne Skript fuehrt der
+              Klick also zum Video, nur auf YouTube statt eingebettet.
+              Als GESCHWISTER und nicht im Knopf, weil ein <a> nicht in einem
+              <button> stehen darf.
+            */}
+            <noscript>
+              <a className="cc-podcast__ohne-skript" href={ganzeFolge}>
+                Folge ab {minuteWort(start)} auf YouTube ansehen
+              </a>
+            </noscript>
+          </div>
+        ) : null}
 
         <div className="cc-podcast__text">
           {children}
