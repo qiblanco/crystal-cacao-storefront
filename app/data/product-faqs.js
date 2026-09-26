@@ -19,7 +19,7 @@
 export const FAQ_CACAO = [
   {
     q: 'Was ist zeremonieller Kakao?',
-    a: 'Zeremonieller Kakao ist eine spezielle Form von Kakao, die absichtsvoll und bewusst zubereitet und konsumiert wird. Im Gegensatz zu gewöhnlichem Kakao wird dieser Kakao unter Einbeziehung ritueller Elemente, Achtsamkeit und Intentionalität zubereitet. Zeremonieller Kakao wird oft in ganzheitlichen Praktiken verwendet und kann eine tiefere Verbindung mit dem Selbst, der Natur oder anderen Menschen fördern. Die Zubereitung und der Konsum werden als eine Art Zeremonie betrachtet, die die psychoaktiven und energetischen Eigenschaften des Kakaos betont.',
+    a: 'Zeremonieller Kakao ist eine spezielle Form von Kakao, die absichtsvoll und achtsam zubereitet und konsumiert wird. Im Gegensatz zu gewöhnlichem Kakao wird dieser Kakao unter Einbeziehung ritueller Elemente, Achtsamkeit und Intentionalität zubereitet. Zeremonieller Kakao wird oft in ganzheitlichen Praktiken verwendet und kann eine tiefere Verbindung mit dem Selbst, der Natur oder anderen Menschen fördern. Die Zubereitung und der Konsum werden als eine Art Zeremonie betrachtet, die die psychoaktiven und energetischen Eigenschaften des Kakaos betont.',
     flag: 'eso-buzzword',
   },
   {
@@ -36,7 +36,7 @@ export const FAQ_CACAO = [
   },
   {
     q: 'Was ist eine Kakaozeremonie und ist diese nötig?',
-    a: 'Die Kakaozeremonie ist eine bewusste und absichtliche Praxis des Genießens von zeremoniellem Kakao an einem Ort der Wohlfühlatmosphäre. Diese einzigartige Art des Konsums verstärkt die tiefe und unterschwellige Wirkung des Kakaos, was sie für den Einnehmenden leichter erfahrbar macht. Obwohl eine Kakaozeremonie keine zwingende Voraussetzung ist, bietet sie Raum für persönliche Entfaltung und Reflektion. Viele Menschen wählen bewusst, sich Zeit für ihren Kakao zu nehmen und ihn auf individuelle Weise zu zelebrieren, oft im Rahmen von Dankbarkeitspraktiken.',
+    a: 'Die Kakaozeremonie ist eine bewusste und absichtliche Praxis des Genießens von zeremoniellem Kakao an einem Ort der Wohlfühlatmosphäre. Diese einzigartige Art des Konsums verstärkt die tiefe und unterschwellige Wirkung des Kakaos, was sie für den Einnehmenden leichter erfahrbar macht. Obwohl eine Kakaozeremonie keine zwingende Voraussetzung ist, bietet sie Raum für persönliche Entfaltung und Reflektion. Viele Menschen nehmen sich gezielt Zeit für ihren Kakao und zelebrieren ihn auf ihre eigene Weise, oft im Rahmen von Dankbarkeitspraktiken.',
     flag: 'unfalsifizierbar',
   },
   {

@@ -225,9 +225,9 @@ function Mineralstoffe() {
             {minerals.map(([name, desc], i) => (
               <li key={i}>
                 <b>
-                  {i + 1}. {name}
+                  {i + 1}. {name}:
                 </b>{' '}
-                – {desc}
+                {desc}
               </li>
             ))}
           </ol>
@@ -289,7 +289,7 @@ function Herkunft({sorte}) {
 }
 
 const COPYRIGHT =
-  'Copyright: Quirino Olivera Núñez - Asociación para la Investigación Científica de la Amazonía del Perú';
+  'Copyright: Quirino Olivera Núñez, Asociación para la Investigación Científica de la Amazonía del Perú';
 
 const ursprungRows = [
   {
@@ -297,12 +297,12 @@ const ursprungRows = [
       <>
         <p>
           Im Norden Perus, im Tal von Jaén und Bagua, erhebt sich der mystische{' '}
-          <b>Spiraltempel von Montegrande</b> – ein Ort, an dem Archäologen
+          <b>Spiraltempel von Montegrande</b>, ein Ort, an dem Archäologen
           Kakaorückstände in <b>6.300 Jahre alten Keramiken entdeckt</b> haben.
         </p>
         <p className="mt-3">
           Diese Funde gelten heute als der{' '}
-          <b>älteste bekannte Nachweis von Kakao weltweit</b> – der Beginn einer
+          <b>älteste bekannte Nachweis von Kakao weltweit</b>: der Beginn einer
           Geschichte, die bis in unsere Zeit fortlebt.
         </p>
         <p className="mt-3">
@@ -345,13 +345,13 @@ const ursprungRows = [
         <p className="mt-3">
           <b>
             Crystal Cacao® wächst dort, wo die Geschichte des Kakaos begann
-          </b>{' '}
-          – im selben Boden, unter derselben Sonne und in einer ununterbrochenen
+          </b>
+          : im selben Boden, unter derselben Sonne und in einer ununterbrochenen
           Linie, die seit über 6.000 Jahren fortbesteht.
         </p>
         <p className="mt-3">
           Er trägt die Energie, Reinheit und Resonanz des ältesten bekannten
-          Kakaos der Welt – und macht sie erlebbar für den Menschen von heute.
+          Kakaos der Welt und macht sie erlebbar für den Menschen von heute.
         </p>
       </>
     ),
@@ -364,7 +364,7 @@ function Ursprung() {
   return (
     <div className="NormalSectionSize my-[100px]!">
       <h2 className="text-center text-2xl font-bold mb-10">
-        Crystal Cacao® – Ursprung, der 6.300 Jahre zurückreicht
+        Crystal Cacao®: Ursprung, der 6.300 Jahre zurückreicht
       </h2>
       <div className="flex flex-col gap-12">
         {ursprungRows.map((row, i) => (

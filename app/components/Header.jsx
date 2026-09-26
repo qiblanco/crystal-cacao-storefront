@@ -97,10 +97,10 @@ function CacaoAnnouncementBanner() {
       >
         <p>
           <span className="banner-line">
-            {KAKAO_KENNZAHLEN.bewertungSkala} ⭐⭐⭐⭐⭐ - Über{' '}
+            {KAKAO_KENNZAHLEN.bewertungSkala} ⭐⭐⭐⭐⭐ · Über{' '}
             {KAKAO_KENNZAHLEN.nutzer} aktive Nutzer
           </span>
-          <span className="banner-offer-sep"> - </span>
+          <span className="banner-offer-sep"> · </span>
           <span className="banner-line">jetzt mit Zufriedenheitsgarantie!</span>
         </p>
       </Link>

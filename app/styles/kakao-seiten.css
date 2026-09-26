@@ -3077,6 +3077,20 @@ main .cc-absicht h1 {
   color: var(--cc-muted);
 }
 
+/* Schlusszeile mit Foto (2026-09-26, nach dem Gegenpruefer): dieselbe Bauform
+   wie .cc-absicht__urheber oben -- Foto links, Name daneben, ein Bildradius.
+   Der Abstand sitzt am Rahmen, nicht mehr am Absatz. */
+.cc-absicht__gruss-zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  margin-top: var(--cc-space-3);
+}
+
+.cc-absicht .cc-absicht__gruss-zeile .cc-absicht__gruss {
+  margin: 0;
+}
+
 /* DIE PRUEFDOKUMENTE TRETEN AUS DER LESESPALTE HERAUS (2026-09-26): die
    Spalte ist 70ch schmal, die drei Karten einer Sorte brauchen eine Reihe.
    Der Block nimmt dieselbe Breite wie auf den Kaufseiten (72rem) und bleibt
