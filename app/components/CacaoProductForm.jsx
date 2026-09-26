@@ -1,7 +1,7 @@
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import {EuGewaehrleistungsHinweis} from './EuGewaehrleistungsLabel';
-import {anzeigeSatz, formatPreis} from '~/lib/markt-pricing';
+import {anzeigeSatz, formatPreis, ganzEuroAnzeige} from '~/lib/markt-pricing';
 import {useMarktLand} from '~/lib/markt-land';
 
 /**
@@ -107,8 +107,11 @@ export function cacaoPricing(quantity, selectedVariant, handle, land) {
     const satz = anzeigeSatz(handle, waehrung, land);
     const rabattProEinheit =
       Math.floor(netto * (rabattProzent / 100) * 100) / 100;
-    einzel = Math.round((netto - rabattProEinheit) * (1 + satz));
-    compareAt = rabattProzent > 0 ? Math.round(netto * (1 + satz)) : null;
+    // Ganz-Euro-Regel je Land (markt-pricing.js, ganzEuroAnzeige): DE
+    // gerundet, sonst aufgerundet -- AT 1x nennt 79 statt 78 bei 78,13 Kasse.
+    einzel = ganzEuroAnzeige((netto - rabattProEinheit) * (1 + satz), land);
+    compareAt =
+      rabattProzent > 0 ? ganzEuroAnzeige(netto * (1 + satz), land) : null;
   } else {
     if (typeof console !== 'undefined') {
       console.warn(
