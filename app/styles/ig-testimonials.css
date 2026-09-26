@@ -1,0 +1,408 @@
+/* ============================================================================
+   IG-TESTIMONIAL-SLIDESHOW — Token-CSS der Komponente
+   Job 20260911-GROSSJOB-ig-testimonial-slideshow-…, Segment s03.
+
+   ABGELEITET AUS DEM STÄRKSTEN BESTANDS-REZEPT, nicht neu erfunden: die
+   Tiefschlaf-v3 (94/100) bzw. das daraus gewonnene .lp-a3-Token-CSS
+   (app/styles/schlaf-zellen-schutz.css). Übernommen sind Ratio, Raster und
+   Rollenverteilung der Farbe, NICHT die Variablennamen — diese Datei wird auf
+   Produktseiten geladen, die ihr eigenes Token-Set mitbringen; ein `--a-*`
+   hier würde deren Werte überschreiben oder von ihnen überschrieben.
+
+   DESHALB SITZEN DIE TOKENS AUF `.qb-igt` UND NICHT AUF `:root`. Das ist der
+   einzige bewusste Unterschied zum Referenz-Rezept: dort ist die Datei die
+   Seite, hier ist sie ein Baustein IN einer fremden Seite. Ein `:root`-Block
+   wäre eine Nebenwirkung auf alles, was die Route sonst noch lädt — genau die
+   Klasse Fehler, die der Zwillingsjob gerade für die Video-Geometrie aufgelöst
+   hat.
+
+   REGEL DIESER DATEI: alle Größen, Farben, Radien und Schatten kommen aus dem
+   Token-Block. Ausserhalb davon erfindet KEINE Regel einen freien Wert.
+
+   ZÄHLUNG, damit sie nachprüfbar ist statt behauptet:
+     Schriftgrößen  4 eigene (Schwelle der Rubrik: ≤ 9)
+     Gold-Töne      1 (--igt-akzent; --igt-akzent-tinte ist derselbe Hue,
+                       abgedunkelt für Schrift auf hellem Grund — dieselbe
+                       Bauform wie --a-akzent-tinte im Referenz-Rezept, damit
+                       der Hue-Bin der Rubrik bei 1 bleibt)
+     Bild-Radius    1 (--igt-r2, auf der Bühne)
+     Spacing        8pt-Raster, 6 Stufen
+     H2-Stil        0 eigene (die Sektion erbt die H2-Regel der Seite)
+   ========================================================================== */
+
+.qb-igt {
+  /* ── Typo: modulare Skala ~1.25, VIER Stufen ─────────────────────────── */
+  /* Schriftstufen = die Skala des Kakao-Ladens (--cc-fs-*), K2: eine eigene
+     13-px-Stufe neben den 12,8 px des Ladens kostete stimmig_typo 20 Punkte
+     (design-rubrik 2026-09-26, 94 -> 91 auf der ganzen Seite). */
+  --igt-fs-xs: var(--cc-fs-1, 0.8rem); /* 12.8px — Handle, Fußzeile */
+  --igt-fs-base: var(--cc-fs-2, 1rem); /* 16px — Fließtext */
+  --igt-fs-md: var(--cc-fs-3, 1.25rem); /* 20px — Unterzeile */
+  --igt-fs-lg: var(--cc-fs-4, 1.5625rem); /* 25px — Play-Abzeichen */
+  /* KEIN eigener H2-Wert mehr — die Begründung steht an .qb-igt__titel. */
+
+  /* ── Spacing: 8pt-Grid ───────────────────────────────────────────────── */
+  --igt-s1: 8px;
+  --igt-s2: 16px;
+  --igt-s3: 24px;
+  --igt-s4: 32px;
+  --igt-s6: 48px;
+  --igt-s8: 64px;
+
+  /* ── Farbe: warmes Neutral-Kontinuum + EIN Akzent (60-30-10) ─────────── */
+  /* KAKAO-LADEN (crystal-cacao.com), laden-eigene Abweichung, K2 im Manifest:
+     Farben und Bild-Radius kommen aus den Tokens des Ladens
+     (app/styles/kakao-seiten.css), nicht aus der Vorlage. Die Vorlage bindet
+     ihr Gold an --qb-akzent aus den qb-tokens, die dieser Laden bewusst nicht
+     fuehrt; ohne diese Zuordnung stuende dort `var()` ohne Wert, und
+     Fokusrahmen und Play-Zeichen fielen still in die Vererbung. EIN Gold
+     (--cc-gold), EIN Bild-Radius (--cc-radius-bild). Job
+     20260926-crystal-kakao-zwei-vorlagen-features-ig-stimmen-und-kasse-im-browser. */
+  --igt-grund: var(--cc-grund, #fbf8f4);
+  --igt-flaeche: var(--cc-flaeche, #f6f1ea);
+  --igt-dunkel: var(--cc-dunkel, #171310);
+  --igt-text: var(--cc-text, #2c2a26);
+  --igt-muted: var(--cc-muted, #6b665d);
+  --igt-akzent: var(--cc-gold, rgb(242, 191, 114)); /* der eine Akzent, nur Handlung/Beweis */
+  --igt-akzent-tinte: var(--cc-gold-text, #90671d); /* dasselbe Gold als SCHRIFT (5,07:1 auf Weiss) */
+  --igt-linie: var(--cc-linie, #e6ded3);
+
+  /* ── Radien + Schatten: je ZWEI Werte ────────────────────────────────── */
+  --igt-r1: 8px;
+  --igt-r2: var(--cc-radius-bild, 10px);
+  --igt-shadow-sm: 0 1px 3px rgba(25, 23, 20, 0.07);
+  --igt-shadow-md: 0 12px 32px rgba(25, 23, 20, 0.11);
+
+  /* ── Layout ──────────────────────────────────────────────────────────── */
+  --igt-breite: 1080px;
+  --igt-kachel: 268px;
+
+  font-family: inherit;
+  color: var(--igt-text);
+  padding: var(--igt-s8) var(--igt-s3);
+  background: var(--igt-grund);
+}
+
+/* ─── Kopf: Weissraum gruppiert, keine Boxen ──────────────────────────────── */
+.qb-igt__kopf {
+  max-width: var(--igt-breite);
+  margin: 0 auto var(--igt-s4);
+  text-align: center;
+}
+
+.qb-igt__titel {
+  /* ═══ HIER STEHT BEWUSST KEIN font-size ═══════════════════════════════
+     Die Überschrift spricht die H2-Stimme DER GASTGEBER-SEITE, nicht ihre
+     eigene. Gemessen 2026-09-11 (s04, A/B auf zwei Servern) an
+     /products/crystal-cacao-create: die Seite führt ihre H2 mit 35,2 px/600,
+     der eigene Token clamp(…, 2.25rem) ergab bei 1280 px genau 36 px — also
+     0,8 px daneben. Für die Design-Rubrik ist das ein DRITTER H2-Stil, und
+     die Hausregel lautet „EIN H2-Stil je Seite": stimmig_typo fiel von 68 auf
+     48, der Seiten-Score von 82 (bestanden) auf 79 (nicht bestanden).
+
+     EINE SEKTION, DIE IHRE EIGENE ÜBERSCHRIFTENGRÖSSE MITBRINGT, VERSCHLECH-
+     TERT JEDE SEITE, AUF DIE SIE GESTELLT WIRD — und zwar auch dann, wenn sie
+     allein gemessen makellos ist (der Komponenten-Beleg aus s03 steht bei
+     98/100). Das ist kein Widerspruch: der eine Score misst die Komponente,
+     der andere die Seite, und genau zwischen den beiden lag die Lücke.
+
+     WAS DAS KOSTET, ehrlich: ohne Regel gilt die H2-Regel der Gastgeber-Seite;
+     hat eine Seite gar keine, greift der Browser-Standard (1.5em). Das ist der
+     Preis dafür, dass die Sektion nirgends eine fremde Skala aufbricht.
+     ═══════════════════════════════════════════════════════════════════════ */
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--igt-s2);
+  color: var(--igt-dunkel);
+  /* KAKAO-LADEN, K2: KEIN eigenes Gewicht. Die H2 dieses Ladens stehen auf 700
+     (`main h2`, kakao-seiten.css); die 600 der Vorlage passten zu qiblanco und
+     ergaben hier eine zweite H2-Kombi (design-rubrik 2026-09-26). Ohne Regel
+     gilt das Gewicht der Gastgeber-Seite, wie schon bei der Groesse. */
+}
+
+.qb-igt__unter {
+  font-size: var(--igt-fs-md);
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 56ch;
+  color: var(--igt-muted);
+}
+
+/* ─── Die Bahn: scroll-snap, Maus-Drag über useDragSwipe (GL-DES-0012) ───── */
+.qb-igt__bahn {
+  display: flex;
+  gap: var(--igt-s2);
+  max-width: var(--igt-breite);
+  margin: 0 auto;
+  padding: var(--igt-s1) var(--igt-s1) var(--igt-s3);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  /* DIESE EINE ZEILE IST KEIN FEINSCHLIFF, SIE HAELT DIE LCP-MESSUNG DER SEITE
+     AM LEBEN (gemessen 2026-09-11, s04, A/B auf zwei Servern):
+     die Bahn traegt links `padding: var(--igt-s1)`, die Kachel
+     `scroll-snap-align: start`. Ohne scroll-padding liegt die Snap-Position
+     der ERSTEN Kachel damit bei scrollLeft 8 statt 0 -- der Browser korrigiert
+     das beim ersten Layout selbst und erzeugt dabei ein scroll-Ereignis.
+     GEMESSEN an /products/qione-2-pro: MIT diesem Scroll meldete die Seite
+     GAR KEINEN LCP-Kandidaten (0 Eintraege, 5 von 5 Laeufen, auch nach 15 s),
+     OHNE ihn wieder zwei bei ~300 ms; die unveraenderte Kontrollseite
+     /products/qihome-air meldete in beiden Armen durchgehend.
+     DIE NAHELIEGENDE ERKLAERUNG ("ein Scroll beendet die LCP-Meldung") IST
+     NACHGEBAUT UND HAELT NICHT: eine hermetische Fixture mit genau dieser Bahn
+     erzeugt den Scroll bei 22 ms und bekommt trotzdem einen Kandidaten bei
+     36 ms. Der Zusammenhang an der echten Seite ist belegt, der Mechanismus
+     nicht -- was dort zusaetzlich dazukommt (130 statt 86 Bilder), ist nicht
+     auseinandergerechnet. Die Zeile bleibt: sie beseitigt das Scroll-Ereignis
+     nachweislich, und ein Scroll vor dem ersten Kandidaten ist nach dieser
+     Messlage ein Risiko. Der Nutzer sieht davon nichts -- die Feldmessung
+     (CrUX) verliert die Seite trotzdem.
+     Stehende Messung dazu: homepage-bauer/pruefungen/probe_lcp_meldet.py */
+  scroll-padding-inline-start: var(--igt-s1);
+  /* Die Bildlaufleiste ist hier Rauschen: die Bahn sagt über Pfeile und
+     Wisch-Hinweis selbst, dass sie sich bewegen lässt. */
+  scrollbar-width: none;
+}
+
+.qb-igt__bahn::-webkit-scrollbar {
+  display: none;
+}
+
+/* EINE EINZIGE KACHEL STEHT IN DER MITTE, NICHT AM RAND.
+   Zwei der fünf Flächen tragen nach der Auswahl vom 2026-09-12 genau eine
+   Kachel (Kakao, QiHome). Linksbündig ist für eine Bahn richtig, die nach
+   rechts weiterläuft; unter einer zentrierten Überschrift sieht eine einzelne
+   Karte am linken Rand dagegen aus wie ein Rest — und die Designsprache
+   verlangt für eine Reihe eine gemeinsame optische Mitte.
+   NUR in diesem einen Fall: bei mehreren Kacheln würde `center` die
+   Scroll-Position der ersten Kachel verschieben und damit genau die
+   Snap-Rechnung stören, an der die LCP-Meldung der Seite hängt (siehe
+   scroll-padding-inline-start oben). Die Klasse setzt deshalb die Komponente,
+   und nur wenn die Liste genau einen Eintrag hat. Kein neuer Wert, kein neues
+   Token. */
+.qb-igt__bahn.is-eine {
+  justify-content: center;
+}
+
+/* Während eines echten Maus-Drags darf der Browser nicht zusätzlich seine
+   eigene Trägheit fahren — sonst ruckelt die Bahn gegen den Zeiger. */
+.qb-igt__bahn.is-dragging {
+  scroll-behavior: auto;
+  cursor: grabbing;
+  user-select: none;
+}
+
+.qb-igt__bahn:focus-visible {
+  outline: 2px solid var(--igt-akzent-tinte);
+  outline-offset: 4px;
+  border-radius: var(--igt-r1);
+}
+
+/* ─── Die Kachel ──────────────────────────────────────────────────────────── */
+.qb-igt__kachel {
+  flex: 0 0 var(--igt-kachel);
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--igt-s1);
+}
+
+/* Die Fläche ist im Vorschau-Zustand ein <button> und danach ein <div>. Beide
+   bekommen hier dasselbe Kleid — der Element-Wechsel darf nicht sichtbar sein.
+   GEOMETRIE (display/width/aspect-ratio) kommt aus der Komponente, nicht von
+   hier: das ist die Trennung, die der Zwillingsjob eingeführt hat. */
+.qb-igt__flaeche {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  border: 0;
+  background: var(--igt-flaeche);
+  border-radius: var(--igt-r2);
+  overflow: hidden;
+  box-shadow: var(--igt-shadow-sm);
+  cursor: pointer;
+  transition:
+    box-shadow 200ms ease-out,
+    transform 200ms ease-out;
+}
+
+/* Ein Bild-Post ist keine Handlung — er sieht auch nicht wie eine aus. */
+span.qb-igt__flaeche {
+  cursor: default;
+}
+
+.qb-igt__flaeche:is(button):hover {
+  box-shadow: var(--igt-shadow-md);
+  transform: translateY(-2px);
+}
+
+.qb-igt__flaeche:focus-visible {
+  outline: 2px solid var(--igt-akzent-tinte);
+  outline-offset: 3px;
+}
+
+/* Der Radius gehört auf die Bühne mit, sonst stehen die Ecken des Posters über
+   dem gerundeten Rahmen. EIN Bild-Radius-Token für beides. */
+.qb-igt__buehne {
+  border-radius: var(--igt-r2);
+  background: var(--igt-flaeche);
+}
+
+/* ─── Das Zeichen: Play, dann Laden ──────────────────────────────────────── */
+.qb-igt__zeichen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* Es liegt ÜBER dem Poster und UNTER nichts — der Player blendet sich
+     darüber, sobald er zeigt, und dann ist das Zeichen ohnehin weg. */
+  pointer-events: none;
+}
+
+.qb-igt__abzeichen {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  font-size: var(--igt-fs-lg);
+  line-height: 1;
+  /* Der EINE Akzent, und er sitzt auf der Handlung — genau dort, wo die
+     Designsprache ihn haben will. */
+  background: var(--igt-akzent);
+  color: var(--igt-dunkel);
+  box-shadow: var(--igt-shadow-md);
+  padding-left: 3px; /* das Dreieck steht optisch sonst links der Mitte */
+}
+
+.qb-igt__spinner {
+  display: block;
+  width: 1em;
+  height: 1em;
+  padding: 0;
+  border: 0.14em solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  opacity: 0.9;
+  animation: qb-igt-dreh 720ms linear infinite;
+}
+
+@keyframes qb-igt-dreh {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── Die Namenszeile (nur T1/T2 — T3 hat baulich keine) ─────────────────── */
+.qb-igt__profil {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 var(--igt-s1);
+  font-size: var(--igt-fs-xs);
+  line-height: 1.4;
+  text-decoration: none;
+  color: var(--igt-akzent-tinte);
+  font-weight: 600;
+}
+
+.qb-igt__profil:hover .qb-igt__handle {
+  text-decoration: underline;
+}
+
+.qb-igt__profil:focus-visible {
+  outline: 2px solid var(--igt-akzent-tinte);
+  outline-offset: 2px;
+  border-radius: var(--igt-r1);
+}
+
+.qb-igt__aufig {
+  color: var(--igt-muted);
+  font-weight: 400;
+}
+
+/* ─── Nav ────────────────────────────────────────────────────────────────── */
+.qb-igt__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--igt-s2);
+  margin-top: var(--igt-s2);
+}
+
+.qb-igt__pfeil {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--igt-linie);
+  background: var(--igt-grund);
+  color: var(--igt-text);
+  font-size: var(--igt-fs-base);
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 200ms ease-out;
+}
+
+.qb-igt__pfeil:hover {
+  border-color: var(--igt-akzent);
+}
+
+.qb-igt__pfeil:focus-visible {
+  outline: 2px solid var(--igt-akzent-tinte);
+  outline-offset: 2px;
+}
+
+.qb-igt__wisch {
+  font-size: var(--igt-fs-xs);
+  color: var(--igt-muted);
+}
+
+/* ─── Schmale Flächen ────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .qb-igt {
+    --igt-kachel: 232px;
+    padding: var(--igt-s6) var(--igt-s2);
+  }
+
+  /* Auf dem Telefon ist die Bahn selbst die Bedienung — die Pfeile sind dort
+     ein Ziel, das der Daumen nie trifft, und kosten nur Fläche. */
+  .qb-igt__nav {
+    gap: var(--igt-s1);
+  }
+
+  .qb-igt__pfeil {
+    display: none;
+  }
+}
+
+/* ─── Bewegung abbestellt ────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .qb-igt__bahn {
+    scroll-behavior: auto;
+  }
+
+  .qb-igt__flaeche,
+  .qb-igt__pfeil {
+    transition: none;
+  }
+
+  .qb-igt__flaeche:is(button):hover {
+    transform: none;
+  }
+
+  /* Ein ruhendes Zeichen bleibt ein Zeichen: seine AUFGABE ist die
+     Sichtbarkeit, nicht die Drehung. */
+  .qb-igt__spinner {
+    animation: none;
+    border-top-color: currentColor;
+    opacity: 0.55;
+  }
+
+  /* Die Einblendung des Players ist die einzige Bewegung, die sonst
+     übrigbliebe. Sie wird im selben Zug abgeschaltet. */
+  .qb-igt__player {
+    transition: none !important;
+  }
+}
