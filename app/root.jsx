@@ -175,6 +175,12 @@ export async function loader(args) {
     // preise-wie-produktseite-prio10): gelesen in lib/context.js, hier nur an
     // den Client gereicht, damit die Hydration denselben Modus rechnet.
     preismodus: args.context.preismodus ?? preismodusStand(),
+    // DAS AUFGELOESTE MARKT-LAND, EINMAL UND FUER ALLE ANZEIGEN (Naht-Nachzug
+    // 2026-09-26 aus Vorlage c5941ee, #422). `resolveCountry` laeuft in
+    // lib/context.js; ohne diese Zeile raet jede Preisanzeige den Markt aus
+    // der WAEHRUNG und liegt in AT um drei Prozentpunkte zu niedrig (Kakao
+    // 7 statt 10 %). Derselbe Wert, den die @inContext-Queries benutzen.
+    marktLand: storefront.i18n.country,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,

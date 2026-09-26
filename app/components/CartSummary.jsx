@@ -1,6 +1,7 @@
 import {CartForm} from '@shopify/hydrogen';
 import {Preis} from './Preis';
 import {getCartLineGrossDisplayTotalExact} from '~/lib/cart-display-pricing';
+import {useMarktLand} from '~/lib/markt-land';
 import {useEffect, useId, useRef, useState} from 'react';
 import {useFetcher} from 'react-router';
 import {cartLineContentIds} from '~/lib/pixel-content';
@@ -17,6 +18,9 @@ export function CartSummary({cart, layout}) {
   const discountCodeInputId = useId();
   const giftCardHeadingId = useId();
   const giftCardInputId = useId();
+  // Der Warenkorb rechnet den Bruttobetrag selbst (Netto-Shop) und braucht
+  // dafuer den Satz des aufgeloesten Marktes -- in AT 10 statt 7 % beim Kakao.
+  const marktLand = useMarktLand();
 
   // ZWISCHENSUMME BRUTTO — 2026-09-09. Hier stand `cart.cost.subtotalAmount`,
   // und das ist bei diesem Shop der NETTO-Betrag: gemessen 71,03 EUR fuer eine
@@ -35,7 +39,7 @@ export function CartSummary({cart, layout}) {
       !('parentRelationship' in zeile && zeile.parentRelationship?.parent),
   );
   const bruttoSumme = zeilen.reduce(
-    (summe, zeile) => summe + getCartLineGrossDisplayTotalExact(zeile),
+    (summe, zeile) => summe + getCartLineGrossDisplayTotalExact(zeile, marktLand),
     0,
   );
   const waehrung = cart?.cost?.subtotalAmount?.currencyCode ?? 'EUR';

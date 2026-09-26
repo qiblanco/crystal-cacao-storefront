@@ -2,6 +2,7 @@ import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import {EuGewaehrleistungsHinweis} from './EuGewaehrleistungsLabel';
 import {anzeigeSatz, formatPreis} from '~/lib/markt-pricing';
+import {useMarktLand} from '~/lib/markt-land';
 
 /**
  * Mengenstaffel Crystal Cacao® — GESCHAEFTSREGEL (Prozente + Badges), KEINE
@@ -83,7 +84,7 @@ function formatPer100g(wert, waehrung) {
  * @param {object} [selectedVariant] Variante mit price {amount, currencyCode}
  * @param {string} [handle] Produkt-Handle (Steuersatz-Zuordnung, 7 % Kakao)
  */
-export function cacaoPricing(quantity, selectedVariant, handle) {
+export function cacaoPricing(quantity, selectedVariant, handle, land) {
   const staffel = CACAO_STAFFEL[quantity] || CACAO_STAFFEL['1'];
   const netto = Number.parseFloat(selectedVariant?.price?.amount);
   let waehrung = selectedVariant?.price?.currencyCode || 'EUR';
@@ -103,7 +104,7 @@ export function cacaoPricing(quantity, selectedVariant, handle) {
     waehrung === 'EUR' ? staffel.rabattProzent : 0;
   const rabattImWarenkorb = waehrung !== 'EUR' && staffel.rabattProzent > 0;
   if (Number.isFinite(netto)) {
-    const satz = anzeigeSatz(handle, waehrung);
+    const satz = anzeigeSatz(handle, waehrung, land);
     const rabattProEinheit =
       Math.floor(netto * (rabattProzent / 100) * 100) / 100;
     einzel = Math.round((netto - rabattProEinheit) * (1 + satz));
@@ -134,9 +135,9 @@ export function cacaoPricing(quantity, selectedVariant, handle) {
 /**
  * Dropdown-Optionen der Mengenstaffel (Preise dynamisch abgeleitet).
  */
-export function cacaoSizeOptions(selectedVariant, handle) {
+export function cacaoSizeOptions(selectedVariant, handle, land) {
   return ['3', '2', '1'].map((value) => {
-    const pricing = cacaoPricing(value, selectedVariant, handle);
+    const pricing = cacaoPricing(value, selectedVariant, handle, land);
     const rabatt =
       pricing.rabattProzent > 0 ? `${pricing.rabattProzent}% Rabatt | ` : '';
     // Ausserhalb des EUR-Markts nennt die Zeile den Listenpreis und sagt, dass
@@ -184,6 +185,9 @@ export function CacaoProductForm({
   gewaehrleistungsHinweis = true,
 }) {
   const {open} = useAside();
+  // Der Lebensmittelsatz ist NICHT ueberall 7 % -- in AT sind es 10 %
+  // (gemessen 2026-09-13, cart-display-pricing.js SATZ_JE_LAND).
+  const marktLand = useMarktLand();
 
   return (
     <div className="product-form">
@@ -194,7 +198,7 @@ export function CacaoProductForm({
           value={quantity}
           onChange={(e) => onQuantityChange(e.target.value)}
         >
-          {cacaoSizeOptions(selectedVariant, handle).map((opt) => (
+          {cacaoSizeOptions(selectedVariant, handle, marktLand).map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>

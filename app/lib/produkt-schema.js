@@ -319,7 +319,14 @@ function retourenRichtlinie() {
   };
 }
 
-export function produktSchema(produkt) {
+/**
+ * @param {object} produkt Produkt aus der Storefront-API
+ * @param {string} [marktLand] ISO-Land des aufgeloesten Marktes (Default DE).
+ *   MUSS mitgegeben werden, sonst weicht der ausgezeichnete Preis in AT um
+ *   einen Prozentpunkt von dem ab, den die Seite zeigt und die Kasse verlangt
+ *   -- und Google vergleicht strukturierte Daten mit der sichtbaren Seite.
+ */
+export function produktSchema(produkt, marktLand) {
   if (!produkt?.handle || !produkt?.title) return null;
   if (OHNE_PREIS_NACHWEIS.includes(produkt.handle)) return null;
 
@@ -327,7 +334,12 @@ export function produktSchema(produkt) {
   const waehrung = variante?.price?.currencyCode;
   // Brutto — siehe Kopf. bruttoAnzeige() liefert denselben Wert, den die
   // Seite anzeigt; null, wenn der Betrag fehlt oder unbrauchbar ist.
-  const preis = bruttoAnzeige(variante?.price?.amount, produkt.handle, waehrung);
+  const preis = bruttoAnzeige(
+    variante?.price?.amount,
+    produkt.handle,
+    waehrung,
+    marktLand,
+  );
   // Ohne Preis KEIN offers-Block und damit kein Rich Result — dann lohnt der
   // ganze Knoten nicht, denn Preis und Verfügbarkeit sind sein einziger
   // Mehrwert gegenüber dem, was Google ohnehin aus der Seite liest.
