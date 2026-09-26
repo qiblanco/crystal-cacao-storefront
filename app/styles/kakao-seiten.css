@@ -3015,10 +3015,17 @@ main .cc-absicht h1 {
 }
 
 .cc-absicht__zitat p {
-  font-size: var(--cc-fs-4);
+  font-size: var(--cc-fs-3);
   line-height: 1.45;
   color: var(--cc-dunkel);
   margin-bottom: 0;
+  /* „Bewusstseinserweiterung" ist in 25 px rund 310 px breit — auf einem
+     320-px-Telefon stehen 261 px zur Verfuegung, und ein Wort ohne Trennstelle
+     schob die ganze Seite 35 px zur Seite (gemessen: scrollWidth 355 bei 320).
+     Silbentrennung nach der Seitensprache (lang="de"), und wo sie nicht
+     greift, bricht das Wort trotzdem, statt ueber den Rand zu laufen. */
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 /* DER VORSPANN UND CHRISTIANS SATZ STEHEN EINE STUFE GROESSER (--cc-fs-4,
@@ -3030,8 +3037,20 @@ main .cc-absicht h1 {
    der alten Pruefdokumente wegfielen. Die Leiter lautet jetzt 16 / 20 / 25 /
    31,25 / 48,8 — ein Schritt 1,25 je Stufe, H1 ausgenommen. */
 .cc-absicht .cc-lead {
-  font-size: var(--cc-fs-4);
   line-height: 1.45;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+/* Die groessere Stufe erst ab 48em: auf dem Telefon bleiben Vorspann und Zitat
+   bei 20 px, sonst zerlegt die Silbentrennung Christians Satz in fuenf
+   Trennstriche (gemessen bei 320 px: „Bewusstseinserweite-rung", „Entrau-
+   matisierung", „Kör-perbewusstsein", „natür-licher", „för-dern"). */
+@media (min-width: 48em) {
+  .cc-absicht .cc-lead,
+  .cc-absicht__zitat p {
+    font-size: var(--cc-fs-4);
+  }
 }
 
 /* Die Absaetze, in denen der Text seine eigenen Grenzen benennt (fehlender

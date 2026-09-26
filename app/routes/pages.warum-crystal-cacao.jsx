@@ -333,8 +333,8 @@ export default function WarumCrystalCacaoPage() {
           <h2>Wie der Kakao zu uns kam</h2>
           <p>
             Anna und ich haben über drei Jahre in Tulum gelebt, in Mexiko. Es
-            war die Zeit von Corona, und in Tulum trafen sich damals Menschen
-            aus der ganzen Welt.
+            war die Zeit von Corona, und in Tulum trafen sich damals viele
+            Menschen mit weiten, modernen Gedanken.
           </p>
           <p>
             Am meisten beeindruckt haben mich die indigenen Stämme, die dorthin
@@ -344,8 +344,8 @@ export default function WarumCrystalCacaoPage() {
             Zeremonien. Eine Pflanze hatten sie alle gemeinsam: den Kakao.
           </p>
           <p>
-            Ich kannte Kakao bis dahin als süßes Getränk aus der Kindheit und
-            als Praline. Ehrlich gesagt kannte ich nur Schokolade. In Mexiko
+            Ich kannte Kakao bis dahin als Getränk mit viel Zucker und als
+            Praline. Ehrlich gesagt kannte ich nur Schokolade. In Mexiko
             habe ich die Bohne in ihrer Urform erlebt, von Bäumen, wie sie seit
             Jahrtausenden im Dschungel wachsen. Das hat mich gepackt.
           </p>
@@ -356,14 +356,13 @@ export default function WarumCrystalCacaoPage() {
           <p>
             Crystal Cacao kommt aus meinem Wunsch, Mineralmedizin zu
             etablieren. Damit meine ich Mineralstoffe und Spurenelemente in
-            ihrer reinsten und ursprünglichsten Form, so wie eine Pflanze sie
-            selbst gebildet hat.
+            ihrer reinsten und ursprünglichsten Form: so, wie die Kakaobohne
+            sie mitbringt.
           </p>
           <p>
             Kakao bringt davon 24 mit, dazu sieben Wirkstoffe. Magnesium,
             Kalium, Eisen und Zink gehören genauso dazu wie Theobromin,
-            Anandamid und Tryptophan. Und das alles in einer Tasse, die du
-            ohnehin trinkst.
+            Anandamid und Tryptophan. Das alles steckt in einer Tasse.
           </p>
         </section>
 
