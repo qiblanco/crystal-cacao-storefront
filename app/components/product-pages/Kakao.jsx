@@ -436,8 +436,12 @@ function ComparisonTable() {
   ];
 
   const cell = (val) => {
+    // 2026-09-27: war text-gray-400 (#9a938a), 3,04:1 auf Weiss und 2,87:1
+    // auf der Zebrazeile, bei 12,8 px (Soll 4,5). Das „–" sagt „nicht
+    // enthalten", es ist Text. gray-500 ist --cc-muted: 5,70 bzw. 5,38:1,
+    // derselbe Ton wie die Mengenangaben im Tabellenkopf, kein neuer Grauton.
     if (val === '-')
-      return <td className="text-center py-2 px-3 text-gray-400">–</td>;
+      return <td className="text-center py-2 px-3 text-gray-500">–</td>;
     const isObj = typeof val === 'object' && val !== null && 'value' in val;
     return (
       <td className="text-center py-2 px-3">
@@ -684,6 +688,11 @@ function SideToSideWithTable() {
  * das Bild zeigt etwas anderes als sie sagen — ohne alt faellt genau dieser
  * Teil weg. Default '' bleibt, damit kuenftige Aufrufe mit echter Kulisse
  * nichts erfinden muessen.
+ *
+ * `top-10` und `text-5xl!` gelten nur ab 48em. Am Telefon stellt
+ * app/styles/kakao-seiten.css die Ueberschrift nach oben, eine Stufe kleiner
+ * und mit eigenem Schleier (2026-09-27, Kontrast am Telefon; Abschnitt
+ * "AM TELEFON STEHT DIE UEBERSCHRIFT OBEN").
  */
 function HerobannerWithText({src, text, imgAlt = ''}) {
   return (

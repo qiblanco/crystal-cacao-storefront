@@ -537,9 +537,14 @@
    * Farbton dreht von 256 Grad (blau) auf die warme Achse.
    * EHRLICH ZU 400: 2,87:1 traegt keinen Fliesstext. Das gilt fuer Tailwinds
    * eigenes gray-400 genauso (dort 2,74:1 auf demselben Grund) — der Ersatz
-   * verschlechtert nichts, er erbt eine Schwaeche der Vorlage. Die neun
-   * Elemente, die es auf /pages/crystal-cacao benutzen, sind Trennzeichen
-   * einer Tabellenzeile, kein Text.
+   * verschlechtert nichts, er erbt eine Schwaeche der Vorlage.
+   * KORREKTUR 2026-09-27: hier stand, die Elemente mit 400 seien
+   * "Trennzeichen einer Tabellenzeile, kein Text". Das waren die "–" der
+   * Vergleichstabelle, und sie sagen "nicht enthalten", sind also Text. Sie
+   * stehen jetzt in 500 (--cc-muted, 5,38:1 auf --cc-grund, 5,70:1 auf
+   * Weiss). Unter app/ benutzt seitdem kein Element mehr 400; die Stufe
+   * bleibt gebunden, damit ein kuenftiger K1-Nachzug mit text-gray-400 warm
+   * ankommt statt blau.
    *
    * ORANGE: text-orange-500 steht genau EINMAL (Uebersichtsseite) und war
    * damit eine fuenfte Akzentfarbe auf einem einzigen Element. Es faellt auf
@@ -1805,6 +1810,70 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
  * positioniert, und nur darauf wirkt z-index ohnehin. */
 .ProductPageKakao div:has(> img + h2) > h2 {
   z-index: 1;
+}
+
+/* --------------------------------------------------------------------------
+ * AM TELEFON STEHT DIE UEBERSCHRIFT OBEN, UND DER SCHLEIER WAECHST MIT IHR
+ * 2026-09-27, Job 20260927-crystal-startseite-kontrast-flow-banner-und-
+ * vergleichstabelle-am-telefon (Befund von s02 im Grossjob 20260926-…-
+ * seitendurchgang, vor dem Bau nachgemessen).
+ *
+ * DER BEFUND: am Telefon war "Wach. Klar. Im Flow." zu schwach. Kontrast-
+ * Median gegen das Bild, das wirklich unter der Schrift liegt: 2,53 bei
+ * 320 px, 2,81 bei 360, 2,94 bei 375, 5. Perzentil 1,38 (Soll 3,0 fuer grosse
+ * Schrift). "Im Flow." stand auf hellem Haar und weissem Hemd.
+ *
+ * DIE URSACHE IST GEOMETRIE, NICHT FARBE: die Ueberschrift steht per `top-10`
+ * (40 px) plus Aussenabstand aus `.ProductPageKakao h2` (48 px) immer 88 px
+ * unter der Bildkante. Am Desktop sind das 11 % eines 768 px hohen Bildes,
+ * also oben im Schleier. Am Telefon ist das Bild 192 bis 239 px hoch, die
+ * Zeilen lagen bei 40 bis 80 % der Hoehe, mitten auf den Gesichtern. Der
+ * Schleier oben endet bei 45 % und hat die Schrift dort nie erreicht.
+ *
+ * DER FIX, unterhalb der Hausgrenze 47.99em (dieselbe wie beim Aufmacher):
+ *   - die Ueberschrift steht wieder OBEN im Bild wie am Desktop, 16 px statt
+ *     88 px unter der Kante;
+ *   - sie steigt eine Stufe ab (--cc-fs-6 auf --cc-fs-5), derselbe Griff wie
+ *     `.cc-kakao-aufmacher h1`. Das Markup setzt `text-5xl!`; umgestellt wird
+ *     deshalb die Variable, die diese Utility liest, statt mit !important
+ *     gegen sie anzutreten;
+ *   - den Schleier traegt die Ueberschrift SELBST als Hintergrund. Er ist so
+ *     hoch wie ihre Zeilen plus 48 px Auslauf und waechst mit, wenn sie
+ *     umbricht. Das ::after mit seinen festen 45 % ist hier aus. Der dunkle
+ *     Ton ist --cc-dunkel mit demselben Startwert 72 %, keine neue Farbe.
+ *
+ * WARUM DER SCHLEIER AN DER UEBERSCHRIFT HAENGT: die Variante "nur nach oben
+ * ruecken, festen Schleier behalten" misst bei normaler Schrift genauso gut.
+ * Mit 125 % Grundschrift (Telefon-Einstellung "grosse Schrift") faellt sie
+ * bei 320 px wieder durch, 5. Perzentil 2,64 und 2,02; diese Fassung haelt
+ * dort 7,33 und 7,05. Wer die Schrift gross stellt, braucht den Kontrast am
+ * meisten.
+ *
+ * WARUM KEIN TEXTSCHATTEN: die Messung schaltet Schatten mit der Schrift ab
+ * und misst das Bild darunter. Ein Schatten haette die Zahl nicht bewegt.
+ *
+ * Messgeraet: crystal-cacao-node/pruefungen/probe_startseite_kontrast_
+ * telefon.py (Median / 5. Perzentil je Zeile). Ab 48em gilt alles oben
+ * unveraendert, der Desktop wird hier nicht angefasst.
+ * ------------------------------------------------------------------------ */
+@media (max-width: 47.99em) {
+  .ProductPageKakao div:has(> img + h2)::after {
+    display: none;
+  }
+
+  .ProductPageKakao div:has(> img + h2) > h2 {
+    --text-5xl: var(--cc-fs-5);
+    top: 0;
+    margin-block: 0;
+    padding: var(--cc-space-2) var(--cc-space-2) var(--cc-space-5);
+    border-radius: var(--cc-radius-bild) var(--cc-radius-bild) 0 0;
+    background: linear-gradient(
+      to bottom,
+      rgb(23 19 16 / 72%) 0%,
+      rgb(23 19 16 / 60%) 55%,
+      rgb(23 19 16 / 0%) 100%
+    );
+  }
 }
 
 /* ==========================================================================
