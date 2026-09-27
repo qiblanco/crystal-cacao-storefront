@@ -47,12 +47,14 @@
     {
       "upstream": "app/components/ProductImage.jsx",
       "klasse": "K1",
-      "sha256": "a59e40e7b5dbab5af986a5db7c84a65d0d691c48e151413b729e08813dcc96aa"
+      "sha256": "89364eb7a1237d35bcbe3f30ea1fadf35d6a8dda51d094209006610db27d3edc",
+      "nachzug_grund": "NACHZUG 2026-09-27 (Job 20260927-produktbild-lcp-laedt-lazy-vorlage-und-kakao-prio35): byte-gleich aus qiblanco-storefront 9465188 (#675). Das Galerie-Hauptbild laedt eager mit fetchpriority=high: es steht im ersten Bildschirm und ist auf beiden Kaufseiten das LCP-Element (vorher loading=lazy, Abruf erst nach dem CSS)."
     },
     {
       "upstream": "app/components/ProductImageList.jsx",
       "klasse": "K1",
-      "sha256": "b1fea10cf0cfc52a01201fecfb8b4faa852d0b5e45b6d98580a16683a8bb25fd"
+      "sha256": "eac51a78bd664f4c76deaa913ad91977d0e48c8c1b5e71eb297e212e780e0654",
+      "nachzug_grund": "NACHZUG 2026-09-27 (Job 20260927-produktbild-lcp-laedt-lazy-vorlage-und-kakao-prio35): byte-gleich aus qiblanco-storefront 9465188 (#675). Vorschaubilder mit gemessener sizes-Angabe und 100er-Leiter (desktop vorher 4,95x); mitgenommen ist die Video-Kachel-Prop aus #667 (Default null, ohne Prop byte-gleiches Rendern; die Kakao-Routen uebergeben keine)."
     },
     {
       "upstream": "app/components/reusables/ActiveCampaignForm.jsx",
