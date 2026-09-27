@@ -91,6 +91,48 @@ const PFAD_JE_SORTE = Object.freeze(
 );
 
 /**
+ * DIE BILDLEITER DER HALBSPALTE — Zielbreiten in Pixeln fuer das srcset der
+ * Kaufseiten-Bilder (Job 20260927-crystal-kaufseiten-schicken-dem-telefon-
+ * keine-desktop-pixel, Muster D-061). Gelesen von SortenSeite.jsx.
+ *
+ * WARUM SIE HIER STEHT: die sortenspezifischen Bilder (`inhaltsstoffe.bild`,
+ * `herkunft[].bild`) stehen in dieser Datei, und ein Bild-Eintrag traegt
+ * seine Leiter mit — die gemeinsamen Bilder der Seite benutzen dieselbe.
+ *
+ * WIE SIE ENTSTANDEN IST: jede Sprosse ist fuer JEDE Datei, die diese Leiter
+ * traegt, am Shopify-CDN nachgemessen (2026-09-27, Beleg im Job-Ordner
+ * belege/cdn_leiter.json): gelieferte Pixelbreite = angefragte Breite, Bytes
+ * kleiner als die Masterdatei. Die oberste Sprosse deckt DPR 2 auf der
+ * breitesten Halbspalte (643 px -> 1286 px Bedarf). Deshalb traegt sie nur,
+ * wer einen Master von mindestens 1320 px hat; ein kleinerer Master endet mit
+ * seiner eigenen Breite (DSC01491_Kopie.webp: 1200).
+ * Wer ein Bild tauscht, misst die Leiter fuer die neue Datei nach: das CDN
+ * kodiert bei einem Breiten-Parameter neu, und bei den 1000-px-Mastern der
+ * Startseite lag `width=840` messbar UEBER dem Master (D-061).
+ */
+export const LEITER_HALBSPALTE = Object.freeze([
+  300, 420, 550, 660, 740, 840, 1000, 1100, 1320,
+]);
+
+/**
+ * Ein Bild-Eintrag: Adresse, INTRINSISCHE Masse der Masterdatei (werden
+ * width/height am <img> und reservieren den Platz) und die gemessene Leiter.
+ *
+ * POSITIONSARGUMENTE STATT EINES `{url: …, breite: …}`-LITERALS, und das ist
+ * tragend: pruefungen/probe_sortenaufmacher.py (Arm C) liest je Sortenblock
+ * das ERSTE `url:` und das ERSTE `breite:`/`hoehe:` als Wortmarke. Ein
+ * Objekt-Literal mit diesen Schluesseln VOR dem `wortmarke`-Block wuerde die
+ * Probe auf ein Kaufseiten-Foto umlenken, ohne dass sie es merkt.
+ * @param {string} url
+ * @param {number} breite
+ * @param {number} hoehe
+ * @param {readonly number[]} [leiter=LEITER_HALBSPALTE]
+ */
+export function bildEintrag(url, breite, hoehe, leiter = LEITER_HALBSPALTE) {
+  return Object.freeze({url, breite, hoehe, leiter});
+}
+
+/**
  * WAS HIER STEHEN DARF UND WAS NICHT — die Bedingung des Auftrags woertlich:
  * „Der Text darf sagen, wofuer die Sorte gemacht ist, aber nichts behaupten,
  * was sie bewirkt." Und: „‚Wach. Mutig. Kraftvoll.' beschreibt eine Haltung,
@@ -125,7 +167,10 @@ const PFAD_JE_SORTE = Object.freeze(
  *                         heraus beschreibt — Bestandstext.
  *   inhaltsstoffe.bild    das erste der zwei Bilder (Frau / Armband-Motiv);
  *                         das zweite (Kaffee) ist auf beiden Seiten dasselbe
- *                         und steht deshalb im Bauteil, nicht hier.
+ *                         und steht deshalb im Bauteil, nicht hier. Seit
+ *                         2026-09-27 ein Bild-Eintrag (`bildEintrag`, siehe
+ *                         LEITER_HALBSPALTE), keine nackte Adresse mehr —
+ *                         dasselbe gilt fuer `herkunft[].bild`.
  *   inhaltsstoffe.bildSeite  'links' (Awake) / 'rechts' (Create): am
  *                         Schreibtisch stehen die zwei Bilder bei Awake links
  *                         vom Text, bei Create rechts. EHRLICH: dafuer gibt es
@@ -162,7 +207,11 @@ export const SORTEN = Object.freeze({
       'Gedacht für den Start in den Tag: morgens, vor dem Sport, ' +
       'vor einem langen Vormittag.',
     inhaltsstoffe: Object.freeze({
-      bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06589_1.jpg?v=1764275150',
+      bild: bildEintrag(
+        'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06589_1.jpg?v=1764275150',
+        4000,
+        4000,
+      ),
       bildSeite: 'links',
       liste: Object.freeze([
         {
@@ -206,7 +255,11 @@ export const SORTEN = Object.freeze({
             'durch ihre besondere Bohnenstruktur ein außergewöhnlich feines ' +
             'Aromaprofil.',
         ],
-        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/tal-kakao-awake.jpg?v=1764276290',
+        bild: bildEintrag(
+          'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/tal-kakao-awake.jpg?v=1764276290',
+          1559,
+          1559,
+        ),
       },
       {
         absaetze: [
@@ -217,7 +270,11 @@ export const SORTEN = Object.freeze({
             'Ruhe kristallisiert er langsam aus und entfaltet dabei sein ' +
             'charakteristisches Kristallmuster.',
         ],
-        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC02183_1.jpg?v=1764259399',
+        bild: bildEintrag(
+          'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC02183_1.jpg?v=1764259399',
+          1333,
+          1333,
+        ),
       },
       {
         absaetze: [
@@ -229,7 +286,11 @@ export const SORTEN = Object.freeze({
             'in dein persönliches Ritual mit Achtsamkeit, Herzöffnung und ' +
             'tiefer Verbindung zu dir selbst.**',
         ],
-        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01401.jpg?v=1766919672',
+        bild: bildEintrag(
+          'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01401.jpg?v=1766919672',
+          4000,
+          4000,
+        ),
       },
     ]),
     wortmarke: Object.freeze({
@@ -254,7 +315,11 @@ export const SORTEN = Object.freeze({
       'Gedacht für den klaren Kopf: lange Stunden am Schreibtisch, ' +
       'Arbeit, die Ruhe braucht.',
     inhaltsstoffe: Object.freeze({
-      bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/bracelet-kakao-highlight.png?v=1764257247',
+      bild: bildEintrag(
+        'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/bracelet-kakao-highlight.png?v=1764257247',
+        1336,
+        1336,
+      ),
       bildSeite: 'rechts',
       liste: Object.freeze([
         {
@@ -295,7 +360,14 @@ export const SORTEN = Object.freeze({
             'elegante, quadratische 420 g-Tafel gegossen: ein purer Block ' +
             '**Bio Kristall Kakao®.**',
         ],
-        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01491_Kopie.webp?v=1759179615',
+        // Master nur 1200 px: er selbst ist die oberste Sprosse (DPR 2 auf
+        // der breitesten Halbspalte braeuchte 1286 px, Shopify skaliert nicht hoch).
+        bild: bildEintrag(
+          'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01491_Kopie.webp?v=1759179615',
+          1200,
+          800,
+          [300, 420, 550, 660, 740, 840, 1000, 1100, 1200],
+        ),
       },
       {
         absaetze: [
@@ -304,7 +376,11 @@ export const SORTEN = Object.freeze({
             'Kristallmuster. Es ist ein Sinnbild für naturbelassene Qualität, aromatische Tiefe ' +
             'und unsere tiefe Achtung vor dem Ursprung.',
         ],
-        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC02183_1.jpg?v=1764259399',
+        bild: bildEintrag(
+          'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC02183_1.jpg?v=1764259399',
+          1333,
+          1333,
+        ),
       },
       {
         absaetze: [
@@ -317,7 +393,11 @@ export const SORTEN = Object.freeze({
             'in dein persönliches Ritual voller Achtsamkeit, Herzöffnung und ' +
             'tiefer Verbundenheit.**',
         ],
-        bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01953.jpg?v=1766919764',
+        bild: bildEintrag(
+          'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01953.jpg?v=1766919764',
+          4000,
+          4000,
+        ),
       },
     ]),
     wortmarke: Object.freeze({
