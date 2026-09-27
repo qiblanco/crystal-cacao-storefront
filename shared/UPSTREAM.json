@@ -47,8 +47,8 @@
     {
       "upstream": "app/components/ProductImage.jsx",
       "klasse": "K1",
-      "sha256": "89364eb7a1237d35bcbe3f30ea1fadf35d6a8dda51d094209006610db27d3edc",
-      "nachzug_grund": "NACHZUG 2026-09-27 (Job 20260927-produktbild-lcp-laedt-lazy-vorlage-und-kakao-prio35): byte-gleich aus qiblanco-storefront 9465188 (#675). Das Galerie-Hauptbild laedt eager mit fetchpriority=high: es steht im ersten Bildschirm und ist auf beiden Kaufseiten das LCP-Element (vorher loading=lazy, Abruf erst nach dem CSS)."
+      "sha256": "9aa1e113e21ac8ed724db8914956e01cf36d2257ab1b727bd7d92a944320a84c",
+      "nachzug_grund": "NACHZUG 2026-09-27 (Job 20260927-galeriebild-vorrang-nur-wo-lcp-video-seiten-prio45): byte-gleich aus qiblanco-storefront 3b0108c (#679). Neue Prop vorrang (Default true = eager + fetchpriority=high wie bisher); nur die DACH-Video-Seiten QiBracelet/QiHome Air uebergeben vorrang={false}. Die Kakao-Routen uebergeben keine, Rendern hier unveraendert."
     },
     {
       "upstream": "app/components/ProductImageList.jsx",
