@@ -1852,9 +1852,22 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
  * WARUM KEIN TEXTSCHATTEN: die Messung schaltet Schatten mit der Schrift ab
  * und misst das Bild darunter. Ein Schatten haette die Zahl nicht bewegt.
  *
+ * WARUM SCHRIFT UND ABSTAENDE HIER EINEN vw-DECKEL TRAGEN (Nachzug am selben
+ * Tag, gemessen): das Bild waechst mit der Fensterbreite, nicht mit der
+ * Schrift. --cc-fs-5 hat anders als --cc-fs-6/-7 keinen vw-Deckel, und die
+ * Abstands-Token sind rem. Mit 150 % Grundschrift wurde die Ueberschrift bei
+ * 320 px 237 px hoch auf einem 181 px hohen Bild, mit 200 % 378 px auf 171 px:
+ * sie lief unter dem Bild auf den hellen Grund (5. Perzentil 2,18 bis 2,57).
+ * Deshalb derselbe Griff wie bei --cc-fs-6 oben: min(rem-Wert, vw-Wert). Die
+ * vw-Werte sind so gewaehlt, dass sie bei normaler Schrift zwischen 320 und
+ * 767 px nie greifen (10.1vw sind bei 320 px 32,3 px > 31,25 px; 5vw = 16 px,
+ * 15vw = 48 px). Gemessen: bei 100 % dieselben Werte wie ohne Deckel, bei
+ * 150 und 200 % bleibt die Ueberschrift im Bild (5. Perzentil >= 7,09).
+ *
  * Messgeraet: crystal-cacao-node/pruefungen/probe_startseite_kontrast_
- * telefon.py (Median / 5. Perzentil je Zeile). Ab 48em gilt alles oben
- * unveraendert, der Desktop wird hier nicht angefasst.
+ * telefon.py (Median / 5. Perzentil je Zeile, Ueberschrift im Bild, auch bei
+ * 200 % Grundschrift). Ab 48em gilt alles oben unveraendert, der Desktop
+ * wird hier nicht angefasst.
  * ------------------------------------------------------------------------ */
 @media (max-width: 47.99em) {
   .ProductPageKakao div:has(> img + h2)::after {
@@ -1862,10 +1875,11 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   }
 
   .ProductPageKakao div:has(> img + h2) > h2 {
-    --text-5xl: var(--cc-fs-5);
+    --text-5xl: min(var(--cc-fs-5), 10.1vw);
     top: 0;
     margin-block: 0;
-    padding: var(--cc-space-2) var(--cc-space-2) var(--cc-space-5);
+    padding: min(var(--cc-space-2), 5vw) min(var(--cc-space-2), 5vw)
+      min(var(--cc-space-5), 15vw);
     border-radius: var(--cc-radius-bild) var(--cc-radius-bild) 0 0;
     background: linear-gradient(
       to bottom,
