@@ -1,5 +1,6 @@
 import {Link} from 'react-router';
 import LazyImage from '~/components/reusables/LazyImage';
+import {bildQuelle} from '~/components/reusables/shopifyBildQuellen';
 import {SORTEN, POSITIONIERUNG, andereSorte} from '~/lib/sorten-profil';
 
 /**
@@ -129,6 +130,56 @@ import {SORTEN, POSITIONIERUNG, andereSorte} from '~/lib/sorten-profil';
  * entstanden und wird im RESULT als gefunden gemeldet, nicht im
  * Vorbeigehen mitgedreht.
  */
+/**
+ * DIE LEITER DER WORTMARKE — gemessen, nicht pauschal
+ * (Job 20260927-crystal-kaufseiten-schicken-dem-telefon-keine-desktop-pixel, s02).
+ *
+ * Vorher ging `src={wm.url}` an die MASTERDATEI: 995 px (awake) bzw. 950 px
+ * (create) fuer eine Flaeche von 246 bzw. 199 CSS-px am Telefon, also 2,02-
+ * bzw. 2,39-fach zu viele Pixel auf dem groessten Element des ersten
+ * Bildschirms.
+ *
+ * DIE FLAECHE FOLGT AUS EINER EINZIGEN GROESSE, --cc-wortmarke-hoehe in
+ * app/styles/kakao-seiten.css: 88 px unter 30em (`max-width: 29.99em`),
+ * 112 px ab 30em; die Breite ist Hoehe x Seitenverhaeltnis (awake 2,795,
+ * create 2,262). Daraus, und am DOM gegengemessen (11 Fensterbreiten
+ * 360..1920, belege/s02/boxbreiten_wortmarke_zwilling.json):
+ *     awake   246,7 px (< 30em)   312,5 px (ab 30em)
+ *     create  200,0 px (< 30em)   252,6 px (ab 30em)
+ * `sizes` rundet AUF (247/313, 200/253): ein halber Pixel zu wenig liesse
+ * den Browser an der Sprossengrenze die kleinere Datei waehlen.
+ * Unter 278 px Fensterbreite schrumpft die Hoehe weiter mit dem Fenster;
+ * `sizes` nennt dort die Obergrenze, das Bild wird hoechstens schaerfer.
+ *
+ * Die Sprossen decken 1x / 2x / 3x beider Flaechen (awake 246/313 -> 300,
+ * 360, 550, 660, 740; create 199/253 -> 200, 300, 420, 550, 600), jede am
+ * CDN nachgemessen (belege/cdn_leiter.json des Jobs, jede kleiner als der
+ * Master). Die MASTERBREITE steht als oberste Sprosse dabei: am Telefon mit
+ * DPR 3 reicht 740 bzw. 600, am Schreibtisch mit DPR 3 (939 bzw. 759 px
+ * Bedarf) nicht — ohne sie bekaeme dieser Fall 0,79x statt der vollen Datei.
+ *
+ * `loading="eager"` und `fetchPriority="high"` bleiben unveraendert: die
+ * Leiter aendert WELCHE Datei geladen wird, nicht WANN.
+ */
+const WORTMARKE_QUELLEN = Object.freeze({
+  awake: Object.freeze({
+    leiter: Object.freeze([300, 360, 550, 660, 740, 995]),
+    sizes: '(min-width: 30em) 313px, 247px',
+  }),
+  create: Object.freeze({
+    leiter: Object.freeze([200, 300, 420, 550, 600, 950]),
+    sizes: '(min-width: 30em) 253px, 200px',
+  }),
+});
+
+/** src + srcSet + sizes der Wortmarke; unbekannte Sorte -> nackte Adresse wie vorher. */
+function wortmarkeQuelle(sorte, url) {
+  const q = WORTMARKE_QUELLEN[sorte];
+  if (!q) return {src: url};
+  const quelle = bildQuelle(url, q.leiter);
+  return quelle.srcSet ? {...quelle, sizes: q.sizes} : quelle;
+}
+
 export function SortenAufmacher({sorte}) {
   const profil = SORTEN[sorte];
   // FAIL-CLOSED: eine unbekannte Sorte rendert nichts, statt einen halben
@@ -150,7 +201,7 @@ export function SortenAufmacher({sorte}) {
 
       <img
         className="cc-sortenaufmacher__wortmarke"
-        src={wm.url}
+        {...wortmarkeQuelle(profil.sorte, wm.url)}
         width={wm.breite}
         height={wm.hoehe}
         alt={`Crystal Cacao ${profil.name}`}
