@@ -32,6 +32,22 @@ export default {
 
       const response = await handleRequest(request);
 
+      // MESSPUNKT AM RAND: welche Storefront-API-Version dieser laufende
+      // Prozess fuer seine eigenen Abfragen WIRKLICH benutzt (Muster:
+      // qiblanco-storefront server.js). Gelesen von
+      // homepage-bauer/pruefungen/probe_sfapi_version_frist.py (Quelle `rand`)
+      // - anders als ein Blick in node_modules zeigt er den geladenen Stand,
+      // auch nach einem Neu-Installieren ohne Neustart.
+      // Wirft nie: ein fehlender Messkopf darf den Kaufweg nicht beruehren.
+      try {
+        const version = /\/api\/([^/]+)\/graphql\.json/.exec(
+          hydrogenContext.storefront.getApiUrl(),
+        )?.[1];
+        if (version) response.headers.set('X-QB-SFAPI-Version', version);
+      } catch {
+        // unveraenderliche Kopfzeilen (z.B. Redirect) - Messkopf entfaellt
+      }
+
       if (hydrogenContext.session.isPending) {
         response.headers.set(
           'Set-Cookie',
