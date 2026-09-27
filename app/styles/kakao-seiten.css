@@ -868,6 +868,23 @@
   justify-content: space-between;
   gap: 20px;
 }
+/* Galerie VOR dem Bildeingang so breit wie ihre Spalte (Job 20260927-
+   produktgalerie-kollabiert-vor-dem-bildeingang-css-beide-laeden-prio40,
+   gleiche Regel wie qiblanco-storefront app/styles/app.css).
+   .ProductImages zentriert (align-items: center), der Wrapper ist darum
+   shrink-to-fit, und .product-image darin ebenfalls (align-items: flex-start).
+   Bevor das Hauptbild da ist, ist ihre Breite 0: gemessen mit festgehaltenen
+   Bildabrufen auf crystal-cacao.com Awake 0 px von 358 px, beim Bildeingang
+   Sprung auf volle Breite. Beide Breiten sind noetig: nur der Wrapper auf
+   100 % liess .product-image hier bei 0 px. Geladen ist die Geometrie unter
+   1024 px unveraendert. Ab 1024 px bleibt alles, wie es ist: dort haengt die
+   Spaltenbreite der Vorschau am sizes-Wert von ProductImageList (K1). */
+@media (max-width: 1023.98px) {
+  .ProductImageWrapperSticky,
+  .ProductImageWrapperSticky > .product-image {
+    width: 100%;
+  }
+}
 .ProductImages .product-image-list {
   display: flex;
   flex-direction: row;
