@@ -114,33 +114,121 @@ const STANDBILD_LEITER = {
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ÄNDERUNG 2026-09-27 (Job 20260927-videobaustein-klick-ohne-rueckmeldung-
+ * spielt-attribut-postmessage-beide-laeden): EIN KLICK OHNE PLAYER HAT JETZT
+ * EINEN AUSWEG, `spielt` SAGT, WER ES GESETZT HAT, UND DER HANDSCHLAG SPRICHT
+ * NUR NOCH MIT DEM URSPRUNG, DEN DAS IFRAME TRÄGT.
+ *
+ * GEMESSEN VOR DEM UMBAU (live, Browser stumm, 1366 und 390 px):
+ *   YouTube gesperrt (Tracking-Schutz, Erweiterung, Firmennetz): `laedt` ab
+ *   ~40 ms, `spielt` ab ~970 ms — gesetzt von der Gnadenfrist nach dem load
+ *   der FEHLERSEITE. Der Player hat kein Wort gesagt. Danach: Standbild, kein
+ *   Knopf, kein Ladezeichen, kein Link. 16 Konsolenwarnungen „target origin".
+ *   YouTube erreichbar: `spielt` ab ~1,5 s, ebenfalls aus der Gnadenfrist —
+ *   auf diesem Server meldet der Player nur playerState -1 mit
+ *   videoData.errorCode "auth" (Bot-Sperre gegen die Rechenzentrums-Adresse).
+ *   9 Warnungen: der Gruß ging an ZWEI Ursprünge, und das Anklopfen begann,
+ *   bevor das iframe überhaupt geladen war (about:blank trägt den Ursprung
+ *   der Seite, jeder frühe Gruß passte also auf keinen der beiden).
+ *
+ * WIE ES JETZT GEBAUT IST — nach YouTubes eigener www-widgetapi.js (gelesen
+ * am 2026-09-27): das Ziel eines Grußes ist der Ursprung der iframe-`src`,
+ * nie eine Liste. Trägt die Einbettungs-URL `origin` und `widgetid`, meldet
+ * sich der Player UNGEFRAGT mit `readyToListen` (gemessen 516 ms, VOR dem
+ * load bei 679 ms); erst darauf wird gegrüßt. Ein einziger Ersatz-Gruß beim
+ * load hält den Handschlag, falls YouTube dieses Ereignis je fallen lässt.
+ * Mit erreichbarem YouTube: 0 Warnungen. Mit gesperrtem: 1 (der Ersatz-Gruß
+ * trifft die Fehlerseite) — bewusst, denn ohne ihn sähe bei einer stillen
+ * Änderung auf YouTubes Seite JEDER Besucher nur noch den Ausweg.
+ *
+ * DIE ENTSCHEIDUNG, und sie hat jetzt vier Ausgänge statt drei:
+ *   Player meldet playerState 1                   -> spielt / player
+ *   load + GNADENFRIST_MS, Player hat geantwortet -> spielt / gnadenfrist
+ *     (er ist da und zeigt seine eigene Oberfläche: Fehlerhinweis, eigener
+ *     Knopf, Anmeldung — die ist dann der Weg weiter)
+ *   HARTE_FRIST_MS, Player hat geantwortet        -> spielt / frist
+ *   load + ANTWORT_FRIST_MS OHNE jedes Wort       -> ausweg / gnadenfrist
+ *   ABSOLUTE_FRIST_MS ohne jedes Wort             -> ausweg / frist
+ * `data-qb-video-ausloeser` trägt, welche Stelle entschieden hat. Nur
+ * `player` ist ein Abspielbeweis; homepage-bauer/bin/mess_videoumschaltung.py
+ * hält das gegen seine EIGENE Erhebung der Player-Nachrichten.
+ *
+ * DER AUSWEG: an der Stelle des Knopfes steht derselbe Knopf als LINK auf
+ * die Folge an derselben Sekunde (neuer Tab). Das iframe wird dabei nicht
+ * ausgehängt, sondern auf about:blank gestellt und verborgen: ein Player, der
+ * doch lebt, verstummt damit sicher — und ein Aushängen liefe gegen einen
+ * Knoten, den eine Erweiterung ersetzt haben kann (React-removeChild bricht
+ * dann die ganze Seite). Im Hintergrund-Tab wird nicht auf `ausweg`
+ * entschieden: gedrosselte Uhren sind kein Beleg für einen stummen Player.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
 /* Wie lange nach `onLoad` noch auf die Auskunft gewartet wird. `onLoad` sagt
  * nur, dass das Player-DOKUMENT da ist — nicht, dass Bild da ist. */
 const GNADENFRIST_MS = 900;
 /* Die Frist, die nicht ausfallen kann. Bliebe die Vorschau liegen, weil die
  * Auskunft nie kommt, stünde ein Standbild über einem laufenden Video — das
- * wäre schlimmer als der Fehler, der hier behoben wird. */
+ * wäre schlimmer als der Fehler, der hier behoben wird. Seit 2026-09-27 gilt
+ * sie für einen Player, der GEANTWORTET hat; einer, der schweigt, bekommt den
+ * Ausweg (ANTWORT_FRIST_MS / ABSOLUTE_FRIST_MS). */
 const HARTE_FRIST_MS = 4000;
+/* Nach dem load der EIGENEN Quelle: so lange darf der Player schweigen, bevor
+ * das Dokument im Rahmen als „kein Player" gilt. Er meldet sich gemessen VOR
+ * dem load; 1500 ms sind Luft für ein langsames Telefon, keine Wartezeit. */
+const ANTWORT_FRIST_MS = 1500;
+/* Kein load, kein Wort: ein hängendes Netz. Länger als jedes gemessene
+ * Laden des Players, kurz genug, dass niemand vor einem Ladezeichen aufgibt. */
+const ABSOLUTE_FRIST_MS = 15000;
 const ZUSTAND_ABSPIELEND = 1;
+/* Der Ursprung, von dem der Player lädt — und damit der EINZIGE, an den
+ * gegrüßt wird. Aus der Quelle abgeleitet, nicht zweimal von Hand geführt. */
+const PLAYER_URSPRUNG = 'https://www.youtube-nocookie.com';
+/* Laufende Nummer je Player der Seite, wie in YouTubes eigener API. Ohne
+ * `widgetid` in der URL meldet der Player sich nie von selbst. */
+let naechsteWidgetId = 1;
 
 /**
- * Fragt den YouTube-Player, wann er wirklich spielt.
+ * Der Handschlag mit dem YouTube-Player (postMessage-Protokoll der
+ * IFrame-API, ohne deren Fremdskript).
  *
- * @param {HTMLIFrameElement} iframe  das eingebettete iframe (mit enablejsapi=1)
- * @param {() => void} beiSpielt      genau einmal gerufen, wenn er spielt
- * @returns {() => void} Abmelder
+ * Gegrüßt wird NUR der Ursprung, den das iframe trägt, und NUR wenn der
+ * Player zuhört: auf `readyToListen` hin, plus ein einziger Ersatz-Gruß beim
+ * load, falls bis dahin kein `initialDelivery` kam.
+ *
+ * @param {HTMLIFrameElement} iframe
+ * @param {{ursprung: string, widgetId: number, beiAntwort: () => void,
+ *          beiSpielt: () => void}} opts
+ * @returns {{abmelden: () => void, beiLoad: () => void}}
  */
-function spielMelderAnbinden(iframe, beiSpielt) {
-  if (typeof window === 'undefined' || !iframe) return () => {};
+function spielMelderAnbinden(iframe, {ursprung, widgetId, beiAntwort, beiSpielt}) {
+  const leer = {abmelden: () => {}, beiLoad: () => {}};
+  if (typeof window === 'undefined' || !iframe) return leer;
+  let geantwortet = false;
+  let initialisiert = false;
   let gemeldet = false;
-  let versuche = 0;
-  let takt = 0;
+
+  const gruessen = () => {
+    try {
+      const f = iframe.contentWindow;
+      if (f) {
+        f.postMessage(
+          JSON.stringify({event: 'listening', id: widgetId, channel: 'widget'}),
+          ursprung,
+        );
+      }
+    } catch {
+      /* fremdes Fenster nicht erreichbar — der Ausweg fängt das auf */
+    }
+  };
 
   const aufNachricht = (ev) => {
     /* Nur der eigene Player zählt: auf der Seite können weitere fremde
      * Fenster sprechen, und ein `message` ohne Absenderprüfung ist eine
      * offene Tür. */
     if (!iframe.contentWindow || ev.source !== iframe.contentWindow) return;
+    if (ev.origin !== ursprung) return;
     let d;
     try {
       d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
@@ -148,6 +236,21 @@ function spielMelderAnbinden(iframe, beiSpielt) {
       return;
     }
     if (!d || typeof d !== 'object') return;
+    if (!geantwortet) {
+      geantwortet = true;
+      beiAntwort();
+    }
+    if (d.event === 'readyToListen') {
+      gruessen();
+      return;
+    }
+    if (
+      d.event === 'initialDelivery' ||
+      d.event === 'onReady' ||
+      d.event === 'alreadyInitialized'
+    ) {
+      initialisiert = true;
+    }
     const info = d.info && typeof d.info === 'object' ? d.info : null;
     const zustand =
       d.event === 'onStateChange'
@@ -161,32 +264,12 @@ function spielMelderAnbinden(iframe, beiSpielt) {
     }
   };
 
-  /* Der Player antwortet erst, wenn er zuhört — also ein paar Mal anklopfen
-   * und dann nicht mehr. Kein Dauer-Timer. */
-  const anklopfen = () => {
-    versuche += 1;
-    try {
-      const f = iframe.contentWindow;
-      if (f) {
-        const gruss = JSON.stringify({event: 'listening', id: 1, channel: 'widget'});
-        f.postMessage(gruss, 'https://www.youtube.com');
-        f.postMessage(gruss, 'https://www.youtube-nocookie.com');
-      }
-    } catch {
-      /* fremdes Fenster noch nicht bereit — beim nächsten Versuch wieder */
-    }
-    if (gemeldet || versuche >= 8) {
-      window.clearInterval(takt);
-      takt = 0;
-    }
-  };
-
   window.addEventListener('message', aufNachricht);
-  anklopfen();
-  takt = window.setInterval(anklopfen, 700);
-  return () => {
-    window.removeEventListener('message', aufNachricht);
-    if (takt) window.clearInterval(takt);
+  return {
+    abmelden: () => window.removeEventListener('message', aufNachricht),
+    beiLoad: () => {
+      if (!initialisiert) gruessen();
+    },
   };
 }
 
@@ -275,26 +358,84 @@ export function PodcastEinstieg({
   /* `zeigt` ist NICHT „der Player existiert", sondern „der Player hat Bild".
    * Der Unterschied zwischen beidem ist genau das Schwarz, um das es geht. */
   const [zeigt, setZeigt] = useState(false);
+  /* `ausweg`: kein Player hat je geantwortet — der Knopf wird zum Link. */
+  const [ausweg, setAusweg] = useState(false);
+  /* Welche Stelle den Ladezustand beendet hat: player | gnadenfrist | frist. */
+  const [ausloeser, setAusloeser] = useState(null);
   const rahmen = useRef(null);
+  const melder = useRef(null);
+  const antwort = useRef(false);
+  const entschieden = useRef(false);
+  const widgetId = useRef(0);
+  const start = Math.max(0, Math.floor(startSekunde || 0));
+
+  /* EINE Stelle entscheidet, und nur einmal. */
+  const entscheide = (wie, ergebnis) => {
+    if (entschieden.current) return;
+    entschieden.current = true;
+    setAusloeser(wie);
+    if (ergebnis === 'ausweg') setAusweg(true);
+    else setZeigt(true);
+  };
+  /* Schweigen wird erst im sichtbaren Tab zum Befund: im Hintergrund drosselt
+   * der Browser die Uhren, und ein langsamer Player sähe dann aus wie keiner. */
+  const pruefeSchweigen = (wie) => {
+    if (entschieden.current || antwort.current) return;
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      const wieder = () => {
+        if (document.visibilityState !== 'visible') return;
+        document.removeEventListener('visibilitychange', wieder);
+        setTimeout(() => pruefeSchweigen(wie), ANTWORT_FRIST_MS);
+      };
+      document.addEventListener('visibilitychange', wieder);
+      return;
+    }
+    entscheide(wie, 'ausweg');
+  };
 
   useEffect(() => {
     if (!laeuft || !rahmen.current) return undefined;
-    return spielMelderAnbinden(rahmen.current, () => setZeigt(true));
+    const m = spielMelderAnbinden(rahmen.current, {
+      ursprung: PLAYER_URSPRUNG,
+      widgetId: widgetId.current,
+      beiAntwort: () => {
+        antwort.current = true;
+      },
+      beiSpielt: () => entscheide('player', 'spielt'),
+    });
+    melder.current = m;
+    return () => {
+      m.abmelden();
+      melder.current = null;
+    };
   }, [laeuft]);
 
-  /* Die Frist, die nicht ausfallen kann — unabhängig von jeder Auskunft. */
+  /* Die Fristen ab dem Klick — unabhängig von jedem load. */
   useEffect(() => {
-    if (!laeuft || zeigt) return undefined;
-    const t = setTimeout(() => setZeigt(true), HARTE_FRIST_MS);
-    return () => clearTimeout(t);
-  }, [laeuft, zeigt]);
-  const start = Math.max(0, Math.floor(startSekunde || 0));
+    if (!laeuft) return undefined;
+    const hart = setTimeout(() => {
+      if (antwort.current) entscheide('frist', 'spielt');
+    }, HARTE_FRIST_MS);
+    const absolut = setTimeout(() => pruefeSchweigen('frist'), ABSOLUTE_FRIST_MS);
+    return () => {
+      clearTimeout(hart);
+      clearTimeout(absolut);
+    };
+  }, [laeuft]);
 
   /* Der Weg zur ganzen Folge. Er zeigt bewusst auf DIESELBE Sekunde: wer
    * hier weiterklickt, soll dort weitermachen, wo er aufgehoert hat, nicht
    * am Anfang neu beginnen. Ohne Skript ist genau dieser Link der Ersatz
    * fuer den Knopf (siehe <noscript> unten). */
   const ganzeFolge = folgeUrl(videoId, start);
+  /* Die Einbettung. `origin` und `widgetid` wie in YouTubes eigener API:
+   * erst damit meldet der Player sich von selbst (`readyToListen`). Die
+   * Nummer entsteht beim Klick, die Adresse also erst im Browser. */
+  const quelle =
+    laeuft && typeof window !== 'undefined'
+      ? `${PLAYER_URSPRUNG}/embed/${videoId}?start=${start}&autoplay=1&enablejsapi=1` +
+        `&origin=${encodeURIComponent(window.location.origin)}&widgetid=${widgetId.current}`
+      : '';
 
   const standbild = EIGENE_STANDBILDER[videoId] || null;
   const quellen = standbild
@@ -311,7 +452,10 @@ export function PodcastEinstieg({
         {standbild ? (
           <div
             className="cc-podcast__buehne"
-            data-qb-video-zustand={laeuft ? (zeigt ? 'spielt' : 'laedt') : 'vorschau'}
+            data-qb-video-zustand={
+              laeuft ? (ausweg ? 'ausweg' : zeigt ? 'spielt' : 'laedt') : 'vorschau'
+            }
+            data-qb-video-ausloeser={ausloeser || undefined}
           >
             {/* SCHICHT 0 — die Vorstufe. Grob, vollflächig, sofort da: sie
                 steht als data-URI im HTML und braucht weder eine Anfrage noch
@@ -347,10 +491,25 @@ export function PodcastEinstieg({
               <iframe
                 ref={rahmen}
                 className="cc-podcast__fuellung"
-                src={`https://www.youtube-nocookie.com/embed/${videoId}?start=${start}&autoplay=1&enablejsapi=1`}
+                src={ausweg ? 'about:blank' : quelle}
                 title={titel}
-                style={{opacity: zeigt ? 1 : 0, transition: 'opacity 240ms ease-out'}}
-                onLoad={() => setTimeout(() => setZeigt(true), GNADENFRIST_MS)}
+                style={{
+                  opacity: zeigt && !ausweg ? 1 : 0,
+                  visibility: ausweg ? 'hidden' : undefined,
+                  transition: 'opacity 240ms ease-out',
+                }}
+                onLoad={() => {
+                  /* Nur der load der EIGENEN Quelle zählt: hat ein
+                     Einwilligungs-Werkzeug oder eine Erweiterung die Adresse
+                     umgeschrieben, sagt dieser load nichts über den Player. */
+                  const f = rahmen.current;
+                  if (entschieden.current || !f || f.getAttribute('src') !== quelle) return;
+                  if (melder.current) melder.current.beiLoad();
+                  setTimeout(() => {
+                    if (antwort.current) entscheide('gnadenfrist', 'spielt');
+                  }, GNADENFRIST_MS);
+                  setTimeout(() => pruefeSchweigen('gnadenfrist'), ANTWORT_FRIST_MS);
+                }}
                 allow="autoplay; encrypted-media; picture-in-picture"
                 allowFullScreen
               />
@@ -365,7 +524,10 @@ export function PodcastEinstieg({
               <button
                 type="button"
                 className="cc-podcast__knopf"
-                onClick={() => setLaeuft(true)}
+                onClick={() => {
+                  if (!widgetId.current) widgetId.current = naechsteWidgetId++;
+                  setLaeuft(true);
+                }}
                 aria-label={`Podcast ab Minute ${minuteWort(start)} abspielen: ${titel}`}
               >
                 <span className="cc-podcast__play" aria-hidden="true">
@@ -376,12 +538,34 @@ export function PodcastEinstieg({
                 </span>
               </button>
             )}
-            {laeuft && !zeigt ? (
+            {laeuft && !zeigt && !ausweg ? (
               <span className="cc-podcast__play" aria-hidden="true">
                 <span className="cc-podcast__play-scheibe">
                   <span className="cc-video-spinner" />
                 </span>
               </span>
+            ) : null}
+            {/* DER AUSWEG — derselbe Knopf an derselben Stelle, jetzt als Link
+                auf die Folge an derselben Sekunde. Wer klickt und der Player
+                kann hier nicht laden (Tracking-Schutz, Erweiterung,
+                Firmennetz), landet trotzdem bei 8:30 — nur auf YouTube. Die
+                Klasse ist die des Knopfes: gleiche Fläche, gleiches Gold,
+                gleiche Trefferfläche, kein zweiter Stil-Pfad. */}
+            {ausweg ? (
+              <a
+                className="cc-podcast__knopf"
+                href={ganzeFolge}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Podcast ab Minute ${minuteWort(start)} auf YouTube ansehen (neuer Tab): ${titel}`}
+              >
+                <span className="cc-podcast__play" aria-hidden="true">
+                  <span className="cc-podcast__play-scheibe">▶</span>
+                </span>
+                <span className="cc-podcast__marke" aria-hidden="true">
+                  ab {minuteWort(start)} auf YouTube
+                </span>
+              </a>
             ) : null}
             {/*
               OHNE AKTIVES SKRIPT passiert bei einem <button> nichts. Das ist
