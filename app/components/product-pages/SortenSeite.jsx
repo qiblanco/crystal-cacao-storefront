@@ -1,8 +1,9 @@
 import {Belege} from '../reusables/Belege';
 import {AbsichtHinweis} from '../reusables/AbsichtHinweis';
+import {bildQuelle} from '../reusables/shopifyBildQuellen';
 import {ProductFAQ} from '../ProductFAQ';
 import {FAQ_CACAO} from '~/data/product-faqs';
-import {sortenProfil} from '~/lib/sorten-profil';
+import {sortenProfil, bildEintrag, LEITER_HALBSPALTE} from '~/lib/sorten-profil';
 
 /**
  * DIE SORTENSEITE — der Rumpf unter dem Kaufblock, einmal gebaut, zweimal
@@ -101,15 +102,118 @@ function Fett({text}) {
   return teile.map((t, i) => (i % 2 === 1 ? <b key={i}>{t}</b> : t));
 }
 
-const IMG_KAFFEE =
-  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-1052459-kaffee.jpg?v=1764250719';
+/* ======================================================================
+ * BILDLAST DER KAUFSEITEN — gemessene Leiter je Datei, Muster D-061 der
+ * Startseite. Job 20260927-crystal-kaufseiten-schicken-dem-telefon-keine-desktop-pixel.
+ * ======================================================================
+ *
+ * DER GEMESSENE ANLASS (2026-09-27, crystal-cacao.com, mess_ladeverhalten.py
+ * mit 90-s-Fenster, gedrosselt 1,6 Mbit/150 ms, Median aus 3 Laeufen):
+ *   AWAKE   mobil LCP 8 240 ms · 7 436 214 Bildbytes · desktop 7 517 908
+ *   CREATE  mobil LCP 8 224 ms · 4 988 548 Bildbytes · desktop 5 092 530
+ * DAS TELEFON LUD SO VIEL WIE DER RECHNER. Jedes <img> hier trug die nackte
+ * CDN-Adresse, also die Masterdatei (bis 4000 px und 2,5 MB fuer eine
+ * 326-px-Flaeche), ohne srcset, ohne sizes und ohne loading. Und weil keines
+ * `lazy` war, zog der Browser alle schon beim ersten Blick, obwohl das erste
+ * davon mobil erst 3,5 Bildschirme tiefer steht. Das 25-s-Fenster, mit dem
+ * D-061 die Startseite gemessen hat, reichte hier nicht einmal: in 3 von 3
+ * Laeufen kam das load-Ereignis nicht.
+ *
+ * DIE LEITER STEHT JE DATEI (D-061): je Datei und Sprosse am CDN
+ * nachgemessen (Accept avif/webp, echte Pixelbreite dekodiert; Beleg
+ * claude-jobs/20260927-crystal-kaufseiten-schicken-dem-telefon-keine-desktop-pixel/belege/cdn_leiter.json).
+ * Aufgenommen ist nur, was KLEINER ist als der Master. Anders als bei den
+ * 1000-px-Mastern der Startseite war hier keine Sprosse schwerer als ihr
+ * Master — die Regel bleibt trotzdem: wer eine Datei tauscht, misst neu.
+ *
+ * DIE `sizes`-WERTE SIND GEMESSEN, NICHT VON DER STARTSEITE UEBERNOMMEN: die
+ * Boxbreiten wurden an elf Fensterbreiten (360…1920) am gerenderten DOM
+ * abgelesen, und sie folgen genau der CSS — .NormalSectionSize ist
+ * hoechstens 1350 px breit mit 16 px Innenabstand, der Seitenrahmen hat
+ * 16 px, ab 1382 px steht der Inhalt also bei 1318 px. Die Startseite deckelt
+ * bei 548/1152 px; hier waeren das 91 bzw. 736 px zu wenig. Drei Familien:
+ *   HALB_GAP10  Inhaltsstoffe, Mineralstoffe (gap-10): bis 639 px volle
+ *               Spalte (100vw − 64), darueber (100vw − 104)/2, ab 1382 → 639.
+ *   HALB_GAP8   Herkunft, Ursprung (gap-8): dasselbe mit (100vw − 96)/2 → 643.
+ *   BANNER      volle Breite des Seitenrahmens (100vw − 32) OHNE Deckel:
+ *               bei 1920 px sind das 1888 px.
+ *
+ * LOADING: das erste Bild dieser Datei steht mobil bei 2 978 px, am
+ * Schreibtisch bei 2 069 px, also unter dem ersten Bildschirm. Alle sind
+ * deshalb `lazy`. Das erste SICHTBARE Bild der Kaufseite ist die Wortmarke
+ * im SortenAufmacher; sie traegt eager + fetchPriority="high" bereits.
+ * Ein zweiter Gewinn haengt daran: die Desktop-Paare (`hidden sm:flex!`)
+ * sind am Telefon display:none, und ein `lazy`-Bild ohne Box laedt nie.
+ * Vorher holte das Telefon auch sie.
+ *
+ * `width`/`height` sind die INTRINSISCHEN Masse der Masterdatei. Sie
+ * reservieren ueber das Seitenverhaeltnis den Platz, bevor das Bild da ist
+ * (Tailwind-Preflight: max-width 100 %, height auto). Die Lehre aus D-061
+ * gilt hier woertlich: width OHNE height ist kein Mass, sondern ein falsches
+ * Seitenverhaeltnis — deshalb setzt `bildAttr` immer beide.
+ */
+const SIZES_HALB_GAP10 =
+  '(min-width: 1382px) 639px, (min-width: 640px) calc((100vw - 104px) / 2), calc(100vw - 64px)';
+const SIZES_HALB_GAP8 =
+  '(min-width: 1382px) 643px, (min-width: 640px) calc((100vw - 96px) / 2), calc(100vw - 64px)';
+const SIZES_BANNER = 'calc(100vw - 32px)';
+
+/**
+ * Bildquellen als Spread ins <img>: src + srcSet + sizes + width + height.
+ *
+ * `eintrag` ist ein Bild-Eintrag {url, breite, hoehe, leiter}. Einer ohne
+ * gemessene Leiter kommt UNVERAENDERT als nackte Adresse zurueck — dieselbe
+ * Absicht wie `bild()` in Kakao.jsx: eine geratene Leiter ist keine
+ * gemessene, und der stehende Traeger (Gruppe ladeverhalten-bildmasse-kakao)
+ * meldet ein solches Bild als ueberversorgt, statt dass es still falsch wird.
+ */
+function bildAttr(eintrag, sizes) {
+  if (!eintrag?.leiter) return {src: eintrag?.url};
+  return {
+    ...bildQuelle(eintrag.url, eintrag.leiter),
+    sizes,
+    width: eintrag.breite,
+    height: eintrag.hoehe,
+  };
+}
+
+/* Master 470x459: fuer JEDE Flaeche dieser Seite zu klein (Bedarf mobil 652,
+ * desktop 639 px). Shopify skaliert nicht hoch, die Leiter endet am Master;
+ * die Deckung (0,72 mobil) ist Bestand und durch Markup nicht heilbar. */
+const IMG_KAFFEE = bildEintrag(
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-1052459-kaffee.jpg?v=1764250719',
+  470,
+  459,
+  [300, 420, 470],
+);
+
+/* Eine Datei, zwei Flaechen: Halbspalte bei den Mineralstoffen UND das
+ * Banner. Die Leiter deckt deshalb beide — unten wie die Halbspalte, oben
+ * bis zum Master (3111 px): das Banner braucht am Schreibtisch mit DPR 2
+ * 2816 px (1440) und mehr, als es gibt (3776 px bei 1920). */
+const IMG_BOHNE = bildEintrag(
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/bohne-create.jpg?v=1763083566',
+  3111,
+  2902,
+  [...LEITER_HALBSPALTE, 1500, 2000, 2560, 3111],
+);
 
 function BioaktiveInhaltsstoffe({sorte}) {
   const {bild, bildSeite, liste, fazit} = sorte.inhaltsstoffe;
   const bilder = (
     <div className="hidden sm:flex! flex-col gap-4">
-      <img className="w-full rounded-xl" src={bild} alt="" />
-      <img className="w-full rounded-xl" src={IMG_KAFFEE} alt="" />
+      <img
+        className="w-full rounded-xl"
+        {...bildAttr(bild, SIZES_HALB_GAP10)}
+        alt=""
+        loading="lazy"
+      />
+      <img
+        className="w-full rounded-xl"
+        {...bildAttr(IMG_KAFFEE, SIZES_HALB_GAP10)}
+        alt=""
+        loading="lazy"
+      />
     </div>
   );
   return (
@@ -125,8 +229,9 @@ function BioaktiveInhaltsstoffe({sorte}) {
           {/* Mobile-only top image */}
           <img
             className="block sm:hidden! w-full rounded-xl mb-5"
-            src={bild}
+            {...bildAttr(bild, SIZES_HALB_GAP10)}
             alt=""
+            loading="lazy"
           />
 
           <ol className="list-decimal list-inside space-y-4 text-sm text-gray-800">
@@ -150,8 +255,9 @@ function BioaktiveInhaltsstoffe({sorte}) {
           {/* Mobile-only bottom image */}
           <img
             className="block sm:hidden! w-full rounded-xl mt-5"
-            src={IMG_KAFFEE}
+            {...bildAttr(IMG_KAFFEE, SIZES_HALB_GAP10)}
             alt=""
+            loading="lazy"
           />
         </div>
 
@@ -161,12 +267,13 @@ function BioaktiveInhaltsstoffe({sorte}) {
   );
 }
 
-function Mineralstoffe() {
-  const IMG_BOHNE =
-    'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/bohne-create.jpg?v=1763083566';
-  const IMG_BALI =
-    'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06610_1.jpg?v=1764258286';
+const IMG_BALI = bildEintrag(
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06610_1.jpg?v=1764258286',
+  4000,
+  4000,
+);
 
+function Mineralstoffe() {
   const minerals = [
     ['Magnesium (Mg)', 'Energiehaushalt, Nerven'],
     ['Kalium (K)', 'Herzfunktion, Zellspannung'],
@@ -200,13 +307,15 @@ function Mineralstoffe() {
         <div className="hidden sm:flex! flex-col gap-4">
           <img
             className="w-full rounded-xl hidden sm:block!"
-            src={IMG_BOHNE}
+            {...bildAttr(IMG_BOHNE, SIZES_HALB_GAP10)}
             alt=""
+            loading="lazy"
           />
           <img
             className="w-full rounded-xl hidden sm:block!"
-            src={IMG_BALI}
+            {...bildAttr(IMG_BALI, SIZES_HALB_GAP10)}
             alt=""
+            loading="lazy"
           />
         </div>
 
@@ -217,8 +326,9 @@ function Mineralstoffe() {
           {/* Mobile-only top image */}
           <img
             className="block sm:hidden! w-full rounded-xl mb-5"
-            src={IMG_BOHNE}
+            {...bildAttr(IMG_BOHNE, SIZES_HALB_GAP10)}
             alt=""
+            loading="lazy"
           />
 
           <ol className="space-y-1 text-sm text-gray-800">
@@ -235,8 +345,9 @@ function Mineralstoffe() {
           {/* Mobile-only bottom image */}
           <img
             className="block sm:hidden! w-full rounded-xl mt-5"
-            src={IMG_BALI}
+            {...bildAttr(IMG_BALI, SIZES_HALB_GAP10)}
             alt=""
+            loading="lazy"
           />
         </div>
       </div>
@@ -280,7 +391,12 @@ function Herkunft({sorte}) {
                 </p>
               ))}
             </div>
-            <img className="w-full rounded-xl" src={row.bild} alt="" />
+            <img
+              className="w-full rounded-xl"
+              {...bildAttr(row.bild, SIZES_HALB_GAP8)}
+              alt=""
+              loading="lazy"
+            />
           </div>
         ))}
       </div>
@@ -312,7 +428,11 @@ const ursprungRows = [
         </p>
       </>
     ),
-    img: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/montegrande.jpg?v=1764260249',
+    img: bildEintrag(
+      'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/montegrande.jpg?v=1764260249',
+      1598,
+      1598,
+    ),
     copyright: COPYRIGHT,
   },
   {
@@ -332,7 +452,11 @@ const ursprungRows = [
         </p>
       </>
     ),
-    img: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/tempel-kakao.jpg?v=1764260567',
+    img: bildEintrag(
+      'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/tempel-kakao.jpg?v=1764260567',
+      1459,
+      1459,
+    ),
     copyright: COPYRIGHT,
   },
   {
@@ -355,7 +479,11 @@ const ursprungRows = [
         </p>
       </>
     ),
-    img: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-herkunft.jpg?v=1764260814',
+    img: bildEintrag(
+      'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-herkunft.jpg?v=1764260814',
+      1398,
+      1398,
+    ),
     copyright: COPYRIGHT,
   },
 ];
@@ -376,7 +504,12 @@ function Ursprung() {
               {row.text}
             </div>
             <div>
-              <img className="w-full rounded-xl" src={row.img} alt="" />
+              <img
+                className="w-full rounded-xl"
+                {...bildAttr(row.img, SIZES_HALB_GAP8)}
+                alt=""
+                loading="lazy"
+              />
               {row.copyright && (
                 <p className="text-[0.7em] text-gray-500 mt-1">
                   {row.copyright}
@@ -390,10 +523,15 @@ function Ursprung() {
   );
 }
 
-function HerobannerWithText({src, text}) {
+function HerobannerWithText({bild, text}) {
   return (
     <div className="my-[10vh]! relative">
-      <img className="w-full h-auto rounded-xl block" src={src} alt="" />
+      <img
+        className="w-full h-auto rounded-xl block"
+        {...bildAttr(bild, SIZES_BANNER)}
+        alt=""
+        loading="lazy"
+      />
       {text && (
         <h2 className="absolute top-10 left-0 right-0 text-center text-white! text-5xl!">
           {text}
@@ -418,10 +556,7 @@ export function SortenSeite({sorte}) {
       <Zubereitung />
       <Herkunft sorte={profil} />
       <Ursprung />
-      <HerobannerWithText
-        src="https://cdn.shopify.com/s/files/1/0279/3095/1750/files/bohne-create.jpg?v=1763083566"
-        text=""
-      />
+      <HerobannerWithText bild={IMG_BOHNE} text="" />
       <Belege sorte={`crystal-cacao-${sorte}`} />
       {/* Einmal gebaut, zweimal ausgeliefert (AWAKE und CREATE) — dieselbe
           Naht, aus der diese Datei ueberhaupt entstanden ist. */}

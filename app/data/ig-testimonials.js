@@ -55,6 +55,26 @@
  *   zubereite, beginnt für mich ein kleines Ritual. Erdend, herzöffnend und
  *   voller Wärme."
  * Ohne JavaScript und ohne Kommentare bleibt davon im Bundle nur der Eintrag.
+ *
+ * ==================== DAS POSTER TRAEGT EINE BREITE ====================
+ * (Job 20260927-crystal-kaufseiten-schicken-dem-telefon-keine-desktop-pixel)
+ * `posterPfad` endet auf `&width=600`. Der Master ist 720x1280 px und
+ * 161 406 B; die Kachel ist 232 CSS-px breit (unter 768 px Fensterbreite)
+ * bzw. 268 px (darueber), das Bild fuellt sie per object-fit: cover. Am
+ * CDN gemessen 2026-09-27 liefert `&width=600` 600x1067 px mit 125 226 B.
+ * Deckung damit: Telefon DPR 2 1,29 (vorher 1,55), Schreibtisch DPR 1 2,24
+ * (vorher 2,69), Schreibtisch DPR 2 1,12; ein Telefon mit DPR 3 sieht 0,86.
+ *
+ * WARUM EINE ADRESSE UND KEIN srcset: die Kachel rendert `posterPfad` als
+ * `src` UND als `poster` des Videos (IgTestimonialSlideshow.jsx, K1 und
+ * byte-gleich zur Vorlage — nicht anfassen). Eine Leiter braeuchte die
+ * Komponente; die Datenschicht kann nur EINE Datei nennen, und die ist
+ * zwangslaeufig ein Kompromiss zwischen den Dichten. 550 wuerde am
+ * Schreibtisch mit DPR 2 gerade decken (1,03); 600 kostet 17 KB mehr und
+ * gibt dafuer einem Telefon mit DPR 3 0,86 statt 0,79. Das Original (720 px)
+ * war fuer DPR 3 genau richtig und fuer alles darunter zu gross.
+ * Weil `src` und `poster` dieselbe Adresse lesen, bleibt es beim Klick auf
+ * Play bei EINEM Abruf.
  */
 export const IG_TESTIMONIALS = [
   {
@@ -70,7 +90,7 @@ export const IG_TESTIMONIALS = [
     datum: '2026-02-05',
     sprache: 'de',
     posterPfad:
-      'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/cc-ig-kakao--duy4ioojqsh--auszug-poster-16s.jpg?v=1790464059',
+      'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/cc-ig-kakao--duy4ioojqsh--auszug-poster-16s.jpg?v=1790464059&width=600',
     inDerReihe: true,
     videoUrl:
       'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/cc-ig-kakao--duy4ioojqsh--auszug-0-17s75.mp4?v=1790464052',
