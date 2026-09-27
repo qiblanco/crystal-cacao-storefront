@@ -3,9 +3,14 @@ import {Image} from '@shopify/hydrogen';
 /**
  * @param {{
  *   image: ProductVariantFragment['image'];
+ *   vorrang?: boolean;
  * }}
+ *
+ * vorrang (Default true): fetchpriority="high" am Hauptbild. Nur abschalten, wo
+ * ein anderes Element das LCP ist (QiBracelet, QiHome Air: das 360-Video),
+ * sonst konkurriert das Bild mit ihm um die Leitung. eager bleibt immer.
  */
-export function ProductImage({image}) {
+export function ProductImage({image, vorrang = true}) {
   if (!image) return <div className="product-image" />;
 
   return (
@@ -26,12 +31,14 @@ export function ProductImage({image}) {
          * Am Zwilling (mobil, gedrosselt): QiOne 2 Pro LCP 6,9 -> 4,1 s, und
          * der CLS fällt von 0,3 auf 0,04, weil das Bild vor dem ersten
          * Zeichnen da ist. Wo ein Video das LCP ist (QiBracelet, QiHome Air),
-         * kostet es 60-150 ms, so viel wie zwei Bestandsläufe streuen.
+         * kostet die hohe Priorität am Zwilling (5 Läufe, abwechselnd) mobil
+         * 110-140 ms und desktop 60-130 ms; dort übergeben die Aufrufer
+         * vorrang={false} und das Bild lädt eager ohne fetchpriority.
          * fetchpriority klein geschrieben: react-dom 18.3 warnt bei der
          * camelCase-Form (Messung im Kopf von reusables/LazyImage.jsx).
          */
         loading="eager"
-        fetchpriority="high"
+        fetchpriority={vorrang ? 'high' : undefined}
       />
     </div>
   );
