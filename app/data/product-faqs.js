@@ -24,15 +24,15 @@ export const FAQ_CACAO = [
   },
   {
     q: 'Was bedeutet psychoaktiv in diesem Zusammenhang?',
-    a: 'Psychoaktiver Kakao enthält natürliche Verbindungen wie Theobromin, Koffein, Phenylethylamin und Anandamid. Diese Substanzen können leichte Veränderungen in der Stimmung, Wachsamkeit und Entspannung auslösen. Der Ausdruck "psychoaktiv" wird hier verwendet, um darauf hinzuweisen, dass der Konsum von Kakao das zentrale Nervensystem beeinflussen kann, wodurch positive Veränderungen in Denken, Fühlen und Wahrnehmen auftreten können. Es ist wichtig zu betonen, dass diese Effekte subtil sind und nicht mit starken Rauschzuständen verglichen werden können.',
+    a: 'Gemeint ist damit, dass Kakao das zentrale Nervensystem beeinflussen kann. Er enthält natürliche Stoffe wie Theobromin, Koffein, Phenylethylamin und Anandamid, und die können deine Stimmung, deine Wachheit und deine Entspannung leicht verändern, sodass sich auch Denken, Fühlen und Wahrnehmen positiv verändern können. Diese Effekte sind sanft und mit einem starken Rausch überhaupt nicht zu vergleichen.',
   },
   {
     q: 'Wie wird zeremonieller Kakao zubereitet?',
-    a: 'Die Zubereitung von zeremoniellem Kakao ist unkompliziert und kann nach den ersten Versuchen zu einer natürlichen und sogar freudigen Praxis werden. Eine Kurzanleitung dazu: 1. Erwärmen von etwa 75 ml Wasser oder pflanzlicher Milch (z.B. Hafermilch) auf maximal 85 °C. 2. Zerkleinern der Kakaomasse. 3. Abmessen von 15 g für eine Tasse. 4. Auflösen der Kakaomasse in der warmen Flüssigkeit. Rühren kann dabei helfen! 5. Je nach Vorliebe den Kakao mit verschiedenen Gewürzen verfeinern. 6. Zeit nehmen, den Kakao spüren und genießen.',
+    a: 'Das ist ganz unkompliziert, und nach den ersten Versuchen wird es dir schnell vertraut und macht sogar richtig Freude. Erwärm etwa 75 ml Wasser oder Pflanzenmilch, zum Beispiel Hafermilch, auf höchstens 85 °C. Zerkleinere die Kakaomasse, wieg 15 g für eine Tasse ab und lös sie in der warmen Flüssigkeit auf, am besten unter Rühren. Wenn du magst, verfeinerst du deinen Kakao mit verschiedenen Gewürzen. Und dann nimm dir Zeit, ihn zu spüren und zu genießen.',
   },
   {
     q: 'Für wen ist Kakao (un)geeignet?',
-    a: 'Kakao enthält Theobromin, ein natürliches Stimulans. Personen, die empfindlich auf Koffein reagieren, wird eine äußerst vorsichtige Dosierung von 5 bis 10 g pro Tasse empfohlen. Bei der Frage nach dem Konsum von reinem Kakao während der Schwangerschaft ist es ratsam, Gesundheitsfachleute zu konsultieren, da Ansichten dazu variieren können. Kinder erleben oft eine positive Reaktion auf Kakao und genießen seine stimmungsaufhellende Wirkung. Hierbei ist eine behutsame Dosierung wichtig, und es ist ratsam, die Konsumzeit in Bezug auf die Schlafenszeiten der Kleinen zu beachten. Für Personen, die Medikamente oder Antidepressiva (SSRIs) einnehmen, ist vor dem Genuss von zeremoniellem Kakao eine Rücksprache mit ihrem behandelnden Arzt äußerst empfehlenswert.',
+    a: 'Kakao enthält Theobromin, einen natürlichen Wachmacher. Wenn du empfindlich auf Koffein reagierst, fang deshalb sehr vorsichtig an, mit 5 bis 10 g pro Tasse. Wenn du schwanger bist und reinen Kakao trinken möchtest, frag am besten vorher deine Ärztin, deinen Arzt oder deine Hebamme, weil die Ansichten dazu auseinandergehen. Kinder mögen Kakao oft sehr und genießen, dass er die Stimmung hebt. Dosier für sie behutsam und achte darauf, dass sie ihn nicht zu kurz vor dem Schlafengehen trinken. Und wenn du Medikamente oder Antidepressiva (SSRIs) nimmst, sprich bitte unbedingt mit deinem behandelnden Arzt, bevor du zeremoniellen Kakao trinkst.',
   },
   {
     q: 'Was ist eine Kakaozeremonie und ist diese nötig?',
@@ -41,7 +41,7 @@ export const FAQ_CACAO = [
   },
   {
     q: 'Wie oft darf man zeremoniellen Kakao trinken?',
-    a: 'Die Häufigkeit des Konsums von zeremoniellem Kakao ist individuell und kann von Person zu Person variieren. Es wird empfohlen, auf die eigene körperliche und mentale Reaktion zu achten. Ein maßvoller Konsum, der das persönliche Wohlbefinden unterstützt, ist in der Regel angebracht.',
+    a: 'Das ist ganz individuell und bei jedem Menschen ein bisschen anders. Achte am besten darauf, wie du dich körperlich und im Kopf damit fühlst. In der Regel passt ein maßvoller Genuss, der dir guttut.',
   },
   // ENTFERNT 2026-09-02 (Job …-prio6-s02): "Welche Effekte entstehen durch die
   // Kombination von Qi Blanco®-Produkten und zeremoniellem Kakao?" — der
