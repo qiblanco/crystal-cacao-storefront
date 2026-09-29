@@ -3,27 +3,27 @@
  * Set-Zeile (natives Shopify-Bundle, Menge 1) im Warenkorb, nicht als
  * Einzelpackung mit Menge 2 oder 3.
  *
- * WARUM (Grossjob 20260929-GROSSJOB-partnercodes-gelten-fuer-3er-sets-und-
- * julie-nachtragen, Christian: "Partnercodes gelten auch fuer die 3er-Sets"):
+ * WARUM (Großjob 20260929-GROSSJOB-partnercodes-gelten-fuer-3er-sets-und-
+ * julie-nachtragen, Christian: "Partnercodes gelten auch für die 3er-Sets"):
  * mit Menge 2/3 macht die Shopify-Automatik "Mengenrabatt 2x/3x Crystal
  * Cacao" den Staffelpreis. Sie ist ein Produktrabatt, und zwei Produktrabatte
- * stapeln auf derselben Zeile nicht: ein Partnercode faellt mit
+ * stapeln auf derselben Zeile nicht: ein Partnercode fällt mit
  * DISCOUNT_CODE_NOT_HONOURED weg (gemessen 2026-09-29, Julies Bestellung
  * #13532). Die Set-Produkte kosten auf den Cent den Staffelpreis (EUR) und
  * tragen keine Automatik — dort greift der Code.
  *
- * DIE NORMALFORM WIRD UEBER DIE GANZE KAKAO-MENGE GEBILDET, NIE JE ZEILE.
- * Die Automatik zaehlt Awake und Create ZUSAMMEN (und das Angebot "Create &
- * Awake"), und ein Set traegt sie nicht. Gemessen 2026-09-29: Set-2 x2 kostet
+ * DIE NORMALFORM WIRD ÜBER DIE GANZE KAKAO-MENGE GEBILDET, NIE JE ZEILE.
+ * Die Automatik zählt Awake und Create ZUSAMMEN (und das Angebot "Create &
+ * Awake"), und ein Set trägt sie nicht. Gemessen 2026-09-29: Set-2 x2 kostet
  * 228,04 statt 198,92 (ab 4x 30 %), Awake x1 + Set-2 kostet 185,05 statt
- * 148,60. Ein Umleger je Zeile waere dort ein Aufpreis. Darum:
+ * 148,60. Ein Umleger je Zeile wäre dort ein Aufpreis. Darum:
  *   - genau EINE Sorte mit 2 oder 3 Packungen, keine fremde Kakao-Zeile
  *     -> Set-Zeile x1 (wenn sie nicht teurer ist, siehe .server.js)
- *   - sonst Einzelpackung x Gesamtmenge je Sorte, also der Weg ueber die
+ *   - sonst Einzelpackung x Gesamtmenge je Sorte, also der Weg über die
  *     Automatik wie bisher (ab 4 Packungen, gemischte Sorten, Angebot).
  *
  * Diese Datei ist rein (kein Netz, kein Server-Import): der Warenkorb-Stepper
- * (CartLineItem.jsx) liest daraus, wie viele Packungen eine Set-Zeile traegt.
+ * (CartLineItem.jsx) liest daraus, wie viele Packungen eine Set-Zeile trägt.
  */
 
 /** Handle -> Sorte und Packungen je Zeilen-Einheit. */
@@ -46,7 +46,7 @@ export const KAKAO_SET = {
   create: {2: 'mengenrabatt-2x', 3: 'mengenrabatt-3x-create'},
 };
 
-/** Set-Zeile? Dann {sorte, packungen}, sonst null (auch fuer Einzelpackungen). */
+/** Set-Zeile? Dann {sorte, packungen}, sonst null (auch für Einzelpackungen). */
 export function kakaoSetArt(handle) {
   const art = KAKAO_ZEILEN[handle];
   return art && art.packungen > 1 ? art : null;
@@ -54,8 +54,8 @@ export function kakaoSetArt(handle) {
 
 /*
  * Eine Kakao-Zeile, die diese Datei nicht kennt (crystal-cacao-angebot,
- * crystal-cacao-adfiefiale): sie zaehlt in die Automatik, also darf daneben
- * kein Set entstehen — es verloere die Automatik fuer die ganze Menge.
+ * crystal-cacao-adfiefiale): sie zählt in die Automatik, also darf daneben
+ * kein Set entstehen — es verlöre die Automatik für die ganze Menge.
  */
 function istFremdeKakaoZeile(handle) {
   return (

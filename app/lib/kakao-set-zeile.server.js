@@ -9,28 +9,28 @@ import {
  * Stellt nach jeder Zeilen-Aktion die Kakao-Normalform her (Regel und Messung
  * in ~/lib/kakao-set-zeile.js). Aufgerufen aus der Warenkorb-Action
  * (routes/cart.jsx) und dem Warenkorb-Permalink (routes/cart.$lines.jsx) —
- * dieselben zwei Tueren wie bei den Qi-Master-Add-ons.
+ * dieselben zwei Türen wie bei den Qi-Master-Add-ons.
  *
  * WARUM AM WARENKORB UND NICHT IN DER KAUFFORM: die 2x/3x-Auswahl der
  * Kaufseite ist nur EIN Weg zu Menge 2/3. Der Stepper im Warenkorb, ein
  * zweites "In den Warenkorb" derselben Sorte und ein Partner-Permalink
- * (/cart/<variante>:3?discount=<code>) fuehren genauso dorthin, und in jedem
- * dieser Faelle verloere der Partnercode wieder gegen die Automatik.
+ * (/cart/<variante>:3?discount=<code>) führen genauso dorthin, und in jedem
+ * dieser Fälle verlöre der Partnercode wieder gegen die Automatik.
  *
  * WIE: der Tausch geschieht AN ORT (cartLinesUpdate mit merchandiseId). Das
  * ist eine Mutation, die Zeilen-id und Zeilen-Attribute bleiben, die
- * Warenkorb-Attribute (_qpx_anon, Herkunft, UTM) werden nicht beruehrt
+ * Warenkorb-Attribute (_qpx_anon, Herkunft, UTM) werden nicht berührt
  * (gemessen 2026-09-29 an der Storefront-API).
  *
  * NIE TEURER: das Set wird nur gelegt, wenn sein Preis im Markt des
- * Warenkorbs nicht ueber dem Betrag der Einzelzeile vor Code liegt. In EUR
+ * Warenkorbs nicht über dem Betrag der Einzelzeile vor Code liegt. In EUR
  * sind beide centgleich, in USD ist das Set billiger, in CHF ist das
  * Create-Set 0,22 bzw. 1,05 teurer (gemessen 2026-09-29) — dort bleibt die
- * Einzelzeile. Die Varianten werden zur Laufzeit ueber den Handle aufgeloest,
+ * Einzelzeile. Die Varianten werden zur Laufzeit über den Handle aufgelöst,
  * nie als ID getippt.
  *
- * FAIL-SOFT: jeder Lese- oder Aufloesefehler laesst das Ergebnis der
- * Kundenaktion unveraendert (eine Warnung im Log, kein leerer Warenkorb).
+ * FAIL-SOFT: jeder Lese- oder Auflösefehler lässt das Ergebnis der
+ * Kundenaktion unverändert (eine Warnung im Log, kein leerer Warenkorb).
  * Kill-Schalter: env KAKAO_SET_ZEILE=off.
  */
 const ZEILEN_AKTIONEN = new Set([
@@ -39,8 +39,8 @@ const ZEILEN_AKTIONEN = new Set([
   CartForm.ACTIONS.LinesRemove,
 ]);
 
-// Bewusst ohne #graphql-Kennung: diese zwei Abfragen gehoeren nicht in die
-// Codegen-Typen (storefrontapi.generated.d.ts bleibt unberuehrt).
+// Bewusst ohne #graphql-Kennung: diese zwei Abfragen gehören nicht in die
+// Codegen-Typen (storefrontapi.generated.d.ts bleibt unberührt).
 const VARIANTE_QUERY = `
   query KakaoSetVariante(
     $handle: String!
@@ -153,13 +153,13 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
     if (!plan) return result;
 
     // Schritt 1: je Sorte EINE Einzelpackungs-Zeile mit der Gesamtmenge, in
-    // EINER Mutation (Menge 0 entfernt die uebrigen Zeilen derselben Sorte).
+    // EINER Mutation (Menge 0 entfernt die übrigen Zeilen derselben Sorte).
     if (plan.einzelform.length || plan.entfernen.length) {
       const aendern = [];
       for (const z of plan.einzelform) {
         const v = await variante(storefront, z.handle);
         if (!v) {
-          warnen(`${z.handle} nicht aufloesbar - Warenkorb bleibt wie er ist`);
+          warnen(`${z.handle} nicht auflösbar - Warenkorb bleibt wie er ist`);
           return result;
         }
         aendern.push({id: z.id, merchandiseId: v.id, quantity: z.quantity});
@@ -182,7 +182,7 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
     );
     const set = await variante(storefront, kandidat.set);
     if (!zeile || !set?.availableForSale) {
-      warnen(`${kandidat.set} nicht verfuegbar oder Zeile fehlt - Einzelpackung bleibt`);
+      warnen(`${kandidat.set} nicht verfügbar oder Zeile fehlt - Einzelpackung bleibt`);
       return neu;
     }
     const setCent = Math.round(Number.parseFloat(set.price?.amount) * 100);
@@ -209,7 +209,7 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
     }
     return r;
   } catch (e) {
-    warnen(`Lesefehler, Warenkorb unveraendert: ${e?.message || e}`);
+    warnen(`Lesefehler, Warenkorb unverändert: ${e?.message || e}`);
     return neu;
   }
 }
@@ -220,7 +220,7 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
  * teurer als die Automatik ab 4x). CartLineItem schickt deshalb `kakaoPackungen`
  * {lineId, handle, packungen}; hier wird daraus die Einzelpackung der Sorte
  * mit dieser Menge, und legeKakaoSetZeile() stellt danach die Normalform her.
- * Ohne aufloesbare Einzelpackung bleiben die Zeilen, wie der Client sie
+ * Ohne auflösbare Einzelpackung bleiben die Zeilen, wie der Client sie
  * schickte (dort: dieselbe Menge, also nichts).
  *
  * @param {{storefront: any, inputs: any}} args
@@ -236,7 +236,7 @@ export async function kakaoPackungenEingabe({storefront, inputs}) {
   }
   const v = await variante(storefront, KAKAO_EINZEL[art.sorte]);
   if (!v) {
-    warnen(`${KAKAO_EINZEL[art.sorte]} nicht aufloesbar - Stepper ohne Wirkung`);
+    warnen(`${KAKAO_EINZEL[art.sorte]} nicht auflösbar - Stepper ohne Wirkung`);
     return zeilen;
   }
   return [
