@@ -13,6 +13,7 @@
  *   2. `waitUntil` -> ein executionContext mit echter Funktion
  *   3. `env`       -> process.env via dotenv
  *   4. `oxygen-buyer-country` -> aus einer lokalen IP-Land-Tabelle (2026-09-04)
+ *   6. `oxygen-buyer-ip` -> die Kunden-Adresse selbst (2026-09-29, siehe unten)
  *
  * Zulieferung 4 kam spaeter dazu und ist die einzige mit direkter
  * Umsatzwirkung: `app/lib/markt-pricing.js` liest den Laendercode aus genau
@@ -63,7 +64,13 @@ import {Readable} from 'node:stream';
 import path from 'node:path';
 import fs from 'node:fs';
 import {fileURLToPath, pathToFileURL} from 'node:url';
-import {ladeTabelle, kundenAdresse, istNichtOeffentlicheSchreibweise} from '../geo/laendererkennung.mjs';
+import {
+  ladeTabelle,
+  kundenAdresse,
+  istNichtOeffentlicheSchreibweise,
+  v4ZuZahl,
+  v6ZuPaar,
+} from '../geo/laendererkennung.mjs';
 
 const WURZEL = path.dirname(fileURLToPath(import.meta.url));
 
@@ -235,6 +242,11 @@ const zaehler = {
   erkannt: 0,
   kopf_verworfen: 0, // eingehende Faelschungsversuche bzw. Altlasten
   je_land: {},
+  // Zulieferung 6 (oxygen-buyer-ip), eigene Felder, damit die Laender-Wache
+  // (proben/probe_geo_wirkt.mjs) ihre Quote unveraendert rechnet.
+  kaeufer_ip_an: null,
+  kaeufer_ip_gesetzt: 0,
+  kaeufer_ip_verworfen: 0,
 };
 let zaehlerSchmutzig = false;
 
@@ -295,6 +307,74 @@ function laenderKopfStellen(headers, req) {
 }
 
 // ---------------------------------------------------------------------------
+// 6. oxygen-buyer-ip — die Kaeufer-Adresse fuer Shopify (2026-09-29)
+// ---------------------------------------------------------------------------
+// Hydrogen liest `buyerIp` AUSSCHLIESSLICH aus dieser Kopfzeile
+// (getStorefrontHeaders) und schickt ihn als X-Shopify-Client-IP an die
+// Storefront API bzw. als x-forwarded-for in forward(). Fehlt er, sieht
+// Shopify jeden Besucher an unserer Server-IP (Hetzner Helsinki).
+// Job 20260929-repair-crystal-cacao-node-oxygen-buyer-ip-fehlt.
+//
+// DIESELBEN DREI EIGENSCHAFTEN WIE ZULIEFERUNG 4:
+// (a) Eingehende `oxygen-buyer-ip` UND `x-shopify-client-ip-sig` werden IMMER
+//     entfernt. Gemessen VOR diesem Bau: ein mitgeschicktes
+//     `oxygen-buyer-ip: 8.8.8.8` ging unveraendert als X-Shopify-Client-IP an
+//     Shopify. Die Signatur liest Hydrogen ebenfalls aus der eingehenden
+//     Anfrage; auf Oxygen setzt sie der Netzrand, hier nie der Kunde.
+// (b) fail-closed: keine lesbare oeffentliche Adresse -> keine Kopfzeile.
+// (c) Adresse aus dem LETZTEN x-forwarded-for-Eintrag (kundenAdresse).
+// Unabhaengig vom Geo-Schalter: eigener Schalter CRYSTAL_BUYER_IP, fehlt er,
+// gilt 'on'. Rueckweg: CRYSTAL_BUYER_IP=off in repo/.env + Dienst-Neustart.
+//
+// WAS DAS BEI SHOPIFY BEWIRKT, gemessen 2026-09-29 (proben/
+// probe_kaeufer_ip_wirkt.mjs): mit dem OEFFENTLICHEN Storefront-Token
+// ignoriert Shopify die unsignierte Kaeufer-IP und meldet weiter
+// country=FI. Wirksam wird sie erst mit einem PRIVATEN Storefront-Token
+// (Hydrogen setzt dann Shopify-Storefront-Buyer-IP). Diese Zulieferung ist die
+// Voraussetzung dafuer; ohne sie haette auch der private Token keine IP.
+const KAEUFER_IP_KOPF = 'oxygen-buyer-ip';
+const KAEUFER_IP_SIG_KOPF = 'x-shopify-client-ip-sig';
+const KAEUFER_IP_AN = (process.env.CRYSTAL_BUYER_IP ?? 'on').toLowerCase() !== 'off';
+zaehler.kaeufer_ip_an = KAEUFER_IP_AN;
+console.log(
+  KAEUFER_IP_AN
+    ? '[kaeufer-ip] Kaeufer-IP an Shopify AN (oxygen-buyer-ip aus x-forwarded-for)'
+    : '[kaeufer-ip] Kaeufer-IP AUS (CRYSTAL_BUYER_IP=off) — Shopify sieht die Server-IP.',
+);
+
+function istOeffentlicheAdresse(adresse) {
+  if (!adresse) return false;
+  const lesbar = adresse.includes(':') ? v6ZuPaar(adresse) !== null : v4ZuZahl(adresse) !== null;
+  return lesbar && !istNichtOeffentlicheSchreibweise(adresse);
+}
+
+/**
+ * Setzt `oxygen-buyer-ip` — oder entfernt ihn ersatzlos.
+ * @param {Headers} headers bereits aus der Node-Anfrage gefuellt
+ * @param {import('node:http').IncomingMessage} req
+ */
+function kaeuferIpStellen(headers, req) {
+  let verworfen = false;
+  for (const name of [KAEUFER_IP_KOPF, KAEUFER_IP_SIG_KOPF]) {
+    if (headers.has(name)) {
+      headers.delete(name); // (a) — ausnahmslos, vor jeder Fallunterscheidung
+      verworfen = true;
+    }
+  }
+  if (verworfen) {
+    zaehler.kaeufer_ip_verworfen++;
+    zaehlerSchmutzig = true;
+  }
+  if (!KAEUFER_IP_AN) return;
+
+  const adresse = kundenAdresse(req);
+  if (!istOeffentlicheAdresse(adresse)) return; // (b)
+  headers.set(KAEUFER_IP_KOPF, adresse);
+  zaehler.kaeufer_ip_gesetzt++;
+  zaehlerSchmutzig = true;
+}
+
+// ---------------------------------------------------------------------------
 // Der echte Ursprung — siehe Kopf. Faellt NIE auf localhost zurueck.
 // ---------------------------------------------------------------------------
 function ersterWert(kopf) {
@@ -326,6 +406,7 @@ function nodeAnfrageZuRequest(req, url) {
   }
 
   laenderKopfStellen(headers, req);
+  kaeuferIpStellen(headers, req);
 
   const hatKoerper = req.method !== 'GET' && req.method !== 'HEAD';
   return new Request(url, {
