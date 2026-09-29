@@ -3,8 +3,8 @@
  * Set-Zeile (natives Shopify-Bundle, Menge 1) im Warenkorb, nicht als
  * Einzelpackung mit Menge 2 oder 3.
  *
- * WARUM (Großjob 20260929-GROSSJOB-partnercodes-gelten-fuer-3er-sets-und-
- * julie-nachtragen, Christian: "Partnercodes gelten auch für die 3er-Sets"):
+ * WARUM (Großjob Partnercodes und Sets vom 29.09.2026, Segment s03,
+ * Christian: "Partnercodes gelten auch für die 3er-Sets"):
  * mit Menge 2/3 macht die Shopify-Automatik "Mengenrabatt 2x/3x Crystal
  * Cacao" den Staffelpreis. Sie ist ein Produktrabatt, und zwei Produktrabatte
  * stapeln auf derselben Zeile nicht: ein Partnercode fällt mit
