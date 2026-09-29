@@ -5,6 +5,7 @@ import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
 import {getCartLinePriceDisplayExact} from '~/lib/cart-display-pricing';
 import {useMarktLand} from '~/lib/markt-land';
+import {kakaoSetArt} from '~/lib/kakao-set-zeile';
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -113,8 +114,21 @@ export function CartLineItem({layout, line, childrenMap}) {
 function CartLineQuantity({line}) {
   if (!line || typeof line?.quantity === 'undefined') return null;
   const {id: lineId, quantity, isOptimistic} = line;
-  const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
-  const nextQuantity = Number((quantity + 1).toFixed(0));
+  // Eine Kakao-Set-Zeile (Menge 1) traegt 2 oder 3 Packungen. Der Stepper
+  // zeigt und zaehlt dort PACKUNGEN; der Server legt die Zeile danach selbst
+  // wieder auf Set oder Einzelpackung (lib/kakao-set-zeile.server.js).
+  const handle = line.merchandise?.product?.handle;
+  const set = kakaoSetArt(handle);
+  const menge = set ? set.packungen * quantity : quantity;
+  const prevQuantity = Number(Math.max(0, menge - 1).toFixed(0));
+  const nextQuantity = Number((menge + 1).toFixed(0));
+  const eingabe = (neu) =>
+    set
+      ? {
+          lines: [{id: lineId, quantity}],
+          kakaoPackungen: {lineId, handle, packungen: neu},
+        }
+      : {lines: [{id: lineId, quantity: neu}]};
 
   return (
     // AUFBAU DER VORLAGE qiblanco.com (Christian 2026-09-10: "genauso aufbauen
@@ -128,10 +142,10 @@ function CartLineQuantity({line}) {
     // ist wie in der Vorlage nur die Zahl.
     <div className="cart-line-quantity">
       <div className="quantity-wrapper">
-        <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+        <CartLineUpdateButton {...eingabe(prevQuantity)}>
           <button
             aria-label="Menge verringern"
-            disabled={quantity <= 1 || !!isOptimistic}
+            disabled={menge <= 1 || !!isOptimistic}
             name="decrease-quantity"
             value={prevQuantity}
           >
@@ -140,9 +154,9 @@ function CartLineQuantity({line}) {
         </CartLineUpdateButton>
         <small>
           <span className="sr-only">Menge: </span>
-          {quantity}
+          {menge}
         </small>
-        <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+        <CartLineUpdateButton {...eingabe(nextQuantity)}>
           <button
             aria-label="Menge erhöhen"
             name="increase-quantity"
@@ -203,7 +217,7 @@ function CartLineRemoveButton({lineIds, disabled}) {
  *   lines: CartLineUpdateInput[];
  * }}
  */
-function CartLineUpdateButton({children, lines}) {
+function CartLineUpdateButton({children, lines, kakaoPackungen}) {
   const lineIds = lines.map((line) => line.id);
 
   return (
@@ -211,7 +225,7 @@ function CartLineUpdateButton({children, lines}) {
       fetcherKey={getUpdateKey(lineIds)}
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
+      inputs={kakaoPackungen ? {lines, kakaoPackungen} : {lines}}
     >
       {children}
     </CartForm>

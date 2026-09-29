@@ -1,4 +1,5 @@
 import {redirect} from 'react-router';
+import {legeKakaoSetZeile} from '~/lib/kakao-set-zeile.server';
 import {
   getAttributionCartAttributes,
   getOriginCartAttributes,
@@ -26,7 +27,7 @@ import {
  * @param {Route.LoaderArgs}
  */
 export async function loader({request, context, params}) {
-  const {cart, env} = context;
+  const {cart, env, storefront} = context;
   const {lines} = params;
   if (!lines) return redirect('/cart');
   const linesMap = lines.split(',').map((line) => {
@@ -76,13 +77,25 @@ export async function loader({request, context, params}) {
   ];
 
   // create a cart
-  const result = await cart.create({
+  const angelegt = await cart.create({
     lines: linesMap,
     discountCodes: discountArray,
     ...(attributionAttributes.length
       ? {attributes: attributionAttributes}
       : {}),
   });
+
+  // Partner-Permalink mit 2/3 Packungen einer Kakao-Sorte: Set-Zeile, damit
+  // der ?discount=-Code neben dem Staffelpreis greift (kakao-set-zeile.server.js).
+  const result = angelegt?.errors?.length
+    ? angelegt
+    : await legeKakaoSetZeile({
+        cart,
+        storefront,
+        env,
+        action: 'LinesAdd',
+        result: angelegt,
+      });
 
   const cartResult = result.cart;
 
