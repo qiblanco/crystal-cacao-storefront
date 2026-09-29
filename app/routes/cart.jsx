@@ -2,6 +2,10 @@ import {useLoaderData, data} from 'react-router';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 import {persistAttributionOnCartResult} from '~/lib/cart-attribution.server';
+import {
+  kakaoPackungenEingabe,
+  legeKakaoSetZeile,
+} from '~/lib/kakao-set-zeile.server';
 import {ABSENDER_MARKE} from '~/lib/kakao-zone';
 
 /**
@@ -20,7 +24,7 @@ export const headers = ({actionHeaders}) => actionHeaders;
  * @param {Route.ActionArgs}
  */
 export async function action({request, context}) {
-  const {cart, env} = context;
+  const {cart, env, storefront} = context;
 
   const formData = await request.formData();
 
@@ -38,7 +42,10 @@ export async function action({request, context}) {
       result = await cart.addLines(inputs.lines);
       break;
     case CartForm.ACTIONS.LinesUpdate:
-      result = await cart.updateLines(inputs.lines);
+      // Stepper einer Kakao-Set-Zeile: Menge in Packungen (kakao-set-zeile.server.js).
+      result = await cart.updateLines(
+        await kakaoPackungenEingabe({storefront, inputs}),
+      );
       break;
     case CartForm.ACTIONS.LinesRemove:
       result = await cart.removeLines(inputs.lineIds);
@@ -83,6 +90,11 @@ export async function action({request, context}) {
   // Order-note_attributes, aus denen das Backend stitcht. Genau dieser
   // Schritt fehlte auf qiblanco fuer `_qpx_anon` (0/191 Orders, 90,6 %
   // faelschlich "direct"). Consent-gegated in cart-attribution.server.js.
+  // 2 oder 3 Packungen einer Kakao-Sorte liegen als Set-Zeile im Warenkorb,
+  // damit ein Partnercode neben dem Staffelpreis greift (Grossjob 20260929
+  // partnercodes x Sets, s03). Liest nach jeder Zeilen-Aktion nach.
+  result = await legeKakaoSetZeile({cart, storefront, env, action, result});
+
   result = await persistAttributionOnCartResult({cart, request, env, result});
 
   const cartId = result?.cart?.id;
