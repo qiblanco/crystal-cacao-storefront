@@ -114,8 +114,8 @@ export function CartLineItem({layout, line, childrenMap}) {
 function CartLineQuantity({line}) {
   if (!line || typeof line?.quantity === 'undefined') return null;
   const {id: lineId, quantity, isOptimistic} = line;
-  // Eine Kakao-Set-Zeile (Menge 1) traegt 2 oder 3 Packungen. Der Stepper
-  // zeigt und zaehlt dort PACKUNGEN; der Server legt die Zeile danach selbst
+  // Eine Kakao-Set-Zeile (Menge 1) trägt 2 oder 3 Packungen. Der Stepper
+  // zeigt und zählt dort PACKUNGEN; der Server legt die Zeile danach selbst
   // wieder auf Set oder Einzelpackung (lib/kakao-set-zeile.server.js).
   const handle = line.merchandise?.product?.handle;
   const set = kakaoSetArt(handle);
