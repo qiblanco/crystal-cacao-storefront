@@ -181,6 +181,17 @@ export const PRODUKT_BESCHREIBUNGEN = {
   '/products/crystal-cacao-angebot':
     'Crystal Cacao® Create und Awake – Bio im Set: beide Sorten Zeremonie-Kakao ' +
     'aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  // Die drei gemischten Sets (2026-09-30, Elina EL-20260930-9c7bdd63), gleiche
+  // Bauart wie die vier Bundles darueber; wortgleich zur Vorlage qiblanco.
+  '/products/bundle-1x-awake-1x-create':
+    'Crystal Cacao® Awake und Create – Bio im gemischten 2er-Set: Zeremonie-Kakao ' +
+    'aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-2x-awake-1x-create':
+    'Crystal Cacao® 2x Awake und 1x Create – Bio im gemischten 3er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-1x-awake-2x-create':
+    'Crystal Cacao® 1x Awake und 2x Create – Bio im gemischten 3er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
 };
 
 /**
