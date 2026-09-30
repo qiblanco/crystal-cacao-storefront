@@ -81,6 +81,25 @@ const TRACKING_PARAM_NAMES = new Set([
   'clickid',
   'h_ad_id',
   'h_click_id',
+  // UpPromote-Affiliate-Referenz (Nachzug aus qiblanco-storefront, dort
+  // Grossjob s03 2026-08-25; hier Job
+  // rtbefund-uppromote-kakao-flaeche-wache-20260929). Der Wert kommt als
+  // Query-Parameter am Affiliate-Link an (`?sca_ref=<id>.<hash>`) und ist KEIN
+  // Cookie - er gehoert deshalb hierher und ausdruecklich NICHT in
+  // TRACKING_COOKIE_NAMES, genau wie fbclid und gclid.
+  //
+  // WARUM DER WERT DIE CHECKOUT-GRENZE UEBERQUEREN MUSS: die UpPromote-Cookies
+  // auf crystal-cacao.com sind host-only und auf checkout.qiblanco.com nicht
+  // lesbar. Das App-Embed auf checkout.qiblanco.com liest `sca_ref` aus der
+  // URL (core.min.js: REF_CODE:"sca_ref"). Zweite, gewollte Wirkung: der Wert
+  // wird Order-note_attribute und macht die Zuordnung fuer uns gegenpruefbar.
+  //
+  // ZWILLINGSLISTE in public/qiblanco-tracker.js (TRACKING_PARAM_NAMES): der
+  // Tracker entscheidet, was GESPEICHERT wird, diese Liste, was davon
+  // WEITERGEREICHT wird. Wer nur eine ergaenzt, baut einen stillen Verlust.
+  // Bewacht von der rt-Wache uppromote-kakao-flaeche-wache (Arm sca-ref).
+  'sca_ref',
+  'sca_source',
 ]);
 
 const TRACKING_COOKIE_NAMES = new Set([

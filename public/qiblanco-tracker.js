@@ -23,6 +23,20 @@
     clickid: true,
     h_ad_id: true,
     h_click_id: true,
+    // UpPromote-Affiliate-Referenz (Nachzug aus qiblanco-storefront, dort
+    // Grossjob s03 2026-08-25; hier Job
+    // rtbefund-uppromote-kakao-flaeche-wache-20260929). Ohne diesen Eintrag
+    // wird ein Affiliate-Klick auf crystal-cacao.com gar nicht erst
+    // gespeichert, und die Provision haengt allein daran, dass der Link des
+    // Partners zufaellig die Landing-Seite war.
+    //
+    // ZWILLINGSLISTE: dieselben Namen muessen in
+    // app/lib/checkout-tracking.js TRACKING_PARAM_NAMES stehen. Diese Liste
+    // entscheidet, was GESPEICHERT wird; die dortige, was davon an die
+    // Checkout-URL und in die note_attributes WEITERGEREICHT wird. Bewacht
+    // von der rt-Wache uppromote-kakao-flaeche-wache (Arm sca-ref).
+    sca_ref: true,
+    sca_source: true,
   };
 
   function isTrackingParamName(name) {
