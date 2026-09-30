@@ -1,12 +1,10 @@
 import {CartForm} from '@shopify/hydrogen';
 import {
-  KAKAO_EINZEL,
-  KAKAO_SETS,
-  kakaoSetArt,
+  SET_GROESSE_MIN,
+  kakaoPreisschutz,
   kakaoZeilenPlan,
-  setSchluessel,
   sortenSetsGleicherMenge,
-  stepperZusammensetzung,
+  stepperEinzelZeilen,
 } from '~/lib/kakao-set-zeile';
 
 /*
@@ -42,6 +40,22 @@ import {
  * gelegt, wenn es im Markt auch nicht unter dem billigsten Sorten-Set
  * derselben Packungszahl liegt (EUR centgleich, CHF 116 = 116). Bekommt es
  * einen Festpreis in der Preisliste, greift es dort ohne Codeänderung.
+ *
+ * AB 4 PACKUNGEN IST DER ANKER DER EINZELWEG MIT AUTOMATIK (2026-09-30,
+ * Großjob kakao-partnercodes-alle-mengen, s03). Für 4 bis 7 Packungen sind
+ * die Sorten-Sets selbst neu, es gibt also kein älteres Set als Maßstab. Die
+ * Untergrenze ist dort der gemessene Betrag der Einzelzeilen vor Code, also
+ * genau das, was der Kunde ohne Set heute zahlt. Zusammen mit "nie teurer"
+ * heißt das: centgleich, bis auf ANKER_TOLERANZ_CENT_JE_ZEILE (Rundung je
+ * Einzelzeile). In EUR und USD sind die Sets centgleich (gemessen s02). In CHF
+ * rundet Shopify die Sets auf ganze Franken und sie liegen 0,40 bis 4,50 CHF
+ * über dem Einzelweg — dort bleibt ab 4 Packungen der alte Weg.
+ *
+ * MEHRERE SET-ZEILEN (ab 8 Packungen): verglichen wird die SUMME aller
+ * Set-Zeilen gegen die Summe der Einzelzeilen. Die Einzelzeilen werden an Ort
+ * zu Set-Zeilen; gibt es mehr Set- als Einzelzeilen, werden die übrigen
+ * VORHER angelegt, und scheitert danach der Tausch, werden sie wieder
+ * entfernt (keine Packung doppelt im Warenkorb).
  *
  * FAIL-SOFT: jeder Lese- oder Auflösefehler lässt das Ergebnis der
  * Kundenaktion unverändert (eine Warnung im Log, kein leerer Warenkorb).
@@ -225,60 +239,101 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
       zeilen = await zeilenLesen(storefront, cartId);
     }
 
-    // Schritt 2: die Einzelzeile(n) auf das Set umlegen, wenn es nicht
-    // teurer ist. Gemischt: die erste Zeile wird an Ort zum Set, die zweite
-    // fällt weg — in EINER Mutation.
+    // Schritt 2: die Einzelzeile(n) auf die Set-Zeile(n) umlegen, wenn das
+    // nicht teurer und nicht billiger ist.
     const {kandidat} = plan;
     const einzelZeilen = kandidat.einzel.map((e) =>
       zeilen.find((z) => z.handle === e.handle && z.quantity === e.packungen),
     );
-    const set = await variante(storefront, kandidat.set);
-    if (einzelZeilen.some((z) => !z) || !set?.availableForSale) {
-      warnen(`${kandidat.set} nicht verfügbar oder Zeile fehlt - Einzelpackung bleibt`);
+    if (einzelZeilen.some((z) => !z)) {
+      warnen(`Einzelzeile fehlt nach Schritt 1 - Einzelpackung bleibt`);
       return neu;
     }
     const waehrung = einzelZeilen[0].waehrung;
-    const setCent = Math.round(Number.parseFloat(set.price?.amount) * 100);
-    const zeileCent = Math.round(
-      einzelZeilen.reduce((s, z) => s + z.vorCode, 0) * 100,
+    const sets = [];
+    for (const s of kandidat.sets) {
+      const v = await variante(storefront, s.handle);
+      if (!v?.availableForSale) {
+        warnen(`${s.handle} nicht verfügbar - Einzelpackung bleibt`);
+        return neu;
+      }
+      sets.push({...s, variante: v});
+    }
+    const setCent = sets.reduce(
+      (summe, s) =>
+        summe + Math.round(Number.parseFloat(s.variante.price?.amount) * 100) * s.quantity,
+      0,
     );
-    if (
-      set.price?.currencyCode !== waehrung ||
-      einzelZeilen.some((z) => z.waehrung !== waehrung) ||
-      !Number.isFinite(setCent) ||
-      !Number.isFinite(zeileCent) ||
-      setCent > zeileCent
-    ) {
+    const zeileCent = Math.round(
+      einzelZeilen.reduce((summe, z) => summe + z.vorCode, 0) * 100,
+    );
+    const benannt = sets.map((s) => `${s.handle} x${s.quantity}`).join(' + ');
+    const waehrungGleich =
+      sets.every((s) => s.variante.price?.currencyCode === waehrung) &&
+      einzelZeilen.every((z) => z.waehrung === waehrung);
+    const schutz = waehrungGleich
+      ? kakaoPreisschutz({
+          packungen: kandidat.packungen,
+          gemischt: kandidat.gemischt,
+          setCent,
+          zeileCent,
+          einzelZeilen: einzelZeilen.length,
+          sortenSetCent:
+            kandidat.gemischt && kandidat.packungen < SET_GROESSE_MIN
+              ? await sortenSetUntergrenzeCent(storefront, kandidat.packungen, waehrung)
+              : undefined,
+        })
+      : {ok: false, grund: 'waehrung'};
+    if (!schutz.ok) {
       warnen(
-        `${kandidat.set} ${set.price?.amount} ${set.price?.currencyCode} gegen Einzelzeile ` +
-          `${zeileCent / 100} ${waehrung} - Einzelpackung bleibt (nie teurer)`,
+        `${benannt} ${setCent / 100} gegen Einzelzeile ${zeileCent / 100} ${waehrung} - ` +
+          `Einzelpackung bleibt (${schutz.grund})`,
       );
       return neu;
     }
-    if (kandidat.gemischt) {
-      const untergrenze = await sortenSetUntergrenzeCent(
-        storefront,
-        kandidat.packungen,
-        waehrung,
+
+    // Einzelzeile i wird an Ort Set-Zeile i; übrige Einzelzeilen fallen weg,
+    // übrige Set-Zeilen werden vorher angelegt.
+    const anOrt = sets.slice(0, einzelZeilen.length);
+    const extra = sets.slice(einzelZeilen.length);
+    if (extra.length) {
+      const r = await cart.addLines(
+        extra.map((s) => ({merchandiseId: s.variante.id, quantity: s.quantity})),
+        {cartId},
       );
-      if (!Number.isFinite(untergrenze) || setCent < untergrenze) {
-        warnen(
-          `${kandidat.set} ${set.price?.amount} ${waehrung} unter dem Sorten-Set ` +
-            `(${untergrenze / 100}) - Einzelpackungen bleiben (nie billiger als das Sorten-Set)`,
-        );
+      if (!r?.cart || r?.errors?.length) {
+        warnen(`Set-Zeile anlegen gescheitert: ${JSON.stringify(r?.errors || [])}`);
         return neu;
       }
     }
-    const [erste, ...weitere] = einzelZeilen;
     const r = await cart.updateLines(
       [
-        {id: erste.id, merchandiseId: set.id, quantity: 1},
-        ...weitere.map((z) => ({id: z.id, quantity: 0})),
+        ...anOrt.map((s, i) => ({
+          id: einzelZeilen[i].id,
+          merchandiseId: s.variante.id,
+          quantity: s.quantity,
+        })),
+        ...einzelZeilen.slice(anOrt.length).map((z) => ({id: z.id, quantity: 0})),
       ],
       {cartId},
     );
     if (!r?.cart || r?.errors?.length) {
       warnen(`Set-Tausch gescheitert: ${JSON.stringify(r?.errors || [])}`);
+      if (extra.length) {
+        // Die vorher angelegten Set-Zeilen wieder heraus: sonst lägen deren
+        // Packungen zusätzlich zu den Einzelzeilen im Warenkorb.
+        const nachher = await zeilenLesen(storefront, cartId);
+        const extraHandles = new Set(extra.map((s) => s.handle));
+        const weg = nachher.filter((z) => extraHandles.has(z.handle));
+        if (weg.length) {
+          const z = await cart.updateLines(
+            weg.map((x) => ({id: x.id, quantity: 0})),
+            {cartId},
+          );
+          if (z?.cart && !z?.errors?.length) return z;
+        }
+        warnen('Rückbau der angelegten Set-Zeilen gescheitert');
+      }
       return neu;
     }
     return r;
@@ -290,20 +345,20 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
 
 /**
  * Der Stepper einer Set-Zeile rechnet in PACKUNGEN, nicht in Sets: "+" auf
- * dem 3er-Set bedeutet 4 Packungen, nicht zwei 3er-Sets (sonst 6 Packungen,
- * teurer als die Automatik ab 4x). CartLineItem schickt deshalb `kakaoPackungen`
- * {lineId, handle, packungen}; hier wird daraus die Einzelpackung der Sorte
- * mit dieser Menge, und legeKakaoSetZeile() stellt danach die Normalform her.
- * Ohne auflösbare Einzelpackung bleiben die Zeilen, wie der Client sie
- * schickte (dort: dieselbe Menge, also nichts).
+ * dem 3er-Set bedeutet 4 Packungen, nicht zwei 3er-Sets. CartLineItem schickt
+ * deshalb `kakaoPackungen` {lineId, handle, packungen} und zeigt die Packungen
+ * der ganzen Zeile (Set-Größe x Zeilenmenge, ab 8 Packungen z.B. Set 3+2 x4
+ * = 20). Hier wird daraus die Zusammensetzung der Zeile mit der neuen
+ * Packungszahl, und legeKakaoSetZeile() stellt danach die Normalform her.
  *
- * Gemischtes Set: die Zeile kann nur EINE Ware tragen (LinesUpdate legt keine
- * Zeile an). Ergibt die neue Zusammensetzung wieder ein Set (2 oder 3
- * Packungen), wird die Zeile direkt dieses Set; sonst trägt sie die Sorte mit
- * mehr Packungen (bei Gleichstand Awake), und die andere Sorte wird vorher
- * als eigene Zeile angelegt — dafür braucht es den `cart`-Handler. Fehlt er
- * oder scheitert das Anlegen, bleibt die Zeile, wie sie ist (keine Packung
- * geht still verloren).
+ * DER WEG GEHT IMMER ÜBER DIE EINZELPACKUNGEN (seit 2026-09-30, s03): die
+ * Zeile trägt die Sorte mit mehr Packungen (bei Gleichstand Awake), die
+ * andere Sorte wird vorher als eigene Zeile angelegt — dafür braucht es den
+ * `cart`-Handler. Erst die Normalform legt daraus wieder Sets, und nur dort
+ * sitzt der Preisschutz. Ein direkter Sprung auf ein Set würde ihn umgehen
+ * (in CHF ist das 4er-Set teurer als der Einzelweg). Fehlt der Handler oder
+ * scheitert das Anlegen, bleibt die Zeile, wie sie ist (keine Packung geht
+ * still verloren).
  *
  * @param {{storefront: any, inputs: any, cart?: any}} args
  */
@@ -311,31 +366,18 @@ export async function kakaoPackungenEingabe({storefront, inputs, cart}) {
   const zeilen = Array.isArray(inputs?.lines) ? inputs.lines : [];
   const wunsch = inputs?.kakaoPackungen;
   if (!wunsch || typeof wunsch !== 'object' || !storefront) return zeilen;
-  const art = kakaoSetArt(wunsch.handle);
-  const packungen = Number.parseInt(wunsch.packungen, 10);
-  if (!art || !wunsch.lineId || !(packungen >= 1 && packungen <= 99)) {
-    return zeilen;
-  }
-  const neu = stepperZusammensetzung(art.je, packungen);
-  const gesamt = neu.awake + neu.create;
-  let handle;
-  let menge;
-  let dazu = null;
-  if (art.gemischt && (gesamt === 2 || gesamt === 3)) {
-    handle = KAKAO_SETS[setSchluessel(neu)];
-    menge = 1;
-  } else if (gesamt === 0) {
-    handle = KAKAO_EINZEL[art.sorte || 'awake'];
-    menge = 0;
-  } else {
-    const sorte = neu.create > neu.awake ? 'create' : 'awake';
-    const andere = sorte === 'awake' ? 'create' : 'awake';
-    handle = KAKAO_EINZEL[sorte];
-    menge = art.gemischt ? neu[sorte] : gesamt;
-    if (art.gemischt && neu[andere] > 0) {
-      dazu = {handle: KAKAO_EINZEL[andere], quantity: neu[andere]};
-    }
-  }
+  // Zeilenmenge: das Formular schickt die Zeile mit ihrer aktuellen Menge mit.
+  const eigene = zeilen.find((z) => z.id === wunsch.lineId);
+  const ziel = wunsch.lineId
+    ? stepperEinzelZeilen(
+        wunsch.handle,
+        eigene?.quantity,
+        Number.parseInt(wunsch.packungen, 10),
+      )
+    : null;
+  if (!ziel) return zeilen;
+  const {handle, quantity: menge} = ziel.zeile;
+  const {dazu} = ziel;
   const v = await variante(storefront, handle);
   if (!v) {
     warnen(`${handle} nicht auflösbar - Stepper ohne Wirkung`);

@@ -192,6 +192,86 @@ export const PRODUKT_BESCHREIBUNGEN = {
   '/products/bundle-1x-awake-2x-create':
     'Crystal Cacao® 1x Awake und 2x Create – Bio im gemischten 3er-Set: ' +
     'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  // Die Sets mit 4 bis 7 Packungen (2026-09-30, Grossjob kakao-partnercodes-
+  // alle-mengen s02), gleiche Bauart und derselbe Satz wie darüber.
+  '/products/bundle-4x-awake':
+    'Crystal Cacao® Awake, Bio im 4er-Set mit vier Packungen: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-3x-awake-1x-create':
+    'Crystal Cacao® 3x Awake und 1x Create, Bio im gemischten 4er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-2x-awake-2x-create':
+    'Crystal Cacao® 2x Awake und 2x Create, Bio im gemischten 4er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-1x-awake-3x-create':
+    'Crystal Cacao® 1x Awake und 3x Create, Bio im gemischten 4er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-4x-create':
+    'Crystal Cacao® Create, Bio im 4er-Set mit vier Packungen: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-5x-awake':
+    'Crystal Cacao® Awake, Bio im 5er-Set mit fünf Packungen: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-4x-awake-1x-create':
+    'Crystal Cacao® 4x Awake und 1x Create, Bio im gemischten 5er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-3x-awake-2x-create':
+    'Crystal Cacao® 3x Awake und 2x Create, Bio im gemischten 5er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-2x-awake-3x-create':
+    'Crystal Cacao® 2x Awake und 3x Create, Bio im gemischten 5er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-1x-awake-4x-create':
+    'Crystal Cacao® 1x Awake und 4x Create, Bio im gemischten 5er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-5x-create':
+    'Crystal Cacao® Create, Bio im 5er-Set mit fünf Packungen: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-6x-awake':
+    'Crystal Cacao® Awake, Bio im 6er-Set mit sechs Packungen: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-5x-awake-1x-create':
+    'Crystal Cacao® 5x Awake und 1x Create, Bio im gemischten 6er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-4x-awake-2x-create':
+    'Crystal Cacao® 4x Awake und 2x Create, Bio im gemischten 6er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-3x-awake-3x-create':
+    'Crystal Cacao® 3x Awake und 3x Create, Bio im gemischten 6er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-2x-awake-4x-create':
+    'Crystal Cacao® 2x Awake und 4x Create, Bio im gemischten 6er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-1x-awake-5x-create':
+    'Crystal Cacao® 1x Awake und 5x Create, Bio im gemischten 6er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-6x-create':
+    'Crystal Cacao® Create, Bio im 6er-Set mit sechs Packungen: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-7x-awake':
+    'Crystal Cacao® Awake, Bio im 7er-Set mit sieben Packungen: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-6x-awake-1x-create':
+    'Crystal Cacao® 6x Awake und 1x Create, Bio im gemischten 7er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-5x-awake-2x-create':
+    'Crystal Cacao® 5x Awake und 2x Create, Bio im gemischten 7er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-4x-awake-3x-create':
+    'Crystal Cacao® 4x Awake und 3x Create, Bio im gemischten 7er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-3x-awake-4x-create':
+    'Crystal Cacao® 3x Awake und 4x Create, Bio im gemischten 7er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-2x-awake-5x-create':
+    'Crystal Cacao® 2x Awake und 5x Create, Bio im gemischten 7er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-1x-awake-6x-create':
+    'Crystal Cacao® 1x Awake und 6x Create, Bio im gemischten 7er-Set: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+  '/products/bundle-7x-create':
+    'Crystal Cacao® Create, Bio im 7er-Set mit sieben Packungen: ' +
+    'Zeremonie-Kakao aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
 };
 
 /**
