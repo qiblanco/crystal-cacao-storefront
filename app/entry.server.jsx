@@ -226,7 +226,41 @@ export default async function handleRequest(
      * braucht keine Fremdverbindung (Commit 86e5396). Ein Eintrag
      * dafuer waere eine Erlaubnis ohne Benutzer.
      */
-    connectSrc: ['https://qpx.65-108-150-121.sslip.io'],
+    connectSrc: [
+      'https://qpx.65-108-150-121.sslip.io',
+      // UpPromote-Affiliate-Pixel (Job
+      // rtbefund-uppromote-kakao-flaeche-wache-20260929). STELLE 2 VON 2 zu
+      // scriptSrc unten. GELADEN wird collect.js von static-pixel., GESENDET
+      // an pixel.uppromote.com - der Sende-Host steht nur im Skript selbst.
+      // Fehlt er, blockt die CSP den POST auf /api/logs, und weil das
+      // Folgeereignis `affiliate_tracked` nur im .then() dieses POSTs feuert,
+      // stehen Linker und Zuordnung still (gemessen auf qiblanco.com
+      // 2026-08-25, Grossjob s03; dort stehen dieselben zwei Hosts).
+      'https://static-pixel.uppromote.com',
+      'https://pixel.uppromote.com',
+    ],
+
+    /*
+     * UpPromote STELLE 1 VON 2 (Job rtbefund-uppromote-kakao-flaeche-wache-
+     * 20260929): collect.js wird von UpPromoteTracking.jsx nach Einwilligung
+     * von static-pixel.uppromote.com nachgeladen. Bis hierher gab es KEIN
+     * script-src, Skripte fielen auf default-src zurueck - und das nennt
+     * nur 'self', cdn.shopify.com, shopify.com und die Nonce.
+     *
+     * VORSICHT, DIESER BLOCK IST NICHT WIE connectSrc: scriptSrc gehoert
+     * NICHT zu den fuenf Schluesseln, die Hydrogen vorbelegt und mischt.
+     * Er ERSETZT den Rueckfall. Deshalb steht die default-src-Liste hier
+     * vollstaendig ausgeschrieben; die Nonce haengt Hydrogen selbst an
+     * (createCSPHeader: scriptSrc bekommt 'nonce-...' angefuegt, sobald er
+     * ein Array ist). Laden bleibt einwilligungsgebunden: eine CSP ERLAUBT,
+     * sie laedt nicht.
+     */
+    scriptSrc: [
+      "'self'",
+      'https://cdn.shopify.com',
+      'https://shopify.com',
+      'https://static-pixel.uppromote.com',
+    ],
 
     imgSrc: [
       "'self'",
