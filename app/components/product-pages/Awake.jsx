@@ -8,6 +8,12 @@ import {SortenSeite} from './SortenSeite';
  * derselben-seite). Die Route (products.crystal-cacao-awake.jsx) importiert
  * weiter diesen Default — sie musste sich nicht bewegen.
  */
-export default function AwakeProductPage() {
-  return <SortenSeite sorte="awake" />;
+/**
+ * faqItems (Default: undefined, dann die volle FAQ_CACAO in SortenSeite, also
+ * unverändert): die Fragen der FAQ am Seitenende. Die Kaufseite übergibt seit
+ * dem 30.09.2026 nur den Rest, weil ihre häufigsten Kundenfragen weiter oben
+ * stehen (Amazon-Stil, reusables/AmazonStil.jsx Kundenfragen).
+ */
+export default function AwakeProductPage({faqItems} = {}) {
+  return <SortenSeite sorte="awake" faqItems={faqItems} />;
 }

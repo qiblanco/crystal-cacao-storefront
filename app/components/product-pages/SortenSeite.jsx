@@ -542,9 +542,12 @@ function HerobannerWithText({bild, text}) {
 }
 
 /**
- * @param {{sorte: 'awake'|'create'}} props
+ * @param {{sorte: 'awake'|'create', faqItems?: Array}} props
+ *   faqItems: Fragen der FAQ am Seitenende. Default = volle FAQ_CACAO
+ *   (unverändert). Die Kaufseiten übergeben seit dem 30.09.2026 nur den Rest,
+ *   weil die häufigsten Kundenfragen weiter oben stehen (Amazon-Stil).
  */
-export function SortenSeite({sorte}) {
+export function SortenSeite({sorte, faqItems = FAQ_CACAO}) {
   const profil = sortenProfil(sorte);
   if (!profil) {
     throw new Error(`SortenSeite: unbekannte Sorte '${sorte}'`);
@@ -561,7 +564,7 @@ export function SortenSeite({sorte}) {
       {/* Einmal gebaut, zweimal ausgeliefert (AWAKE und CREATE) — dieselbe
           Naht, aus der diese Datei ueberhaupt entstanden ist. */}
       <AbsichtHinweis />
-      <ProductFAQ items={FAQ_CACAO} />
+      <ProductFAQ items={faqItems} />
     </>
   );
 }

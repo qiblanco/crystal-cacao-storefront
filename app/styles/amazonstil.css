@@ -1,0 +1,232 @@
+/* ============================================================================
+   amazonstil.css — Gerätevergleich (.qb-gv) und Kundenfragen (.qb-kf)
+   Amazon-Stil Stufe 2 (Grossjob growth-m-lp-produktseite-verkauft, s04,
+   27.09.2026). Komponente reusables/AmazonStil.jsx, Texte und Schalter
+   reusables/amazonstil-daten.js. Geladen nur über links() der drei
+   /products/-Geräteseiten und (seit 30.09.2026) der zwei Kakao-Kaufseiten.
+
+   KEIN NEUER WERT (Design-Pflicht): Schrift nur in Stufen, die alle drei
+   Seiten schon führen (14, 16, 19,2 px); H2/H3 setzen die Seiten selbst
+   (pdp-qi.css, qihome-air.css, reset.css), hier steht ABSICHTLICH keine
+   Überschriftengröße (Lehre IG-Stimmen, D-2026-09-11). Farben aus qb-tokens;
+   Kartengrund = der Kartengrund DER Seite (--pdpqi-karte bzw. --qa-flaeche).
+   Linie wie zwischen den FAQ-Fragen (app.css .ProductFAQ__item). Radius
+   --qb-radius-klein, 8-px-Raster, Sektions-Takt 64 px. Kein Gold: die Wege
+   zu den anderen Geräten sind der Textknopf des Bausatzes (.btn--text).
+   ========================================================================== */
+
+/* ---- Gerätevergleich ------------------------------------------------------ */
+.qb-gv {
+  margin-top: 64px;
+  margin-bottom: 64px;
+}
+.qb-gv__titel {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.qb-gv__raster {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+.qb-gv__geraet {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--pdpqi-karte, var(--qa-flaeche, #fff));
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--qb-radius-klein);
+  color: var(--qb-text);
+}
+/* Das Gerät DIESER Seite: kräftigere Linie in der Tinte (Zustand, kein Gold). */
+.qb-gv__geraet--eigenes {
+  border: 2px solid var(--qb-text);
+}
+.qb-gv__kopf {
+  margin: 0;
+}
+.qb-gv__kopf-inhalt {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: none;
+}
+a.qb-gv__kopf-inhalt:hover .qb-gv__name {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.qb-gv__bild {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+.qb-gv__merkmale {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+.qb-gv__zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 8px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+.qb-gv__zeile dt {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--qb-text-gedaempft);
+}
+.qb-gv__zeile dd {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.qb-gv__zeile--preis dd {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+/* Trefferfläche >= 44 px (web-tokens trefferflaeche.min_px). */
+.qb-gv__studie {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.qb-gv__studie:hover {
+  text-decoration: none;
+}
+.qb-gv__fuss {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: auto;
+}
+.qb-gv__weg {
+  padding-left: 0;
+  padding-right: 0;
+  text-align: left;
+}
+.qb-gv__marke {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--qb-text-gedaempft);
+}
+
+/* Ab 750 px: drei Spalten, deren Zeilen auf EINER Höhe stehen (subgrid) —
+   Preis neben Preis wie in einer Tabelle. Ohne subgrid bleibt alles lesbar. */
+@media (min-width: 750px) {
+  .qb-gv__raster {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 24px;
+  }
+  .qb-gv__geraet {
+    display: grid;
+    grid-row: span 7;
+    grid-template-rows: subgrid;
+    gap: 0;
+    padding: 24px;
+  }
+  .qb-gv__raster--raten .qb-gv__geraet {
+    grid-row: span 8;
+  }
+  .qb-gv__kopf-inhalt {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    padding-bottom: 16px;
+  }
+  .qb-gv__bild {
+    width: 120px;
+    height: 120px;
+  }
+  .qb-gv__merkmale {
+    display: grid;
+    grid-row: span 5;
+    grid-template-rows: subgrid;
+  }
+  .qb-gv__raster--raten .qb-gv__merkmale {
+    grid-row: span 6;
+  }
+  .qb-gv__fuss {
+    padding-top: 8px;
+  }
+}
+
+/* ---- Sortenvergleich Crystal Cacao® (s03, 30.09.2026) --------------------
+   Dieselben qb-gv-Klassen, zwei Spalten, sechs Zeilen. Neu sind nur die
+   Wofür-Liste und die zweizeiligen Bericht-Links; Werte aus dem Bestand
+   dieser Datei (14/16 px, 8-px-Raster, Tinte/gedämpft). */
+.qb-gv__liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-left: 1.25em;
+  list-style: disc;
+}
+/* Die Seiten setzen <li> selbst größer (reset.css); in der Tabelle gilt die
+   Zellgröße der übrigen Zeilen. */
+.qb-gv__liste li {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.qb-gv__bericht {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8px 0;
+  text-decoration: none;
+}
+.qb-gv__bericht-art {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.qb-gv__bericht:hover .qb-gv__bericht-art {
+  text-decoration: none;
+}
+.qb-gv__bericht-quelle {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--qb-text-gedaempft);
+}
+@media (min-width: 750px) {
+  .qb-gv__raster--sorten {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .qb-gv__raster--sorten .qb-gv__geraet {
+    grid-row: span 8;
+  }
+  .qb-gv__raster--sorten .qb-gv__merkmale {
+    grid-row: span 6;
+  }
+}
+
+/* ---- Kundenfragen --------------------------------------------------------- */
+/* Spalte wie die FAQ unten (ProductFAQ.jsx: 860 px, seitlich 1.5rem); die
+   Fragen tragen die FAQ-Klassen (.ProductFAQ__*) und sehen aus wie sie. */
+.qb-kf {
+  max-width: 860px;
+  margin-top: 64px;
+  margin-bottom: 64px;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+.qb-kf__titel {
+  margin-bottom: 16px;
+}
+.qb-kf__liste {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}

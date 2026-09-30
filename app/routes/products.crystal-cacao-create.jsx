@@ -27,6 +27,11 @@ import {StarRating} from '~/components/reusables/StarRating';
 import {IgTestimonialSlideshow} from '~/components/reusables/IgTestimonialSlideshow';
 import igStyles from '~/styles/ig-testimonials.css?url';
 import {igVideoDescriptor} from '~/lib/ig-video-schema';
+import amazonstilStyles from '~/styles/amazonstil.css?url';
+import amazonstilLadenStyles from '~/styles/amazonstil-laden.css?url';
+import {Kundenfragen, Sortenvergleich} from '~/components/reusables/AmazonStil';
+import {ladeSortenPreise, sortenStilAn, teileFragen} from '~/components/reusables/amazonstil-daten';
+import {FAQ_CACAO} from '~/data/product-faqs';
 
 /**
  * IG-STIMMEN (2026-09-26, Job
@@ -36,7 +41,19 @@ import {igVideoDescriptor} from '~/lib/ig-video-schema';
  * :root, und wird deshalb nur auf den beiden Kakao-Kaufseiten geladen.
  */
 export function links() {
-  return [{rel: 'stylesheet', href: igStyles}];
+  return [
+    {rel: 'stylesheet', href: igStyles},
+    // Sortenvergleich + Kundenfragen (Amazon-Stil wie qiblanco.com, 30.09.2026).
+    // Beide Schalter aus (amazonstil-daten.js): kein Stylesheet, Seite wie vorher.
+    // amazonstil-laden.css: laden-eigene Bruecke (Tokens + Textknopf), direkt
+    // nach der byte-gleichen Vorlage, damit sie nur deren Luecken fuellt.
+    ...(sortenStilAn('crystal-cacao-create')
+      ? [
+          {rel: 'stylesheet', href: amazonstilStyles},
+          {rel: 'stylesheet', href: amazonstilLadenStyles},
+        ]
+      : []),
+  ];
 }
 /**
  * @type {MetaFunction<typeof loader>}
@@ -83,13 +100,17 @@ export async function loader(args) {
 async function loadCriticalData({context, request}, handle) {
   const {storefront} = context;
 
-  const [{product}] = await Promise.all([
+  const [{product}, sortenPreise] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: {
         handle, // ✅ use the static handle
         selectedOptions: getSelectedProductOptions(request),
       },
     }),
+    // Preise beider Sorten für den Sortenvergleich, in derselben Runde wie die
+    // Produktabfrage (amazonstil-daten.js, byte-gleich zu qiblanco.com).
+    // Fail-soft; Schalter aus: null, keine Abfrage.
+    ladeSortenPreise(storefront),
   ]);
 
   if (!product?.id) {
@@ -100,6 +121,7 @@ async function loadCriticalData({context, request}, handle) {
 
   return {
     product,
+    sortenPreise,
     aufmacherFassung: waehleAufmacherFassung(request),
     // Markt-Land für die Produkt-Auszeichnung: `meta()` hat keinen Kontext,
     // und der ausgezeichnete Preis muss derselbe sein wie der sichtbare
@@ -117,7 +139,7 @@ function loadDeferredData({context, params}) {
 
 export default function Product() {
   /** @type {LoaderReturnData} */
-  const {product, aufmacherFassung} = useLoaderData();
+  const {product, aufmacherFassung, sortenPreise} = useLoaderData();
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -138,6 +160,10 @@ export default function Product() {
   const {title, descriptionHtml} = product;
   const [featuredImage, setFeaturedImage] = useState(product?.images.nodes[0]);
   const [quantity, setQuantity] = useState('3');
+  // Kundenfragen oben, der Rest bleibt in der FAQ unten (Regel und
+  // Reihenfolge in amazonstil-daten.js). Schalter aus: oben leer, unten die
+  // volle Liste, Seite wie vorher.
+  const fragen = teileFragen('crystal-cacao-create', FAQ_CACAO);
   return (
     <>
       {aufmacherFassung === 'bestand' ? (
@@ -264,7 +290,19 @@ export default function Product() {
         Sorte, er zeigt beide Tueten.
       */}
       <IgTestimonialSlideshow produkt="Kakao" />
-      <Create />
+      {/* AMAZON-STIL (Grossjob 20260930-GROSSJOB-amazonstil-crystal-cacao-...,
+          s04): dieselben Bausteine wie qiblanco.com (s03), byte-gleich
+          uebernommen. Direkt nach den Instagram-Stimmen der Sortenvergleich mit
+          Wofür-Liste und Analyseberichten, dann die häufigsten Kundenfragen.
+          FAQPage-Schema genau einmal: oben über die volle Liste, die FAQ unten
+          bekommt nur den Rest. Die Belege-Sektion unten bleibt. */}
+      <Sortenvergleich
+        handle="crystal-cacao-create"
+        varianten={sortenPreise}
+        eigeneVariante={selectedVariant}
+      />
+      <Kundenfragen handle="crystal-cacao-create" oben={fragen.oben} alle={FAQ_CACAO} />
+      <Create faqItems={fragen.unten} />
     </>
   );
 }
