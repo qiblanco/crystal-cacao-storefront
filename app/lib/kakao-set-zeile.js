@@ -18,16 +18,30 @@
  * (gemessen 2026-09-30 am Laden, 1+1, 2+1 und 1+2, beide Domains). Dafür gibt
  * es seit dem 2026-09-30 drei gemischte Set-Produkte, gleicher Staffelpreis.
  *
+ * JEDE MENGE (Christian, 30.09.2026: "mit 2, mit 3, mit 4, mit 5, mit einer
+ * und auch gemischt über die Sorten hinweg", Nachtrag 01.10. 00:05: "nicht
+ * von 1 bis 5, sondern für jede Menge, auch 20"). Ab 4 Packungen macht die
+ * Automatik "ab 4x" 30 %, und auch dort fiel der Code weg. Seit dem
+ * 2026-09-30 gibt es Sets der Größen 4, 5, 6 und 7 in jeder Zusammensetzung
+ * (26 Stück, Großjob 20260930-GROSSJOB-kakao-partnercodes-alle-mengen-und-
+ * mengenrabatt-gemischt, s02). Ab 4 Packungen ist die Stufe linear (49,73 EUR
+ * netto bzw. 69,30 USD je Packung), also ist jede Menge ab 8 centgleich als
+ * Summe von Sets der Größen 4 bis 7 darstellbar.
+ *
  * DIE NORMALFORM WIRD ÜBER DIE GANZE KAKAO-MENGE GEBILDET, NIE JE ZEILE.
  * Die Automatik zählt Awake und Create ZUSAMMEN (und das Angebot "Create &
  * Awake"), und ein Set trägt sie nicht. Gemessen 2026-09-29: Set-2 x2 kostet
  * 228,04 statt 198,92 (ab 4x 30 %), Awake x1 + Set-2 kostet 185,05 statt
- * 148,60. Ein Umleger je Zeile wäre dort ein Aufpreis. Darum:
- *   - insgesamt 2 oder 3 Packungen Awake/Create, keine fremde Kakao-Zeile
- *     -> EINE Set-Zeile x1 in genau dieser Zusammensetzung (wenn sie nicht
- *     teurer ist, siehe .server.js)
- *   - sonst je Sorte eine Einzelpackung x Gesamtmenge, also der Weg über die
- *     Automatik wie bisher (ab 4 Packungen, Angebot).
+ * 148,60. Ein Umleger je Zeile wäre dort ein Aufpreis. Darum, keine fremde
+ * Kakao-Zeile vorausgesetzt:
+ *   - 1 Packung -> die Einzelpackung
+ *   - 2 bis 7 Packungen -> EINE Set-Zeile x1 in genau dieser Zusammensetzung
+ *   - ab 8 Packungen -> Set-Zeilen der Größen 4 bis 7, die Sorten so
+ *     gleichmäßig verteilt, dass möglichst wenige verschiedene Zeilen
+ *     entstehen (12 Awake + 8 Create = Set 3+2 x4)
+ *   - jeweils nur, wenn es nicht teurer und nicht billiger ist (.server.js)
+ *   - sonst (fremde Kakao-Zeile, Preisschutz greift) je Sorte eine
+ *     Einzelpackung x Gesamtmenge, also der Weg über die Automatik.
  *
  * Diese Datei ist rein (kein Netz, kein Server-Import): der Warenkorb-Stepper
  * (CartLineItem.jsx) liest daraus, wie viele Packungen eine Set-Zeile trägt.
@@ -45,6 +59,9 @@ export const KAKAO_EINZEL = {
  * Set je Zusammensetzung, Schlüssel "<awake>+<create>" in Packungen.
  * Die gemischten Sets sind am 2026-09-30 angelegt (Shopify-Bundles,
  * Komponenten Awake/Create, Preis 114,02 bzw. 148,60 wie die Sorten-Sets).
+ * Die Größen 4 bis 7 ebenfalls am 2026-09-30 (s02, alle Zusammensetzungen,
+ * netto 198,92 / 248,65 / 298,38 / 348,11 EUR, USD fest 277,20 / 346,50 /
+ * 415,80 / 485,10 = der Warenkorbpreis der Automatik auf den Cent).
  */
 export const KAKAO_SETS = {
   '2+0': 'bundle-2x-awake',
@@ -54,7 +71,48 @@ export const KAKAO_SETS = {
   '1+1': 'bundle-1x-awake-1x-create',
   '2+1': 'bundle-2x-awake-1x-create',
   '1+2': 'bundle-1x-awake-2x-create',
+  // 4 Packungen
+  '4+0': 'bundle-4x-awake',
+  '3+1': 'bundle-3x-awake-1x-create',
+  '2+2': 'bundle-2x-awake-2x-create',
+  '1+3': 'bundle-1x-awake-3x-create',
+  '0+4': 'bundle-4x-create',
+  // 5 Packungen
+  '5+0': 'bundle-5x-awake',
+  '4+1': 'bundle-4x-awake-1x-create',
+  '3+2': 'bundle-3x-awake-2x-create',
+  '2+3': 'bundle-2x-awake-3x-create',
+  '1+4': 'bundle-1x-awake-4x-create',
+  '0+5': 'bundle-5x-create',
+  // 6 Packungen
+  '6+0': 'bundle-6x-awake',
+  '5+1': 'bundle-5x-awake-1x-create',
+  '4+2': 'bundle-4x-awake-2x-create',
+  '3+3': 'bundle-3x-awake-3x-create',
+  '2+4': 'bundle-2x-awake-4x-create',
+  '1+5': 'bundle-1x-awake-5x-create',
+  '0+6': 'bundle-6x-create',
+  // 7 Packungen
+  '7+0': 'bundle-7x-awake',
+  '6+1': 'bundle-6x-awake-1x-create',
+  '5+2': 'bundle-5x-awake-2x-create',
+  '4+3': 'bundle-4x-awake-3x-create',
+  '3+4': 'bundle-3x-awake-4x-create',
+  '2+5': 'bundle-2x-awake-5x-create',
+  '1+6': 'bundle-1x-awake-6x-create',
+  '0+7': 'bundle-7x-create',
 };
+
+/** Set-Größen, aus denen eine Menge ab 8 Packungen zusammengesetzt wird. */
+export const SET_GROESSE_MIN = 4;
+export const SET_GROESSE_MAX = 7;
+
+/*
+ * Rein technische Obergrenze der Zerlegung (die Suche ist quadratisch in der
+ * Menge). Keine Geschäftsregel: der Online-Bestand erlaubt heute höchstens 22
+ * Packungen je Sorte in einem Warenkorb. Darüber bleibt der alte Weg.
+ */
+export const KAKAO_NORMALFORM_MAX = 999;
 
 /** Handle -> Packungen je Sorte je Zeilen-Einheit. */
 export const KAKAO_ZEILEN = {
@@ -104,6 +162,64 @@ function istFremdeKakaoZeile(handle) {
   );
 }
 
+/*
+ * Verteilt eine Menge auf m Sets: Größen so gleich wie möglich (die größeren
+ * zuerst), Awake ebenso, die zusätzlichen Awake-Packungen auf die größeren
+ * Sets. Dabei bleibt jede Awake-Zahl unter der Set-Größe: ist floor(a/m)
+ * gleich floor(n/m), liegt der Awake-Rest nie über dem Größen-Rest.
+ */
+function aufMSets(awake, create, m) {
+  const n = awake + create;
+  const q = Math.floor(n / m);
+  const r = n % m;
+  const ka = Math.floor(awake / m);
+  const ra = awake % m;
+  const zaehler = new Map();
+  for (let i = 0; i < m; i += 1) {
+    const groesse = q + (i < r ? 1 : 0);
+    const a = ka + (i < ra ? 1 : 0);
+    const schluessel = `${a}+${groesse - a}`;
+    zaehler.set(schluessel, (zaehler.get(schluessel) || 0) + 1);
+  }
+  return [...zaehler.entries()];
+}
+
+/**
+ * Die Soll-Zeilen der Normalform für eine Zusammensetzung, oder null, wenn
+ * es kein Set gibt (1 Packung, mehr als KAKAO_NORMALFORM_MAX, fehlendes Set).
+ * Ab 8 Packungen: Set-Zeilen der Größen 4 bis 7; gewählt wird die Setzahl
+ * mit den wenigsten verschiedenen Zeilen, bei Gleichstand die kleinste.
+ * Gleiche Sets liegen als EINE Zeile mit Menge im Warenkorb.
+ *
+ * @param {{awake: number, create: number}} je
+ * @returns {null | Array<{handle: string, quantity: number,
+ *   je: {awake: number, create: number}}>}
+ */
+export function kakaoSollZeilen(je) {
+  const awake = je?.awake || 0;
+  const create = je?.create || 0;
+  const n = awake + create;
+  if (n < 2 || n > KAKAO_NORMALFORM_MAX) return null;
+  const zeile = ([schluessel, quantity]) => {
+    const handle = KAKAO_SETS[schluessel];
+    if (!handle) return null;
+    const [a, c] = schluessel.split('+').map(Number);
+    return {handle, quantity, je: {awake: a, create: c}};
+  };
+  if (n <= SET_GROESSE_MAX) {
+    const z = zeile([setSchluessel({awake, create}), 1]);
+    return z ? [z] : null;
+  }
+  let beste = null;
+  const bis = Math.floor(n / SET_GROESSE_MIN);
+  for (let m = Math.ceil(n / SET_GROESSE_MAX); m <= bis; m += 1) {
+    const zeilen = aufMSets(awake, create, m).map(zeile);
+    if (zeilen.some((z) => !z)) continue;
+    if (!beste || zeilen.length < beste.length) beste = zeilen;
+  }
+  return beste;
+}
+
 /**
  * Was am Warenkorb zu tun ist, damit er in der Normalform steht.
  *
@@ -113,14 +229,18 @@ function istFremdeKakaoZeile(handle) {
  *   entfernen: string[],
  *   hinzu: Array<{handle: string, quantity: number}>,
  *   kandidat: null | {je: object, packungen: number, gemischt: boolean,
- *     einzel: Array<{handle: string, packungen: number}>, set: string},
+ *     einzel: Array<{handle: string, packungen: number}>,
+ *     sets: Array<{handle: string, quantity: number, je: object}>,
+ *     set: string | null},
  * }}
  *   Schritt 1 (`einzelform`/`entfernen`/`hinzu`): je Sorte EINE
  *   Einzelpackungs-Zeile mit der Gesamtmenge. Vorhandene Zeilen werden dabei
  *   an Ort umgelegt; neu angelegt wird nur, wenn eine Sorte keine Zeile mehr
  *   hat (eine gemischte Set-Zeile ist EINE Zeile für zwei Sorten).
- *   `kandidat`: Schritt 2, diese Einzelzeilen auf das Set umlegen, sofern das
- *   Set nicht teurer ist. null: nichts zu tun.
+ *   `kandidat`: Schritt 2, diese Einzelzeilen auf die Set-Zeilen `sets`
+ *   umlegen, sofern das nicht teurer und nicht billiger ist. `set` ist der
+ *   Handle, wenn es genau eine Set-Zeile x1 ist, sonst null.
+ *   null: nichts zu tun.
  */
 export function kakaoZeilenPlan(zeilen) {
   const kakao = (zeilen || []).filter((z) => KAKAO_ZEILEN[z.handle]);
@@ -133,15 +253,17 @@ export function kakaoZeilenPlan(zeilen) {
     for (const s of KAKAO_SORTEN) je[s] += KAKAO_ZEILEN[z.handle][s] * menge;
   }
   const gesamt = je.awake + je.create;
-  const soll = !fremd && (gesamt === 2 || gesamt === 3)
-    ? KAKAO_SETS[setSchluessel(je)]
-    : null;
+  const soll = fremd ? null : kakaoSollZeilen(je);
 
-  if (soll) {
-    const [z] = kakao;
-    if (kakao.length === 1 && z.handle === soll && z.quantity === 1) {
-      return null;
-    }
+  // Steht der Warenkorb schon genau in den Soll-Zeilen, ist nichts zu tun.
+  if (
+    soll &&
+    kakao.length === soll.length &&
+    soll.every((s) =>
+      kakao.some((z) => z.handle === s.handle && Number(z.quantity) === s.quantity),
+    )
+  ) {
+    return null;
   }
 
   // Schritt 1: Ziel je Sorte = eine Einzelpackung mit der Gesamtmenge.
@@ -186,7 +308,8 @@ export function kakaoZeilenPlan(zeilen) {
         packungen: gesamt,
         gemischt: ziele.length > 1,
         einzel: ziele.map((z) => ({handle: z.handle, packungen: z.quantity})),
-        set: soll,
+        sets: soll,
+        set: soll.length === 1 && soll[0].quantity === 1 ? soll[0].handle : null,
       }
     : null;
 
@@ -233,4 +356,84 @@ export function stepperZusammensetzung(je, packungen) {
     delta += 1;
   }
   return neu;
+}
+
+/*
+ * Rundungsspielraum der Untergrenze ab 4 Packungen: Shopify rundet die
+ * Automatik je Einzelzeile auf den Cent, das Set hat einen festen Preis. Mehr
+ * als ein Cent je Einzelzeile unter dem Einzelweg wäre ein Preisnachlass, den
+ * niemand entschieden hat — dann bleibt der alte Weg.
+ */
+export const ANKER_TOLERANZ_CENT_JE_ZEILE = 1;
+
+/**
+ * Preisschutz des Set-Tauschs, in Cent und im Markt des Warenkorbs.
+ *
+ *   NIE TEURER: Summe der Set-Zeilen <= Einzelzeilen vor Code (nach der
+ *   Automatik). Gilt für jede Menge.
+ *   NIE BILLIGER, zwei Anker, im Code benannt:
+ *     - 2 bis 3 Packungen, gemischt: nicht unter dem billigsten Sorten-Set
+ *       derselben Packungszahl (Elina EL-20260930-9c7bdd63). Die Sorten-Sets
+ *       selbst sind der Anker und haben keine Untergrenze (USD 159/210 liegen
+ *       seit 12/2025 unter der Automatik, Bestandsstufe).
+ *     - ab 4 Packungen, jede Mischung: nicht unter dem Einzelweg mit
+ *       Automatik (s03, 2026-09-30). Für 4 bis 7 sind die Sorten-Sets selbst
+ *       neu, ein älteres Set als Maßstab gibt es nicht. Toleranz
+ *       ANKER_TOLERANZ_CENT_JE_ZEILE je Einzelzeile.
+ *
+ * @param {{packungen: number, gemischt: boolean, setCent: number,
+ *   zeileCent: number, einzelZeilen: number, sortenSetCent?: number}} p
+ * @returns {{ok: boolean, grund: string}}
+ */
+export function kakaoPreisschutz({
+  packungen,
+  gemischt,
+  setCent,
+  zeileCent,
+  einzelZeilen,
+  sortenSetCent,
+}) {
+  if (!Number.isFinite(setCent) || !Number.isFinite(zeileCent)) {
+    return {ok: false, grund: 'preis_unlesbar'};
+  }
+  if (setCent > zeileCent) return {ok: false, grund: 'nie_teurer'};
+  if (packungen >= SET_GROESSE_MIN) {
+    const untergrenze = zeileCent - ANKER_TOLERANZ_CENT_JE_ZEILE * (einzelZeilen || 1);
+    if (setCent < untergrenze) return {ok: false, grund: 'nie_billiger_als_automatik'};
+    return {ok: true, grund: 'anker_einzelweg'};
+  }
+  if (gemischt) {
+    if (!Number.isFinite(sortenSetCent)) return {ok: false, grund: 'sorten_set_unlesbar'};
+    if (setCent < sortenSetCent) return {ok: false, grund: 'nie_billiger_als_sorten_set'};
+    return {ok: true, grund: 'anker_sorten_set'};
+  }
+  return {ok: true, grund: 'sorten_set'};
+}
+
+/**
+ * Stepper auf einer Set-Zeile, ganze Zeile gerechnet (Set x Zeilenmenge):
+ * welche Einzelpackung die Zeile danach trägt und welche zweite Sorte vorher
+ * als eigene Zeile dazukommt. Die Normalform legt daraus wieder Sets — erst
+ * dort sitzt der Preisschutz, deshalb nie ein direkter Sprung auf ein Set.
+ *
+ * @param {string} handle  Set-Handle der Zeile
+ * @param {number} zeilenMenge  aktuelle Menge der Zeile (Sets)
+ * @param {number} packungen  Wunsch in Packungen für die ganze Zeile
+ * @returns {null | {zeile: {handle: string, quantity: number},
+ *   dazu: null | {handle: string, quantity: number}}}
+ */
+export function stepperEinzelZeilen(handle, zeilenMenge, packungen) {
+  const art = kakaoSetArt(handle);
+  const menge = Math.max(1, Number.parseInt(zeilenMenge, 10) || 1);
+  if (!art || !(packungen >= 1 && packungen <= KAKAO_NORMALFORM_MAX)) return null;
+  const neu = stepperZusammensetzung(
+    {awake: art.je.awake * menge, create: art.je.create * menge},
+    packungen,
+  );
+  const sorte = neu.create > neu.awake ? 'create' : 'awake';
+  const andere = sorte === 'awake' ? 'create' : 'awake';
+  return {
+    zeile: {handle: KAKAO_EINZEL[sorte], quantity: neu[sorte]},
+    dazu: neu[andere] > 0 ? {handle: KAKAO_EINZEL[andere], quantity: neu[andere]} : null,
+  };
 }

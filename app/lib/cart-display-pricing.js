@@ -20,8 +20,8 @@ const SALE_CACAO_HANDLES = new Set(['37cr378n', 'aw783hfn', 'awcr37shyj']);
 // erste Anlauf suchte Produkte per Substring cacao im Handle und übersah
 // dabei die Bundle-Produkte — dieselbe Ware unter anderem Namen. Träger des
 // Steuer-Overrides ist die Collection, also ist die Collection die
-// Grundgesamtheit. Sie hat 12 Mitglieder; die hier gelisteten sind alle
-// davon bis auf das Test-Duplikat (siehe unten).
+// Grundgesamtheit. Sie hatte 12 Mitglieder, seit 2026-09-30 38; die hier
+// gelisteten sind alle davon bis auf das Test-Duplikat (siehe unten).
 // Wirkung der Bundle-Zeilen: sie zeigten 136 statt 122 bzw. 177 statt 159 —
 // dieselbe Menge Kakao war über den Größenwähler 14 bzw. 18 Euro billiger
 // als über das Bundle-Produkt (gemeldet als Digest-Punkt 8).
@@ -40,6 +40,35 @@ const CACAO_HANDLES = new Set([
   'bundle-1x-awake-1x-create',
   'bundle-2x-awake-1x-create',
   'bundle-1x-awake-2x-create',
+  // Sets mit 4 bis 7 Packungen in jeder Zusammensetzung seit 2026-09-30,
+  // Grossjob kakao-partnercodes-alle-mengen s02, ebenfalls in der Kakao-
+  // Collection mit dem 7-%-Override.
+  'bundle-4x-awake',
+  'bundle-3x-awake-1x-create',
+  'bundle-2x-awake-2x-create',
+  'bundle-1x-awake-3x-create',
+  'bundle-4x-create',
+  'bundle-5x-awake',
+  'bundle-4x-awake-1x-create',
+  'bundle-3x-awake-2x-create',
+  'bundle-2x-awake-3x-create',
+  'bundle-1x-awake-4x-create',
+  'bundle-5x-create',
+  'bundle-6x-awake',
+  'bundle-5x-awake-1x-create',
+  'bundle-4x-awake-2x-create',
+  'bundle-3x-awake-3x-create',
+  'bundle-2x-awake-4x-create',
+  'bundle-1x-awake-5x-create',
+  'bundle-6x-create',
+  'bundle-7x-awake',
+  'bundle-6x-awake-1x-create',
+  'bundle-5x-awake-2x-create',
+  'bundle-4x-awake-3x-create',
+  'bundle-3x-awake-4x-create',
+  'bundle-2x-awake-5x-create',
+  'bundle-1x-awake-6x-create',
+  'bundle-7x-create',
 ]);
 // BEWUSST NICHT aufgenommen: das zwölfte Collection-Mitglied
 // test-page-crystal-cacao(R)-create-spater-wieder-loschen ist ein aktives
