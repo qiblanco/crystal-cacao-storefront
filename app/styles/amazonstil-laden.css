@@ -48,3 +48,24 @@
   text-decoration: none;
   color: var(--cc-gold-text, #90671d);
 }
+
+/* Schrift, Flaeche und Abstand auf die Skala des Ladens (kakao-seiten.css),
+   wie bei den IG-Stimmen (ig-testimonials.css, K2). Die Vorlage setzt freie
+   Werte (0,875rem, 1,2rem, 64px, #fff); im Laden waeren das eine zehnte
+   Schriftgroesse, eine fuenfte Hintergrundfarbe und ein vierter
+   Sektionsabstand (design-rubrik am Kandidaten 88 statt 94). Der
+   Sektionstakt kommt hier aus .NormalSectionSize. */
+.qb-gv,
+.qb-kf {
+  --pdpqi-karte: var(--cc-flaeche, #f6f1ea);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.qb-gv__zeile dt,
+.qb-gv__marke,
+.qb-gv__bericht-quelle {
+  font-size: var(--cc-fs-1, 0.8rem);
+}
+.qb-gv__zeile--preis dd {
+  font-size: var(--cc-fs-3, 1.25rem);
+}
