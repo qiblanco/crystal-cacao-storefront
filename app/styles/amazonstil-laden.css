@@ -1,0 +1,50 @@
+/* ==========================================================================
+   amazonstil-laden.css — LADEN-EIGENE BRUECKE fuer den Amazon-Stil
+   (Grossjob 20260930-GROSSJOB-amazonstil-crystal-cacao-..., s04, 30.09.2026)
+
+   amazonstil.css, AmazonStil.jsx und amazonstil-daten.js stehen BYTE-GLEICH
+   zu qiblanco.com in diesem Laden (K1, shared/UPSTREAM.json). Die Vorlage
+   bindet drei Werte an die qb-tokens (app/styles/qb-tokens.css dort) und den
+   Textknopf an .btn--text aus ihrer app.css. Beides fuehrt dieser Laden
+   bewusst nicht (Muster ig-testimonials.css, K2). Ohne diese Datei stuende
+   dort var() ohne Wert: Rahmen und Radius der eigenen Spalte fielen still weg.
+
+   Die Werte kommen aus den Tokens des Ladens (kakao-seiten.css) und sind
+   deckungsgleich mit der Vorlage: --cc-text #2c2a26 = --qb-ref-tinte,
+   --cc-muted #6b665d = --qb-ref-tinte-gedaempft, Radius klein 8px.
+   Geladen wird sie nur zusammen mit amazonstil.css (Routen-links()).
+   ========================================================================== */
+.qb-gv,
+.qb-kf {
+  --qb-text: var(--cc-text, #2c2a26);
+  --qb-text-gedaempft: var(--cc-muted, #6b665d);
+  --qb-radius-klein: 8px;
+}
+
+/* Der Textknopf der Vorlage (app.css .btn--text), hier nur im Block. Schrift
+   erbt der Laden, Gold als Schrift nur beim Zeigen. */
+.qb-gv .btn--text {
+  display: inline-block;
+  box-sizing: border-box;
+  min-height: 44px;
+  width: auto;
+  max-width: 100%;
+  padding: 0.6rem 0.9rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--cc-text, #2c2a26);
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+  transition: 0.2s all linear;
+}
+.qb-gv .btn--text:hover {
+  text-decoration: none;
+  color: var(--cc-gold-text, #90671d);
+}

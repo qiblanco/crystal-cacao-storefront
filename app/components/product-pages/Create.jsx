@@ -8,6 +8,12 @@ import {SortenSeite} from './SortenSeite';
  * derselben-seite). Die Route (products.crystal-cacao-create.jsx) importiert
  * weiter diesen Default — sie musste sich nicht bewegen.
  */
-export default function CreateProductPage() {
-  return <SortenSeite sorte="create" />;
+/**
+ * faqItems (Default: undefined, dann die volle FAQ_CACAO in SortenSeite, also
+ * unverändert): die Fragen der FAQ am Seitenende. Die Kaufseite übergibt seit
+ * dem 30.09.2026 nur den Rest, weil ihre häufigsten Kundenfragen weiter oben
+ * stehen (Amazon-Stil, reusables/AmazonStil.jsx Kundenfragen).
+ */
+export default function CreateProductPage({faqItems} = {}) {
+  return <SortenSeite sorte="create" faqItems={faqItems} />;
 }
