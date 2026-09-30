@@ -1,7 +1,7 @@
 /*
- * Kakao-Sets im Warenkorb: zwei oder drei Packungen EINER Sorte liegen als
+ * Kakao-Sets im Warenkorb: zwei oder drei Packungen Kakao liegen als
  * Set-Zeile (natives Shopify-Bundle, Menge 1) im Warenkorb, nicht als
- * Einzelpackung mit Menge 2 oder 3.
+ * Einzelpackungen mit Menge 2 oder 3.
  *
  * WARUM (Großjob Partnercodes und Sets vom 29.09.2026, Segment s03,
  * Christian: "Partnercodes gelten auch für die 3er-Sets"):
@@ -12,44 +12,83 @@
  * #13532). Die Set-Produkte kosten auf den Cent den Staffelpreis (EUR) und
  * tragen keine Automatik — dort greift der Code.
  *
+ * GEMISCHTE SORTEN (Elina, EL-20260930-9c7bdd63: "das Mischen verschiedener
+ * Cacao-Sorten innerhalb eines Sets soll explizit erlaubt sein"): Awake und
+ * Create zusammen laufen in dieselbe Automatik und verloren den Code genauso
+ * (gemessen 2026-09-30 am Laden, 1+1, 2+1 und 1+2, beide Domains). Dafür gibt
+ * es seit dem 2026-09-30 drei gemischte Set-Produkte, gleicher Staffelpreis.
+ *
  * DIE NORMALFORM WIRD ÜBER DIE GANZE KAKAO-MENGE GEBILDET, NIE JE ZEILE.
  * Die Automatik zählt Awake und Create ZUSAMMEN (und das Angebot "Create &
  * Awake"), und ein Set trägt sie nicht. Gemessen 2026-09-29: Set-2 x2 kostet
  * 228,04 statt 198,92 (ab 4x 30 %), Awake x1 + Set-2 kostet 185,05 statt
  * 148,60. Ein Umleger je Zeile wäre dort ein Aufpreis. Darum:
- *   - genau EINE Sorte mit 2 oder 3 Packungen, keine fremde Kakao-Zeile
- *     -> Set-Zeile x1 (wenn sie nicht teurer ist, siehe .server.js)
- *   - sonst Einzelpackung x Gesamtmenge je Sorte, also der Weg über die
- *     Automatik wie bisher (ab 4 Packungen, gemischte Sorten, Angebot).
+ *   - insgesamt 2 oder 3 Packungen Awake/Create, keine fremde Kakao-Zeile
+ *     -> EINE Set-Zeile x1 in genau dieser Zusammensetzung (wenn sie nicht
+ *     teurer ist, siehe .server.js)
+ *   - sonst je Sorte eine Einzelpackung x Gesamtmenge, also der Weg über die
+ *     Automatik wie bisher (ab 4 Packungen, Angebot).
  *
  * Diese Datei ist rein (kein Netz, kein Server-Import): der Warenkorb-Stepper
  * (CartLineItem.jsx) liest daraus, wie viele Packungen eine Set-Zeile trägt.
  */
 
-/** Handle -> Sorte und Packungen je Zeilen-Einheit. */
-export const KAKAO_ZEILEN = {
-  'crystal-cacao-awake': {sorte: 'awake', packungen: 1},
-  'crystal-cacao-create': {sorte: 'create', packungen: 1},
-  'bundle-2x-awake': {sorte: 'awake', packungen: 2},
-  'bundle-3x-awake': {sorte: 'awake', packungen: 3},
-  'mengenrabatt-2x': {sorte: 'create', packungen: 2},
-  'mengenrabatt-3x-create': {sorte: 'create', packungen: 3},
-};
+/** Die Sorten in fester Reihenfolge (sie bestimmt auch den Set-Schlüssel). */
+export const KAKAO_SORTEN = ['awake', 'create'];
 
 export const KAKAO_EINZEL = {
   awake: 'crystal-cacao-awake',
   create: 'crystal-cacao-create',
 };
 
-export const KAKAO_SET = {
-  awake: {2: 'bundle-2x-awake', 3: 'bundle-3x-awake'},
-  create: {2: 'mengenrabatt-2x', 3: 'mengenrabatt-3x-create'},
+/**
+ * Set je Zusammensetzung, Schlüssel "<awake>+<create>" in Packungen.
+ * Die gemischten Sets sind am 2026-09-30 angelegt (Shopify-Bundles,
+ * Komponenten Awake/Create, Preis 114,02 bzw. 148,60 wie die Sorten-Sets).
+ */
+export const KAKAO_SETS = {
+  '2+0': 'bundle-2x-awake',
+  '3+0': 'bundle-3x-awake',
+  '0+2': 'mengenrabatt-2x',
+  '0+3': 'mengenrabatt-3x-create',
+  '1+1': 'bundle-1x-awake-1x-create',
+  '2+1': 'bundle-2x-awake-1x-create',
+  '1+2': 'bundle-1x-awake-2x-create',
 };
 
-/** Set-Zeile? Dann {sorte, packungen}, sonst null (auch für Einzelpackungen). */
+/** Handle -> Packungen je Sorte je Zeilen-Einheit. */
+export const KAKAO_ZEILEN = {
+  [KAKAO_EINZEL.awake]: {awake: 1, create: 0},
+  [KAKAO_EINZEL.create]: {awake: 0, create: 1},
+  ...Object.fromEntries(
+    Object.entries(KAKAO_SETS).map(([schluessel, handle]) => {
+      const [awake, create] = schluessel.split('+').map(Number);
+      return [handle, {awake, create}];
+    }),
+  ),
+};
+
+/** Set-Schlüssel einer Zusammensetzung. */
+export function setSchluessel(je) {
+  return KAKAO_SORTEN.map((s) => je[s] || 0).join('+');
+}
+
+/**
+ * Set-Zeile? Dann {packungen, je: {awake, create}, sorte, gemischt},
+ * sonst null (auch für Einzelpackungen). `sorte` ist bei gemischten Sets null.
+ */
 export function kakaoSetArt(handle) {
-  const art = KAKAO_ZEILEN[handle];
-  return art && art.packungen > 1 ? art : null;
+  const je = KAKAO_ZEILEN[handle];
+  if (!je) return null;
+  const packungen = KAKAO_SORTEN.reduce((s, x) => s + je[x], 0);
+  if (packungen < 2) return null;
+  const sorten = KAKAO_SORTEN.filter((x) => je[x] > 0);
+  return {
+    packungen,
+    je: {...je},
+    sorte: sorten.length === 1 ? sorten[0] : null,
+    gemischt: sorten.length > 1,
+  };
 }
 
 /*
@@ -72,60 +111,126 @@ function istFremdeKakaoZeile(handle) {
  * @returns {null | {
  *   einzelform: Array<{id: string, handle: string, quantity: number}>,
  *   entfernen: string[],
- *   kandidat: null | {sorte: string, packungen: number, einzel: string, set: string},
+ *   hinzu: Array<{handle: string, quantity: number}>,
+ *   kandidat: null | {je: object, packungen: number, gemischt: boolean,
+ *     einzel: Array<{handle: string, packungen: number}>, set: string},
  * }}
- *   `einzelform`/`entfernen`: Schritt 1, alle Kakao-Zeilen einer Sorte auf
- *   EINE Einzelpackungs-Zeile mit der Gesamtmenge. `kandidat`: Schritt 2,
- *   diese Zeile auf das Set umlegen, sofern das Set nicht teurer ist.
- *   null: nichts zu tun.
+ *   Schritt 1 (`einzelform`/`entfernen`/`hinzu`): je Sorte EINE
+ *   Einzelpackungs-Zeile mit der Gesamtmenge. Vorhandene Zeilen werden dabei
+ *   an Ort umgelegt; neu angelegt wird nur, wenn eine Sorte keine Zeile mehr
+ *   hat (eine gemischte Set-Zeile ist EINE Zeile für zwei Sorten).
+ *   `kandidat`: Schritt 2, diese Einzelzeilen auf das Set umlegen, sofern das
+ *   Set nicht teurer ist. null: nichts zu tun.
  */
 export function kakaoZeilenPlan(zeilen) {
   const kakao = (zeilen || []).filter((z) => KAKAO_ZEILEN[z.handle]);
   if (!kakao.length) return null;
   const fremd = zeilen.some((z) => istFremdeKakaoZeile(z.handle));
 
-  const jeSorte = {};
+  const je = {awake: 0, create: 0};
   for (const z of kakao) {
-    const art = KAKAO_ZEILEN[z.handle];
     const menge = Number(z.quantity) || 0;
-    jeSorte[art.sorte] ??= {packungen: 0, zeilen: []};
-    jeSorte[art.sorte].packungen += art.packungen * menge;
-    jeSorte[art.sorte].zeilen.push(z);
+    for (const s of KAKAO_SORTEN) je[s] += KAKAO_ZEILEN[z.handle][s] * menge;
   }
-  const sorten = Object.keys(jeSorte);
-  const eine = sorten.length === 1 ? jeSorte[sorten[0]] : null;
-  const setFaehig =
-    !fremd && eine && (eine.packungen === 2 || eine.packungen === 3);
+  const gesamt = je.awake + je.create;
+  const soll = !fremd && (gesamt === 2 || gesamt === 3)
+    ? KAKAO_SETS[setSchluessel(je)]
+    : null;
 
-  if (setFaehig) {
-    const soll = KAKAO_SET[sorten[0]][eine.packungen];
-    const [z] = eine.zeilen;
-    if (eine.zeilen.length === 1 && z.handle === soll && z.quantity === 1) {
+  if (soll) {
+    const [z] = kakao;
+    if (kakao.length === 1 && z.handle === soll && z.quantity === 1) {
       return null;
     }
   }
 
-  const einzelform = [];
-  const entfernen = [];
-  for (const sorte of sorten) {
-    const {packungen, zeilen: zs} = jeSorte[sorte];
-    const [erste, ...rest] = zs;
-    const einzel = KAKAO_EINZEL[sorte];
-    if (erste.handle !== einzel || erste.quantity !== packungen) {
-      einzelform.push({id: erste.id, handle: einzel, quantity: packungen});
-    }
-    entfernen.push(...rest.map((z) => z.id));
+  // Schritt 1: Ziel je Sorte = eine Einzelpackung mit der Gesamtmenge.
+  // Zuordnung Zeile -> Ziel: zuerst die Zeile, die schon diese Einzelpackung
+  // ist, dann eine Set-Zeile nur dieser Sorte, dann jede übrige Zeile.
+  const ziele = KAKAO_SORTEN.filter((s) => je[s] > 0).map((s) => ({
+    sorte: s,
+    handle: KAKAO_EINZEL[s],
+    quantity: je[s],
+  }));
+  const frei = [...kakao];
+  const nimm = (pruefe) => {
+    const i = frei.findIndex(pruefe);
+    return i < 0 ? null : frei.splice(i, 1)[0];
+  };
+  const nurSorte = (z, s) =>
+    KAKAO_SORTEN.every((x) => (x === s) === KAKAO_ZEILEN[z.handle][x] > 0);
+  const zuordnung = ziele.map((ziel) => ({
+    ziel,
+    zeile:
+      nimm((z) => z.handle === ziel.handle) ||
+      nimm((z) => nurSorte(z, ziel.sorte)),
+  }));
+  for (const eintrag of zuordnung) {
+    if (!eintrag.zeile) eintrag.zeile = nimm(() => true);
   }
 
-  const kandidat = setFaehig
+  const einzelform = [];
+  const hinzu = [];
+  for (const {ziel, zeile} of zuordnung) {
+    if (!zeile) {
+      hinzu.push({handle: ziel.handle, quantity: ziel.quantity});
+    } else if (zeile.handle !== ziel.handle || zeile.quantity !== ziel.quantity) {
+      einzelform.push({id: zeile.id, handle: ziel.handle, quantity: ziel.quantity});
+    }
+  }
+  const entfernen = frei.map((z) => z.id);
+
+  const kandidat = soll
     ? {
-        sorte: sorten[0],
-        packungen: eine.packungen,
-        einzel: KAKAO_EINZEL[sorten[0]],
-        set: KAKAO_SET[sorten[0]][eine.packungen],
+        je: {...je},
+        packungen: gesamt,
+        gemischt: ziele.length > 1,
+        einzel: ziele.map((z) => ({handle: z.handle, packungen: z.quantity})),
+        set: soll,
       }
     : null;
 
-  if (!einzelform.length && !entfernen.length && !kandidat) return null;
-  return {einzelform, entfernen, kandidat};
+  if (!einzelform.length && !entfernen.length && !hinzu.length && !kandidat) {
+    return null;
+  }
+  return {einzelform, entfernen, hinzu, kandidat};
+}
+
+/**
+ * Das Sorten-Set derselben Packungszahl (für die Untergrenze gemischter
+ * Sets, siehe .server.js): {awake: handle|null, create: handle|null}.
+ */
+export function sortenSetsGleicherMenge(packungen) {
+  return {
+    awake: KAKAO_SETS[`${packungen}+0`] ?? null,
+    create: KAKAO_SETS[`0+${packungen}`] ?? null,
+  };
+}
+
+/**
+ * Stepper auf einer Set-Zeile: aus der Wunsch-Packungszahl wird die
+ * Zusammensetzung je Sorte. "+" legt eine Packung der Sorte dazu, von der
+ * das Set mehr hat (bei Gleichstand Awake), "−" nimmt eine von der Sorte,
+ * von der es mehr hat (bei Gleichstand Create). Bei Sorten-Sets bleibt es
+ * bei der einen Sorte, wie bisher.
+ *
+ * @param {{awake: number, create: number}} je  Zusammensetzung des Sets
+ * @param {number} packungen  Wunsch (>= 0)
+ * @returns {{awake: number, create: number}}
+ */
+export function stepperZusammensetzung(je, packungen) {
+  const neu = {awake: je.awake || 0, create: je.create || 0};
+  let delta = packungen - (neu.awake + neu.create);
+  while (delta > 0) {
+    const s = neu.create > neu.awake ? 'create' : 'awake';
+    neu[s] += 1;
+    delta -= 1;
+  }
+  while (delta < 0) {
+    const s = neu.awake > neu.create ? 'awake' : 'create';
+    if (neu[s] === 0) break;
+    neu[s] -= 1;
+    delta += 1;
+  }
+  return neu;
 }

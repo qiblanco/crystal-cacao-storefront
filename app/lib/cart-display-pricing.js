@@ -35,6 +35,11 @@ const CACAO_HANDLES = new Set([
   'mengenrabatt-3x-create',
   'bundle-2x-awake',
   'bundle-3x-awake',
+  // Gemischte Sets seit 2026-09-30, Elina EL-20260930-9c7bdd63, ebenfalls
+  // Mitglied der Kakao-Collection mit dem 7-%-Override.
+  'bundle-1x-awake-1x-create',
+  'bundle-2x-awake-1x-create',
+  'bundle-1x-awake-2x-create',
 ]);
 // BEWUSST NICHT aufgenommen: das zwölfte Collection-Mitglied
 // test-page-crystal-cacao(R)-create-spater-wieder-loschen ist ein aktives
