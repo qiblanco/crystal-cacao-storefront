@@ -39,7 +39,11 @@ export function AddToCartButton({
             type="hidden"
             value={JSON.stringify(analytics)}
           />
+          {/* data-qb-kaufknopf: daran erkennt KaufknopfChatSignal den
+              Kaufknopf und unterdrückt das Chat-Widget, solange es ihn
+              überdeckt. */}
           <button className='btn--primary'
+            data-qb-kaufknopf=""
             type="submit"
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
