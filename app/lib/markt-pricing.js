@@ -70,24 +70,29 @@ export function bruttoAnzeige(amount, handle, currencyCode, land) {
 
 /**
  * GANZ-EURO-ANZEIGE: aus dem Kundenbetrag die Zahl, die die Seite nennt.
+ * Die Regel heißt: die Seite nennt nie weniger, als die Kasse nimmt.
  *
- * ZWEI REGELN, GETRENNT AM LAND (Job 20260926-at-kakao-einzelpackung-78-
- * beworben-kasse-78-13-beide-laeden):
- * - DE (Heimat- und Kalibrierland, STEUER_LAND_DEFAULT): kaufmännisch
- *   gerundet, wie bisher. Hier sind die Preise so gesetzt, dass der ganze
- *   Euro der offizielle Preis ist (Kakao 76,00, Staffel 61/53 mit den auf DE
- *   kalibrierten Festbetragsrabatten). Aufrunden hieße dort, Preise zu nennen,
- *   die die Kasse gar nicht nimmt: QiOne 1087,0055 zeigte mit ceil 1088
- *   (deshalb wurde ceil in ProductPrice einmal entfernt), die Kakao-Staffel
- *   3x rechnet im Modell 53,21 und kassiert 53,00.
- * - JEDES ANDERE LAND: auf den nächsten ganzen Euro AUFgerundet (auf Cent
- *   gerechnet, damit 76,00 nicht zu 77 wird). Dort ist nichts kalibriert,
- *   und kaufmännisch gerundet verspricht die Seite zu wenig. Gemessen am
- *   2026-09-26 in AT: netto 71,03 x 1,10 = 78,13 an der Kasse, die Seite
- *   nannte 78. Aufgerundet nennt sie 79, und der Kunde zahlt 78,13, also nie
- *   mehr als versprochen. CH/US gilt dasselbe: dort ist der Markets-Preis
- *   heute ganzzahlig und bleibt es, ein umgerechneter Cent-Preis würde
- *   ebenso nach oben genannt.
+ * Gerechnet wird auf den Cent, dann auf den nächsten ganzen Euro AUFgerundet.
+ * Das gilt in jedem Land (AT seit Job 20260926-at-kakao-einzelpackung-78-
+ * beworben-kasse-78-13-beide-laeden: netto 71,03 x 1,10 = 78,13, die Seite
+ * nennt 79 statt 78).
+ *
+ * DE hat EINE Toleranz von 1 Cent (Job 20261001-kakao-sets-ab-4-seite-nennt-
+ * weniger-als-kasse-prio30). DE ist das Kalibrierland: dort sind Nettopreise
+ * so gesetzt, dass brutto ein ganzer Euro herauskommt. Ein Nettopreis auf den
+ * Cent trifft das Ziel aber nur auf höchstens einen halben Netto-Cent mal
+ * (1 + Satz) genau, nach Cent-Rundung also auf +-1 Cent: QiOne 2 Pro
+ * 913,45 x 1,19 = 1087,0055 bleibt 1.087 (reines ceil zeigte 1.088, deshalb
+ * wurde ceil in ProductPrice einmal entfernt), Kakao 71,03 x 1,07 = 76,0021
+ * bleibt 76. Was mehr als 1 Cent über dem ganzen Euro liegt, ist nicht
+ * kalibriert und wird aufgerundet: die Kakao-Sets ab 4 Packungen kosten
+ * 49,73 netto je Packung, 5 Packungen 248,65 x 1,07 = 266,06 an der Kasse.
+ * Kaufmännisch gerundet nannte die Seite 266, jetzt 267.
+ * Gemessen über alle 48 DE-Produkte (preis_soll, 2026-10-01): es ändern sich
+ * genau die Sets mit 5, 6 und 7 Packungen (266/319/372 -> 267/320/373).
+ *
+ * Für MODELLIERTE Beträge (die Kakao-Staffel rechnet einen Festbetragsrabatt
+ * als Prozent nach) gilt staffelModellAnzeige(), nicht diese Funktion.
  *
  * Die Regel hängt NICHT am Preismodus: nach dem Brutto-Kipp liefert Shopify
  * für AT mit "Dynamisch" wieder 78,13, und die Regel greift gleich.
@@ -103,9 +108,30 @@ export function ganzEuroAnzeige(betrag, land) {
   const zahl = Number(betrag);
   if (!Number.isFinite(zahl)) return null;
   const l = String(land || STEUER_LAND_DEFAULT).toUpperCase();
-  if (l === STEUER_LAND_DEFAULT) return Math.round(zahl);
   const cent = Math.round(zahl * 100);
+  // `|| 0`: bei 0,00 ergibt ceil(-0,01) sonst -0, und das formatiert als "-0".
+  if (l === STEUER_LAND_DEFAULT) return Math.ceil((cent - 1) / 100) || 0;
   return Math.ceil(cent / 100);
+}
+
+/**
+ * STAFFEL-MODELL-ANZEIGE: nur für die Kakao-Staffel (CacaoProductForm,
+ * cacaoPricing). Dort ist der Betrag ein Modell: der Mengenrabatt ist ein
+ * Festbetrag, die Seite rechnet ihn als Prozent nach. 3 Packungen ergeben im
+ * Modell 49,73 x 1,07 = 53,21, die Kasse nimmt 53,00, weil der Festbetrag in
+ * DE den runden Betrag trifft. Darum bleibt DE hier kaufmännisch gerundet;
+ * jedes andere Land rundet auf wie ganzEuroAnzeige().
+ *
+ * @param {number} betrag Modellbetrag, ungerundet
+ * @param {string} [land] ISO-Land des aufgelösten Marktes (Default DE)
+ * @returns {number|null} ganzer Anzeigewert
+ */
+export function staffelModellAnzeige(betrag, land) {
+  const zahl = Number(betrag);
+  if (!Number.isFinite(zahl)) return null;
+  const l = String(land || STEUER_LAND_DEFAULT).toUpperCase();
+  if (l === STEUER_LAND_DEFAULT) return Math.round(zahl);
+  return ganzEuroAnzeige(zahl, l);
 }
 
 /**
