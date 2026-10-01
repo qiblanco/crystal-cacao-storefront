@@ -3,6 +3,69 @@
 /* eslint-disable */
 import type * as StorefrontAPI from '@shopify/hydrogen/storefront-api-types';
 
+export type VergleichPreisFragment = Pick<StorefrontAPI.Product, 'handle'> & {
+  selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<{
+    price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+  }>;
+};
+
+export type GeraeteVergleichPreiseQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type GeraeteVergleichPreiseQuery = {
+  qione?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Product, 'handle'> & {
+      selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<{
+        price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+      }>;
+    }
+  >;
+  bracelet?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Product, 'handle'> & {
+      selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<{
+        price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+      }>;
+    }
+  >;
+  qihome?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Product, 'handle'> & {
+      selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<{
+        price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+      }>;
+    }
+  >;
+};
+
+export type KakaoSortenPreiseQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type KakaoSortenPreiseQuery = {
+  awake?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Product, 'handle'> & {
+      selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<{
+        price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+      }>;
+    }
+  >;
+  create?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Product, 'handle'> & {
+      selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<{
+        price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+      }>;
+    }
+  >;
+};
+
+export type SortenPreisFragment = Pick<StorefrontAPI.Product, 'handle'> & {
+  selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<{
+    price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+  }>;
+};
+
 export type MoneyFragment = Pick<
   StorefrontAPI.MoneyV2,
   'currencyCode' | 'amount'
@@ -345,6 +408,16 @@ export type FooterQuery = {
       >;
     }
   >;
+};
+
+export type PreismodusQueryVariables = StorefrontAPI.Exact<{
+  [key: string]: never;
+}>;
+
+export type PreismodusQuery = {
+  shop: {
+    metafield?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+  };
 };
 
 export type SitemapProdukteQueryVariables = StorefrontAPI.Exact<{
@@ -837,6 +910,11 @@ export type SkeletonProductFragment = Pick<
   | 'encodedVariantExistence'
   | 'encodedVariantAvailability'
 > & {
+  images: {
+    nodes: Array<
+      Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+    >;
+  };
   options: Array<
     Pick<StorefrontAPI.ProductOption, 'name'> & {
       optionValues: Array<
@@ -952,6 +1030,14 @@ export type SkeletonProductQuery = {
       | 'encodedVariantExistence'
       | 'encodedVariantAvailability'
     > & {
+      images: {
+        nodes: Array<
+          Pick<
+            StorefrontAPI.Image,
+            'id' | 'url' | 'altText' | 'width' | 'height'
+          >
+        >;
+      };
       options: Array<
         Pick<StorefrontAPI.ProductOption, 'name'> & {
           optionValues: Array<
@@ -1502,6 +1588,14 @@ export type PredictiveSearchQuery = {
 };
 
 interface GeneratedQueryTypes {
+  '#graphql\n  fragment VergleichPreis on Product {\n    handle\n    selectedOrFirstAvailableVariant(\n      selectedOptions: []\n      ignoreUnknownOptions: true\n      caseInsensitiveMatch: true\n    ) {\n      price {\n        amount\n        currencyCode\n      }\n    }\n  }\n  query GeraeteVergleichPreise($country: CountryCode, $language: LanguageCode)\n  @inContext(country: $country, language: $language) {\n    qione: product(handle: "qione-2-pro") {\n      ...VergleichPreis\n    }\n    bracelet: product(handle: "qibracelet") {\n      ...VergleichPreis\n    }\n    qihome: product(handle: "qihome-air") {\n      ...VergleichPreis\n    }\n  }\n': {
+    return: GeraeteVergleichPreiseQuery;
+    variables: GeraeteVergleichPreiseQueryVariables;
+  };
+  '#graphql\n  query KakaoSortenPreise($country: CountryCode, $language: LanguageCode)\n  @inContext(country: $country, language: $language) {\n    awake: product(handle: "crystal-cacao-awake") {\n      ...SortenPreis\n    }\n    create: product(handle: "crystal-cacao-create") {\n      ...SortenPreis\n    }\n  }\n  fragment SortenPreis on Product {\n    handle\n    selectedOrFirstAvailableVariant(\n      selectedOptions: []\n      ignoreUnknownOptions: true\n      caseInsensitiveMatch: true\n    ) {\n      price {\n        amount\n        currencyCode\n      }\n    }\n  }\n': {
+    return: KakaoSortenPreiseQuery;
+    variables: KakaoSortenPreiseQueryVariables;
+  };
   '#graphql\n  fragment Shop on Shop {\n    id\n    name\n    description\n    primaryDomain {\n      url\n    }\n    # Das Feld brand/logo ist hier bewusst NICHT mehr enthalten: es lieferte\n    # die Logo-URL der Marke Qi Blanco in den Datensatz jeder Seite, und\n    # gemessen 2026-09-02 liest keine Komponente dieser Storefront es (Suche\n    # ueber app/ nach .brand: 0 Treffer ausserhalb dieser Datei). Die\n    # Kopfzeile zeigt ABSENDER_MARKE als Text.\n    #\n    # primaryDomain BLEIBT und ist KEIN Versehen: sie zeigt auf\n    # checkout.qiblanco.com und wird von HeaderMenu/FooterMenu gebraucht, um\n    # shop-interne URLs auf Pfade zu kuerzen. Der Checkout ist bei Shopify\n    # gemeinsam — das ist die Kassen-Domain, keine Fremdwerbung.\n  }\n  query Header(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    shop {\n      ...Shop\n    }\n  }\n': {
     return: HeaderQuery;
     variables: HeaderQueryVariables;
@@ -1509,6 +1603,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  query Footer(\n    $country: CountryCode\n    $footerMenuHandle: String!\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    menu(handle: $footerMenuHandle) {\n      ...Menu\n    }\n  }\n  #graphql\n  fragment MenuItem on MenuItem {\n    id\n    resourceId\n    tags\n    title\n    type\n    url\n  }\n  fragment ChildMenuItem on MenuItem {\n    ...MenuItem\n  }\n  fragment ParentMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...ChildMenuItem\n    }\n  }\n  fragment Menu on Menu {\n    id\n    items {\n      ...ParentMenuItem\n    }\n  }\n\n': {
     return: FooterQuery;
     variables: FooterQueryVariables;
+  };
+  '#graphql\n  query Preismodus {\n    shop {\n      metafield(namespace: "qb_preis", key: "modus") {\n        value\n      }\n    }\n  }\n': {
+    return: PreismodusQuery;
+    variables: PreismodusQueryVariables;
   };
   '#graphql\n  query SitemapProdukte($handle: String!, $first: Int!) {\n    collection(handle: $handle) {\n      products(first: $first) {\n        nodes {\n          handle\n          title\n          createdAt\n          updatedAt\n        }\n      }\n    }\n  }\n': {
     return: SitemapProdukteQuery;
