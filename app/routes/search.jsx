@@ -3,7 +3,7 @@ import {Analytics} from '@shopify/hydrogen';
 import {SearchForm} from '~/components/SearchForm';
 import {SearchResults} from '~/components/SearchResults';
 import {getEmptyPredictiveSearchResult} from '~/lib/search';
-import {noindexMeta, noindexHeader} from '~/lib/seo';
+import {noindexMeta, noindexHeader, istZusammensetzungsSet} from '~/lib/seo';
 import {
   ABSENDER_MARKE,
   istKakaoProdukt,
@@ -341,8 +341,12 @@ function nurKakaoTreffer(items) {
     const nodes = wert?.nodes ?? [];
     let behalten = nodes;
     if (gattung === 'products') {
-      behalten = nodes.filter((n) =>
-        istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)),
+      // Kakao-Zusammensetzungs-Sets sind Warenkorb-Ziele, keine Suchtreffer
+      // (Elina EL-20261001-397a9719; Begruendung an istZusammensetzungsSet).
+      behalten = nodes.filter(
+        (n) =>
+          istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)) &&
+          !istZusammensetzungsSet(n?.handle),
       );
     } else if (gattung === 'pages') {
       behalten = nodes.filter((n) => istKakaoSeite(n?.handle));
@@ -534,8 +538,10 @@ async function predictiveSearch({request, context}) {
       if (gattung === 'products') {
         return [
           gattung,
-          liste.filter((n) =>
-            istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)),
+          liste.filter(
+            (n) =>
+              istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)) &&
+              !istZusammensetzungsSet(n?.handle),
           ),
         ];
       }

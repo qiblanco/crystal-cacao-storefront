@@ -18,6 +18,7 @@ import {
   UMGELEITETE_PRODUKTE,
 } from '~/lib/kakao-zone';
 import {produktMeta} from '~/lib/produkt-seo';
+import {istNichtIndexierbaresProdukt, noindexMeta} from '~/lib/seo';
 
 /**
  * @type {Route.MetaFunction}
@@ -63,6 +64,18 @@ export const meta = ({data}) => {
   // Optional-Chaining allein auf `data` und waere hier ausgestiegen.
   if (!produkt?.handle) {
     return [{title: `Produkt | ${ABSENDER_MARKE}`}];
+  }
+  // Nicht indexierbar laut ~/lib/seo, seit 2026-10-01 vor allem die
+  // Kakao-Zusammensetzungs-Sets (Elina EL-20261001-397a9719): Warenkorb-Ziele
+  // der Laden-Normalform, keine Landeseiten. Nur Titel und noindex, kein
+  // Canonical und kein Product-Knoten: strukturierte Daten auf einer Seite,
+  // die nicht in den Index soll, waeren ein widerspruechliches Signal. Die
+  // Seite selbst rendert und verkauft unveraendert.
+  if (istNichtIndexierbaresProdukt(produkt.handle)) {
+    return [
+      {title: `${produkt.title ?? 'Produkt'} | ${ABSENDER_MARKE}`},
+      noindexMeta(),
+    ];
   }
   return produktMeta({
     produkt,
