@@ -67,6 +67,19 @@ export function produktLink(handle, block, art) {
   return ziel || `/products/${ALIAS[handle] || handle}`;
 }
 
+/**
+ * Die Kaufziele des LP-Blocks (die LP-Shopseiten mit Buy-Box), als Pfade.
+ * Ein Link dorthin ist der Ausgang einer Landingpage zur Kaufseite und trägt
+ * ihren nächsten Klick. KaufknopfChatSignal (lib/kaufknopf-chat.js) erkennt
+ * daran die LP-Knöpfe, über denen die Chat-Blase nicht stehen darf.
+ * @returns {string[]}
+ */
+export function lpKaufZiele() {
+  return [
+    ...new Set(Object.values(PRODUKT_LINKS).map((e) => e[BLOCK_LP].kauf)),
+  ];
+}
+
 /*
  * Thema-Chips (DreiThemenBand): im LP-Block darf der esmog-Chip nicht auf
  * die PDP zeigen — Ziel ist die E-Smog-Campaign-LP (URL mit Grossschreibung,
