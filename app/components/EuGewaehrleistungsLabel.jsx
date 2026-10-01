@@ -573,7 +573,7 @@ function EuLabelAusloeser({
   if (!eigeneZeile) {
     return (
       <>
-        {bild}
+        <EuZeichenVektor />
         {knopf}
       </>
     );
@@ -584,6 +584,61 @@ function EuLabelAusloeser({
       {bild}
       {knopf}
     </span>
+  );
+}
+
+/**
+ * DAS ZEICHEN DER LISTEN-BAUFORM ALS VEKTOR (Elina EL-20261001-0b68ad76).
+ *
+ * Auftrag: "das EU-Gewährleistungslabel-Icon soll in denselben Goldton
+ * eingefärbt werden wie alle anderen Icons in der Liste, aktuell fällt es
+ * farblich heraus". Das löst EL-20260909-395f848c ab, das das Originalbild
+ * in Blau verlangt hatte.
+ *
+ * Ein Rasterbild (AUSLOESER_ZEICHEN, JPEG) lässt sich nicht in einen
+ * CSS-Farbwert umfärben -- ein `filter` träfe den Goldton nur ungefähr.
+ * Darum steht das Zeichen hier nachgezeichnet: Schild, Sternenkranz, das
+ * G-Schild, vermessen am Original (240 x 251). Das Schild zieht seine Farbe
+ * aus `currentColor`, also aus derselben Regel wie die Nachbar-Icons
+ * (`.BenefitList svg` in app.css). Ohne diese Regel -- in der Kakao-Liste --
+ * stehen die Originalfarben aus eu-gewaehrleistung.css, das Zeichen sieht
+ * dort aus wie bisher.
+ *
+ * DAS IST WEITERHIN NUR DAS SCHMUCK-ZEICHEN, NIE DIE AMTLICHE GRAFIK: kein
+ * QR-Code, kein Verordnungstext. Die Auflagen aus Anhang I gelten für das
+ * Bild im Overlay und bleiben unberührt. Die Block-Bauform (eigeneZeile)
+ * zeigt weiter das Bild aus AUSLOESER_ZEICHEN.
+ *
+ * Keine width-Angabe am Element: das Seitenverhältnis kommt aus der
+ * viewBox. Die Breite setzt die jeweilige Liste (feste Icon-Spalte in der
+ * .BenefitList, `width: auto` in der Kakao-Liste).
+ */
+const ZEICHEN_SCHILD = 'M0 0H240V214L190 249Q121 254 52 249L0 214Z';
+const ZEICHEN_STERNE =
+  'M121.3 2.6L124.2 11.6L133.7 11.6L126 17.1L128.9 26.1L121.3 20.6L113.7 26.1L116.6 17.1L108.9 11.6L118.4 11.6ZM171.3 16L174.2 25L183.7 25L176 30.5L178.9 39.5L171.3 34L163.7 39.5L166.6 30.5L158.9 25L168.4 25ZM207.9 52.6L210.8 61.6L220.3 61.6L212.6 67.1L215.5 76.1L207.9 70.6L200.3 76.1L203.2 67.1L195.5 61.6L205 61.6ZM221.3 102.6L224.2 111.6L233.7 111.6L226 117.1L228.9 126.1L221.3 120.6L213.7 126.1L216.6 117.1L208.9 111.6L218.4 111.6ZM207.9 152.6L210.8 161.6L220.3 161.6L212.6 167.1L215.5 176.1L207.9 170.6L200.3 176.1L203.2 167.1L195.5 161.6L205 161.6ZM171.3 189.2L174.2 198.2L183.7 198.2L176 203.7L178.9 212.7L171.3 207.2L163.7 212.7L166.6 203.7L158.9 198.2L168.4 198.2ZM121.3 202.6L124.2 211.6L133.7 211.6L126 217.1L128.9 226.1L121.3 220.6L113.7 226.1L116.6 217.1L108.9 211.6L118.4 211.6ZM71.3 189.2L74.2 198.2L83.7 198.2L76 203.7L78.9 212.7L71.3 207.2L63.7 212.7L66.6 203.7L58.9 198.2L68.4 198.2ZM34.7 152.6L37.6 161.6L47.1 161.6L39.4 167.1L42.3 176.1L34.7 170.6L27.1 176.1L30 167.1L22.3 161.6L31.8 161.6ZM21.3 102.6L24.2 111.6L33.7 111.6L26 117.1L28.9 126.1L21.3 120.6L13.7 126.1L16.6 117.1L8.9 111.6L18.4 111.6ZM34.7 52.6L37.6 61.6L47.1 61.6L39.4 67.1L42.3 76.1L34.7 70.6L27.1 76.1L30 67.1L22.3 61.6L31.8 61.6ZM71.3 16L74.2 25L83.7 25L76 30.5L78.9 39.5L71.3 34L63.7 39.5L66.6 30.5L58.9 25L68.4 25Z';
+const ZEICHEN_G =
+  'M176 93V87C160 72 141 66 121 66C101 66 82 72 67 87V113C68 140 93 164 121 178C149 164 173 140 174 113H125';
+
+function EuZeichenVektor() {
+  return (
+    <svg
+      className="eu-gwl__zeichen eu-gwl__zeichen--vektor"
+      xmlns="http://www.w3.org/2000/svg"
+      height="1em"
+      viewBox="0 0 240 251"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path fill="currentColor" d={ZEICHEN_SCHILD} />
+      <path className="eu-gwl__zeichen-sterne" d={ZEICHEN_STERNE} />
+      <path
+        className="eu-gwl__zeichen-g"
+        fill="none"
+        strokeWidth="8"
+        strokeLinejoin="round"
+        d={ZEICHEN_G}
+      />
+    </svg>
   );
 }
 

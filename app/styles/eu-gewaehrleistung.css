@@ -71,16 +71,34 @@
  * und `.CacaoBenefitList .eu-gwl__zeichen` sie mit `1em` -- rund 19 px bzw.
  * rund 14 px, weil die Nachbar-Icons bzw. die Emoji daneben genau so gross
  * sind.
- * Die srcset-Leiter rechnet dort also mit MEHR, als die Flaeche braucht:
- * das Bild kommt schaerfer als noetig herein, nicht unschaerfer. Bewusst
- * hingenommen, weil eine zweite Anzeigebreite eine zweite Zahl waere, die
- * jemand pflegen muss; der Test haelt die Richtung fest (die Leiter darf die
- * Listen-Flaeche nie UNTERschreiten -- das waere sichtbar).
+ * Seit Elina EL-20261001-0b68ad76 ist das Zeichen in der Listen-Bauform
+ * kein Bild mehr, sondern ein <svg> (EuZeichenVektor) -- die srcset-Leiter
+ * betrifft dort nichts mehr, sie gilt nur noch fuer diese Block-Bauform.
+ * Die Klasse bleibt dieselbe, damit Groesse und Abstand der Listen weiter
+ * an einer Stelle greifen.
  */
 .eu-gwl__zeichen {
   flex: 0 0 auto;
   width: 36px;
   height: auto;
+}
+
+/*
+ * Das Zeichen der Listen-Bauform als Vektor (Elina EL-20261001-0b68ad76,
+ * Zeichnung in EuGewaehrleistungsLabel.jsx, EuZeichenVektor). Hier stehen
+ * die ORIGINALFARBEN des Bildes, gemessen am JPEG (Blau 2/76/161, Sterne
+ * 237/237/33). Sie gelten, wo keine Liste etwas anderes sagt -- in der
+ * Kakao-Liste. Die .BenefitList faerbt das Schild ueber `.BenefitList svg`
+ * in ihren Goldton und stellt die Sterne auf Weiss (app.css).
+ */
+.eu-gwl__zeichen--vektor {
+  color: #024ca1;
+}
+.eu-gwl__zeichen-sterne {
+  fill: #eded21;
+}
+.eu-gwl__zeichen-g {
+  stroke: #fff;
 }
 
 /* ------------------------------------------------------------------ */
