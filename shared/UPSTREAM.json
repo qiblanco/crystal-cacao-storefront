@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "234f87ff85526586ab105856047b4ba9dcaa02e9",
-  "erzeugt_utc": "2026-10-01T05:19:24Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 234f87ff8552; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 5c64e5e3a46d). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "4325116855c38820020f112ca7de1db5052bf2d0",
+  "erzeugt_utc": "2026-10-01T22:53:29Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 4325116855c3; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 234f87ff8552). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -400,8 +400,7 @@
     {
       "upstream": "app/components/reusables/blockLinks.js",
       "klasse": "K1",
-      "sha256": "cba5612d2736e48766f615f1c419f47ab4329dfa66cded8f6eed1913c880f0c5",
-      "nachzug_grund": "Neu 2026-09-30 (Grossjob 20260930-GROSSJOB-amazonstil-crystal-cacao-und-us-seite-genau-wie-deutsch-mit-paritaetspruefer, s04): Amazon-Stil der Kakao-Kaufseiten (Sortenvergleich mit Analyseberichten, Kunden fragen), Christian 30.09.2026 'das gleiche bitte auch bei Crystal Cacao machen ... im Shop-Bereich'. Byte-gleich aus qiblanco-storefront origin/main 1376176671 (Bau dort: #713 a26a504). Import-Huelle der zwei Kakao-Kaufseiten; blockLinks.js/raten-angebot.js/redesign3themen.js/CdnBild.jsx sind reine Importe von AmazonStil.jsx bzw. amazonstil-daten.js (Geraetevergleich-Zweig, im Laden ungerendert). Die zwei Luecken des Ladens (qb-tokens, .btn--text) fuellt die laden-eigene app/styles/amazonstil-laden.css, damit diese Datei byte-gleich bleibt."
+      "sha256": "d13d6ba2969378220325a885a51a7d588e0467d2277e8be90e8a0f1839561e75"
     },
     {
       "upstream": "app/components/reusables/raten-angebot.js",
