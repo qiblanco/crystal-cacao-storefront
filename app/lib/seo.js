@@ -449,8 +449,47 @@ export const NICHT_INDEXIERBARE_PRODUKTE = [
  * @returns {boolean}
  */
 export function istNichtIndexierbaresProdukt(handle) {
-  return !!handle && NICHT_INDEXIERBARE_PRODUKTE.includes(handle);
+  if (!handle) return false;
+  return NICHT_INDEXIERBARE_PRODUKTE.includes(handle) || istZusammensetzungsSet(handle);
 }
+
+/**
+ * Kakao-Zusammensetzungs-Sets: reine Warenkorb-Ziele, keine Landeseiten.
+ *
+ * WARUM SIE ANDERS LIEGEN ALS DIE BESTANDS-SETS OBEN (Elina
+ * EL-20261001-397a9719, 2026-10-01): Der Satz am Aufnahme-Kriterium oben,
+ * „reale Bundles bleiben indexiert, besserer Inhalt statt Unsichtbarkeit",
+ * gilt für die vier Sets vom Dezember 2025 (`bundle-2x-awake`,
+ * `bundle-3x-awake`, `mengenrabatt-2x`, `mengenrabatt-3x-create`). Sie haben
+ * eigene Beschreibungen in produkt-seo.js und bleiben im Index. Die Sets vom
+ * 30.09.2026 sind etwas anderes:
+ *   - Die Laden-Normalform (kakao-set-zeile.js) legt sie SELBST in den
+ *     Warenkorb, damit der Partnercode neben dem Mengenpreis greift (ein
+ *     Produktrabatt je Zeile, Plan Advanced). Kein Kunde ruft sie direkt auf,
+ *     keine Seite verlinkt sie.
+ *   - Es sind 29 Beinahe-Dubletten derselben zwei Sorten. Gemessen am
+ *     2026-10-01: 29 von 43 Produkt-URLs der Sitemap, 25 von 28 Treffern der
+ *     Suche „awake" auf crystal-cacao.com, jede Seite HTTP 200 und indexierbar.
+ * Besserer Inhalt hilft hier nicht: eine Seite je Zusammensetzung hätte nichts
+ * zu sagen, was die Sorten-Seite nicht schon sagt.
+ *
+ * REGEL STATT LISTE, damit künftige Zusammensetzungen ohne Code-Änderung mit
+ * hineinfallen:
+ *   gemischt               bundle-<a>x-awake-<c>x-create   (jede Menge)
+ *   Sorten-Set ab 4 Pack.  bundle-<n>x-awake|create        (n >= 4)
+ * `bundle-2x-awake` und `bundle-3x-awake` passen absichtlich nicht.
+ *
+ * Kaufbar bleiben sie unverändert: Status, Kanäle und Preise werden nicht
+ * berührt, nur Sitemap, Suche und das robots-Meta lesen diese Regel.
+ * @param {string|undefined} handle
+ * @returns {boolean}
+ */
+export function istZusammensetzungsSet(handle) {
+  return !!handle && ZUSAMMENSETZUNGS_SET_RE.test(handle);
+}
+
+const ZUSAMMENSETZUNGS_SET_RE =
+  /^bundle-(?:\d+x-awake-\d+x-create|(?:[4-9]|[1-9]\d+)x-(?:awake|create))$/;
 
 /**
  * Kollektions-Handles, die NICHT in den Google-Index gehören.

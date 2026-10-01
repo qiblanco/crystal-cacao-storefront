@@ -54,6 +54,7 @@ import {
   istTestartefakt,
   titelSchluessel,
 } from '~/lib/kakao-zone';
+import {istNichtIndexierbaresProdukt} from '~/lib/seo';
 
 /** Wieviele Produkte höchstens gezogen werden. Deckelt die Antwort, entscheidet nichts. */
 const PRODUKTE_MAX = 250;
@@ -275,6 +276,12 @@ export async function sitemapSeiten({storefront, origin}) {
     if (produkt.handle in UMGELEITETE_PRODUKTE) continue;
     // (b) Testartefakt: sagt seinen Zweck im eigenen Titel an.
     if (istTestartefakt(produkt.title)) continue;
+    // (b2) Nicht indexierbar laut ~/lib/seo, seit 2026-10-01 vor allem die
+    //      Kakao-Zusammensetzungs-Sets (Elina EL-20261001-397a9719): reine
+    //      Warenkorb-Ziele, 29 Beinahe-Dubletten. Dieselbe Funktion setzt das
+    //      noindex der Produktseite; Sitemap und robots-Meta laufen damit
+    //      nicht auseinander. Erkannt wird am Handle-Muster, nicht per Liste.
+    if (istNichtIndexierbaresProdukt(produkt.handle)) continue;
     // (c) Dublette: derselbe Inhalt unter einer zweiten Adresse. Die schwächere
     //     Adresse zieht Ranking-Signal von der starken ab — Suchmaschinen
     //     müssen raten, welche die echte ist.
