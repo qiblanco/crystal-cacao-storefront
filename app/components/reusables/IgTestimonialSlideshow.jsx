@@ -567,7 +567,7 @@ export function IgTestimonialSlideshow({
        * ist KEINE Kachel — siehe Kopf, Abschnitt „WELCHE KACHELN STEHEN". */
       (t) => t.produkt === produkt && t.inDerReihe === true,
     );
-    /* Stabil nach (ansEnde, Stufe, Sprache) — die Rang-Ordnung der Datenschicht
+    /* Stabil nach (vorn, ansEnde, Stufe, Sprache) — die Rang-Ordnung der Datenschicht
      * bleibt innerhalb jeder Gruppe erhalten (ES2019: sort ist stabil).
      *
      * Der Erzeuger der Datenschicht sortiert die Kacheln nach genau demselben
@@ -585,9 +585,22 @@ export function IgTestimonialSlideshow({
      * ein Gedicht am Anfang ein Rateseil ist und am Ende ein Schlusswort.
      * Ohne das Feld ändert sich NICHTS: `!== true` heißt 0, und damit ist
      * diese Stufe für jede Kachel ohne Marke ein No-Op (drei der vier
-     * Produktreihen tragen sie nicht). */
+     * Produktreihen tragen sie nicht).
+     *
+     * `vorn` STEHT NOCH DAVOR: eine Kachel mit `vorn: n` steht an Stelle n
+     * am ANFANG der Reihe, vor allen ohne das Feld und unabhängig von ihrer
+     * Stufe. Christian am 2026-09-28 zu /products/qibracelet: „bitte diese 3
+     * zuerst stellen, dann die anderen danach" — darunter unser eigener Post
+     * an Stelle 1, also genau das, was die Stufen-Ordnung sonst verhindert.
+     * Die Weisung ist jünger und nennt die Seite; sie sticht dort. Ohne das
+     * Feld ändert sich NICHTS: jede Kachel ohne Marke bekommt denselben Rang,
+     * und die stabile Sortierung lässt die übrigen Stufen entscheiden. */
+    const OHNE_VORN = Number.MAX_SAFE_INTEGER;
+    const vornRang = (t) => (Number.isInteger(t.vorn) ? t.vorn : OHNE_VORN);
     const ansEndeRang = (t) => (t.ansEnde === true ? 1 : 0);
     return [...meine].sort((a, b) => {
+      const v = vornRang(a) - vornRang(b);
+      if (v !== 0) return v;
       const e = ansEndeRang(a) - ansEndeRang(b);
       if (e !== 0) return e;
       const s = (STUFEN_RANG[a.stufe] ?? 9) - (STUFEN_RANG[b.stufe] ?? 9);
