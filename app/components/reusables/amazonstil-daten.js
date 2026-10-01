@@ -452,7 +452,7 @@ export const SORTENVERGLEICH = {
       // Theobromin: product-pages/Awake.jsx ("Theobromin: 950 mg / 100g");
       // Koffein: Nährstoff-Analyse Dartsch DARTSCH/04/11/25 (unten verlinkt),
       // Wortlaut im Verkaufs-Chat qi-salesbot/data/seeds/qiblanco-knowledge.json.
-      profil: 'Theobromin 950 mg, Koffein 120 mg je 100 g',
+      profil: 'Theobromin 950 mg, Koffein 120 mg je 100\u00a0g',
       // Route products.crystal-cacao-awake.jsx, CacaoBenefitList.
       bio: 'Bio-zertifiziert nach DE-ÖKO-006',
       // qi-salesbot/data/zeugnis-vertrag.json (SSoT), im Kakao-Laden
@@ -499,7 +499,7 @@ export const SORTENVERGLEICH = {
       bohne: 'Amazonas Nativo aus dem Departamento Amazonas in Peru',
       // product-pages/Create.jsx ("Theobromin: 1.050 mg / 100g & Koffein:
       // 140 mg / 100g").
-      profil: 'Theobromin 1.050 mg, Koffein 140 mg je 100 g',
+      profil: 'Theobromin 1.050 mg, Koffein 140 mg je 100\u00a0g',
       bio: 'Bio-zertifiziert nach DE-ÖKO-006',
       berichte: [
         {
