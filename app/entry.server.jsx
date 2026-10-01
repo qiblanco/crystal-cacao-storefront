@@ -2,6 +2,7 @@ import {ServerRouter} from 'react-router';
 import {isbot} from 'isbot';
 import {renderToReadableStream} from 'react-dom/server';
 import {createContentSecurityPolicy} from '@shopify/hydrogen';
+import {refAusAufruf, wendePartnercodeAn} from '~/lib/partnercode.server';
 
 /*
  * ================================================================
@@ -270,6 +271,24 @@ export default async function handleRequest(
     ],
     frameSrc: ["'self'", 'https://www.youtube-nocookie.com'],
   });
+
+  // PARTNERCODE AUTOMATISCH, wie auf qiblanco.com: ein Partnerlink
+  // (?sca_ref=...) legt den Code des Partners in den Warenkorb, wenn dort
+  // noch keiner liegt. Bibliothek und Datenmodul sind K1 (byte-gleich aus
+  // qiblanco-storefront, Erzeuger und taeglicher Abgleich leben nur dort,
+  // bin/k1-nachzug zieht die Partnerliste hierher nach). Begruendung, Schutz
+  // der Codeliste und Rueckweg: app/lib/partnercode.server.js.
+  // Job 20261001-crystal-uppromote-link-sca-ref-setzt-code-prio30.
+  if (responseStatusCode < 400) {
+    const partnerRef = refAusAufruf(request, isbot);
+    if (partnerRef && context?.cart) {
+      await wendePartnercodeAn({
+        ref: partnerRef,
+        cart: context.cart,
+        responseHeaders,
+      });
+    }
+  }
 
   const body = await renderToReadableStream(
     <NonceProvider>
