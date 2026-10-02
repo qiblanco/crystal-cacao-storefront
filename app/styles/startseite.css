@@ -1200,3 +1200,35 @@
     padding: var(--cc-space-4);
   }
 }
+
+/* ==== KONTROLLE 2026-10-03 · drei Abstaende, die der Reset verschluckt ====
+ * Job 20261003-kontrolle-crystal-startseite-optik-und-fehler (Christian:
+ * „dass sich keine Fehler mehr reingeschlichen haben“). Der Reset oben setzt
+ * `h2` und `p` im Akt auf margin 0 und laesst den Abstand von den
+ * Stapel-Containern (gap) kommen. Drei eingehaengte Bausteine stapeln aber
+ * ueber Aussenraender und hatten deshalb am Kundenrand 0 px zwischen
+ * Ueberschrift und Inhalt (gemessen 02.10., 390 und 1440 px, Chromium):
+ *   „Unsere Sorten“            -> Oberkante der Sortenkacheln
+ *   „Was im Regal alles …“     -> erster Absatz des Podcasts
+ *   letzte Belegkarte          -> Schlusssatz „Primoris Belgium prueft …“
+ * Werte aus dem 8pt-Token, wie die uebrigen Ueberschriften des Akts
+ * (Kopf 16 px, Kartenraster 24 px). */
+.home.cc-start .cc-akt .recommended-products > h2 {
+  margin-bottom: var(--cc-space-3);
+}
+.home.cc-start .cc-akt .cc-podcast__text h2 {
+  margin-bottom: var(--cc-space-2);
+}
+.home.cc-start .cc-akt .cc-belege__grenze {
+  margin-top: var(--cc-space-3);
+}
+
+/* Das Bildband „Unsere Wurzeln“ legt seine Ueberschrift mit z-index 1 ueber
+ * das Bild. Ohne eigenen Stapelkontext gilt diese 1 auf Seitenebene, und weil
+ * das Band im Quelltext NACH der Kopfzeile (sticky, z-index 1) steht, malte
+ * der schwarze Schleier beim Scrollen ueber die Kopfzeile (gemessen 02.10.:
+ * elementFromPoint in der Kopfzeile trifft H2 in .cc-band, 1440/1024/390 px).
+ * `isolation: isolate` haelt die 1 im Band. */
+.home.cc-start .cc-band {
+  isolation: isolate;
+}
