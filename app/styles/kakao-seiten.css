@@ -3639,3 +3639,51 @@ main .cc-absicht h1 {
 .ProductPageKakao .cc-zubereitung__dosis dd {
   margin-inline-start: 0;
 }
+
+/* ==========================================================================
+ * KAUFSEITEN AWAKE/CREATE: EIN ABSCHNITTSTAKT (seit 2026-10-02)
+ * Grossjob 20261002-GROSSJOB-crystal-cacao-startseite-hochwertig-slider-
+ * profile-responsiv — „Produktseiten Awake und Create im selben System
+ * nachziehen“. Dasselbe System wie die Startseite (app/styles/startseite.css):
+ * ein Abschnitt traegt NUR Innenabstand (.NormalSectionSize: 64/96 px), kein
+ * Aussenrand, und seine erste Ueberschrift keinen Kopfabstand.
+ *
+ * GEMESSEN VORHER (02.10., /products/crystal-cacao-awake, 1440 px): zwischen
+ * zwei Abschnitten standen 96 (Innen unten) + 100 (`my-[100px]!`) + 96 (Innen
+ * oben) + 48 (`main h2`) = 340 px Leere, am Telefon 276 px — fuenfmal auf
+ * jeder Kaufseite. Jetzt: 192 px bzw. 128 px.
+ *
+ * DER SCOPE IST EINE EIGENSCHAFT, KEIN PFAD: `main` mit dem Sorten-Aufmacher
+ * als direktem Kind — das sind genau die zwei Kaufseiten (SortenAufmacher.jsx).
+ * Die Tailwind-Klassen `my-[100px]!`/`my-[10vh]!` tragen !important, deshalb
+ * hier ebenfalls. Rueckweg: diesen Block entfernen.
+ * ========================================================================== */
+/* IN @layer base, NICHT ungelayert: `my-[100px]!` ist ein WICHTIGER
+ * Tailwind-Utility in @layer utilities, und bei !important gewinnt die FRUEHERE
+ * Ebene — base vor utilities, jede Ebene vor ungelayert. Ungelayert lief dieser
+ * Block beim ersten Bau wirkungslos (gemessen: weiter 292 px). */
+@layer base {
+  main:has(> .cc-sortenaufmacher) > :is(.NormalSectionSize, .qb-igt) {
+    margin-block: 0 !important;
+  }
+  main:has(> .cc-sortenaufmacher) > .my-\[10vh\]\! {
+    margin-block: var(--cc-space-6) !important;
+  }
+  @media (min-width: 48em) {
+    main:has(> .cc-sortenaufmacher) > .my-\[10vh\]\! {
+      margin-block: var(--cc-space-7) !important;
+    }
+  }
+}
+/* Die erste Ueberschrift eines Abschnitts: als erstes Kind ODER als erste
+ * direkte H2 — „Kunden fragen“ (qb-kf) traegt vor seiner H2 ein unsichtbares
+ * Element, `:first-child` traf dort ins Leere (gemessen: 265 px). */
+main:has(> .cc-sortenaufmacher) > :is(.NormalSectionSize, .qb-igt) > :first-child,
+main:has(> .cc-sortenaufmacher) > .NormalSectionSize > h2:first-of-type,
+main:has(> .cc-sortenaufmacher) > .NormalSectionSize > :first-child > :first-child,
+main:has(> .cc-sortenaufmacher) > .NormalSectionSize :is(h2, h3):first-child {
+  margin-top: 0;
+}
+main:has(> .cc-sortenaufmacher) > .cc-belege {
+  margin-block: var(--cc-space-6);
+}

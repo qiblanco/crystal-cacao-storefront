@@ -107,8 +107,11 @@ function CartEmpty({hidden = false}) {
     <div hidden={hidden} className="cc-leerzustand">
       <p>Dein Warenkorb ist noch leer.</p>
       <p className="cc-leerzustand-hinweis">
-        Zwei Sorten, ein Kakao: Awake für den Start in den Tag, Create für den
-        klaren Kopf.
+        {/* Positionierung seit 2026-10-02 (Christian): Awake herzöffnend,
+            powerful; Create Fokus, High Performance. Vorher: „Awake für den
+            Start in den Tag, Create für den klaren Kopf.“ */}
+        Zwei Sorten, ein Kakao: Awake ist herzöffnend und powerful, Create
+        steht für Fokus und High Performance.
       </p>
       <Link
         className="cc-knopf"

@@ -1,0 +1,1202 @@
+/* ============================================================================
+ * startseite.css — die Startseite von crystal-cacao.com seit 2026-10-02.
+ *
+ * Grossjob 20261002-GROSSJOB-crystal-cacao-startseite-hochwertig-slider-
+ * profile-responsiv. Geladen NUR von app/routes/_index.jsx (links()).
+ * Scope: .home.cc-start. Die abgelegten Fassungen (?fassung=bisher|bestand|
+ * entwurf) tragen ihn nicht und bleiben davon unberuehrt.
+ *
+ * EIN ABSTANDSSYSTEM statt gestapelter Raender. Gemessen am 02.10.: die
+ * bisherige Startseite setzte `mt-[10vh]!`, `mt-[100px]!` und Bild-`mb-[10vh]`
+ * auf den 64/96-px-Innenabstand jedes Abschnitts und kam so auf 250 bis
+ * 390 px leere Flaeche. Hier gilt:
+ *   - ein Abschnitt (.cc-akt) traegt NUR Innenabstand: --cc-space-6 (64 px)
+ *     am Telefon, --cc-space-7 (96 px) ab 48em. Kein Aussenrand.
+ *   - innerhalb eines Abschnitts stapeln die Bloecke mit --cc-space-4/-5.
+ *   - eingehaengte Bausteine (Belege, Podcast, Stimmen, Zubereitung,
+ *     Sortenkacheln, Gruender) verlieren im Abschnitt ihre eigenen
+ *     Aussenraender; ihr Inneres bleibt, wie es ist.
+ * Rechnerisch groesste Luecke zwischen zwei Abschnitten: 128 px (Telefon)
+ * bzw. 192 px (Rechner) — derselbe Takt wie /pages/schlaf-zellen-schutz.
+ *
+ * FARBEN NUR AUS DER WEISSLISTE der Farbwelt-Probe (homepage-bauer/
+ * pruefungen/probe_crystal_farbwelt.py): --cc-Token, Weiss, unbunte Schleier.
+ * EIN H2-STIL (Groesse x Gewicht) und EINE Ausrichtung (links) fuer alle H2
+ * der Seite — die design-rubrik zieht fuer jeden weiteren Stil 20 Punkte ab,
+ * fuer gemischte Ausrichtung 15.
+ * ========================================================================== */
+
+/* ---- Rahmen ------------------------------------------------------------- */
+
+/* `body > main` traegt 16 px Seitenrand und 48 px unten (app.css). Die Akte
+ * laufen randlos (eigene Hintergrundflaeche), deshalb hebt der Rahmen beides
+ * auf; den Rand zum Inhalt setzt .cc-akt__innen. */
+.home.cc-start {
+  /* `.home` deckelt sonst auf 1152 px (kakao-seiten.css); die Akte laufen
+   * randlos, den Inhalt deckelt .cc-akt__innen. */
+  max-width: none;
+  /* app.css setzt `.home { width: 100% }` — mit negativen Raendern bliebe
+   * rechts ein Streifen Seitengrund stehen. `auto` laesst die Raender wirken. */
+  width: auto;
+  overflow-wrap: break-word;
+  margin-inline: calc(-1 * var(--cc-space-2));
+  margin-bottom: calc(-1 * var(--cc-space-5));
+  color: var(--cc-text);
+}
+
+/* Der erste Akt sitzt naeher am Kopf: der Slider ist der erste Eindruck,
+ * und 96 px Leere ueber ihm waeren genau der Leerraum, um den es geht. */
+.home.cc-start .cc-akt.cc-start-slider {
+  padding-top: var(--cc-space-4);
+}
+
+.home.cc-start .cc-akt {
+  margin: 0;
+  padding: var(--cc-space-6) 0;
+  background: var(--cc-grund);
+}
+.home.cc-start .cc-akt--flaeche {
+  background: var(--cc-flaeche);
+}
+
+.home.cc-start .cc-akt__innen {
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: var(--cc-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-4);
+}
+
+@media (min-width: 48em) {
+  .home.cc-start .cc-akt {
+    padding-block: var(--cc-space-7);
+  }
+  .home.cc-start .cc-akt.cc-start-slider {
+    padding-top: var(--cc-space-5);
+  }
+  .home.cc-start .cc-akt__innen {
+    padding-inline: var(--cc-space-4);
+    gap: var(--cc-space-5);
+  }
+}
+
+/* Eingehaengte Bausteine: Aussenraender weg, Innen bleibt. */
+.home.cc-start .cc-akt :is(.cc-belege, .cc-absicht-hinweis, .cc-zubereitung,
+  .recommended-products, .cc-podcast, .cc-va-stimmen) {
+  margin-block: 0;
+}
+.home.cc-start .cc-akt .NormalSectionSize {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.home.cc-start .cc-akt section {
+  padding-block: 0;
+}
+.home.cc-start .cc-belege {
+  max-width: none;
+  padding-inline: 0;
+}
+.home.cc-start .cc-belege :is(.cc-belege__titel, .cc-belege__grenze) {
+  text-align: left;
+  margin-inline: 0;
+}
+/* Der Podcast-Baustein setzt Absatzabstaende ueber den Seitenkontext; im
+ * Akt stapelt er selbst. */
+.home.cc-start .cc-podcast p + p {
+  margin-top: var(--cc-space-2);
+}
+.home.cc-start .cc-absicht-hinweis {
+  margin-inline: 0;
+  max-width: 44rem;
+}
+.home.cc-start li {
+  margin-bottom: 0;
+}
+.home.cc-start img {
+  max-width: 100%;
+}
+
+/* ---- Typografie: EIN H1-, EIN H2-, EIN H3-Stil --------------------------- */
+
+.home.cc-start h1 {
+  font-size: var(--cc-fs-6);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--cc-dunkel);
+  text-align: left;
+}
+
+.home.cc-start .cc-akt h2 {
+  font-size: var(--cc-fs-5);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-align: left;
+  text-wrap: balance;
+  margin: 0;
+  max-width: 40rem;
+  color: var(--cc-dunkel);
+}
+
+@media (min-width: 48em) {
+  /* Die H1 steigt am Telefon ab (39 -> 49 px), die H2 ebenso (31 -> 39 px). */
+  .home.cc-start h1 {
+    font-size: var(--cc-fs-7);
+  }
+  .home.cc-start .cc-akt h2 {
+    font-size: var(--cc-fs-6);
+  }
+}
+
+.home.cc-start .cc-akt h3 {
+  font-size: var(--cc-fs-3);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--cc-dunkel);
+}
+
+.home.cc-start .cc-akt p {
+  font-size: var(--cc-fs-2);
+  line-height: 1.65;
+  margin: 0;
+  max-width: var(--cc-zeile-max);
+}
+
+.home.cc-start .cc-eyebrow {
+  font-size: var(--cc-fs-1);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--cc-gold-text);
+  margin: 0;
+}
+
+.home.cc-start .cc-akt__kopf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-2);
+  max-width: 46rem;
+}
+.home.cc-start .cc-akt .cc-akt__lead {
+  font-size: var(--cc-fs-3);
+  line-height: 1.5;
+  color: var(--cc-muted);
+}
+
+.home.cc-start .cc-textlink {
+  color: var(--cc-dunkel);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.home.cc-start .cc-knopf-ruhig {
+  /* Zweitrangiger Knopf: umrandet, ohne Flaeche. Die zwei Zwillinge
+   * („Analyse anzeigen“, „Analysedaten“) tragen dieselbe Klasse und damit
+   * denselben Stil (probe_startseite_kanten_und_kopf, Achse D); der eine
+   * gefuellte Knopf je Folie ist der goldene Kaufknopf. */
+  width: auto;
+  max-width: none;
+  padding: 0 var(--cc-space-4);
+  min-height: 56px;
+  font-size: var(--cc-fs-2) !important;
+  border: 2px solid var(--cc-dunkel);
+  background: transparent;
+  color: var(--cc-dunkel);
+}
+.home.cc-start .cc-knopf-ruhig:hover {
+  background: var(--cc-dunkel);
+  border-color: var(--cc-dunkel);
+  color: var(--cc-grund);
+}
+
+.cc-visuell-versteckt {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Bildflaechen ------------------------------------------------------- */
+
+.home.cc-start .cc-bildflaeche {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--cc-radius-bild);
+}
+.home.cc-start .cc-bildflaeche img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+.home.cc-start .cc-bildflaeche--hoch {
+  aspect-ratio: 4 / 3;
+}
+.home.cc-start .cc-bildflaeche--quadrat {
+  aspect-ratio: 1;
+}
+.home.cc-start .cc-bildflaeche--video {
+  aspect-ratio: 16 / 9;
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-bildflaeche--hoch {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+/* Zweispalter: Telefon untereinander, ab 48em zwei gleiche Spalten. */
+.home.cc-start .cc-zweispalter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cc-space-4);
+  align-items: center;
+}
+.home.cc-start .cc-zweispalter--oben {
+  align-items: start;
+}
+.home.cc-start .cc-zweispalter__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-2);
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-zweispalter {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--cc-space-6);
+  }
+}
+
+/* ==== 1 · SORTEN-SLIDER ================================================== */
+
+.home.cc-start .cc-start-slider__kopf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-1);
+}
+.home.cc-start .cc-akt .cc-start-slider__bewertung {
+  font-size: var(--cc-fs-2);
+  color: var(--cc-text);
+}
+.home.cc-start .cc-start-slider__bewertung .qb-sterne {
+  color: var(--cc-gold-text);
+  letter-spacing: 0.05em;
+}
+
+/* Sortenwahl: beide Sorten mit ihrem Zustand, gleichzeitig sichtbar. */
+.home.cc-start .cc-sortenwahl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cc-space-2);
+}
+.home.cc-start .cc-sortenwahl__knopf {
+  appearance: none;
+  font: inherit;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 44px;
+  padding: var(--cc-space-2);
+  border: 2px solid var(--cc-linie);
+  border-radius: var(--cc-radius-knopf);
+  background: transparent;
+  color: var(--cc-text);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.home.cc-start .cc-sortenwahl__knopf.is-aktiv {
+  /* Aktiv = Kante im Sortenton, keine eigene Flaeche: die design-rubrik
+   * zaehlt jede Hintergrundfarbe als eigene Farbwelt (Soll <= 4). */
+  border-color: var(--cc-sorte-text);
+  box-shadow: inset 0 -4px 0 var(--cc-sorte-text);
+}
+.home.cc-start .cc-sortenwahl__knopf:focus-visible {
+  outline: 3px solid var(--cc-dunkel);
+  outline-offset: 2px;
+}
+.home.cc-start .cc-sortenwahl__name {
+  font-size: var(--cc-fs-4);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--cc-sorte-text);
+}
+.home.cc-start .cc-sortenwahl__zustand {
+  font-size: var(--cc-fs-1);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--cc-text);
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-sortenwahl {
+    max-width: 40rem;
+    gap: var(--cc-space-3);
+  }
+  .home.cc-start .cc-sortenwahl__knopf {
+    padding: var(--cc-space-2) var(--cc-space-3);
+  }
+  .home.cc-start .cc-sortenwahl__zustand {
+    font-size: var(--cc-fs-2);
+  }
+}
+
+/* Buehne + Bahn: diskreter Index, transform. */
+.home.cc-start .cc-buehne {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+  border-radius: var(--cc-radius-bild);
+}
+.home.cc-start .cc-buehne:focus-visible {
+  outline: 3px solid var(--cc-dunkel);
+  outline-offset: 4px;
+}
+.home.cc-start .cc-buehne__bahn {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.home.cc-start .cc-folie {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cc-space-2);
+  align-content: start;
+  /* Nach dem Uebergang unsichtbar (Text rechts neben dem Bildschirm ist kein
+   * erster Eindruck, und Tab soll ihn nicht finden). Beim Ziehen sichtbar. */
+  visibility: hidden;
+  transition: visibility 0s linear 0.45s;
+}
+.home.cc-start .cc-folie.is-aktiv,
+.home.cc-start .cc-buehne.is-dragging .cc-folie {
+  visibility: visible;
+  transition-delay: 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home.cc-start .cc-buehne__bahn,
+  .home.cc-start .cc-folie {
+    transition: none;
+  }
+}
+
+/* Telefon: Name und Claim, dann das Bild, dann der Rest. Die Textspalte loest
+ * sich dafuer in das Raster der Folie auf. */
+.home.cc-start .cc-folie__text {
+  display: contents;
+}
+.home.cc-start .cc-folie__nummer { order: 1; }
+.home.cc-start .cc-folie__name { order: 2; }
+.home.cc-start .cc-folie__claim { order: 3; }
+.home.cc-start .cc-folie__bild { order: 4; margin-block: var(--cc-space-1); }
+.home.cc-start .cc-folie__satz { order: 5; }
+.home.cc-start .cc-folie__fakten { order: 6; }
+.home.cc-start .cc-folie__kauf { order: 7; }
+
+.home.cc-start .cc-akt .cc-folie__name {
+  margin: 0;
+  font-size: var(--cc-fs-2);
+  line-height: 1;
+}
+.home.cc-start .cc-folie__wortmarke {
+  display: block;
+  height: 64px;
+  width: auto;
+  border-radius: 0;
+}
+.home.cc-start .cc-akt .cc-folie__claim {
+  /* Am Telefon fliessend zwischen 20 und 25 px (Stufen fs-3/fs-4), damit
+   * „Fokus. High Performance.“ auf 390 px in einer Zeile steht und beide
+   * Folien gleich hoch bleiben. */
+  font-size: clamp(var(--cc-fs-3), 5.6vw, var(--cc-fs-4));
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--cc-sorte-text);
+}
+.home.cc-start .cc-akt .cc-folie__satz {
+  font-size: var(--cc-fs-2);
+}
+.home.cc-start .cc-folie__fakten {
+  display: grid;
+  gap: var(--cc-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home.cc-start .cc-folie__fakten li {
+  position: relative;
+  padding-left: var(--cc-space-3);
+  line-height: 1.5;
+}
+.home.cc-start .cc-folie__fakten li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.6em;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--cc-radius-rund);
+  background: var(--cc-sorte-text);
+}
+.home.cc-start .cc-folie__kauf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-2);
+  margin-top: var(--cc-space-1);
+}
+.home.cc-start .cc-folie__kauf .cc-kachel-preis {
+  margin: 0;
+}
+.home.cc-start .cc-folie__kauf .cc-kachel-preis-jetzt {
+  font-size: var(--cc-fs-4);
+}
+.home.cc-start .cc-folie__knoepfe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-2) var(--cc-space-3);
+}
+.home.cc-start .cc-folie__knopf {
+  width: auto;
+  max-width: none;
+  padding: 0 var(--cc-space-5);
+}
+.home.cc-start .cc-folie__link {
+  color: var(--cc-dunkel);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.home.cc-start .cc-folie__bild img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--cc-radius-bild);
+}
+
+@media (min-width: 48em) {
+  .home.cc-start .cc-folie {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--cc-space-6);
+    align-items: start;
+  }
+  .home.cc-start .cc-folie__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cc-space-2);
+    order: 0;
+  }
+  .home.cc-start .cc-folie__bild {
+    order: 0;
+    margin: 0;
+  }
+  .home.cc-start .cc-folie__wortmarke {
+    height: 88px;
+  }
+  .home.cc-start .cc-akt .cc-folie__claim {
+    font-size: var(--cc-fs-5);
+  }
+  .home.cc-start .cc-akt .cc-folie__satz {
+    font-size: var(--cc-fs-3);
+    line-height: 1.5;
+  }
+}
+
+/* Christians Standard-Slider (homepage-bauer/baukasten/qb-standard-slider):
+ * Fortschrittsbalken + zwei Pfeile UNTER der Bahn. Markup und Klassen wie
+ * InfoSlider auf qiblanco.com; die Werte hier aus den --cc-Token. */
+.home.cc-start .cc-buehne__bedienung {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+}
+.home.cc-start .ProgressWrapper {
+  flex: 1 1 auto;
+  height: 5px;
+  margin: 0;
+  border-radius: 1000px;
+  background: rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+}
+.home.cc-start .ProgressTracker {
+  height: 100%;
+  max-width: 100%;
+  background: var(--cc-dunkel);
+  transition: width 0.3s ease-out;
+}
+.home.cc-start .SliderButtonWrapper {
+  display: flex;
+  gap: var(--cc-space-1);
+  margin: 0;
+}
+.home.cc-start .SliderButton {
+  appearance: none;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: var(--cc-radius-rund);
+  background: var(--cc-dunkel);
+  color: #fff;
+  cursor: pointer;
+}
+.home.cc-start .SliderButton:focus-visible {
+  outline: 3px solid var(--cc-gold-tief);
+  outline-offset: 2px;
+}
+.home.cc-start .ButtonPrev {
+  transform: rotate(-90deg);
+}
+.home.cc-start .ButtonNext {
+  transform: rotate(90deg);
+}
+
+/* ==== 2 · ANALYSEPROFILE ================================================= */
+
+.home.cc-start .cc-profil__legende {
+  display: flex;
+  gap: var(--cc-space-3);
+  font-size: var(--cc-fs-1);
+  font-weight: 700;
+}
+.home.cc-start .cc-profil__legende span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-1);
+  color: var(--cc-sorte-text);
+}
+.home.cc-start .cc-profil__legende span::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--cc-sorte-text);
+}
+.home.cc-start .cc-profil__liste {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+.home.cc-start .cc-profil__zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cc-space-1);
+  padding-block: var(--cc-space-2);
+  border-top: 1px solid var(--cc-linie);
+}
+.home.cc-start .cc-profil__zeile:last-child {
+  border-bottom: 1px solid var(--cc-linie);
+}
+.home.cc-start .cc-profil__stoff {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home.cc-start .cc-profil__stoffname {
+  font-weight: 700;
+  color: var(--cc-dunkel);
+}
+.home.cc-start .cc-profil__bedeutung {
+  font-size: var(--cc-fs-1);
+  color: var(--cc-muted);
+}
+.home.cc-start .cc-profil__wertzeile {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 3.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--cc-space-2);
+}
+.home.cc-start .cc-profil__sorte {
+  font-size: var(--cc-fs-1);
+  font-weight: 700;
+  color: var(--cc-sorte-text);
+}
+.home.cc-start .cc-profil__spur {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--cc-linie);
+  overflow: hidden;
+}
+.home.cc-start .cc-profil__balken {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background: var(--cc-sorte-text);
+}
+.home.cc-start .cc-profil__wert {
+  min-width: 5.5em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--cc-text);
+  white-space: nowrap;
+}
+.home.cc-start .is-vorn .cc-profil__wert {
+  font-weight: 700;
+  color: var(--cc-dunkel);
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-profil__zeile {
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr);
+    column-gap: var(--cc-space-5);
+    padding-block: var(--cc-space-3);
+  }
+  .home.cc-start .cc-profil__stoff {
+    grid-row: span 2;
+    justify-content: center;
+  }
+}
+
+.home.cc-start .cc-profil__deutung {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cc-space-3);
+}
+.home.cc-start .cc-profil__karte {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-1);
+  padding: var(--cc-space-3);
+  border-radius: var(--cc-radius-bild);
+  border-top: 3px solid var(--cc-sorte-text);
+  background: var(--cc-grund);
+}
+.home.cc-start .cc-akt .cc-profil__karte-titel {
+  font-weight: 700;
+  color: var(--cc-sorte-text);
+}
+.home.cc-start .cc-profil__fuss {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--cc-space-3);
+}
+.home.cc-start .cc-akt .cc-profil__quelle {
+  color: var(--cc-muted);
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-profil__deutung {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .home.cc-start .cc-profil__fuss {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* ==== 3 · WAS DU SPUERST ================================================= */
+
+.home.cc-start .cc-vorteile {
+  display: grid;
+  gap: var(--cc-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home.cc-start .cc-vorteile li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: var(--cc-space-3);
+  border-left: 3px solid var(--cc-goldbraun);
+}
+
+/* ==== 4 · PODCAST ======================================================== */
+/* Der Baustein bringt sein Raster mit (kakao-seiten.css .cc-podcast__*). */
+
+/* ==== 5 · KAFFEE-VERGLEICH =============================================== */
+
+.home.cc-start .cc-kaffee__raster {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cc-space-4);
+}
+.home.cc-start .cc-kaffee__text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--cc-space-2);
+}
+.home.cc-start .cc-kaffee__kurve {
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+.home.cc-start .cc-kaffee__kurve img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-kaffee__raster {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--cc-space-6);
+    align-items: stretch;
+  }
+}
+
+.home.cc-start .cc-vgl-rahmen {
+  /* min-width 0 + eigener Rollbereich: bei vergroesserter Wurzelschrift
+   * (24 px, Sehhilfe-Einstellung) braucht die Tabelle auf 768 px mehr Breite,
+   * als da ist. Dann rollt der Rahmen, nicht das Dokument (Achse E,
+   * probe_startseite_kanten_und_kopf, gemessen 02.10.: 29 px Ueberlauf). */
+  min-width: 0;
+  max-width: 100%;
+  /* Bezugsrahmen fuer die absolut gesetzten Vorlese-Texte in den Zellen:
+   * ohne ihn entkommen sie dem Rollbereich und dehnen das Dokument. */
+  position: relative;
+  border: 1px solid var(--cc-linie);
+  border-radius: var(--cc-radius-bild);
+  background: var(--cc-grund);
+  overflow-x: auto;
+}
+.home.cc-start table.cc-vgl {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: var(--cc-fs-2);
+}
+.home.cc-start .cc-vgl thead th {
+  padding: var(--cc-space-2) var(--cc-space-1);
+  text-align: center;
+  vertical-align: bottom;
+  font-weight: 400;
+  border-bottom: 1px solid var(--cc-linie);
+}
+.home.cc-start .cc-vgl__logo {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto var(--cc-space-1);
+  border-radius: var(--cc-radius-rund);
+}
+.home.cc-start .cc-akt .cc-vgl__name {
+  font-size: var(--cc-fs-1);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+.home.cc-start .cc-vgl [data-cc-spalte='kakao'] .cc-vgl__name { color: var(--cc-gold-text); }
+.home.cc-start .cc-vgl [data-cc-spalte='kaffee'] .cc-vgl__name { color: var(--cc-kraft-tief); }
+.home.cc-start .cc-vgl [data-cc-spalte='energy'] .cc-vgl__name { color: var(--cc-muted); }
+.home.cc-start .cc-vgl__menge {
+  font-size: var(--cc-fs-1);
+  font-weight: 400;
+  line-height: 1.3;
+  margin: 2px 0 0;
+  color: var(--cc-muted);
+}
+.home.cc-start .cc-vgl tbody tr:nth-child(odd) {
+  background: var(--cc-flaeche);
+}
+.home.cc-start .cc-vgl tbody th {
+  text-align: left;
+  font-weight: 700;
+  font-size: var(--cc-fs-1);
+  color: var(--cc-dunkel);
+  padding: var(--cc-space-2) var(--cc-space-2) 0;
+}
+.home.cc-start .cc-vgl td {
+  padding: var(--cc-space-1) var(--cc-space-2) var(--cc-space-2);
+  vertical-align: middle;
+}
+.home.cc-start .cc-vgl__spur {
+  display: block;
+  height: 10px;
+  margin-bottom: 6px;
+  border-radius: 5px;
+  background: var(--cc-linie);
+  overflow: hidden;
+}
+.home.cc-start .cc-vgl__balken {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+}
+.home.cc-start .cc-vgl [data-cc-spalte='kakao'] .cc-vgl__balken { background: var(--cc-gold-tief); }
+.home.cc-start .cc-vgl [data-cc-spalte='kaffee'] .cc-vgl__balken { background: var(--cc-kraft-tief); }
+.home.cc-start .cc-vgl [data-cc-spalte='energy'] .cc-vgl__balken { background: var(--cc-muted); }
+.home.cc-start .cc-vgl__wert {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.home.cc-start .cc-vgl [data-cc-spalte='kakao'] .cc-vgl__wert {
+  font-weight: 700;
+  color: var(--cc-dunkel);
+}
+.home.cc-start .cc-vgl__leer {
+  color: var(--cc-muted);
+}
+
+/* Telefon: jede Zeile ein Raster aus drei Spalten, die Stoffbezeichnung
+ * darueber. Alle drei Getraenke stehen ohne Wischen nebeneinander. */
+@media (max-width: 47.99em) {
+  .home.cc-start table.cc-vgl,
+  .home.cc-start .cc-vgl thead,
+  .home.cc-start .cc-vgl tbody {
+    display: block;
+  }
+  .home.cc-start .cc-vgl tr {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .home.cc-start .cc-vgl .cc-vgl__ecke {
+    display: none;
+  }
+  .home.cc-start .cc-vgl tbody th {
+    grid-column: 1 / -1;
+  }
+  .home.cc-start .cc-vgl thead th {
+    padding-inline: 4px;
+  }
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-vgl thead th {
+    padding: var(--cc-space-3) var(--cc-space-2) var(--cc-space-2);
+  }
+  .home.cc-start .cc-akt .cc-vgl__name {
+    font-size: var(--cc-fs-2);
+  }
+  .home.cc-start .cc-vgl tbody th {
+    width: 26%;
+    font-size: var(--cc-fs-2);
+    padding: var(--cc-space-2) var(--cc-space-3);
+  }
+  .home.cc-start .cc-vgl td {
+    padding: var(--cc-space-2) var(--cc-space-3);
+  }
+}
+
+.home.cc-start .cc-kaffee__fuss {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--cc-space-3);
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-kaffee__fuss {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* ==== 7 · BELEGE / 8 · HERKUNFT ========================================== */
+
+.home.cc-start .cc-band {
+  /* Bild und Ueberschrift liegen in DERSELBEN Rasterzelle: das Band ist so
+   * hoch wie das hoehere von beiden. Bei 200 % Schrift am Telefon braucht die
+   * Ueberschrift mehr Hoehe als das Bild hat — dann waechst das Bild mit
+   * (object-fit: cover), statt dass Zeilen unten herausragen
+   * (probe_startseite_kontrast_telefon, Arm B, gemessen 02.10.). */
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  border-radius: var(--cc-radius-bild);
+}
+.home.cc-start .cc-band > img,
+.home.cc-start .cc-band > h2 {
+  grid-area: 1 / 1;
+}
+.home.cc-start .cc-band > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: clamp(240px, 38vw, 440px);
+  object-fit: cover;
+  border-radius: 0;
+}
+.home.cc-start .cc-akt .cc-band > h2 {
+  /* EIGENER SCHLEIER statt Verlauf ueber das ganze Bild: die Ueberschrift
+   * traegt ihr Dunkel selbst (unbuntes Schwarz 50 %, Farbwelt-Weissliste).
+   * Damit haelt Weiss auf JEDEM Bildpixel darunter mindestens 4:1 — auch bei
+   * 200 % Schrift, wo die Zeilen bis in das helle Laub oben reichen
+   * (probe_startseite_kontrast_telefon Arm B, gemessen 02.10.: P5 2,81 mit
+   * Verlauf), und das Kontrast-Werkzeug liest einen echten Hintergrund
+   * (Arm V: vorher 1,12:1 gegen den Seitengrund gewertet). */
+  position: relative;
+  z-index: 1;
+  align-self: end;
+  max-width: none;
+  margin: 0;
+  padding: var(--cc-space-3) var(--cc-space-2);
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Bei 200 % Schrift auf 360 px ist „Crystal“ breiter als der Streifen:
+   * ohne Umbruch ragte das Wort ueber den Schleier hinaus (Arm B, P5 1,12). */
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 30em) {
+  .home.cc-start .cc-akt .cc-band > h2 {
+    padding-inline: var(--cc-space-3);
+  }
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-akt .cc-band > h2 {
+    padding: var(--cc-space-4) var(--cc-space-5);
+  }
+}
+
+.home.cc-start .cc-bildpaar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cc-space-2);
+}
+.home.cc-start .cc-liste-nummern {
+  margin: 0;
+  padding-left: var(--cc-space-3);
+  list-style: decimal;
+  display: grid;
+  gap: var(--cc-space-1);
+}
+
+/* ==== 9 · RITUAL ========================================================= */
+
+/* Die Zubereitung bringt ihre Regeln nur im Scope .ProductPageKakao mit
+ * (kakao-seiten.css). Hier dieselben Regeln fuer die Startseite, linksbuendig.
+ * Ihr Wortlaut (data-qb-wortlaut="verpackung") bleibt unberuehrt. */
+.home.cc-start .cc-zubereitung {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-2);
+}
+.home.cc-start .cc-akt .cc-zubereitung__lead {
+  font-size: var(--cc-fs-3);
+  line-height: 1.4;
+  color: var(--cc-muted);
+}
+.home.cc-start .cc-zubereitung__schritte {
+  list-style: decimal;
+  margin: 0;
+  padding-inline-start: 1.6rem;
+  display: grid;
+  gap: var(--cc-space-2);
+}
+.home.cc-start .cc-zubereitung__schritte li {
+  line-height: 1.65;
+  padding-inline-start: 0.25rem;
+}
+.home.cc-start .cc-zubereitung__schritte li::marker {
+  font-weight: 700;
+  color: var(--cc-dunkel);
+}
+.home.cc-start .cc-zubereitung__dosis {
+  margin: var(--cc-space-1) 0 0;
+  padding: var(--cc-space-3);
+  border-radius: var(--cc-radius-bild);
+  background: var(--cc-flaeche);
+  line-height: 1.65;
+}
+.home.cc-start .cc-zubereitung__dosis dt {
+  font-weight: 700;
+  margin-bottom: var(--cc-space-1);
+}
+.home.cc-start .cc-zubereitung__dosis dd {
+  margin: 0;
+}
+.home.cc-start .cc-akt .cc-zubereitung__quelle {
+  font-size: var(--cc-fs-1);
+  color: var(--cc-muted);
+}
+
+.home.cc-start .cc-ritual__reise {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+}
+.home.cc-start .cc-ritual__schritte {
+  display: grid;
+  gap: var(--cc-space-2);
+  margin: 0;
+}
+.home.cc-start .cc-ritual__schritte dt {
+  font-weight: 700;
+  color: var(--cc-dunkel);
+}
+.home.cc-start .cc-ritual__schritte dd {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ==== 10 · KAUF ========================================================== */
+
+/* Die Sortensektion traegt im Akt KEINE eigene Kante und keinen eigenen
+ * Innenabstand oben: die Akt-Grenze ist die Kante. Ihr 3-px-Goldbraun
+ * (kakao-seiten.css) plus 48/64 px Innenabstand ergab hier 243 px Abstand zum
+ * Akt davor (Grenze 240). Der goldbraune Ton bleibt als Kante an der
+ * Vorteile-Liste sichtbar (Farbwelt-Probe ARM-B). Spezifitaet bewusst ueber
+ * `.home.cc-start .cc-akt section`. */
+.home.cc-start .cc-akt section.recommended-products {
+  padding-top: 0;
+  border-top: 0;
+}
+.home.cc-start .recommended-products-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cc-space-2);
+}
+@media (min-width: 48em) {
+  .home.cc-start .recommended-products-grid {
+    gap: var(--cc-space-4);
+  }
+}
+.home.cc-start .cc-kauf__infos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cc-space-3);
+}
+.home.cc-start .cc-mengenrabatt,
+.home.cc-start .cc-garantie {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-4) var(--cc-space-3);
+  border-radius: var(--cc-radius-bild);
+}
+.home.cc-start .cc-mengenrabatt {
+  background: var(--cc-grund);
+  border: 1px solid var(--cc-linie);
+}
+.home.cc-start .cc-mengenrabatt ul,
+.home.cc-start .cc-garantie__punkte {
+  display: grid;
+  gap: var(--cc-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home.cc-start .cc-mengenrabatt li,
+.home.cc-start .cc-garantie__punkte li {
+  position: relative;
+  padding-left: var(--cc-space-4);
+  line-height: 1.5;
+}
+.home.cc-start .cc-mengenrabatt li::before,
+.home.cc-start .cc-garantie__punkte li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+  color: var(--cc-gold-text);
+}
+.home.cc-start .cc-garantie {
+  background: var(--cc-dunkel);
+  color: var(--cc-grund);
+}
+.home.cc-start .cc-akt .cc-garantie h3,
+.home.cc-start .cc-akt .cc-garantie p,
+.home.cc-start .cc-garantie li {
+  color: var(--cc-grund);
+}
+.home.cc-start .cc-garantie__punkte li::before {
+  color: var(--cc-gold);
+}
+/* Ab 64em: links die zwei Sorten, rechts Mengenrabatt und Versprechen
+ * untereinander. Vorher standen zwei 290 px schmale Kacheln links und die
+ * rechte Haelfte des Akts blieb leer. */
+@media (min-width: 64em) {
+  .home.cc-start .cc-start-kauf .cc-akt__innen {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    column-gap: var(--cc-space-6);
+    align-items: start;
+  }
+  .home.cc-start .cc-start-kauf .cc-kauf__infos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (min-width: 48em) and (max-width: 63.99em) {
+  .home.cc-start .cc-kauf__infos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-kauf__infos {
+    gap: var(--cc-space-4);
+  }
+  .home.cc-start .cc-mengenrabatt,
+  .home.cc-start .cc-garantie {
+    padding: var(--cc-space-4);
+  }
+}
+
+/* ==== 11 · ONLINE-KURS =================================================== */
+
+.home.cc-start .cc-lektionen {
+  display: grid;
+  gap: var(--cc-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home.cc-start .cc-lektion {
+  display: grid;
+  /* Anteil statt fester rem-Breite: bei 24 px Wurzelschrift (Sehhilfe-
+   * Einstellung) waere 8rem = 192 px, und „Inhaltsstoffe?“ liefe aus dem
+   * Dokument (probe_startseite_kanten_und_kopf, Achse E, gemessen 02.10.). */
+  grid-template-columns: minmax(0, 34%) minmax(0, 1fr);
+  gap: var(--cc-space-2);
+  align-items: start;
+}
+.home.cc-start .cc-akt .cc-lektion h3 {
+  font-size: var(--cc-fs-2);
+  line-height: 1.4;
+}
+.home.cc-start .cc-lektion ul {
+  margin: 4px 0 0;
+  padding-left: var(--cc-space-3);
+  list-style: disc;
+  color: var(--cc-muted);
+}
+.home.cc-start .cc-lektion ul li {
+  line-height: 1.5;
+}
+.home.cc-start .cc-kurs__anmeldung {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-3);
+  border-radius: var(--cc-radius-bild);
+  background: var(--cc-flaeche);
+}
+.home.cc-start .cc-akt .cc-kurs__hinweis {
+  font-size: var(--cc-fs-1);
+  line-height: 1.5;
+  color: var(--cc-muted);
+}
+@media (min-width: 48em) {
+  .home.cc-start .cc-lektion {
+    grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+    gap: var(--cc-space-3);
+  }
+  .home.cc-start .cc-kurs__anmeldung {
+    padding: var(--cc-space-4);
+  }
+}

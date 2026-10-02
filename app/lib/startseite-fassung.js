@@ -27,7 +27,9 @@
  *     BLEIBT.
  *
  * PARAMETER (alle drei Richtungen, ohne Deploy):
- *   ?fassung=kakao    die heutige Startseite („Unser Kakao")
+ *   ?fassung=hochwertig  die Startseite seit 2026-10-02 (Default)
+ *   ?fassung=kakao    „Unser Kakao" (Startseite 08.09.–02.10.2026),
+ *                     auch ?fassung=bisher
  *   ?fassung=bestand  die alte Startseite (Aufmacher + Sortenraster)
  *   ?fassung=entwurf  der Verkaufsauftritt-Entwurf vom 2026-09-08
  *
@@ -37,14 +39,29 @@
  * Leere, nur weil hier ein Parameter dazugekommen ist.
  */
 
-/** 'kakao' = „Unser Kakao" · 'bestand' = alte Startseite · 'entwurf' = Verkaufsauftritt */
-export const FASSUNG = 'kakao';
+/*
+ * STAND 2026-10-02 (Grossjob 20261002-GROSSJOB-crystal-cacao-startseite-
+ * hochwertig-slider-profile-responsiv): Christian hat die Startseite neu
+ * bestellt — oben der Sorten-Slider (Awake herzöffnend/powerful, Create
+ * Fokus/High Performance), direkt danach die Analyseprofile, Aufbau wie die
+ * Zellen-Schlafschutz-Seite. Die neue Fassung heisst 'hochwertig' und ist
+ * Default. 'kakao' bleibt unveraendert abrufbar, zusaetzlich unter dem
+ * sprechenden Namen 'bisher'.
+ *
+ * DER RUECKWEG DIESES BAUS IST DIESE EINE ZEILE: FASSUNG = 'kakao'.
+ */
 
-const ERLAUBT = ['kakao', 'bestand', 'entwurf'];
+/** 'hochwertig' = Startseite seit 02.10.2026 · 'kakao'/'bisher' = „Unser Kakao" bis 02.10. · 'bestand' = alte Startseite · 'entwurf' = Verkaufsauftritt */
+export const FASSUNG = 'hochwertig';
+
+const ERLAUBT = ['hochwertig', 'kakao', 'bestand', 'entwurf'];
+
+/** Sprechende Namen, die auf eine Fassung zeigen. */
+const ALIAS = {bisher: 'kakao'};
 
 /**
  * @param {Request} request
- * @returns {'kakao'|'bestand'|'entwurf'}
+ * @returns {'hochwertig'|'kakao'|'bestand'|'entwurf'}
  */
 export function waehleFassung(request) {
   let p = null;
@@ -56,7 +73,7 @@ export function waehleFassung(request) {
     p = null;
   }
   if (p) {
-    const f = p.get('fassung');
+    const f = ALIAS[p.get('fassung')] || p.get('fassung');
     if (ERLAUBT.includes(f)) return f;
     const e = p.get('entwurf');
     if (e === '1') return 'entwurf';

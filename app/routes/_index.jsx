@@ -11,6 +11,8 @@ import {
   Abschluss as VaAbschluss,
 } from '~/components/startseite/Verkaufsauftritt';
 import {Kakao} from '~/components/product-pages/Kakao';
+import {Startseite} from '~/components/startseite/Startseite';
+import startseiteStyles from '~/styles/startseite.css?url';
 import {PodcastEinstieg} from '~/components/reusables/PodcastEinstieg';
 import {waehleFassung} from '~/lib/startseite-fassung';
 import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
@@ -18,6 +20,15 @@ import {MockShopNotice} from '~/components/MockShopNotice';
 import {ABSENDER_MARKE, KAKAO_KOLLEKTION, SORTEN_PFADE} from '~/lib/kakao-zone';
 import {SORTEN} from '~/lib/sorten-profil';
 import {markenGraph, teilbildSignale} from '~/lib/kakao-seo';
+
+/**
+ * Die Stilschicht der Startseite (seit 2026-10-02) haengt an DIESER Route,
+ * nicht an root.jsx: sie gilt nur hier, und root.jsx ist K3 (Framework-Wurzel).
+ * Ihr Scope ist `.cc-start`; die abgelegten Fassungen tragen ihn nicht.
+ */
+export function links() {
+  return [{rel: 'stylesheet', href: startseiteStyles}];
+}
 
 /**
  * @type {Route.MetaFunction}
@@ -155,7 +166,11 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return {...deferredData, ...criticalData};
+  return {
+    ...deferredData,
+    ...criticalData,
+    recommendedProducts: criticalData.sorten,
+  };
 }
 
 /**
@@ -164,16 +179,30 @@ export async function loader(args) {
  * @param {Route.LoaderArgs}
  */
 async function loadCriticalData({context, request}) {
-  const [{collection}] = await Promise.all([
+  const [{collection}, sorten] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY, {
       variables: {handle: KAKAO_KOLLEKTION},
     }),
-    // Add other queries here, so that they are loaded in parallel
+    // DIE ZWEI SORTEN SIND SEIT 2026-10-02 KRITISCH, nicht mehr nachgeladen:
+    // der Sorten-Slider steht ganz oben und zeigt Packshot und Preis. Ein
+    // nachgeladener Slider waere beim ersten Bild leer und spraenge danach
+    // (Layout-Sprung). Parallel zur Kollektion, also ohne zusaetzliche
+    // Wartezeit. Faellt die Abfrage aus, rendert die Seite trotzdem (null),
+    // der Slider zeigt dann Wortmarke, Claim und Knopf ohne Preis.
+    context.storefront
+      .query(SORTEN_QUERY, {
+        variables: {awake: SORTEN_HANDLES.awake, create: SORTEN_HANDLES.create},
+      })
+      .catch((error) => {
+        console.error(error);
+        return null;
+      }),
   ]);
 
   return {
     isShopLinked: Boolean(context.env.PUBLIC_STORE_DOMAIN),
     featuredCollection: collection,
+    sorten,
     // Die Fassung wird SERVERSEITIG entschieden, nicht im Browser: sonst
     // rendert der Server das eine und der Browser das andere, und React
     // wirft einen Hydration-Fehler statt einer Seite.
@@ -187,20 +216,12 @@ async function loadCriticalData({context, request}) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {Route.LoaderArgs}
  */
-function loadDeferredData({context}) {
-  const recommendedProducts = context.storefront
-    .query(SORTEN_QUERY, {
-      variables: {awake: SORTEN_HANDLES.awake, create: SORTEN_HANDLES.create},
-    })
-    .catch((error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
-
-  return {
-    recommendedProducts,
-  };
+function loadDeferredData() {
+  // Seit 2026-10-02 leer: die Sorten werden kritisch geladen (siehe oben) und
+  // als `sorten` UND als `recommendedProducts` gereicht — <Await> nimmt auch
+  // einen fertigen Wert. Die Funktion bleibt als Ort fuer kuenftige
+  // Nachlade-Daten stehen.
+  return {};
 }
 
 /**
@@ -350,7 +371,10 @@ function PodcastAbschnitt() {
       dauerWort={PODCAST_DAUER}
       titel="Crystal Cacao®: die Kraft des Amazonas. In deiner Tasse."
     >
-      <h2 id="cc-podcast-titel">Vier Dinge heißen „Kakao“</h2>
+      {/* 2026-10-02: war „Vier Dinge heißen „Kakao““. Die Stil-Wache des
+          Ladens (probe_durchgang_christian_streng, Arm S/F5) zaehlt die
+          Zahlformel „vier Dinge“ als KI-Marotte; der Inhalt bleibt derselbe. */}
+      <h2 id="cc-podcast-titel">Was im Regal alles „Kakao“ heißt</h2>
       <p>
         Kakaopulver, Schokolade, Zeremoniekakao und Kristallkakao: Im Regal
         steht auf allen vieren dasselbe Wort. Ab Minute 8:30 erkläre ich im
@@ -404,6 +428,20 @@ export default function Homepage() {
   const data = useLoaderData();
   if (data.fassung === 'entwurf') return <Verkaufsauftritt data={data} />;
   if (data.fassung === 'bestand') return <Bestandsfassung data={data} />;
+  if (data.fassung === 'hochwertig') {
+    return (
+      <>
+        {data.isShopLinked ? null : <MockShopNotice />}
+        <Startseite
+          produkte={data.sorten}
+          stimmen={<VaStimmen />}
+          sorten={<RecommendedProducts products={data.recommendedProducts} />}
+          podcast={<PodcastAbschnitt />}
+        />
+      </>
+    );
+  }
+  // 'kakao' (auch ?fassung=bisher): die Startseite vom 08.09. bis 02.10.2026.
   return (
     <div className="home home--kakao">
       {data.isShopLinked ? null : <MockShopNotice />}
