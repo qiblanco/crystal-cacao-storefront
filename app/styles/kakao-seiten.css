@@ -737,10 +737,17 @@
 .CacaoVariantSelect {
   width: 100%;
   max-width: var(--cc-kaufblock-max);
-  padding: 0.85rem 1rem;
+  /* Rechts Platz fuer den Pfeil (Kontrolle 2026-10-03): mit 1rem rechts lief
+   * der Text „3x 420g | 30% Rabatt | 53,- € pro Packung“ (318 px bei 16 px)
+   * unter den Pfeil, am Telefon 390 px sichtbar als „Packung⌄“. Jetzt endet
+   * die Textflaeche 8 px vor dem Pfeil, und bei 390 px passt die Zeile ganz
+   * (314 px Platz, 311 px Text mit -0,01em). Schrift bleibt 16 px: darunter
+   * zoomt iOS beim Antippen die Seite. */
+  padding: 0.85rem 2rem 0.85rem 0.75rem;
   font-size: var(--cc-fs-2);
   font-family: inherit;
   font-weight: 600;
+  letter-spacing: -0.01em;
   /* s03, 2026-09-04: hier stand mit #3a3a3a / #f5f0e8 / #d4c9b5 / #b8a88a ein
    * VOLLSTAENDIGES ZWEITES Neutral-Set neben dem Haus-Kontinuum — vier freie
    * Werte an einem einzigen Bedienelement, das auf beiden Kaufseiten direkt
@@ -756,7 +763,7 @@
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232c2a26' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 1rem center;
+  background-position: right 0.75rem center;
   background-size: 12px;
 }
 .CacaoVariantSelect:focus {
