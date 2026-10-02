@@ -1,4 +1,6 @@
 import {Belege} from '../reusables/Belege';
+import {KakaoTiefe} from '../reusables/KakaoTiefe';
+import {KAKAO_TIEFE_AN} from '../reusables/kakao-tiefe-daten';
 import {AbsichtHinweis} from '../reusables/AbsichtHinweis';
 import {bildQuelle} from '../reusables/shopifyBildQuellen';
 import {ProductFAQ} from '../ProductFAQ';
@@ -551,6 +553,24 @@ export function SortenSeite({sorte, faqItems = FAQ_CACAO}) {
   const profil = sortenProfil(sorte);
   if (!profil) {
     throw new Error(`SortenSeite: unbekannte Sorte '${sorte}'`);
+  }
+  /* KAKAO-TIEFE (Grossjob 20261002-GROSSJOB-kakaoseiten-mineralstoffe-
+     dartsch-und-crystal-niveau-auf-dach-und-us): die Abschnitte von den
+     Inhaltsstoffen bis zum Banner weichen dem geteilten Baustein
+     KakaoTiefe (K1, wie auf qiblanco.com), mit den Mineralstoffen aus dem
+     Dartsch-Bericht. Belege, Absicht und FAQ bleiben, wie sie sind; die
+     Pruefdokumente fuehrt dieser Laden schon als .cc-belege, deshalb
+     belege={false}. Rueckweg: KAKAO_TIEFE_AN = false in
+     reusables/kakao-tiefe-daten.js, dann rendert wieder der Bestand unten. */
+  if (KAKAO_TIEFE_AN) {
+    return (
+      <>
+        <KakaoTiefe sorte={sorte} belege={false} />
+        <Belege sorte={`crystal-cacao-${sorte}`} />
+        <AbsichtHinweis />
+        <ProductFAQ items={faqItems} />
+      </>
+    );
   }
   return (
     <>

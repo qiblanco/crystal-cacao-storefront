@@ -1,0 +1,604 @@
+/* ============================================================================
+ * kakao-tiefe.css — Gestaltung von KakaoTiefe.jsx (K1, byte-gleich in
+ * qiblanco-storefront und crystal-cacao-node; der US-Shop bekommt eine
+ * Abschrift als Theme-Asset qb-kakao-tiefe.css).
+ *
+ * Grossjob 20261002-GROSSJOB-kakaoseiten-mineralstoffe-dartsch-und-crystal-
+ * niveau-auf-dach-und-us. Vorbild ist die Startseite von crystal-cacao.com
+ * (startseite.css): EIN Abstandssystem, eine Typo-Skala, ein Bild-Radius,
+ * ein Gold-Akzent nur auf Handlung und Beweis, die zwei Sortenfarben.
+ *
+ * EIGENE TOKENS STATT DER --cc-*: qiblanco.com lädt kakao-seiten.css nicht.
+ * Die Werte unten SIND die --cc-Werte der Startseite, damit der Baustein auf
+ * beiden Hydrogen-Läden gleich aussieht. Wer einen ändert, zieht beide nach.
+ *
+ * H2 BLEIBT DER H2 DES LADENS: Größe, Gewicht und Farbe setzt der Laden
+ * (crystal 39 px/700, qiblanco 24-35 px/600, gemessen 02.10.). Ein eigener
+ * H2-Stil wäre auf jeder Seite der zweite und kostet in der design-rubrik
+ * 20 Punkte. Ausgerichtet wird der Kopf mittig wie der Amazon-Bereich darüber
+ * (gemischte Ausrichtung kostet 15).
+ *
+ * TAKT: ein Akt trägt nur Innenabstand, 64 px am Telefon, 96 px ab 48em.
+ * Größte Lücke zwischen zwei Akten damit 128 / 192 px; die Leerraum-Probe
+ * erlaubt 180 / 240.
+ * ========================================================================== */
+
+.kt {
+  --kt-fs-1: 0.8rem;     /* 12.8 px  Feindruck, Labels      */
+  --kt-fs-2: 1rem;       /* 16 px    Fliesstext             */
+  --kt-fs-3: 1.25rem;    /* 20 px    Lead, H3, Kachelwert   */
+  --kt-fs-4: 1.5625rem;  /* 25 px    Spur-Symbol            */
+  --kt-fs-5: 1.9531rem;  /* 31.25 px Kachel-Symbol          */
+  --kt-space-1: 0.5rem;
+  --kt-space-2: 1rem;
+  --kt-space-3: 1.5rem;
+  --kt-space-4: 2rem;
+  --kt-space-5: 3rem;
+  --kt-space-6: 4rem;
+  --kt-space-7: 6rem;
+  --kt-gold: rgb(242, 191, 114);
+  --kt-gold-tief: rgb(200, 152, 90);
+  --kt-gold-text: #90671d;
+  --kt-dunkel: #171310;
+  --kt-text: #2c2a26;
+  --kt-muted: #6b665d;
+  --kt-flaeche: #f6f1ea;
+  --kt-grund: #fbf8f4;
+  --kt-linie: #e6ded3;
+  --kt-awake: #d94076;
+  --kt-awake-text: #c23c6b;
+  --kt-create: #5ba3f8;
+  --kt-create-text: #1771bd;
+  --kt-neutral: #aaa196;    /* Balken der Vergleichssorte, kein Akzent */
+  --kt-radius: 10px;
+  --kt-zeile: 70ch;
+
+  color: var(--kt-text);
+  font-size: var(--kt-fs-2);
+  line-height: 1.65;
+  overflow-wrap: break-word;
+}
+
+.kt :is(h2, h3, p, ol, ul, dl, dd, figure) {
+  margin: 0;
+  padding: 0;
+}
+.kt :is(ol, ul) {
+  list-style: none;
+}
+
+[data-kt-farbe='awake'] {
+  --kt-sorte: var(--kt-awake);
+  --kt-sorte-text: var(--kt-awake-text);
+}
+[data-kt-farbe='create'] {
+  --kt-sorte: var(--kt-create);
+  --kt-sorte-text: var(--kt-create-text);
+}
+[data-kt-farbe='neutral'] {
+  --kt-sorte: var(--kt-neutral);
+  --kt-sorte-text: var(--kt-muted);
+  --kt-balken: var(--kt-neutral);
+}
+
+/* ---- Akte: randlose Bänder ohne Überbreite ------------------------------
+ * Der Hintergrund läuft per Schatten bis an den Fensterrand, clip-path
+ * schneidet ihn oben und unten ab. Anders als 100vw-Breite erzeugt das keinen
+ * waagerechten Rollbalken. */
+.kt .kt-akt {
+  padding-block: var(--kt-space-6);
+  background: var(--kt-band);
+  box-shadow: 0 0 0 100vmax var(--kt-band);
+  clip-path: inset(0 -100vmax);
+}
+/* Karten liegen in der jeweils anderen Bandfarbe: kein Weiss. Eine fünfte
+ * Hintergrund-Farbwelt kostet in der design-rubrik 10 Punkte; Grund, Fläche,
+ * Gold und Dunkel stehen auf der Kaufseite ohnehin. */
+.kt .kt-akt--grund {
+  --kt-band: var(--kt-grund);
+  --kt-karte: var(--kt-flaeche);
+}
+.kt .kt-akt--flaeche {
+  --kt-band: var(--kt-flaeche);
+  --kt-karte: var(--kt-grund);
+}
+.kt .kt-akt__innen {
+  max-width: 72rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kt-space-4);
+}
+
+/* ---- Kopf ---------------------------------------------------------------- */
+.kt .kt-kopf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--kt-space-2);
+  max-width: 46rem;
+  margin-inline: auto;
+  text-align: center;
+}
+.kt .kt-kopf h2 {
+  text-align: center;
+  text-wrap: balance;
+}
+.kt .kt-augenbraue {
+  font-size: var(--kt-fs-1);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--kt-gold-text);
+}
+.kt .kt-lead {
+  font-size: var(--kt-fs-3);
+  line-height: 1.5;
+  color: var(--kt-muted);
+}
+
+.kt .kt-legende {
+  display: flex;
+  justify-content: center;
+  gap: var(--kt-space-3);
+  font-size: var(--kt-fs-1);
+  font-weight: 700;
+}
+.kt .kt-legende__eintrag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kt-space-1);
+  color: var(--kt-sorte-text);
+}
+.kt .kt-legende__eintrag::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--kt-sorte-text);
+}
+
+.kt .kt-gruppe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kt-space-2);
+}
+.kt .kt-gruppe__titel {
+  font-size: var(--kt-fs-3);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--kt-dunkel);
+  text-align: left;
+}
+.kt .kt-gruppe__zahl {
+  font-size: var(--kt-fs-1);
+  font-weight: 600;
+  color: var(--kt-muted);
+  white-space: nowrap;
+}
+.kt .kt-gruppe__regel {
+  font-size: var(--kt-fs-1);
+  color: var(--kt-muted);
+  max-width: var(--kt-zeile);
+}
+
+.kt .kt-link {
+  color: var(--kt-dunkel);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.kt .kt-link:hover {
+  color: var(--kt-gold-text);
+}
+
+/* ---- Akt 1 · Mineralstoff-Kacheln ---------------------------------------- */
+/* Drei Spalten ab 360 px: zwei machten aus 14 Kacheln sieben Reihen
+ * (Kandidat 02.10.: 3.665 px Akt-Höhe bei 390 px). Darunter zwei, sonst
+ * bricht bei 320 px „Magnesium“ mitten im Wort. */
+.kt .kt-kacheln {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--kt-space-1);
+}
+@media (min-width: 22.5em) {
+  .kt .kt-kacheln {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.kt .kt-kachel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 0.75rem;
+  background: var(--kt-karte);
+  border: 1px solid var(--kt-linie);
+  border-radius: var(--kt-radius);
+}
+.kt .kt-kachel__symbol {
+  font-size: var(--kt-fs-5);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--kt-dunkel);
+}
+.kt .kt-kachel__name {
+  font-size: var(--kt-fs-1);
+  color: var(--kt-muted);
+  line-height: 1.4;
+}
+.kt .kt-kachel__wert {
+  font-size: var(--kt-fs-3);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--kt-dunkel);
+  font-variant-numeric: tabular-nums;
+}
+.kt .kt-kachel__hinweis {
+  font-size: var(--kt-fs-1);
+  color: var(--kt-muted);
+  line-height: 1.4;
+}
+.kt .kt-kachel__vergleich {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: var(--kt-space-1);
+}
+.kt .kt-kachel__andere {
+  font-size: var(--kt-fs-1);
+  color: var(--kt-muted);
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.kt .kt-kacheln--spur .kt-kachel__symbol {
+  font-size: var(--kt-fs-4);
+}
+.kt .kt-kacheln--spur .kt-kachel__wert {
+  font-size: var(--kt-fs-2);
+}
+.kt .kt-kachel--unter {
+  background: transparent;
+  border-style: dashed;
+}
+.kt .kt-kachel--unter :is(.kt-kachel__symbol, .kt-kachel__wert) {
+  color: var(--kt-muted);
+}
+
+.kt .kt-balken {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--kt-linie);
+  overflow: hidden;
+}
+.kt .kt-balken__fuellung {
+  display: block;
+  width: var(--kt-anteil, 0%);
+  height: 100%;
+  border-radius: 3px;
+  background: var(--kt-balken, var(--kt-sorte-text));
+}
+
+.kt .kt-vergleich {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kt-space-1);
+  padding: var(--kt-space-3);
+  background: var(--kt-karte);
+  border-radius: var(--kt-radius);
+}
+.kt .kt-vergleich p {
+  max-width: var(--kt-zeile);
+}
+
+.kt .kt-quelle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kt-space-1);
+  font-size: var(--kt-fs-1);
+  line-height: 1.6;
+  color: var(--kt-muted);
+}
+.kt .kt-quelle p {
+  max-width: var(--kt-zeile);
+}
+
+/* ---- Akt 2 · Analyseprofil ----------------------------------------------- */
+.kt .kt-profil__liste {
+  display: grid;
+}
+.kt .kt-profil__zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--kt-space-1);
+  padding-block: var(--kt-space-2);
+  border-top: 1px solid var(--kt-linie);
+}
+.kt .kt-profil__zeile:last-child {
+  border-bottom: 1px solid var(--kt-linie);
+}
+.kt .kt-profil__stoff {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.kt .kt-profil__name {
+  font-weight: 700;
+  color: var(--kt-dunkel);
+}
+.kt .kt-profil__bedeutung {
+  font-size: var(--kt-fs-1);
+  color: var(--kt-muted);
+}
+.kt .kt-profil__wertzeile {
+  display: grid;
+  grid-template-columns: 3.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--kt-space-2);
+}
+.kt .kt-profil__sorte {
+  font-size: var(--kt-fs-1);
+  font-weight: 700;
+  color: var(--kt-sorte-text);
+}
+.kt .kt-profil .kt-balken {
+  height: 12px;
+  border-radius: 6px;
+}
+.kt .kt-profil .kt-balken__fuellung {
+  border-radius: 6px;
+}
+.kt .kt-profil__wert {
+  min-width: 5.5em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.kt .kt-deutung {
+  padding: var(--kt-space-3);
+  background: var(--kt-karte);
+  border-top: 3px solid var(--kt-sorte-text);
+  border-radius: var(--kt-radius);
+  max-width: 46rem;
+}
+
+/* ---- Akt 3 · Einordnung -------------------------------------------------- */
+.kt .kt-leiter {
+  display: grid;
+  gap: var(--kt-space-2);
+  counter-reset: none;
+}
+.kt .kt-stufe {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  column-gap: var(--kt-space-2);
+  row-gap: 2px;
+  padding: var(--kt-space-2);
+  border: 1px solid var(--kt-linie);
+  border-radius: var(--kt-radius);
+  background: var(--kt-karte);
+}
+.kt .kt-stufe__nr {
+  grid-row: span 3;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 1px solid var(--kt-muted);
+  font-size: var(--kt-fs-1);
+  font-weight: 700;
+  color: var(--kt-muted);
+}
+.kt .kt-stufe__name {
+  font-weight: 700;
+  color: var(--kt-dunkel);
+}
+.kt .kt-stufe__marke {
+  font-size: var(--kt-fs-1);
+  font-weight: 700;
+  color: var(--kt-gold-text);
+}
+.kt .kt-stufe__text {
+  font-size: var(--kt-fs-1);
+  line-height: 1.6;
+  color: var(--kt-muted);
+}
+.kt .kt-stufe--wir {
+  background: var(--kt-karte);
+  border: 2px solid var(--kt-gold-tief);
+}
+.kt .kt-stufe--wir .kt-stufe__nr {
+  border-color: var(--kt-gold-tief);
+  background: var(--kt-gold);
+  color: var(--kt-dunkel);
+}
+.kt .kt-stufe--wir .kt-stufe__text {
+  color: var(--kt-text);
+}
+
+.kt .kt-urstamm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kt-space-2);
+}
+.kt .kt-urstamm p {
+  max-width: var(--kt-zeile);
+}
+.kt .kt-urstamm__liste {
+  display: grid;
+  gap: var(--kt-space-2);
+}
+.kt .kt-urstamm__liste li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--kt-space-2) var(--kt-space-3);
+  background: var(--kt-karte);
+  border-left: 4px solid var(--kt-sorte);
+  border-radius: var(--kt-radius);
+  font-size: var(--kt-fs-1);
+  line-height: 1.6;
+}
+.kt .kt-urstamm__name {
+  font-size: var(--kt-fs-2);
+  font-weight: 700;
+  color: var(--kt-sorte-text);
+}
+
+/* ---- Akt 4/5 · Bild und Text --------------------------------------------- */
+.kt .kt-paar {
+  display: grid;
+  gap: var(--kt-space-3);
+  align-items: center;
+}
+.kt .kt-paar__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kt-space-2);
+}
+.kt .kt-bild {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kt-space-1);
+}
+.kt .kt-bild img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--kt-radius);
+}
+.kt .kt-bild figcaption {
+  font-size: var(--kt-fs-1);
+  line-height: 1.4;
+  color: var(--kt-muted);
+}
+
+.kt .kt-schritte {
+  display: grid;
+  gap: var(--kt-space-2);
+  counter-reset: kt-schritt;
+}
+.kt .kt-schritte li {
+  counter-increment: kt-schritt;
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: var(--kt-space-2);
+  align-items: center;
+}
+.kt .kt-schritte li::before {
+  content: counter(kt-schritt);
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 1px solid var(--kt-dunkel);
+  font-size: var(--kt-fs-1);
+  font-weight: 700;
+  color: var(--kt-dunkel);
+}
+.kt .kt-hinweis {
+  font-size: var(--kt-fs-1);
+  color: var(--kt-muted);
+}
+
+/* ---- Akt 6 · Prüfdokumente ---------------------------------------------- */
+.kt .kt-dokumente {
+  display: grid;
+  gap: var(--kt-space-2);
+}
+.kt .kt-dokument {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kt-space-2);
+  padding: var(--kt-space-3);
+  background: var(--kt-karte);
+  border: 1px solid var(--kt-linie);
+  border-top: 3px solid var(--kt-gold-tief);
+  border-radius: var(--kt-radius);
+}
+.kt .kt-dokument__titel {
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--kt-dunkel);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.kt .kt-dokument__daten {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--kt-space-2);
+  row-gap: 4px;
+  font-size: var(--kt-fs-1);
+  line-height: 1.5;
+}
+.kt .kt-dokument__daten dt {
+  color: var(--kt-muted);
+}
+
+/* ---- ab 40em / 48em / 64em ----------------------------------------------- */
+@media (min-width: 40em) {
+  .kt .kt-kacheln {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .kt .kt-kacheln--hoch .kt-kachel {
+    padding: var(--kt-space-2);
+  }
+  .kt .kt-urstamm__liste {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 48em) {
+  .kt .kt-akt {
+    padding-block: var(--kt-space-7);
+  }
+  .kt .kt-akt__innen {
+    gap: var(--kt-space-5);
+  }
+  .kt .kt-kacheln {
+    gap: var(--kt-space-2);
+  }
+  .kt .kt-paar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--kt-space-5);
+  }
+  .kt .kt-paar--gedreht .kt-bild {
+    order: -1;
+  }
+  .kt .kt-profil__zeile {
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr);
+    column-gap: var(--kt-space-5);
+    padding-block: var(--kt-space-3);
+  }
+  .kt .kt-profil__stoff {
+    grid-row: span 2;
+    justify-content: center;
+  }
+  .kt .kt-leiter {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .kt .kt-stufe {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+  }
+  .kt .kt-stufe__nr {
+    grid-row: auto;
+    margin-bottom: var(--kt-space-1);
+  }
+  .kt .kt-dokumente {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64em) {
+  .kt .kt-kacheln--hoch {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .kt .kt-kacheln--spur {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}

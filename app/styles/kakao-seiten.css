@@ -780,20 +780,27 @@
   margin-top: 1.5rem;
 }
 /*
- * ABSTAND UNTER DER LISTE (Elina EL-20261002-c4146cc6, Ergaenzung zu
- * EL-20261002-e9cf5364): dieselbe Regel wie auf qiblanco.com -- vom letzten
- * Punkt (Gesetzliche Gewaehrleistung) bis zur Oberkante des grauen
- * Instagram-Abschnitts 96 px am Computer, 72 px mobil, also mindestens so viel
- * wie dessen Innenabstand bis zur Ueberschrift (64 / 48 px).
- * Gemessen vorher: 8 px auf beiden Formaten; dieser Restabstand des letzten
- * Punkts ist abgezogen (die .product-main hat hier mobil kein padding).
+ * ABSTAND UNTER DEM PRODUKTBEREICH (Elina EL-20261002-ddcf1d86, Korrektur zu
+ * EL-20261002-c4146cc6; dieselbe Regel wie auf qiblanco.com).
+ * Der Weissraum gehoert unter den GANZEN Produktbereich (Galerie links und
+ * Infos rechts zusammen): 96 px am Computer, 72 px am Handy, gemessen von der
+ * Unterkante des tiefer reichenden Elements bis zur Oberkante des grauen
+ * Instagram-Abschnitts. Er sitzt deshalb als padding am Raster .product, NICHT
+ * mehr als margin unter der Liste: dort sass er nur in der rechten Spalte, und
+ * die Galerie (ab 1024 px position: sticky) wanderte beim Scrollen bis ans
+ * Rasterende und stiess mit 0 px an den Abschnitt. Nicht doppelt: die alte
+ * margin ist entfernt und die 8 px margin des letzten Punkts auf 0 gesetzt.
+ * Die .product-main hat hier mobil kein padding, daher volle 72 px.
  */
-.product-main > .CacaoBenefitList:last-child {
-  margin-bottom: 88px;
+.product:has(> .product-main > .CacaoBenefitList:last-child) {
+  padding-bottom: 96px;
+}
+.product-main > .CacaoBenefitList:last-child li:last-child {
+  margin-bottom: 0;
 }
 @media screen and (max-width: 749px) {
-  .product-main > .CacaoBenefitList:last-child {
-    margin-bottom: 64px;
+  .product:has(> .product-main > .CacaoBenefitList:last-child) {
+    padding-bottom: 72px;
   }
 }
 .CacaoBenefitList ul {
@@ -2534,6 +2541,19 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   border: 0;
   background: transparent;
   cursor: pointer;
+}
+/* DER PODCAST WURDE BEIM ANTIPPEN GOLD (Christian 02.10.2026: „wenn ich ueber
+ * den Podcast klicke, dann wird es erst Gold“). Kein Lade- und kein
+ * Fokusfehler, sondern Hover: app.css faerbt jeden Knopf in <main> beim
+ * Hover gold (`main button:where(…):hover`, Spezifitaet 0,1,2) und schlaegt
+ * damit diese Regel (0,1,0). Der Knopf liegt randlos UEBER dem Vorschaubild,
+ * also wurde die ganze Buehne gold; am Telefon bleibt der Hover nach dem
+ * Tippen stehen. Gemessen live: Ruhe rgba(0,0,0,0), Hover rgb(200,152,90).
+ * Die Rueckmeldung beim Hover traegt die Play-Scheibe (unten), nicht die
+ * Flaeche. Grossjob 20261002-GROSSJOB-kakaoseiten-mineralstoffe-dartsch-und-
+ * crystal-niveau-auf-dach-und-us. */
+.cc-podcast__knopf:is(:hover, :focus, :focus-visible, :active) {
+  background: transparent;
 }
 
 .cc-podcast__fuellung {
