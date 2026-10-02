@@ -440,10 +440,14 @@ export const SORTENVERGLEICH = {
       breite: 2000,
       hoehe: 2000,
       // crystal-cacao-node/repo/app/lib/sorten-profil.js SORTEN.awake.claim
-      // und .einordnung (claim auch <h2> dieser Kaufseite).
+      // und .einordnung (claim auch <h2> dieser Kaufseite). Positionierung seit
+      // 02.10.2026 (Christian: „herzöffnend, powerful“), Grossjob
+      // 20261002-GROSSJOB-crystal-cacao-startseite-hochwertig-..., s04.
+      // Vorher: 'Wach. Mutig. Kraftvoll.' / 'Gedacht für den Start in den Tag:
+      // morgens, vor dem Sport, vor einem langen Vormittag.'
       wofuer: [
-        'Wach. Mutig. Kraftvoll.',
-        'Gedacht für den Start in den Tag: morgens, vor dem Sport, vor einem langen Vormittag.',
+        'Herzöffnend. Powerful.',
+        'Für Tage, an denen du mit offenem Herzen und voller Kraft dabei sein willst.',
       ],
       // Bohne: qi-salesbot/data/zeugnis-vertrag.json (Referenz »Piura Blanco«);
       // Herkunft: product-pages/Awake.jsx herkunftRows[0] ("goldenen
@@ -488,10 +492,13 @@ export const SORTENVERGLEICH = {
       bild: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/Doypack_Mockup__v3-min.png?v=1765893937',
       breite: 2144,
       hoehe: 2133,
-      // sorten-profil.js SORTEN.create.claim und .einordnung.
+      // sorten-profil.js SORTEN.create.claim und .einordnung (seit 02.10.2026:
+      // „Fokus, High Performance“). Vorher: 'Wach. Klar. Fokussiert.' /
+      // 'Gedacht für den klaren Kopf: lange Stunden am Schreibtisch, Arbeit,
+      // die Ruhe braucht.'
       wofuer: [
-        'Wach. Klar. Fokussiert.',
-        'Gedacht für den klaren Kopf: lange Stunden am Schreibtisch, Arbeit, die Ruhe braucht.',
+        'Fokus. High Performance.',
+        'Für Tage, an denen du konzentriert und mit voller Leistung arbeitest.',
       ],
       // Bohne: zeugnis-vertrag.json (Referenz »Amazonas Nativo«); Herkunft:
       // product-pages/Create.jsx herkunftRows[0] ("Bergwäldern des
