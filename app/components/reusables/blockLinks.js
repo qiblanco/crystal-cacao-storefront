@@ -80,6 +80,22 @@ export function lpKaufZiele() {
   ];
 }
 
+/**
+ * Die Detailseiten des öffentlichen Blocks („mehr erfahren“), als Pfade.
+ * Zusammen mit /products/<handle> sind sie die Produkt- bzw. Kaufseiten, auf
+ * die ein Knopf des öffentlichen Blocks führt. KaufknopfChatSignal
+ * (lib/kaufknopf-chat.js) erkennt daran die Knöpfe, über denen die
+ * Chat-Blase nicht stehen darf.
+ * @returns {string[]}
+ */
+export function oeffentlicheDetailZiele() {
+  return [
+    ...new Set(
+      Object.values(PRODUKT_LINKS).map((e) => e[BLOCK_PUBLIC].detail),
+    ),
+  ];
+}
+
 /*
  * Thema-Chips (DreiThemenBand): im LP-Block darf der esmog-Chip nicht auf
  * die PDP zeigen — Ziel ist die E-Smog-Campaign-LP (URL mit Grossschreibung,
