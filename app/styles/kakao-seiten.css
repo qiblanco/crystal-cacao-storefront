@@ -2542,6 +2542,19 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   background: transparent;
   cursor: pointer;
 }
+/* DER PODCAST WURDE BEIM ANTIPPEN GOLD (Christian 02.10.2026: „wenn ich ueber
+ * den Podcast klicke, dann wird es erst Gold“). Kein Lade- und kein
+ * Fokusfehler, sondern Hover: app.css faerbt jeden Knopf in <main> beim
+ * Hover gold (`main button:where(…):hover`, Spezifitaet 0,1,2) und schlaegt
+ * damit diese Regel (0,1,0). Der Knopf liegt randlos UEBER dem Vorschaubild,
+ * also wurde die ganze Buehne gold; am Telefon bleibt der Hover nach dem
+ * Tippen stehen. Gemessen live: Ruhe rgba(0,0,0,0), Hover rgb(200,152,90).
+ * Die Rueckmeldung beim Hover traegt die Play-Scheibe (unten), nicht die
+ * Flaeche. Grossjob 20261002-GROSSJOB-kakaoseiten-mineralstoffe-dartsch-und-
+ * crystal-niveau-auf-dach-und-us. */
+.cc-podcast__knopf:is(:hover, :focus, :focus-visible, :active) {
+  background: transparent;
+}
 
 .cc-podcast__fuellung {
   position: absolute;
