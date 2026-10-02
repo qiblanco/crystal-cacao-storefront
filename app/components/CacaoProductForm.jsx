@@ -1,3 +1,4 @@
+import {useEffect, useRef, useState} from 'react';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import {EuGewaehrleistungsHinweis} from './EuGewaehrleistungsLabel';
@@ -155,11 +156,62 @@ export function cacaoSizeOptions(selectedVariant, handle, land) {
     const hinweis = pricing.rabattImWarenkorb
       ? ' | Mengenrabatt im Warenkorb'
       : '';
+    // KURZFASSUNG fuer schmale Telefone (Job 20261003-crystal-mengenauswahl-
+    // zeile-schmales-telefon): dieselben drei Angaben — Menge, Rabatt, Preis
+    // je Packung —, nur "pro Packung" wird zu "je" vor dem Preis. Gemessen bei
+    // 16 px (Open Sans 600): lang 311 px, kurz 230 px; Platz in der Auswahl
+    // 390 px -> 312, 360 px -> 282, 320 px -> 242. Die Schrift unter 16 px zu
+    // setzen ist kein Ausweg: darunter zoomt iOS beim Antippen die Seite.
+    const hinweisKurz = pricing.rabattImWarenkorb
+      ? ' | Rabatt im Warenkorb'
+      : '';
     return {
       value,
       label: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}${pricing.price} pro Packung${hinweis}`,
+      kurz: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}je ${pricing.price}${hinweisKurz}`,
     };
   });
+}
+
+/**
+ * Ob die LANGE Optionszeile in die Textflaeche der Auswahl passt — gemessen,
+ * nicht per Breitengrenze geraten: der Platz haengt an Breite, Polster und
+ * Schrift, die Zeile an Markt und Waehrung ("1.048,50 CHF" ist laenger als
+ * "53,- €"). Gemessen wird die LAENGSTE lange Zeile, damit die Fassung nicht
+ * mit der gewaehlten Menge wechselt. Server und erster Render zeigen die lange
+ * Fassung (dort gibt es keine Breite); die kurze kommt erst, wenn die Messung
+ * sagt, dass die lange nicht passt.
+ */
+function useKurzfassung(selectRef, langeZeilen) {
+  const [kurz, setKurz] = useState(false);
+  const schluessel = langeZeilen.join('\n');
+  useEffect(() => {
+    const s = selectRef.current;
+    if (!s || typeof window === 'undefined') return undefined;
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) return undefined;
+    const pruefe = () => {
+      const cs = window.getComputedStyle(s);
+      ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      if ('letterSpacing' in ctx) ctx.letterSpacing = cs.letterSpacing;
+      const platz =
+        s.clientWidth -
+        parseFloat(cs.paddingLeft) -
+        parseFloat(cs.paddingRight);
+      if (!(platz > 0)) return;
+      const breite = Math.max(
+        ...schluessel.split('\n').map((z) => ctx.measureText(z).width),
+      );
+      setKurz(breite > platz);
+    };
+    pruefe();
+    // Die Hausschrift kann nach dem ersten Render nachladen und breiter sein
+    // als die Ersatzschrift — nach dem Laden noch einmal messen.
+    if (document.fonts?.ready) document.fonts.ready.then(pruefe);
+    window.addEventListener('resize', pruefe);
+    return () => window.removeEventListener('resize', pruefe);
+  }, [selectRef, schluessel]);
+  return kurz;
 }
 
 /**
@@ -197,19 +249,26 @@ export function CacaoProductForm({
   // Der Lebensmittelsatz ist NICHT ueberall 7 % -- in AT sind es 10 %
   // (gemessen 2026-09-13, cart-display-pricing.js SATZ_JE_LAND).
   const marktLand = useMarktLand();
+  const optionen = cacaoSizeOptions(selectedVariant, handle, marktLand);
+  const selectRef = useRef(null);
+  const kurz = useKurzfassung(
+    selectRef,
+    optionen.map((o) => o.label),
+  );
 
   return (
     <div className="product-form">
       <div className="product-options">
         <h5>Größe</h5>
         <select
+          ref={selectRef}
           className="CacaoVariantSelect"
           value={quantity}
           onChange={(e) => onQuantityChange(e.target.value)}
         >
-          {cacaoSizeOptions(selectedVariant, handle, marktLand).map((opt) => (
+          {optionen.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {kurz ? opt.kurz : opt.label}
             </option>
           ))}
         </select>
