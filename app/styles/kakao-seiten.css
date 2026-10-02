@@ -770,7 +770,24 @@
   color: var(--cc-text);
 }
 .CacaoBenefitList {
-  margin-top: 1.5rem; 
+  margin-top: 1.5rem;
+}
+/*
+ * ABSTAND UNTER DER LISTE (Elina EL-20261002-c4146cc6, Ergaenzung zu
+ * EL-20261002-e9cf5364): dieselbe Regel wie auf qiblanco.com -- vom letzten
+ * Punkt (Gesetzliche Gewaehrleistung) bis zur Oberkante des grauen
+ * Instagram-Abschnitts 96 px am Computer, 72 px mobil, also mindestens so viel
+ * wie dessen Innenabstand bis zur Ueberschrift (64 / 48 px).
+ * Gemessen vorher: 8 px auf beiden Formaten; dieser Restabstand des letzten
+ * Punkts ist abgezogen (die .product-main hat hier mobil kein padding).
+ */
+.product-main > .CacaoBenefitList:last-child {
+  margin-bottom: 88px;
+}
+@media screen and (max-width: 749px) {
+  .product-main > .CacaoBenefitList:last-child {
+    margin-bottom: 64px;
+  }
 }
 .CacaoBenefitList ul {
   list-style: none;
