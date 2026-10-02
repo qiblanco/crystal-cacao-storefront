@@ -260,7 +260,7 @@ function Mineralstoffe({sorte, sprache}) {
           ) : null}
         </div>
 
-        <footer className="kt-quelle">
+        <div className="kt-quelle">
           <p>
             {fuelle(t.quelle, {nr: bericht.nr, datum: datum(bericht.datum, sprache), probe: bericht.probe})}{' '}
             <a className="kt-link" href={KT_MINERALSTOFFE.quelle[sorte]} target="_blank" rel="noopener noreferrer">
@@ -273,7 +273,7 @@ function Mineralstoffe({sorte, sprache}) {
               {fuelle(t.schadstoff_link, {datum: datum(schadstoff.datum, sprache)})}
             </a>
           </p>
-        </footer>
+        </div>
       </div>
     </section>
   );

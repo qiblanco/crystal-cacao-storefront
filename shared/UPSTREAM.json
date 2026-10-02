@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "0005c81b0466f0a9fabc1d3184633df5e846090c",
-  "erzeugt_utc": "2026-10-02T13:34:53Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 0005c81b0466; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 9ce22fb005b7). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "691e1acb91b0379e8bb189229f8a0c1ef4479d5a",
+  "erzeugt_utc": "2026-10-02T19:44:24Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 691e1acb91b0; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 0005c81b0466). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -393,8 +393,7 @@
     {
       "upstream": "app/components/reusables/KakaoTiefe.jsx",
       "klasse": "K1",
-      "sha256": "d6cd505828c81c0c278e6a054359d17efece40d9085f10754c50c4b7f2cd4771",
-      "nachzug_grund": "Neu 2026-10-02 (Grossjob 20261002-GROSSJOB-kakaoseiten-mineralstoffe-dartsch-und-crystal-niveau-auf-dach-und-us, qiblanco #760/#761): die Kakao-Tiefe unter dem Amazon-Bereich, Mineralstoffe aus dem Dartsch-Bericht. Byte-gleich gebaut und gezogen; der Laden ruft KakaoTiefe aus SortenSeite.jsx."
+      "sha256": "55a2de9ec375ae45d0e45a335af1bacb0ac9abcd259f9e1dfec573300d8b5cd6"
     },
     {
       "upstream": "app/components/reusables/kakao-tiefe-daten.js",
@@ -405,8 +404,7 @@
     {
       "upstream": "app/styles/kakao-tiefe.css",
       "klasse": "K1",
-      "sha256": "b00d5b9fc8dbb487fb5ce805f5a9152a169694cee4679f5ac84e448c06880538",
-      "nachzug_grund": "Neu 2026-10-02 (Grossjob 20261002-GROSSJOB-kakaoseiten-mineralstoffe-dartsch-und-crystal-niveau-auf-dach-und-us, qiblanco #760/#761): die Kakao-Tiefe unter dem Amazon-Bereich, Mineralstoffe aus dem Dartsch-Bericht. Byte-gleich gebaut und gezogen; der Laden ruft KakaoTiefe aus SortenSeite.jsx."
+      "sha256": "3499f3104fbccf9872a882ae3775ba678dde79eb99d573724ba280b6871d2923"
     },
     {
       "upstream": "app/components/reusables/CdnBild.jsx",

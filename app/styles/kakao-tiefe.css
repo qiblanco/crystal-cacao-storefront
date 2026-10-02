@@ -21,6 +21,20 @@
  * TAKT: ein Akt trägt nur Innenabstand, 64 px am Telefon, 96 px ab 48em.
  * Größte Lücke zwischen zwei Akten damit 128 / 192 px; die Leerraum-Probe
  * erlaubt 180 / 240.
+ *
+ * ISOLATION GEGEN DIE LADEN-REGELN (s07, 02.10.): der Baustein setzt Fliesstext,
+ * Rand und Quellzeile selbst, statt sie vom Laden zu erben. Gemessen live:
+ * qiblanco.com färbte die Quellzeile per `footer * {color: … !important}` weiß
+ * auf Creme (Kontrast 1,1), setzte p/li per `p, li {1.2rem/1.4/#4a4741}` auf
+ * 19,2 px und liess die Kacheln am Telefon bei x = 0 beginnen. Deshalb:
+ *   - die Quellzeile ist ein <div>, kein <footer> (gegen `!important` hilft
+ *     keine Spezifität);
+ *   - `.kt p` / `.kt li` (0,1,1) schlagen jede nackte Element-Regel eines Ladens,
+ *     verlieren aber gegen jede K1-Klasse (0,2,0); die Werte sind die, die
+ *     crystal-cacao.com am 02.10. zeigte (p 16 px / 1.6, li erbt, Farbe erbt);
+ *   - der seitliche Rand sitzt an .kt-akt__innen und rechnet vom Fenster aus,
+ *     nicht vom Behälter: crystal-cacao.com gibt <main> 16 px Rand, qiblanco.com
+ *     und der US-Shop keinen. Ein Innenabstand am Akt läge auf crystal doppelt.
  * ========================================================================== */
 
 .kt {
@@ -52,6 +66,7 @@
   --kt-neutral: #aaa196;    /* Balken der Vergleichssorte, kein Akzent */
   --kt-radius: 10px;
   --kt-zeile: 70ch;
+  --kt-rand: 1rem;       /* seitlicher Rand am Telefon, 2rem ab 48em */
 
   color: var(--kt-text);
   font-size: var(--kt-fs-2);
@@ -65,6 +80,21 @@
 }
 .kt :is(ol, ul) {
   list-style: none;
+}
+/* Fließtext gehört dem Baustein, nicht dem Laden (siehe Kopf, ISOLATION).
+ * Element-Spezifität (0,1,1): gewinnt gegen `p`, `li`, `main p` der Läden,
+ * verliert gegen jede K1-Klasse. li-Abstand 0.5rem ist der Wert, den alle drei
+ * Läden per Reset tragen — hier festgeschrieben, damit er nicht davon abhängt. */
+.kt p {
+  font-size: var(--kt-fs-2);
+  line-height: 1.6;
+  color: inherit;
+}
+.kt li {
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin-bottom: 0.5rem;
 }
 
 [data-kt-farbe='awake'] {
@@ -103,7 +133,7 @@
   --kt-karte: var(--kt-grund);
 }
 .kt .kt-akt__innen {
-  max-width: 72rem;
+  max-width: min(72rem, 100vw - 2 * var(--kt-rand));
   margin-inline: auto;
   display: flex;
   flex-direction: column;
@@ -554,6 +584,9 @@
   }
 }
 @media (min-width: 48em) {
+  .kt {
+    --kt-rand: 2rem;
+  }
   .kt .kt-akt {
     padding-block: var(--kt-space-7);
   }
