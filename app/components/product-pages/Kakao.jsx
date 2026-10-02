@@ -1146,3 +1146,29 @@ function RitualSection() {
     </div>
   );
 }
+
+/*
+ * WIEDERVERWENDUNG DURCH DIE STARTSEITE (seit 2026-10-02, Grossjob
+ * 20261002-GROSSJOB-crystal-cacao-startseite-hochwertig-slider-profile-
+ * responsiv): app/components/startseite/Startseite.jsx nimmt die gemessenen
+ * Bild-Leitern (`bild`, B_*), die Zubereitung (Wortlaut der Packung, Probe
+ * probe_crystal_cacao_optik__20260918) und die Kurs-Lektionen von hier,
+ * statt eine zweite Liste zu fuehren. Rein additiv: diese Seite rendert
+ * unveraendert und bleibt unter /?fassung=bisher die Rueckweg-Fassung.
+ */
+export {
+  bild,
+  Zubereitung,
+  videos as KURS_VIDEOS,
+  B_CHART,
+  B_BANNER_FLOW,
+  B_BANNER_NATURREIN,
+  B_MUSTER,
+  B_BAUER_FRUCHT,
+  B_BAUER_TONNE,
+  B_KURS_MOCKUP,
+  B_RITUAL_QUADRAT,
+  B_LOGO_KAKAO,
+  B_LOGO_KAFFEE,
+  B_LOGO_ENERGY,
+};

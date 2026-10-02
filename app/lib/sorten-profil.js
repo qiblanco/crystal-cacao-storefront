@@ -201,11 +201,20 @@ export const SORTEN = Object.freeze({
     sorte: 'awake',
     name: 'Awake',
     pfad: PFAD_JE_SORTE.awake,
-    claim: 'Wach. Mutig. Kraftvoll.',
-    kurz: 'Für den Start in den Tag.',
+    // POSITIONIERUNG SEIT 2026-10-02 (Christian, Grossjob
+    // 20261002-GROSSJOB-crystal-cacao-startseite-hochwertig-...): „das eine ist
+    // herzöffnend, powerful, das ist Awake, und der Create ist Fokus, High
+    // Performance“ — ausdrücklich NICHT mehr „für den startenden Tag“.
+    // Vorher: claim 'Wach. Mutig. Kraftvoll.', kurz 'Für den Start in den Tag.',
+    // einordnung 'Gedacht für den Start in den Tag: morgens, vor dem Sport,
+    // vor einem langen Vormittag.' (Rückweg: diese drei Zeilen).
+    // Die Einordnung stützt sich auf das Profil darunter: höchster
+    // L-Tryptophan-Gehalt, „emotionale Tiefe“, „Herzöffnung“ (fazit, herkunft).
+    claim: 'Herzöffnend. Powerful.',
+    kurz: 'Herzöffnend und powerful.',
     einordnung:
-      'Gedacht für den Start in den Tag: morgens, vor dem Sport, ' +
-      'vor einem langen Vormittag.',
+      'Für Tage, an denen du mit offenem Herzen und voller Kraft ' +
+      'dabei sein willst.',
     inhaltsstoffe: Object.freeze({
       bild: bildEintrag(
         'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06589_1.jpg?v=1764275150',
@@ -309,11 +318,17 @@ export const SORTEN = Object.freeze({
     sorte: 'create',
     name: 'Create',
     pfad: PFAD_JE_SORTE.create,
-    claim: 'Wach. Klar. Fokussiert.',
-    kurz: 'Für den klaren Kopf.',
+    // POSITIONIERUNG SEIT 2026-10-02 (Christian, siehe Awake oben).
+    // Vorher: claim 'Wach. Klar. Fokussiert.', kurz 'Für den klaren Kopf.',
+    // einordnung 'Gedacht für den klaren Kopf: lange Stunden am Schreibtisch,
+    // Arbeit, die Ruhe braucht.' (Rückweg: diese drei Zeilen).
+    // Die Einordnung stützt sich auf das Profil darunter: „das stärkste
+    // aktivierende Profil aller Kristall Kakao® Sorten“ (fazit).
+    claim: 'Fokus. High Performance.',
+    kurz: 'Fokus und High Performance.',
     einordnung:
-      'Gedacht für den klaren Kopf: lange Stunden am Schreibtisch, ' +
-      'Arbeit, die Ruhe braucht.',
+      'Für Tage, an denen du konzentriert und mit voller ' +
+      'Leistung arbeitest.',
     inhaltsstoffe: Object.freeze({
       bild: bildEintrag(
         'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/bracelet-kakao-highlight.png?v=1764257247',
