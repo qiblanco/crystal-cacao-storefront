@@ -30,6 +30,14 @@ ARME (jeder druckt seinen Marker; ein Rot-Nachweis nennt den Arm, nicht den Exit
                         Theobromin-Wert steht in der Spalte der eigenen Sorte
               herkunft  section.kt-herkunft: eigene Bohne + eigenes Herkunftsbild
               belege    section.cc-belege__sorte: Pruefzeugnis der eigenen Bohne
+              kopf      <h1> und og:title
+              kauf      JEDES cartFormInput der Seite legt ein Produkt der eigenen Sorte
+                        (product.handle) in den Warenkorb — was der Kunde KAUFT, nicht
+                        nur was er liest (Gegenpruefung 2026-10-03: Variante getauscht
+                        blieb sonst gruen); dazu kauf-getrennt: keine Variante
+                        (merchandiseId) liegt in den Kaufformularen BEIDER Seiten
+            Herkunftsbilder werden am Dateistamm erkannt (Endung egal: ein .webp-Neuexport
+            derselben Datei ist kein Befund).
             dazu: das Herkunftsbild der anderen Sorte steht nirgends auf der Seite.
             Fehlt ein Slot, ist das BEFUND (Inhaltsverlust oder Umbau -> Probe
             nachziehen), nie Freispruch. B/gemeinsam misst den geteilten Inhalt
@@ -89,6 +97,7 @@ vertauschte Sorte (awake-Rumpf auf der create-Route) rot — hermetisch
 gefahren ueber --html-awake/--html-create mit vertauschten Dateien.
 """
 import argparse
+import html as htmlmod
 import difflib
 import json
 import os
@@ -120,9 +129,9 @@ KOPIE_MAX = 40  # Zeilen; vorher 351. Import-/Export-Zeilen der zwei Huellen ble
 # Identitaet je Sorte (Domaenen-Konstanten: Name, Bohne, Laborwert, Herkunftsbild).
 SORTE = {
     "awake": {"name": "Awake", "bohne": "Piura Blanco", "theobromin": "950 mg",
-              "bild": "tal-kakao-awake.jpg"},
+              "bild": "tal-kakao-awake", "handle": "crystal-cacao-awake"},
     "create": {"name": "Create", "bohne": "Amazonas Nativo", "theobromin": "1.050 mg",
-               "bild": "DSC01491_Kopie.webp"},
+               "bild": "DSC01491_Kopie", "handle": "crystal-cacao-create"},
 }
 # Geteilter Inhalt, gemessen auf dem tag-freien, whitespace-normalisierten Text.
 GEMEINSAM_RX = [r"24\s+Mineralstoffe", r"6\.300\s+Jahre", r"Spiraltempel\s+von\s+Montegrande"]
@@ -269,6 +278,7 @@ def main():
         except Exception as e:  # noqa: BLE001
             print(f"[MESSAUSFALL] {sorte}: {e.__class__.__name__}: {e}")
             return 4
+    varianten = {}
     for sorte in ("awake", "create"):
         andere = "create" if sorte == "awake" else "awake"
         h = html[sorte]
@@ -288,6 +298,10 @@ def main():
             "belege": (slot_html(h, "section", "cc-belege__sorte"), [f"· {e['bohne']}"],
                        [f["bohne"]]),
         }
+        h1 = re.search(r"<h1[^>]*>(.*?)</h1>", h, re.S | re.I)
+        og = re.search(r'property="og:title" content="([^"]*)"', h)
+        slots["kopf"] = ((h1.group(1) + " " + og.group(1)) if h1 and og else None,
+                         [f"Crystal Cacao® {e['name']}"], [f"Crystal Cacao® {f['name']}"])
         for slot, (roh, soll, nie) in slots.items():
             if roh is None:
                 ok &= arm(f"B/{sorte}/{slot}", False, "Sorten-Slot fehlt im gelieferten HTML "
@@ -299,6 +313,22 @@ def main():
             ok &= arm(f"B/{sorte}/{slot}", not fehlt and not fremd,
                       f"eigene Sorte fehlt {fehlt}, andere Sorte steht da {fremd}" if fehlt or fremd
                       else f"nennt {e['name']} ({', '.join(soll)[:70]}), nicht {f['name']}")
+        griffe = []
+        for v in re.findall(r'name="cartFormInput" value="([^"]*)"', h):
+            try:
+                d = json.loads(htmlmod.unescape(v))
+            except ValueError:
+                griffe.append("<unlesbar>")
+                continue
+            for zeile in (d.get("inputs") or {}).get("lines") or []:
+                sv = zeile.get("selectedVariant") or {}
+                griffe.append((sv.get("product") or {}).get("handle") or "<ohne handle>")
+                varianten.setdefault(sorte, set()).add(zeile.get("merchandiseId") or "<ohne id>")
+        falsch = [g for g in griffe if g != e["handle"]]
+        ok &= arm(f"B/{sorte}/kauf", bool(griffe) and not falsch,
+                  "kein Kaufformular (cartFormInput) im gelieferten HTML" if not griffe else
+                  f"Kaufformular legt fremdes Produkt in den Warenkorb: {falsch}" if falsch else
+                  f"{len(griffe)} Kaufformular(e) legen {e['handle']} in den Warenkorb")
         ok &= arm(f"B/{sorte}/fremdbild", f["bild"] not in h,
                   f"Herkunftsbild der anderen Sorte ({f['bild']}) steht auf der Seite"
                   if f["bild"] in h else f"Herkunftsbild von {f['name']} nirgends")
@@ -361,6 +391,10 @@ def main():
                       f"{t:.0f} g / {d:.0f} g = {t / d:.2f}, versprochen sind {n:.0f} Tage"
                       if not passt else
                       f"Rechnung geht auf: {t:.0f} g / {d:.0f} g = {n:.0f} Tage")
+    beide = varianten.get("awake", set()) & varianten.get("create", set())
+    ok &= arm("B/kauf-getrennt", not beide,
+              f"dieselbe Variante liegt im Kaufformular BEIDER Sorten: {sorted(beide)}" if beide
+              else "Kaufformulare der beiden Seiten legen verschiedene Varianten")
     print("\nOK" if ok else "\nBEFUND")
     return 0 if ok else 1
 
