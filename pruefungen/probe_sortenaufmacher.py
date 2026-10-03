@@ -19,9 +19,10 @@ Exit-Code unterscheidet Geschwisterarme nicht.
                    einen Einordnungssatz UND mindestens zwei anklickbare
                    Ziele, davon eines auf die ANDERE Sorte. Das ist die
                    Erfuellungsfrage des Auftrags am Kundenrand.
-  [B] DECKUNG      Beide Sorten stehen auf denselben Massen: Blockhoehe,
-                   Wortmarken-Hoehe und die waagerechte Lage der TINTE sind
-                   ueber neun Fensterbreiten gleich. Gemessen wird die
+  [B] DECKUNG      Beide Sorten stehen auf denselben Massen: Blockhoehe
+                   (bei GLEICHEM Text, siehe unten), Wortmarken-Hoehe und die
+                   waagerechte Lage der TINTE sind ueber neun Fensterbreiten
+                   gleich. Gemessen wird die
                    Tintenmitte, nicht die Bildmitte — die Bildmitte ist bei
                    einer unsymmetrischen Leinwand die falsche Groesse und
                    war genau der Grund, warum „Create steht weiter links"
@@ -41,6 +42,23 @@ WARUM ARM B NICHT GENUEGT UND ARM A NICHT ALLEIN STEHT: zwei leere Bloecke
 sind perfekt deckungsgleich. Genau das war der Vorzustand — 0 anklickbare
 Ziele auf beiden Seiten. Und umgekehrt: zwei inhaltsreiche Bloecke koennen
 auseinanderlaufen. Erst A und B zusammen beschreiben die Zusage.
+
+ARM B MISST DAS GERUEST, NICHT DIE TEXTLAENGE (Job 20261003-crystal-zwei-
+gruppenbefunde-sortenaufmacher-und-mengenwahl). Bis 2026-10-02 verglich Arm B
+die rohe Blockhoehe. Das trug nur, weil die alten Einordnungssaetze zufaellig
+gleich lang waren (88/86 Zeichen). Seit Christians Positionierung vom
+2026-10-02 (sorten-profil.js, Commit 0a2798a) sind sie 77/68 Zeichen lang, und
+bei 768 px bricht Awake auf drei Zeilen, Create auf zwei: Delta 30,0 px =
+genau eine Zeile (line-height 30 px); bei 360 px H2 -1 Zeile, Einordnung +1,
+Querverweis-Knopf +1 = 14,4 px. Jede Differenz war ein ganzes Vielfaches der
+Zeilenhoehe ihres Elements, das Geruest war gleich. Jetzt traegt Create fuer
+die Hoehenmessung die Texte von Awake (gleiche Stellen, gleiche Reihenfolge)
+und die Hoehe wird erneut gemessen: so bleibt jede Abweichung in Abstand,
+Polster, Wortmarke oder Anordnung rot, und der Zeilenumbruch eines anderen
+Satzes ist kein Befund. Die rohe Differenz steht weiter in der Tabelle.
+Weichen die Textstellen in Zahl ab, ist das selbst ein Befund (Struktur).
+Rot-Nachweis dafuer: `--rot-arm geruest` legt NUR auf Create 12 px unter die
+Einordnung -> Arm B rot auf allen neun Breiten.
 
 ROT-NACHWEIS — FUEHRBAR, NICHT BEHAUPTET
 ----------------------------------------
@@ -228,6 +246,32 @@ JS_BLOCK = r"""
 """
 
 
+#: Die Textstellen des Aufmachers in Dokumentreihenfolge: Elemente ohne
+#: Kind-Elemente mit sichtbarem Text. Gleiche Zahl und Reihenfolge auf beiden
+#: Sorten ist selbst Teil der Deckung.
+JS_TEXTE = r"""
+() => { const sec = document.querySelector('[data-cc-aufmacher]')
+             || document.querySelector('.items-center-justify-center');
+  if (!sec) return null;
+  return Array.from(sec.querySelectorAll('*')).filter(e => e.children.length === 0
+           && e.tagName !== 'IMG' && (e.textContent || '').trim()).map(e => e.textContent); }
+"""
+
+#: Dieselben Stellen mit fremdem Text fuellen und die Blockhoehe neu lesen.
+JS_GLEICHTEXT = r"""
+(texte) => { const sec = document.querySelector('[data-cc-aufmacher]')
+             || document.querySelector('.items-center-justify-center');
+  const st = Array.from(sec.querySelectorAll('*')).filter(e => e.children.length === 0
+           && e.tagName !== 'IMG' && (e.textContent || '').trim());
+  if (st.length !== texte.length) return {struktur: [st.length, texte.length]};
+  st.forEach((e, i) => { e.textContent = texte[i]; });
+  return {h: +sec.getBoundingClientRect().height.toFixed(1)}; }
+"""
+
+#: Rot-Arm geruest: ein Abstandsfehler, der NUR eine Sorte trifft.
+ROT_GERUEST_CSS = ".cc-sortenaufmacher__einordnung { padding-bottom: 12px !important; }"
+
+
 class Messausfall(Exception):
     pass
 
@@ -325,7 +369,7 @@ def _sorten_profil(repo):
     return aus
 
 
-def messe(basis, fassung, breiten=BREITEN):
+def messe(basis, fassung, breiten=BREITEN, rot_arm=None):
     try:
         from playwright.sync_api import sync_playwright
     except ImportError as exc:  # noqa: BLE001
@@ -345,7 +389,14 @@ def messe(basis, fassung, breiten=BREITEN):
                     try:
                         page.goto(url, wait_until="networkidle", timeout=45000)
                         page.wait_for_timeout(700)
+                        if rot_arm == "geruest" and sorte == "create":
+                            page.add_style_tag(content=ROT_GERUEST_CSS)
                         m = page.evaluate(JS_BLOCK)
+                        if not m.get("fehlt"):
+                            m["texte"] = page.evaluate(JS_TEXTE)
+                            vorlage = erg.get((w, SORTEN[0]), {}).get("texte")
+                            if sorte != SORTEN[0] and vorlage is not None:
+                                m["gleichtext"] = page.evaluate(JS_GLEICHTEXT, vorlage)
                     except Exception as exc:  # noqa: BLE001
                         raise Messausfall("%s nicht messbar: %s" % (url, exc)) from exc
                     finally:
@@ -364,6 +415,8 @@ def main():
     ap.add_argument("--repo", default=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     ap.add_argument("--fassung", default=None, choices=["neu", "bestand"],
                     help="bestand = Rot-Nachweis gegen den Zustand vor dem Umbau")
+    ap.add_argument("--rot-arm", choices=["geruest"], default=None,
+                    help="geruest = 12 px Abstandsfehler NUR auf Create (Arm-B-Rot-Nachweis)")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
@@ -372,7 +425,7 @@ def main():
 
     try:
         _pillow_vorflug()
-        erg = messe(args.basis, args.fassung)
+        erg = messe(args.basis, args.fassung, rot_arm=args.rot_arm)
     except Messausfall as e:
         return _messausfall(str(e))
 
@@ -419,19 +472,32 @@ def main():
     # ---------------------------------------------------------------- Arm B
     zeilen.append("")
     zeilen.append("[B] DECKUNG: stehen beide Sorten auf denselben Massen?")
-    zeilen.append("    %-7s %10s %10s %9s   %s" % ("Breite", "awake", "create", "Delta", "Wortmarke / Tintenmitte"))
+    zeilen.append("    %-7s %10s %10s %9s %13s   %s" % ("Breite", "awake", "create", "Delta",
+                  "Geruest-Delta", "Wortmarke / Tintenmitte"))
     for w in BREITEN:
         a, c = erg[(w, "awake")], erg[(w, "create")]
-        d_block = round(a["block"]["h"] - c["block"]["h"], 1)
+        gt = c.get("gleichtext") or {}
+        if gt.get("struktur"):
+            befunde.append("[B] %d px: die Textstellen des Aufmachers weichen ab (create %d, "
+                           "awake %d) — die zwei Sorten sind nicht gleich gebaut."
+                           % (w, gt["struktur"][0], gt["struktur"][1]))
+            d_block = None
+        elif "h" not in gt:
+            return _messausfall("Arm B: Create bei %d px ohne Gleichtext-Messung" % w, zeilen)
+        else:
+            d_block = round(a["block"]["h"] - gt["h"], 1)
+        d_roh = round(a["block"]["h"] - c["block"]["h"], 1)
         d_bild = round((a["bild"]["h"] if a["bild"] else 0) - (c["bild"]["h"] if c["bild"] else 0), 1)
         d_tinte = round((a["tinte_mitte_versatz"] or 0) - (c["tinte_mitte_versatz"] or 0), 1)
-        zeilen.append("    %-7d %10.1f %10.1f %9.1f   %.1f/%.1f  %.1f/%.1f"
-                      % (w, a["block"]["h"], c["block"]["h"], d_block,
+        zeilen.append("    %-7d %10.1f %10.1f %9.1f %13s   %.1f/%.1f  %.1f/%.1f"
+                      % (w, a["block"]["h"], c["block"]["h"], d_roh,
+                         "Struktur" if d_block is None else "%.1f" % d_block,
                          a["bild"]["h"], c["bild"]["h"],
                          a["tinte_mitte_versatz"], c["tinte_mitte_versatz"]))
-        if abs(d_block) > 0.5:
-            befunde.append("[B] %d px: Blockhoehen laufen auseinander (awake %.1f, create %.1f, "
-                           "Delta %.1f px)." % (w, a["block"]["h"], c["block"]["h"], d_block))
+        if d_block is not None and abs(d_block) > 0.5:
+            befunde.append("[B] %d px: Blockhoehen laufen bei gleichem Text auseinander "
+                           "(awake %.1f, create mit Awake-Text %.1f, Delta %.1f px)."
+                           % (w, a["block"]["h"], gt["h"], d_block))
         if abs(d_bild) > 0.5:
             befunde.append("[B] %d px: Schriftzug-Hoehen ungleich (Delta %.1f px)." % (w, d_bild))
         if abs(d_tinte) > 1.0:
@@ -502,7 +568,7 @@ def main():
             for b in befunde:
                 print("  " + b)
         else:
-            print("OK: Inhalt da, beide Sorten deckungsgleich ueber %d Breiten, "
+            print("OK: Inhalt da, beide Sorten im Geruest deckungsgleich ueber %d Breiten, "
                   "Wortmarken-Masse stimmen, Deckel gehalten (%s)"
                   % (len(BREITEN), args.basis))
     return 1 if befunde else 0
