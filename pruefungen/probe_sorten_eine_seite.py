@@ -16,6 +16,26 @@ ARME (jeder druckt seinen Marker; ein Rot-Nachweis nennt den Arm, nicht den Exit
   B RAND    Beide Kaufseiten liefern am Kundenrand (--basis) ihren SORTEN-
             Inhalt (und NICHT den der anderen) UND den gemeinsamen Inhalt.
             Das ist die Wirkung: Zusammenfuehren darf nichts vertauschen.
+            SEIT 2026-10-03 AN DER EIGENSCHAFT, NICHT AM WORTLAUT (Job
+            20261003-crystal-startseite-wirkungsmessung-und-messgeraete): die
+            Kaufseiten stehen seit dem Amazon-Stil-Umbau (7017c77) in neuer Form,
+            und die Seite fuehrt die ANDERE Sorte legitim im Sortenvergleich. Ein
+            Seiten-weites "fremder Marker verboten" klagt deshalb eine gesunde
+            Seite an (2026-09-30..10-03 taeglich BEFUND/MESSAUSFALL bei vorhandenem
+            Inhalt). Gemessen wird jetzt je SORTEN-SLOT — jeder Ort, der genau
+            EINE Sorte meint, muss die EIGENE nennen und darf die andere nicht:
+              titel     <title>
+              eigenes   article.qb-gv__geraet--eigenes (Vergleich, als "eigenes" markiert)
+              profil    section.kt-profil: "Das Profil von <Sorte>" und der eigene
+                        Theobromin-Wert steht in der Spalte der eigenen Sorte
+              herkunft  section.kt-herkunft: eigene Bohne + eigenes Herkunftsbild
+              belege    section.cc-belege__sorte: Pruefzeugnis der eigenen Bohne
+            dazu: das Herkunftsbild der anderen Sorte steht nirgends auf der Seite.
+            Fehlt ein Slot, ist das BEFUND (Inhaltsverlust oder Umbau -> Probe
+            nachziehen), nie Freispruch. B/gemeinsam misst den geteilten Inhalt
+            auf dem tag-freien Text (24 Mineralstoffe, 6.300 Jahre, Spiraltempel)
+            und die Zubereitungsschritte (15 g, 75 ml, 85 °C) — nicht mehr einen
+            woertlichen Satz.
   D MARKUP  Jede Fett-Markierung in sorten-profil.js ist ein PAAR: ein
             fehlendes zweites ** faellt im Renderer lautlos durch (der Rest
             des Absatzes wuerde fett) — Hinweis des Advisor-Pruefers, K3 P2.
@@ -97,14 +117,36 @@ BASIS_VORGABE = f"https://{sm.shop(SHOP).domain}"   # Domain aufloesen, nicht ti
 
 KOPIE_MAX = 40  # Zeilen; vorher 351. Import-/Export-Zeilen der zwei Huellen bleiben gemeinsam.
 
-SORTEN_MARKER = {
-    "awake": ["Theobromin: 950 mg / 100g", "Piura-Tals", "Crystal Cacao® Awake",
-              "tal-kakao-awake.jpg"],
-    "create": ["Theobromin: 1.050 mg / 100g", "Departamento Amazonas", "Crystal Cacao® Create",
-               "DSC01491_Kopie.webp"],
+# Identitaet je Sorte (Domaenen-Konstanten: Name, Bohne, Laborwert, Herkunftsbild).
+SORTE = {
+    "awake": {"name": "Awake", "bohne": "Piura Blanco", "theobromin": "950 mg",
+              "bild": "tal-kakao-awake.jpg"},
+    "create": {"name": "Create", "bohne": "Amazonas Nativo", "theobromin": "1.050 mg",
+               "bild": "DSC01491_Kopie.webp"},
 }
-GEMEINSAM = ["Enthält 24 Mineralstoffe", "6.300 Jahre zurückreicht", "Spiraltempel von Montegrande",
-             "15 g in 75 ml warmer Milch oder Wasser (max. 85 °C)"]
+# Geteilter Inhalt, gemessen auf dem tag-freien, whitespace-normalisierten Text.
+GEMEINSAM_RX = [r"24\s+Mineralstoffe", r"6\.300\s+Jahre", r"Spiraltempel\s+von\s+Montegrande"]
+SCHRITTE_RX = re.compile(r'<ol[^>]*class="[^"]*\bkt-schritte\b[^"]*"[^>]*>(.*?)</ol>', re.S | re.I)
+
+
+def slot_html(h, tag, klasse):
+    """Inhalt des ersten <tag class="... klasse ..."> bis zu seinem schliessenden Tag
+    (gleichnamige Verschachtelung mitgezaehlt). None = Slot fehlt."""
+    m = re.search(r'<%s\b[^>]*class="[^"]*\b%s\b[^"]*"[^>]*>' % (tag, re.escape(klasse)), h, re.I)
+    if not m:
+        return None
+    tiefe, pos = 1, m.end()
+    for t in re.finditer(r"<(/?)%s\b[^>]*>" % tag, h[pos:], re.I):
+        tiefe += -1 if t.group(1) else 1
+        if tiefe == 0:
+            return h[pos:pos + t.start()]
+    return h[pos:]
+
+
+def text(h):
+    t = re.sub(r"<script\b.*?</script>", " ", h or "", flags=re.S | re.I)
+    t = re.sub(r"<[^>]+>", " ", t)
+    return re.sub(r"\s+", " ", t.replace("&amp;", "&").replace("&nbsp;", " ")).strip()
 WEG = ["Anwendung &amp; Tageszeiten", "Nachmittags:", "Sanftes Ausklingen des Tages"]
 
 # Arm E — die einzige Zubereitung dieser Kaufseite (420-g-Tafel: 420 / 15 = 28 Tage).
@@ -163,7 +205,11 @@ def arm(name, ok, text):
 
 
 def lade(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "probe_sorten_eine_seite"})
+    # Eigener Verkehr ist an der Quelle markiert (Brain-Regel
+    # nachgestellter-kundenweg-muss-unterscheidbar-sein): sonst zaehlt jeder Lauf
+    # im Zugriffslog des Ladens als Besuch einer Kaufseite.
+    req = urllib.request.Request(url, headers={"User-Agent": sm.marker_ua("probe_sorten_eine_seite"),
+                                               "x-qi-testverkehr": "1"})
     with urllib.request.urlopen(req, timeout=40) as r:
         return r.read().decode("utf-8", "replace")
 
@@ -226,15 +272,44 @@ def main():
     for sorte in ("awake", "create"):
         andere = "create" if sorte == "awake" else "awake"
         h = html[sorte]
-        eigen = [m for m in SORTEN_MARKER[sorte] if entkomme(m) not in h]
-        fremd = [m for m in SORTEN_MARKER[andere] if entkomme(m) in h]
-        ok &= arm(f"B/{sorte}/eigen", not eigen, f"Sortenmarker fehlen: {eigen}" if eigen else
-                  f"alle {len(SORTEN_MARKER[sorte])} Sortenmarker da")
-        ok &= arm(f"B/{sorte}/fremd", not fremd, f"Marker der ANDEREN Sorte gefunden: {fremd}" if fremd
-                  else "kein Marker der anderen Sorte")
-        gem = [m for m in GEMEINSAM if entkomme(m) not in h]
-        ok &= arm(f"B/{sorte}/gemeinsam", not gem, f"gemeinsamer Inhalt fehlt: {gem}" if gem
-                  else f"alle {len(GEMEINSAM)} gemeinsamen Marker da (inkl. Zubereitung)")
+        e, f = SORTE[sorte], SORTE[andere]
+        titel = re.search(r"<title[^>]*>(.*?)</title>", h, re.S | re.I)
+        slots = {
+            "titel": (titel.group(1) if titel else None, [f"Crystal Cacao® {e['name']}"],
+                      [f"Crystal Cacao® {f['name']}"]),
+            "eigenes": (slot_html(h, "article", "qb-gv__geraet--eigenes"),
+                        [f"Crystal Cacao® {e['name']}", e["bohne"], f"Theobromin {e['theobromin']}"],
+                        [f"Crystal Cacao® {f['name']}", f["bohne"], f"Theobromin {f['theobromin']}"]),
+            "profil": (slot_html(h, "section", "kt-profil"),
+                       [f"Das Profil von {e['name']}", f"{e['name']} {e['theobromin']}"],
+                       [f"Das Profil von {f['name']}", f"{f['name']} {e['theobromin']}"]),
+            "herkunft": (slot_html(h, "section", "kt-herkunft"), [e["bohne"], e["bild"]],
+                         [f["bohne"], f["bild"]]),
+            "belege": (slot_html(h, "section", "cc-belege__sorte"), [f"· {e['bohne']}"],
+                       [f["bohne"]]),
+        }
+        for slot, (roh, soll, nie) in slots.items():
+            if roh is None:
+                ok &= arm(f"B/{sorte}/{slot}", False, "Sorten-Slot fehlt im gelieferten HTML "
+                          "(Inhaltsverlust oder Umbau -> Probe nachziehen)")
+                continue
+            t = text(roh) + " " + " ".join(re.findall(r'(?:src|href)="([^"]+)"', roh))
+            fehlt = [m for m in soll if m not in t]
+            fremd = [m for m in nie if m in t]
+            ok &= arm(f"B/{sorte}/{slot}", not fehlt and not fremd,
+                      f"eigene Sorte fehlt {fehlt}, andere Sorte steht da {fremd}" if fehlt or fremd
+                      else f"nennt {e['name']} ({', '.join(soll)[:70]}), nicht {f['name']}")
+        ok &= arm(f"B/{sorte}/fremdbild", f["bild"] not in h,
+                  f"Herkunftsbild der anderen Sorte ({f['bild']}) steht auf der Seite"
+                  if f["bild"] in h else f"Herkunftsbild von {f['name']} nirgends")
+        ganz = text(h)
+        schritte = SCHRITTE_RX.search(h)
+        schritt_t = text(schritte.group(1)) if schritte else ""
+        gem = [r for r in GEMEINSAM_RX if not re.search(r, ganz)]
+        zub = [x for x in ("15 g", "75 ml", "85 °C") if x not in schritt_t]
+        ok &= arm(f"B/{sorte}/gemeinsam", not gem and not zub,
+                  f"gemeinsamer Inhalt fehlt: {gem} / Zubereitungsschritte ohne {zub}" if gem or zub
+                  else f"{len(GEMEINSAM_RX)} gemeinsame Inhalte + Zubereitung 15 g / 75 ml / 85 °C da")
         weg = [m for m in WEG if m in h]
         ok &= arm(f"C/{sorte}", not weg, f"Tageszeiten-Abschnitt noch da: {weg}" if weg
                   else "Tageszeiten-Abschnitt weg, Zubereitung bleibt")
@@ -253,9 +328,12 @@ def main():
                   if volumen != {75.0} else "genau EIN Volumen auf der Seite: 75 ml")
 
         # E3 — Abschnitt und FAQ muessen EINIG sein, nicht nur je zulaessig.
-        treffer = ABSCHNITT_RX.search(h)
+        # Seit dem Amazon-Stil-Umbau: die Schritte-Liste ol.kt-schritte ist der Abschnitt
+        # (der Hinweis "420-g-Tafel reicht fuer 28 Tassen" steht daneben und ist E4).
+        treffer = schritte or ABSCHNITT_RX.search(h)
         if not treffer:
-            print(f"[MESSAUSFALL] {sorte}: kein <h2>Zubereitung</h2> + <p> im gelieferten HTML")
+            print(f"[MESSAUSFALL] {sorte}: weder ol.kt-schritte noch <h2>Zubereitung</h2> + <p> "
+                  "im gelieferten HTML")
             return 4
         abschnitt = mengen(re.sub(r"<[^>]+>", " ", treffer.group(1)))
         faq = mengen(antwort)
