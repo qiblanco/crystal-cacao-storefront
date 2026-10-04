@@ -239,6 +239,14 @@ export default async function handleRequest(
       // 2026-08-25, Grossjob s03; dort stehen dieselben zwei Hosts).
       'https://static-pixel.uppromote.com',
       'https://pixel.uppromote.com',
+      // Shopifys eigene Laufzeit-Telemetrie (Job 20261004-csp-neue-klasse-
+      // crystal-cacao-com-connect-src-https-otlp-http-production-shopifysvc-co).
+      // Kein eigener Code ruft sie: consent-tracking-api v0.2, perf-kit-spa und
+      // privacy-banner, die Hydrogen von cdn.shopify.com nachlaedt, senden an
+      // diesen Host (je ein Treffer 'otlp-http' im Skript, 0 in unseren
+      // Assets, gemessen 2026-10-04). Derselbe Anbieter wie das vorbelegte
+      // monorail-edge.shopifysvc.com; qiblanco.com traegt ihn seit 2026-09-18.
+      'https://otlp-http-production.shopifysvc.com',
     ],
 
     /*
