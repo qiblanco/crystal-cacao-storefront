@@ -12,6 +12,7 @@ import {ProductImage} from '~/components/ProductImage';
 import {CacaoProductForm} from '~/components/CacaoProductForm';
 import {EuGewaehrleistungsListenpunkt} from '~/components/EuGewaehrleistungsLabel';
 import {CacaoPriceDisplay} from '~/components/CacaoPriceDisplay';
+import {ladeStaffelKasse} from '~/lib/cacao-pricing';
 import {ProductImageList} from '~/components/ProductImageList';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {useState} from 'react';
@@ -119,9 +120,20 @@ async function loadCriticalData({context, request}, handle) {
 
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
+  // Staffel 2x/3x ausserhalb des EUR-Markts: Zeilenbetrag aus einem Warenkorb
+  // des Landes (lib/cacao-pricing.js, byte-gleich zu qiblanco.com). EUR: null.
+  const variante = product.selectedOrFirstAvailableVariant;
+  const staffelKasse = await ladeStaffelKasse(storefront, {
+    variantId: variante?.id,
+    waehrung: variante?.price?.currencyCode,
+    land: storefront.i18n.country,
+    listenpreis: variante?.price?.amount,
+  });
+
   return {
     product,
     sortenPreise,
+    staffelKasse,
     aufmacherFassung: waehleAufmacherFassung(request),
     // Markt-Land für die Produkt-Auszeichnung: `meta()` hat keinen Kontext,
     // und der ausgezeichnete Preis muss derselbe sein wie der sichtbare
@@ -139,7 +151,7 @@ function loadDeferredData({context, params}) {
 
 export default function Product() {
   /** @type {LoaderReturnData} */
-  const {product, aufmacherFassung, sortenPreise} = useLoaderData();
+  const {product, aufmacherFassung, sortenPreise, staffelKasse} = useLoaderData();
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -253,6 +265,7 @@ export default function Product() {
             quantity={quantity}
             selectedVariant={selectedVariant}
             handle={product.handle}
+            staffelKasse={staffelKasse}
           />
 
           <CacaoProductForm
@@ -260,6 +273,7 @@ export default function Product() {
             handle={product.handle}
             quantity={quantity}
             onQuantityChange={setQuantity}
+            staffelKasse={staffelKasse}
             /* Die Mitteilung haengt auf dieser Kaufflaeche IN der
                Vertrauensliste darunter. Hier abgeschaltet — sonst stuende sie
                zweimal auf der Seite. */

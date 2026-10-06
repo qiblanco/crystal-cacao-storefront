@@ -2,182 +2,34 @@ import {useEffect, useRef, useState} from 'react';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import {EuGewaehrleistungsHinweis} from './EuGewaehrleistungsLabel';
-import {
-  anzeigeSatz,
-  formatPreis,
-  ganzEuroAnzeige,
-  staffelModellAnzeige,
-} from '~/lib/markt-pricing';
 import {useMarktLand} from '~/lib/markt-land';
+import {
+  CACAO_STAFFEL,
+  PACKUNG_GRAMM,
+  cacaoPricing,
+  staffelBetragText,
+} from '~/lib/cacao-pricing';
+
+// Die Staffel-Rechnung kommt seit 2026-10-06 aus lib/cacao-pricing.js, byte-gleich
+// zu qiblanco.com (K1, Job 20261006-preisanzeige-rest-laender-achse-staffel-
+// fremdwaehrung). Ausserhalb des EUR-Markts rechnet sie mit dem Zeilenbetrag aus
+// einem Warenkorb des Landes (staffelKasse vom Loader); teilt die Menge den
+// Zeilenbetrag nicht auf den Cent, nennt die Option den Zeilenbetrag ("163,46 €
+// für 3 Packungen"). Laden-eigen bleiben hier die Kurzfassung der Auswahl und der
+// Kopf (Packungspreis, CacaoPriceDisplay). Die Namen bleiben exportiert.
+export {CACAO_STAFFEL, cacaoPricing};
 
 /**
- * Mengenstaffel Crystal Cacao® — GESCHAEFTSREGEL (Prozente + Badges), KEINE
- * Preiszahlen (M2, Auftrag 20260718-lp-preise-dynamisch-binden-gestuft).
- * Der Packungspreis wird aus dem API-Preis der Variante abgeleitet:
- *   round((netto - trunc2(netto * rabatt)) * (1 + satz))
- * — ergibt 76/61/53 beim Netto 71,03 (satz 7 %).
- *
- * ACHTUNG, SEIT 2026-09-12 IST rabattProzent NICHT MEHR DIE MECHANIK DES
- * LADENS, SONDERN NUR NOCH EIN MODELL DAVON — und ein Modell, dessen
- * Uebereinstimmung mit der Kasse an einer Rundung haengt. Bis zu diesem Tag
- * waren die Shopify-Automatiken "Mengenrabatt 2x/3x Crystal Cacao®" echte
- * PROZENTrabatte (percentage 0.2 / 0.3), und dieser Nachbau war deshalb die
- * Mechanik selbst. Der Job
- * 20260912-BAU-runde-preise-bis-zur-kasse-festbetrag-statt-prozent hat sie auf
- * FESTBETRAEGE umgestellt, damit der Bruttobetrag an der Kasse rund aufgeht
- * (Christian: "wir zeigen im Shop keine Preise mit Cent an"). Gemessen am
- * 2026-09-12 in der Storefront-API: der Rabatt ist jetzt 28,04 bzw. 64,49 EUR
- * FEST — also 19,74 % bzw. 30,26 % und nicht 20 / 30 %.
- *
- * WARUM DIE PROZENTE TROTZDEM STEHEN BLEIBEN: der Prozentsatz ist die
- * UEBERSCHRIFT (Christian ausdruecklich im Auftrag jenes Jobs: "Der
- * Prozentsatz bleibt die Ueberschrift ... der Rabatt selbst wird als
- * Festbetrag gesetzt"), und die Anzeige trifft die Kasse heute exakt
- * (gemessen, 6 von 6 Zellen: 2 Sorten x Menge 1/2/3, Drift 0,00 EUR).
- * Sie trifft sie aber aus ZWEI Rechnungen, die sich nur im selben
- * Rundungsfenster treffen: unser Modell rechnet 49,73 netto je Packung
- * (53,2111 brutto), die Kasse 49,5333 (53,0006) — beide runden auf 53.
- *
- * WORAN ES BRECHEN WIRD, und es wird STILL brechen: ein Festbetrag skaliert
- * NICHT mit dem Preis. Aendert sich das Variantennetto (heute 71,03; preiswatch
- * fuehrt es), rechnet diese Funktion weiter 20/30 % und die Kasse zieht
- * weiter 28,04/64,49 EUR ab — ab dann bewirbt die Seite einen anderen Betrag
- * als die Kasse belastet, ohne dass hier etwas rot wird. Die Funktion kann den
- * Festbetrag baulich nicht lesen: ein Automatikrabatt zeigt sich erst, wenn ein
- * Warenkorb existiert, und auf der Kaufseite gibt es keinen. Der Schutz ist
- * deshalb NICHT hier, sondern eine Wache am Kundenrand — Stand und offene
- * Flanke in devlog D-050 / F-033.
- *
- * UND IN CHF/USD STIMMT ES HEUTE SCHON NICHT: Shopify rechnet den EUR-Festbetrag
- * je Markt per Wechselkurs um, wo er nicht mehr rund landet. Gemessen
- * 2026-09-12: US-Dreier bewirbt 207,00 USD, die Kasse belastet 220,69 USD.
- * Eigener Auftrag
- * 20260912-kakao-staffel-festbetrag-nicht-rund-in-chf-und-usd-prio4.
+ * Dropdown-Optionen der Mengenstaffel (Preise aus lib/cacao-pricing.js).
  */
-export const CACAO_STAFFEL = {
-  '1': {rabattProzent: 0, badge: 'Exklusiv', badgeStyle: 'gold'},
-  '2': {rabattProzent: 20, badge: 'Angebot', badgeStyle: 'red'},
-  '3': {rabattProzent: 30, badge: 'Bestseller Angebot', badgeStyle: 'gradient'},
-};
-
-// FAIL-CLOSED: letzter bekannter guter Stand (DE/EUR-Anzeige), wenn der
-// API-Preis fehlt — nie 0/leer/falsch. preiswatch haelt die Werte synchron.
-const CACAO_FALLBACK = {
-  '1': {einzel: 76, compareAt: null},
-  '2': {einzel: 61, compareAt: 76},
-  '3': {einzel: 53, compareAt: 76},
-};
-
-const PACKUNG_GRAMM = 420;
-
-function formatPer100g(wert, waehrung) {
-  if (waehrung === 'USD') {
-    return `$${wert.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })} / 100g`;
-  }
-  const de = wert.toLocaleString('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  return waehrung === 'EUR' ? `${de}€ / 100g` : `${de} ${waehrung} / 100g`;
-}
-
-/**
- * Staffel-Anzeige je Menge, DYNAMISCH aus dem API-Preis der Variante.
- * @param {string} quantity '1' | '2' | '3'
- * @param {object} [selectedVariant] Variante mit price {amount, currencyCode}
- * @param {string} [handle] Produkt-Handle (Steuersatz-Zuordnung, 7 % Kakao)
- */
-export function cacaoPricing(quantity, selectedVariant, handle, land) {
-  const staffel = CACAO_STAFFEL[quantity] || CACAO_STAFFEL['1'];
-  const netto = Number.parseFloat(selectedVariant?.price?.amount);
-  let waehrung = selectedVariant?.price?.currencyCode || 'EUR';
-  let einzel;
-  let compareAt;
-  // NICHT-EUR-MAERKTE BEKOMMEN KEINE STAFFEL-BEHAUPTUNG (2026-09-12).
-  // Der Mengenrabatt ist seit dem 2026-09-12 ein FESTBETRAG in EUR; Shopify
-  // rechnet ihn je Markt per Wechselkurs um. Diesen Kurs kann die Kaufseite
-  // baulich nicht kennen (ein Automatikrabatt existiert erst mit einem
-  // Warenkorb) — jede hier gerechnete Prozentzahl ist geraten. Gemessen am
-  // Kundenrand war sie zu NIEDRIG geraten: US 3x bewarb 207,00 USD, die Kasse
-  // belastete 220,69 USD. Darum nennt die Seite ausserhalb des EUR-Markts den
-  // LISTENPREIS und verspricht keinen Staffelpreis; der Rabatt zeigt sich im
-  // Warenkorb. Im EUR-Markt bleibt die Rechnung unveraendert — dort trifft der
-  // Festbetrag den runden Bruttobetrag exakt.
-  const rabattProzent =
-    waehrung === 'EUR' ? staffel.rabattProzent : 0;
-  const rabattImWarenkorb = waehrung !== 'EUR' && staffel.rabattProzent > 0;
-  // Packungspreis aus dem Zeilenbetrag der Kasse; Grundpreis daraus.
-  let proPackungExakt;
-  if (Number.isFinite(netto)) {
-    const satz = anzeigeSatz(handle, waehrung, land);
-    const rabattProEinheit =
-      Math.floor(netto * (rabattProzent / 100) * 100) / 100;
-    // Staffelpreis ist ein MODELL des Festbetrags (markt-pricing.js,
-    // staffelModellAnzeige): DE gerundet (3x Modell 53,21, Kasse 53,00).
-    einzel = staffelModellAnzeige((netto - rabattProEinheit) * (1 + satz), land);
-    // KASSENBETRAG außerhalb DE (Grossjob 20261004 preisanzeige, s03; Port
-    // aus qiblanco CacaoProductForm.jsx): der Festbetrag ist so gesetzt, dass
-    // der DE-Bruttobetrag ganz ist. Netto-Zeile nach Rabatt = DE-Ganzbetrag
-    // durch (1 + DE-Satz) auf den Cent (3x 159 / 1,07 = 148,60), darauf der
-    // Satz des Landes: AT 3x 148,60 x 1,10 = 163,46 = Kasse. Der Kopf nennt
-    // den Packungspreis dieser Zeile (163,46 / 3 = 54,49), statt aufzurunden.
-    const menge = Number.parseInt(quantity, 10) || 1;
-    const istDE = String(land || 'DE').toUpperCase() === 'DE';
-    if (!istDE) {
-      let nettoZeile = netto * menge;
-      if (rabattProzent > 0) {
-        const satzDE = anzeigeSatz(handle, waehrung, 'DE');
-        const deGanz = Math.round((netto - rabattProEinheit) * (1 + satzDE));
-        nettoZeile = Math.round(((deGanz * menge) / (1 + satzDE)) * 100) / 100;
-      }
-      const zeile = ganzEuroAnzeige(nettoZeile * (1 + satz), land);
-      proPackungExakt = zeile / menge;
-      einzel = ganzEuroAnzeige(proPackungExakt, land);
-    }
-    // ganzEuroAnzeige ist seit dem K1-Nachzug vom 2026-10-04 die
-    // Kassenbetrag-Regel (Alias von kassenAnzeige): AT 78,13 statt 79.
-    compareAt =
-      rabattProzent > 0 ? ganzEuroAnzeige(netto * (1 + satz), land) : null;
-  } else {
-    if (typeof console !== 'undefined') {
-      console.warn(
-        `[preis-fallback] Kakao-Staffel ${quantity}x: API-Preis fehlt — letzter bekannter Stand wird gezeigt.`,
-      );
-    }
-    const fallback = CACAO_FALLBACK[quantity] || CACAO_FALLBACK['1'];
-    waehrung = 'EUR';
-    einzel = fallback.einzel;
-    compareAt = fallback.compareAt;
-  }
-  return {
-    price: formatPreis(einzel, waehrung, 'pdp'),
-    priceNum: einzel,
-    compareAt: compareAt != null ? formatPreis(compareAt, waehrung, 'pdp') : null,
-    per100g: formatPer100g(
-      (proPackungExakt ?? einzel) / (PACKUNG_GRAMM / 100),
-      waehrung,
-    ),
-    badge: staffel.badge,
-    badgeStyle: staffel.badgeStyle,
-    rabattProzent,
-    rabattImWarenkorb,
-  };
-}
-
-/**
- * Dropdown-Optionen der Mengenstaffel (Preise dynamisch abgeleitet).
- */
-export function cacaoSizeOptions(selectedVariant, handle, land) {
+export function cacaoSizeOptions(selectedVariant, handle, land, staffelKasse) {
   return ['3', '2', '1'].map((value) => {
-    const pricing = cacaoPricing(value, selectedVariant, handle, land);
+    const pricing = cacaoPricing(value, selectedVariant, handle, land, staffelKasse);
     const rabatt =
       pricing.rabattProzent > 0 ? `${pricing.rabattProzent}% Rabatt | ` : '';
-    // Ausserhalb des EUR-Markts nennt die Zeile den Listenpreis und sagt, dass
-    // der Mengenrabatt im Warenkorb abgezogen wird — statt einen Staffelpreis
-    // zu versprechen, den die Kasse nicht einloest (siehe cacaoPricing).
+    // Fehlt der Zeilenbetrag aus dem Warenkorb, nennt die Zeile ausserhalb des
+    // EUR-Markts den Listenpreis und sagt, dass der Mengenrabatt im Warenkorb
+    // abgezogen wird (siehe cacaoPricing).
     const hinweis = pricing.rabattImWarenkorb
       ? ' | Mengenrabatt im Warenkorb'
       : '';
@@ -187,13 +39,17 @@ export function cacaoSizeOptions(selectedVariant, handle, land) {
     // 16 px (Open Sans 600): lang 311 px, kurz 230 px; Platz in der Auswahl
     // 390 px -> 312, 360 px -> 282, 320 px -> 242. Die Schrift unter 16 px zu
     // setzen ist kein Ausweg: darunter zoomt iOS beim Antippen die Seite.
+    // Nennt die Option den Zeilenbetrag, heisst die Kurzfassung "für 3".
     const hinweisKurz = pricing.rabattImWarenkorb
       ? ' | Rabatt im Warenkorb'
       : '';
+    const betragKurz = pricing.teilbar
+      ? `je ${pricing.price}`
+      : `${pricing.gesamt} für ${pricing.menge}`;
     return {
       value,
-      label: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}${pricing.price} pro Packung${hinweis}`,
-      kurz: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}je ${pricing.price}${hinweisKurz}`,
+      label: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}${staffelBetragText(pricing)}${hinweis}`,
+      kurz: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}${betragKurz}${hinweisKurz}`,
     };
   });
 }
@@ -269,12 +125,13 @@ export function CacaoProductForm({
   quantity,
   onQuantityChange,
   gewaehrleistungsHinweis = true,
+  staffelKasse = null,
 }) {
   const {open} = useAside();
   // Der Lebensmittelsatz ist NICHT ueberall 7 % -- in AT sind es 10 %
   // (gemessen 2026-09-13, cart-display-pricing.js SATZ_JE_LAND).
   const marktLand = useMarktLand();
-  const optionen = cacaoSizeOptions(selectedVariant, handle, marktLand);
+  const optionen = cacaoSizeOptions(selectedVariant, handle, marktLand, staffelKasse);
   const selectRef = useRef(null);
   const kurz = useKurzfassung(
     selectRef,
