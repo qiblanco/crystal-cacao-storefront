@@ -71,14 +71,21 @@ export function CartLineItem({layout, line, childrenMap}) {
             </p>
           </Link>
           <ProductPrice price={anzeigePreis.price} />
+          {/* Ohne Shopifys Platzhalter-Variante: ein Produkt mit nur einer
+              Variante (jede Set-Zeile, jede Einzelpackung) trägt die Option
+              "Title: Default Title". Sie sagt dem Kunden nichts und stand bis
+              2026-10-06 sichtbar unter "Bundle: 3x AWAKE". Die Vorlage
+              qiblanco.com filtert sie seit jeher; hier fehlte der Filter. */}
           <ul>
-            {selectedOptions.map((option) => (
-              <li key={option.name}>
-                <small>
-                  {option.name}: {option.value}
-                </small>
-              </li>
-            ))}
+            {selectedOptions
+              .filter((option) => option.value !== 'Default Title')
+              .map((option) => (
+                <li key={option.name}>
+                  <small>
+                    {option.name}: {option.value}
+                  </small>
+                </li>
+              ))}
           </ul>
           <CartLineQuantity line={line} />
         </div>

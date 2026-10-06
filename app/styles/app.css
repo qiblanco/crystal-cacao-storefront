@@ -542,6 +542,29 @@ aside .cart-main.with-discount {
 }
 
 /*
+ * DIE /cart-SEITE IST KEIN SCROLLER — 2026-10-06.
+ *
+ * Der Satz oben ("dort waere ein innerer Scroller falsch") stand da, die
+ * Seitenregel blieb aber ein Scroller: `.cart-main` max-height
+ * calc(100vh - 250px), mit Rabattcode calc(100vh - 300px). Mit einem
+ * eingeloesten Partnercode wird der Inhalt hoeher als der Deckel, und der
+ * Kassenknopf lag ausserhalb des Clips. Gemessen am Kundenrand, Warenkorb
+ * 3x AWAKE + kate5: Knopf 812..883 px, Clip endet bei 808 px (Desktop
+ * 1440x900); 746..817 px gegen 767 px (Telefon 390x844). In der Knopfmitte
+ * traf elementFromPoint nur noch BODY.
+ * `.cart > .cart-main` trifft nur die Seite (routes/cart.jsx legt den
+ * Wrapper `.cart` an, die Schublade nicht) und gewinnt per Spezifitaet ueber
+ * beide Seitenregeln. Die Vorlage qiblanco.com hat den Rabatt-Deckel ganz
+ * entfernt; hier bleibt die Schublade unberuehrt, die eigene Regeln hat.
+ */
+.cart > .cart-main,
+.cart > .cart-main.with-discount {
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+/*
  * ZONE 2 — DIE SCROLLENDE MITTE. Der EINE Scroll-Container der Schublade.
  * `.cart-details` steht seit jeher im DOM (CartMain.jsx), hatte aber nie eine
  * Regel; deshalb scrollten die beiden Vorfahren an seiner Stelle.
@@ -708,6 +731,20 @@ aside .cart-details {
   align-items: center;
   display: flex;
   margin-top: 0.25rem;
+}
+
+/* Der eingeloeste Code ist ein Etikett fuer den Kunden, kein Quelltext: ohne
+ * diese Regel stand er in der Monospace-Schrift des Browsers auf grauem
+ * Grund, als einzige fremde Schrift im Warenkorb (2026-10-06). */
+.cart-discount code {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 10px;
+  background: transparent;
 }
 
 /*

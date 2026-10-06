@@ -8,6 +8,7 @@ import {
   KAKAO_KENNZAHLEN,
   KAKAO_MENUE,
 } from '~/lib/kakao-zone';
+import {kakaoSetArt} from '~/lib/kakao-set-zeile';
 
 /**
  * @param {HeaderProps}
@@ -315,7 +316,25 @@ function CartToggle({cart}) {
 function CartBanner() {
   const originalCart = useAsyncValue();
   const cart = useOptimisticCart(originalCart);
-  return <CartBadge count={cart?.totalQuantity ?? 0} />;
+  return <CartBadge count={packungenImKorb(cart)} />;
+}
+
+/**
+ * Packungen statt Zeilenmenge. Eine Kakao-Set-Zeile hat Menge 1 und trägt 2
+ * bis 7 Packungen; der Stepper im Warenkorb zählt Packungen. Mit
+ * `totalQuantity` stand im Kopf "1", während die Zeile darunter "3" sagte.
+ * Fehlt einer Zeile der Handle (optimistische Zeile), zählt sie mit ihrer
+ * Menge — wie vorher.
+ * @param {{totalQuantity?: number, lines?: {nodes?: Array<object>}}|null} cart
+ */
+function packungenImKorb(cart) {
+  const zeilen = cart?.lines?.nodes;
+  if (!Array.isArray(zeilen)) return cart?.totalQuantity ?? 0;
+  return zeilen.reduce((summe, zeile) => {
+    const set = kakaoSetArt(zeile?.merchandise?.product?.handle);
+    const menge = Number(zeile?.quantity) || 0;
+    return summe + (set ? set.packungen * menge : menge);
+  }, 0);
 }
 
 const FALLBACK_HEADER_MENU = {
