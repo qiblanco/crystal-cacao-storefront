@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "64525b148a6d7fc90a2ae825b8279d49bb54d732",
-  "erzeugt_utc": "2026-10-06T06:53:30Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 64525b148a6d; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 8328e20a07c9). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "115245d4bcb2c6d27e6a06b91d72ed589f7811de",
+  "erzeugt_utc": "2026-10-06T07:53:33Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 115245d4bcb2; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 64525b148a6d). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -59,7 +59,7 @@
     {
       "upstream": "app/components/reusables/ActiveCampaignForm.jsx",
       "klasse": "K1",
-      "sha256": "9528e49a582ce876b5238398a1c696854090edec1b264495fd426b2401ef9798"
+      "sha256": "a70055e873c4383907693d67a4523dcd33e28bc3ef8528acbec10cd02e301b17"
     },
     {
       "upstream": "app/components/reusables/LazyImage.jsx",

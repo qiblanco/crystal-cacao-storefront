@@ -1,6 +1,18 @@
 import {useEffect, useRef} from 'react';
+import {AnmeldeWeiche} from './Anmeldeweiche';
 
+// Seit der AC-Ablösung (Stufe E1, s11) ist dies eine Weiche: je Formular
+// entscheidet der eigene Anmelde-Endpunkt zur Laufzeit, ob das AC-Embed oder
+// das eigene Formular erscheint. Solange er 'ac' meldet oder nicht antwortet,
+// bleibt alles wie bisher (Begründung in Anmeldeweiche.jsx). Formulare, die er
+// nicht kennt (z. B. 33 auf /pages/coming-home), bleiben immer beim Embed.
 export function ActiveCampaignForm({formId}) {
+  return (
+    <AnmeldeWeiche formId={formId} ac={<ActiveCampaignEmbed formId={formId} />} />
+  );
+}
+
+function ActiveCampaignEmbed({formId}) {
   const containerRef = useRef(null);
 
   useEffect(() => {
