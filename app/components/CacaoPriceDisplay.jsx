@@ -6,9 +6,11 @@ import {useMarktLand} from '~/lib/markt-land';
  * Variante (M2, Auftrag 20260718-lp-preise-dynamisch-binden-gestuft);
  * fail-closed auf den letzten bekannten guten Stand (cacaoPricing).
  */
-export function CacaoPriceDisplay({quantity, selectedVariant, handle}) {
+export function CacaoPriceDisplay({quantity, selectedVariant, handle, staffelKasse = null}) {
   const marktLand = useMarktLand();
-  const pricing = cacaoPricing(quantity, selectedVariant, handle, marktLand);
+  // staffelKasse (Job 20261006-preisanzeige-rest): Zeilenbetraege der Kasse je
+  // Menge ausserhalb des EUR-Markts, vom Loader (lib/cacao-pricing.js).
+  const pricing = cacaoPricing(quantity, selectedVariant, handle, marktLand, staffelKasse);
 
   return (
     <div className="Bestseller-Price">
