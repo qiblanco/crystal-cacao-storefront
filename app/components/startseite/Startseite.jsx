@@ -22,6 +22,17 @@ import {
 } from '~/components/product-pages/Kakao';
 
 /**
+ * DIE KAFFEE-KURVE STEHT HIER IN EINEM ANDEREN RASTER ALS AUF DER KAUFSEITE:
+ * .cc-akt__innen hat mobil 24 px Rand je Seite (Kaufseite 32), ab 48em
+ * 32 px Rand + 64 px Spalten-Luecke, gedeckelt bei 72rem = 1152 px. Live
+ * gemessen 2026-10-06: 390 -> 342 px, 768 -> 320, 1024 -> 448, ab 1152 -> 512.
+ * Mit den Kaufseiten-sizes (100vw - 64px) bekam das Telefon 660w fuer 684
+ * gebrauchte Pixel (0,96x, Befund ladeverhalten-bildmasse-kakao).
+ */
+const SIZES_KURVE_START =
+  '(min-width: 1152px) 512px, (min-width: 48em) calc((100vw - 128px) / 2), calc(100vw - 48px)';
+
+/**
  * DIE STARTSEITE AUF HIGH-END-NIVEAU — seit 2026-10-02.
  *
  * Grossjob 20261002-GROSSJOB-crystal-cacao-startseite-hochwertig-slider-
@@ -79,7 +90,7 @@ export function Startseite({produkte, stimmen, sorten, podcast}) {
         <div className="cc-akt__innen">{podcast}</div>
       </section>
       <KaffeeVergleich
-        kurve={bild(B_CHART)}
+        kurve={{...bild(B_CHART), sizes: SIZES_KURVE_START}}
         logos={{
           kakao: bild(B_LOGO_KAKAO),
           kaffee: bild(B_LOGO_KAFFEE),

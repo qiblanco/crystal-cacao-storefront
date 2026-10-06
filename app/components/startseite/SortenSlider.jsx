@@ -262,6 +262,23 @@ export function SortenSlider({produkte = null}) {
   );
 }
 
+/**
+ * DIE WORTMARKE HAT KEINE FESTE BREITE, SONDERN EINE FESTE HOEHE:
+ * startseite.css setzt .cc-folie__wortmarke auf 64 px (mobil) und 88 px
+ * (ab 48em), die Breite folgt dem Seitenverhaeltnis der Datei. Die sizes
+ * werden deshalb daraus gerechnet, nicht getippt. Bis 2026-10-06 stand hier
+ * fest "(min-width: 48em) 280px, 220px" -- gemessen 2026-10-06 lag Create
+ * mobil bei 145 px, bekam 640w geliefert (2,21x, Befund der rt-Wache
+ * ladeverhalten-bildmasse-kakao). Aendert sich die CSS-Hoehe, muessen die
+ * zwei Zahlen hier mitwandern.
+ */
+const WORTMARKE_HOEHE_MOBIL = 64;
+const WORTMARKE_HOEHE_BREIT = 88;
+function wortmarkeSizes(marke) {
+  const v = marke.breite / marke.hoehe;
+  return `(min-width: 48em) ${Math.ceil(WORTMARKE_HOEHE_BREIT * v)}px, ${Math.ceil(WORTMARKE_HOEHE_MOBIL * v)}px`;
+}
+
 function Folie({sorte, index, aktiv, produkt}) {
   const profil = SORTEN[sorte];
   const marke = profil.wortmarke;
@@ -286,7 +303,7 @@ function Folie({sorte, index, aktiv, produkt}) {
             className="cc-folie__wortmarke"
             src={`${marke.url}&width=640`}
             srcSet={`${marke.url}&width=320 320w, ${marke.url}&width=640 640w`}
-            sizes="(min-width: 48em) 280px, 220px"
+            sizes={wortmarkeSizes(marke)}
             width={marke.breite}
             height={marke.hoehe}
             alt={`Crystal Cacao® ${profil.name}`}
