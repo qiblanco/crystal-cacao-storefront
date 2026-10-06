@@ -100,6 +100,16 @@ const TRACKING_PARAM_NAMES = new Set([
   // Bewacht von der rt-Wache uppromote-kakao-flaeche-wache (Arm sca-ref).
   'sca_ref',
   'sca_source',
+  // Google-Ads-Kampagnen-ID aus dem Auto-Tagging (Nachzug aus qiblanco-storefront
+  // PR #775, 47353ab, dort AI-CEO K2 vom 2026-10-04, J5; hier Job
+  // 20261006-crystal-checkout-tracking-gad-campaignid-nachzug-prio30). Kein
+  // Cookie, ein Query-Parameter wie gclid. Bis hierher erreichte er das Backend
+  // NUR ueber die `landing_page`-Query: war die Landeseite nicht die Ad-Seite,
+  // war die Kampagne weg. Als eigenes note_attribute liest ihn hyros-eigenbau
+  // own_source `_landing_params` schon (gleicher params-Schluessel wie die
+  // Query, also kein Doppelzaehlen). Zwilling: public/qiblanco-tracker.js.
+  // Bewacht von crystal-cacao-node/proben/probe_gad_campaignid_grenze.py.
+  'gad_campaignid',
 ]);
 
 const TRACKING_COOKIE_NAMES = new Set([

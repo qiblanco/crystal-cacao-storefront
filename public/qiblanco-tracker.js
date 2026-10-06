@@ -37,6 +37,10 @@
     // von der rt-Wache uppromote-kakao-flaeche-wache (Arm sca-ref).
     sca_ref: true,
     sca_source: true,
+    // Google-Ads-Kampagnen-ID (Nachzug aus qiblanco-storefront PR #775). Ohne
+    // diesen Eintrag wird sie nicht gespeichert und haengt allein an der
+    // Landeseite. ZWILLING: app/lib/checkout-tracking.js TRACKING_PARAM_NAMES.
+    gad_campaignid: true,
   };
 
   function isTrackingParamName(name) {
