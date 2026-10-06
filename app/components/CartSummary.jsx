@@ -6,6 +6,7 @@ import {useEffect, useId, useRef, useState} from 'react';
 import {useFetcher} from 'react-router';
 import {cartLineContentIds} from '~/lib/pixel-content';
 import {buildInitiateCheckoutEvent, qpxTrack} from '~/lib/qpx-commerce';
+import {KasseImBrowser} from '~/components/reusables/KasseImBrowser';
 
 /**
  * @param {CartSummaryProps}
@@ -87,6 +88,10 @@ export function CartSummary({cart, layout}) {
         numItems={zeilen.length}
         contentIds={cartLineContentIds(zeilen)}
       />
+      {/* Direkt unter dem Kassenknopf und nur im Instagram-/Facebook-Browser:
+          der Weg zu Apple Pay / Google Pay führt über die Kasse, nicht über
+          diesen Warenkorb (Begründung und Rückweg in reusables/KasseImBrowser.jsx). */}
+      {cart?.checkoutUrl ? <KasseImBrowser layout={layout} /> : null}
     </div>
   );
 }
