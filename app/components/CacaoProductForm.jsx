@@ -109,14 +109,36 @@ export function cacaoPricing(quantity, selectedVariant, handle, land) {
   const rabattProzent =
     waehrung === 'EUR' ? staffel.rabattProzent : 0;
   const rabattImWarenkorb = waehrung !== 'EUR' && staffel.rabattProzent > 0;
+  // Packungspreis aus dem Zeilenbetrag der Kasse; Grundpreis daraus.
+  let proPackungExakt;
   if (Number.isFinite(netto)) {
     const satz = anzeigeSatz(handle, waehrung, land);
     const rabattProEinheit =
       Math.floor(netto * (rabattProzent / 100) * 100) / 100;
     // Staffelpreis ist ein MODELL des Festbetrags (markt-pricing.js,
-    // staffelModellAnzeige): DE gerundet (3x Modell 53,21, Kasse 53,00),
-    // sonst aufgerundet -- AT 1x nennt 79 statt 78 bei 78,13 Kasse.
+    // staffelModellAnzeige): DE gerundet (3x Modell 53,21, Kasse 53,00).
     einzel = staffelModellAnzeige((netto - rabattProEinheit) * (1 + satz), land);
+    // KASSENBETRAG außerhalb DE (Grossjob 20261004 preisanzeige, s03; Port
+    // aus qiblanco CacaoProductForm.jsx): der Festbetrag ist so gesetzt, dass
+    // der DE-Bruttobetrag ganz ist. Netto-Zeile nach Rabatt = DE-Ganzbetrag
+    // durch (1 + DE-Satz) auf den Cent (3x 159 / 1,07 = 148,60), darauf der
+    // Satz des Landes: AT 3x 148,60 x 1,10 = 163,46 = Kasse. Der Kopf nennt
+    // den Packungspreis dieser Zeile (163,46 / 3 = 54,49), statt aufzurunden.
+    const menge = Number.parseInt(quantity, 10) || 1;
+    const istDE = String(land || 'DE').toUpperCase() === 'DE';
+    if (!istDE) {
+      let nettoZeile = netto * menge;
+      if (rabattProzent > 0) {
+        const satzDE = anzeigeSatz(handle, waehrung, 'DE');
+        const deGanz = Math.round((netto - rabattProEinheit) * (1 + satzDE));
+        nettoZeile = Math.round(((deGanz * menge) / (1 + satzDE)) * 100) / 100;
+      }
+      const zeile = ganzEuroAnzeige(nettoZeile * (1 + satz), land);
+      proPackungExakt = zeile / menge;
+      einzel = ganzEuroAnzeige(proPackungExakt, land);
+    }
+    // ganzEuroAnzeige ist seit dem K1-Nachzug vom 2026-10-04 die
+    // Kassenbetrag-Regel (Alias von kassenAnzeige): AT 78,13 statt 79.
     compareAt =
       rabattProzent > 0 ? ganzEuroAnzeige(netto * (1 + satz), land) : null;
   } else {
@@ -134,7 +156,10 @@ export function cacaoPricing(quantity, selectedVariant, handle, land) {
     price: formatPreis(einzel, waehrung, 'pdp'),
     priceNum: einzel,
     compareAt: compareAt != null ? formatPreis(compareAt, waehrung, 'pdp') : null,
-    per100g: formatPer100g(einzel / (PACKUNG_GRAMM / 100), waehrung),
+    per100g: formatPer100g(
+      (proPackungExakt ?? einzel) / (PACKUNG_GRAMM / 100),
+      waehrung,
+    ),
     badge: staffel.badge,
     badgeStyle: staffel.badgeStyle,
     rabattProzent,
