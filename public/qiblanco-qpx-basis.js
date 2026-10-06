@@ -156,10 +156,15 @@
     // navigator.globalPrivacyControl === true läuft dieser Block nicht.
     // /account ist ausgenommen (Bestellnummern im Pfad).
     //
+    // GESEHEN: ein Abschnitt zählt nach 1 s Sichtbarkeit IN SUMME (>= 50 %
+    // des Elements oder >= 50 % der Fensterhöhe), genau wie die Erfassung mit
+    // Einwilligung (qiblanco-qpx.js snapshot(): dwell >= 1000 kumulativ).
+    // Ein Austritt hält die Uhr an, setzt sie aber nicht zurück. Bis 06.10.2026
+    // verlangte V2 1 s ununterbrochene Sicht und lag dadurch tiefer als G3.
+    //
     // GEIST-ABSCHNITTE: beim SPA-Wechsel steht die alte Seite noch einen
-    // Moment im DOM. Ein Abschnitt zählt deshalb erst nach 1 s Sichtbarkeit
-    // (>= 50 % des Elements oder >= 50 % der Fensterhöhe) und nur, solange er
-    // im Dokument hängt; die Uhr startet beim Wechsel neu. Ein Abschnitt der
+    // Moment im DOM. Ein Abschnitt zählt deshalb nur, solange er im Dokument
+    // hängt, und die Uhr startet beim Wechsel bei null. Ein Abschnitt der
     // Vorseite wird abgeräumt, bevor er reift.
     // =====================================================================
     try {
@@ -194,10 +199,13 @@
         return NAME.test(n) ? n : '';
       }
 
+      // z.summe: bisher gesammelte Sichtzeit, z.seit: Beginn der laufenden
+      // Sicht (0 = gerade nicht sichtbar).
       function reife(el, jetzt) {
         var z = el.__qpxAnon;
-        if (!z || !z.seit) return;
-        if (jetzt - z.seit < REIFE_MS || el.isConnected === false) return;
+        if (!z) return;
+        var ms = (z.summe || 0) + (z.seit ? jetzt - z.seit : 0);
+        if (ms < REIFE_MS || el.isConnected === false) return;
         var n = abschnittName(el);
         if (n && !gesehen[n] && nGesehen < MAX_ABSCHNITTE) {
           gesehen[n] = 1;
@@ -220,13 +228,14 @@
           var jetzt = Date.now();
           for (var i = 0; i < eintraege.length; i++) {
             var en = eintraege[i], el = en.target;
-            var z = el.__qpxAnon || (el.__qpxAnon = {seit: 0});
+            var z = el.__qpxAnon || (el.__qpxAnon = {seit: 0, summe: 0});
             var sicht = en.isIntersecting && el.isConnected !== false &&
                         genugSichtbar(en);
             if (sicht && !d.hidden) {
               if (!z.seit) z.seit = jetzt;
             } else {
               reife(el, jetzt);
+              if (z.seit) z.summe = (z.summe || 0) + (jetzt - z.seit);
               z.seit = 0;
             }
           }
@@ -245,7 +254,7 @@
         beobachtet = bleibt;
         for (var k = 0; k < knoten.length; k++) {
           if (knoten[k].__qpxAnon) continue;
-          knoten[k].__qpxAnon = {seit: 0};
+          knoten[k].__qpxAnon = {seit: 0, summe: 0};
           io.observe(knoten[k]);
           beobachtet.push(knoten[k]);
         }
@@ -338,7 +347,9 @@
         var jetzt = Date.now();
         for (var i = 0; i < beobachtet.length; i++) {
           var z = beobachtet[i].__qpxAnon;
-          if (z && z.seit) z.seit = d.hidden ? 0 : jetzt;
+          if (!z) continue;
+          z.summe = 0; // Sichtzeit der Vorseite zählt nicht für die neue
+          if (z.seit) z.seit = d.hidden ? 0 : jetzt;
         }
       }
 
