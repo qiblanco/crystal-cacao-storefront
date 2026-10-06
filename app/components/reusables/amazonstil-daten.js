@@ -120,14 +120,15 @@ export function vergleichAn(vergleich = VERGLEICH) {
 }
 
 /* Preis wie in der Kaufbox: dieselbe Rechnung wie components/ProductPrice.jsx
-   (anzeigeSatz -> ganzEuroAnzeige -> formatPreis 'pdp'), ohne Streichpreis. */
+   (anzeigeSatz -> ganzEuroAnzeige -> formatPreis 'pdp'), ohne Streichpreis.
+   Seit 2026-10-04 (Kassenbetrag-Regel, s03) auf den Cent, kein zweites Runden. */
 export function preisAnzeige(money, handle, land) {
   const betrag = Number.parseFloat(money?.amount);
   if (!Number.isFinite(betrag)) return null;
   const waehrung = money?.currencyCode || 'EUR';
   const roh = betrag * (1 + anzeigeSatz(handle, waehrung, land));
   const wert = ganzEuroAnzeige(roh, land);
-  return formatPreis(Math.round(wert), waehrung, 'pdp');
+  return formatPreis(wert, waehrung, 'pdp');
 }
 
 /* Monatsrate wie die Ratenzeile unter dem Kaufknopf (KaufZusage.jsx): nur DE,
