@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "8328e20a07c9f71192001ed1c0bcc3aff5a6890f",
-  "erzeugt_utc": "2026-10-06T04:53:32Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 8328e20a07c9; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 792a94d7fd60). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "64525b148a6d7fc90a2ae825b8279d49bb54d732",
+  "erzeugt_utc": "2026-10-06T06:53:30Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 64525b148a6d; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 8328e20a07c9). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -368,8 +368,7 @@
     {
       "upstream": "app/lib/partnercode-daten.server.js",
       "klasse": "K1",
-      "sha256": "bb579910aa479bd01bae0a7ff7a91de5f0147415c242777f20e7a80027db5949",
-      "nachzug_grund": "Nachgezogen 2026-10-01 (Job 20261001-crystal-uppromote-link-sca-ref-setzt-code-prio30): das verschluesselte sca_ref->Code-Datenmodul, byte-gleich aus qiblanco-storefront origin/main eee4435. EINE QUELLE, KEIN ZWEITER ERZEUGER: erzeugt wird es nur in qiblanco-storefront (bin/partnercode-gen.mjs, gespeist von partner-manager/bin/partnercode-abgleich, rt partnercode-abgleich taeglich 06:20 UTC). Dieser Laden traegt weder Erzeuger noch Abgleich; die taegliche Partnerliste kommt als gewoehnlicher K1-UPSTREAM-DRIFT ueber bin/k1-nachzug (stuendlich :53) hierher. Gemessen beim Nachzug: 649 Eintraege, die Laden-Kopie entschluesselt 649/649 aus UpPromote-Links korrekt."
+      "sha256": "ef6a3414073c2a09f3c735e3052f05b1ef87b953bf11bef3d340489ba4e9d37c"
     },
     {
       "upstream": "app/lib/partnercode.server.js",
