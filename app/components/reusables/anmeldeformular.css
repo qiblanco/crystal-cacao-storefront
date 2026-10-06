@@ -1,0 +1,129 @@
+/* Eigenes Anmeldeformular (Anmeldeweiche.jsx, Stufe E1 der AC-Ablösung, s11).
+   Nur Haus-Tokens aus app/styles/qb-tokens.css, keine freien Werte:
+   Schrift fs-2/fs-3/Knopf-Rolle, Abstände im 8-px-Raster, EIN Radius-Token,
+   der Akzent nur auf dem Knopf (Handlung). Hell auf dunklem Grund über
+   .qb-anmelden--dunkel (Fußzeile); sonst erbt das Formular Farbe und Schrift
+   der Seite. */
+
+.qb-anmelden-platz {
+  min-height: calc(var(--qb-ref-raster) * 6);
+}
+
+.qb-anmelden {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--qb-ref-raster) * 2);
+  max-width: calc(var(--qb-ref-raster) * 60);
+  color: inherit;
+  font-family: inherit;
+}
+
+.qb-anmelden__felder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qb-ref-raster);
+}
+
+.qb-anmelden__feld {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: calc(var(--qb-ref-raster) * 6);
+  padding: 0 calc(var(--qb-ref-raster) * 2);
+  border: 1px solid var(--qb-text-gedaempft);
+  border-radius: var(--qb-radius-klein);
+  background: var(--qb-flaeche);
+  color: var(--qb-text);
+  font: inherit;
+  font-size: var(--qb-ref-fs-3);
+}
+
+.qb-anmelden__feld::placeholder {
+  color: var(--qb-text-gedaempft);
+  opacity: 1;
+}
+
+.qb-anmelden__einwilligung {
+  margin: 0;
+  font-size: var(--qb-ref-fs-2);
+  line-height: 1.5;
+}
+
+.qb-anmelden__knopf {
+  align-self: flex-start;
+  min-height: calc(var(--qb-ref-raster) * 6);
+  padding: 0 calc(var(--qb-ref-raster) * 3);
+  border: 0;
+  border-radius: var(--qb-radius-klein);
+  background: var(--qb-akzent);
+  color: var(--qb-text-auf-akzent);
+  font: inherit;
+  font-size: var(--qb-text-btn-primaer);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.qb-anmelden__knopf:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.qb-anmelden__meldung,
+.qb-anmelden__danke {
+  margin: 0;
+  font-size: var(--qb-ref-fs-3);
+  line-height: 1.5;
+}
+
+.qb-anmelden__danke {
+  font-weight: 600;
+}
+
+.qb-anmelden--dunkel .qb-anmelden__feld {
+  border-color: transparent;
+}
+
+/* Fußzeile: app.css färbt dort JEDES Element mit `footer * { color: …
+   !important }` hell. Ohne die Regeln unten stünde der Knopftext weiß auf
+   Gold und getippter Text fast weiß im hellen Feld (gemessen 06.10.2026 in
+   der Vorschau). `!important` ist hier nötig, nicht bequem: eine normale
+   Regel verliert gegen jede !important-Regel, egal wie spezifisch sie ist.
+   Seitenregeln wie `body:has(.erf) .footer button[type='submit']` färben
+   den Knopf sonst in Seitenfarben ein, die zum AC-Formular gehören. */
+footer form.qb-anmelden .qb-anmelden__feld {
+  color: var(--qb-text) !important;
+  background: var(--qb-flaeche) !important;
+}
+
+footer form.qb-anmelden .qb-anmelden__knopf {
+  color: var(--qb-text-auf-akzent) !important;
+  background: var(--qb-akzent) !important;
+  font-size: var(--qb-text-btn-sekundaer) !important;
+}
+
+.qb-anmelden__unsichtbar {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Die Automaten-Falle liegt außerhalb des Bildschirms statt auf display:none:
+   manche Automaten überspringen unsichtbare Felder gezielt. */
+.qb-anmelden__falle {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .qb-anmelden__knopf {
+    align-self: stretch;
+  }
+}
