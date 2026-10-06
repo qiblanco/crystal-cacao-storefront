@@ -367,7 +367,9 @@ export function produktSchema(produkt, marktLand) {
     offers: {
       '@type': 'Offer',
       url,
-      price: String(preis),
+      // Kassenbetrag-Regel (s03 2026-10-04): ganz ohne Nachkommastellen
+      // ("76"), sonst auf den Cent ("78.13") wie die sichtbare Seite.
+      price: Number.isInteger(preis) ? String(preis) : preis.toFixed(2),
       priceCurrency: waehrung,
       availability: verfuegbarkeit(variante?.availableForSale),
       itemCondition: 'https://schema.org/NewCondition',
