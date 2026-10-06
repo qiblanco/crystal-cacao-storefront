@@ -20,7 +20,11 @@
 // diese Dateien gibt (siehe Kopf von produkt-seo.js). Vite loest den
 // relativen Pfad identisch auf; cart-display-pricing importiert selbst
 // nichts, die Kette ist damit vollstaendig node-aufloesbar.
-import {STEUER_LAND_DEFAULT, kassenSatz} from './cart-display-pricing.js';
+import {
+  STEUER_LAND_DEFAULT,
+  kassenSatz,
+  taxRateForHandle,
+} from './cart-display-pricing.js';
 import {istBrutto} from './preismodus.js';
 
 /**
@@ -120,6 +124,48 @@ export function kassenAnzeige(betrag, land) {
 }
 
 /**
+ * STREICHPREIS AUF DER SATZ-ACHSE DES LANDES (Job 20261006-preisanzeige-rest,
+ * Punkte 3 und 6). Der Streichpreis bekommt denselben Steuerschritt wie der
+ * Kaufpreis daneben, sonst ist der gezeigte Rabatt je Land verschieden.
+ *
+ * Gemessen 2026-10-06 (Preisanzeige-Messung, Storefront-API je Land): der
+ * Vergleichspreis aus der API ist ein deutscher BRUTTOBETRAG in einem
+ * Netto-Laden. DE zeigt QiOne 2 Pro 1.087,- neben 1.238,- (913,45 netto x
+ * 1,19 gegen 1238 unversteuert). PL (5533 PLN) und SE (14220 SEK) rechnet
+ * Shopify aus denselben 1238 um, mit demselben Kurs wie den Preis. Darum gilt
+ * für einen API-Wert: heraus mit dem DE-Satz der Ware, hinein mit dem Satz
+ * des Landes. DE bleibt so byte-gleich 1.238,-; AT zeigt 1.248,40 neben
+ * 1.096,14, also denselben Rabatt wie DE (12,2 Prozent).
+ *
+ * Der Paritäts-Ersatz aus streichpreis-paritaet.js (CHF 1420, USD 1599)
+ * steht dagegen auf der Basis der Preisliste, wie der Preis 1048 CHF selbst
+ * (`basis: 'preisliste'`). Er bekommt nur den Satz des Landes: CH 1420 x
+ * 1,081 = 1.535,02 neben 1.132,89, der Rabatt aus dem Paritäts-Konzept
+ * (26,2 Prozent) wie vor dem Kassenbetrag-PR #772. US bleibt 1599.
+ *
+ * Im Preismodus brutto ist der API-Wert schon der Endbetrag, wie der Preis:
+ * dann wird nichts gerechnet.
+ *
+ * @param {{amount: string|number, currencyCode?: string, basis?: string}|null} money
+ * @param {string} handle Produkt-Handle (Steuerklasse)
+ * @param {string} [land] ISO-Land des aufgelösten Marktes (Default DE)
+ * @returns {number|null} Streichpreis auf den Cent (ganz -> ohne Cent)
+ */
+export function streichAnzeige(money, handle, land) {
+  if (!money) return null;
+  const zahl = Number.parseFloat(money.amount);
+  if (!Number.isFinite(zahl)) return null;
+  if (istBrutto()) return kassenAnzeige(zahl, land);
+  const waehrung = money.currencyCode || 'EUR';
+  const satzLand = kassenSatz(handle, waehrung, land);
+  const satzHeraus =
+    money.basis === 'preisliste'
+      ? 0
+      : taxRateForHandle(handle, STEUER_LAND_DEFAULT);
+  return kassenAnzeige((zahl * (1 + satzLand)) / (1 + satzHeraus), land);
+}
+
+/**
  * Alter Name, gleiche Funktion: die Aufrufer der früheren Ganz-Euro-Regel
  * gehen ohne Änderung auf die Kassenbetrag-Regel mit.
  */
@@ -187,11 +233,50 @@ export function formatPreis(wert, currencyCode = 'EUR', stil = 'lp') {
    Rollback-SHA: Stufe CH: ['AT','CH'] -> Stufe US: ['AT','CH','US'].
    Der explizite Preview-Parameter `?markt=XX` funktioniert UNABHAENGIG vom
    Flip (QA/Verify-Werkzeug: gezielter Blick auf einen Markt-Kontext). */
-export const FREIGESCHALTETE_MAERKTE = ['AT', 'CH', 'US'];
+// Stufe Länder (Grossjob 20261004 preisanzeige, s03, eigener Deploy mit
+// eigenem Rückweg): jedes Land mit GEMESSENEM Kassensatz in SATZ_JE_LAND
+// (cart-display-pricing.js) und GB. LI seit 2026-10-06 dazu (Job
+// 20261006-preisanzeige-rest): Normalsatz aus LI-Bestellungen, Kakao-Satz
+// aus der CH-Analogie, Beleg bei SATZ_JE_LAND. Bis dahin sahen LI-Besucher
+// die DE-Seite in EUR und zahlten an der Kasse in CHF.
+export const FREIGESCHALTETE_MAERKTE = [
+  'AT',
+  'CH',
+  'LI',
+  'US',
+  'GB',
+  'FR',
+  'IT',
+  'ES',
+  'NL',
+  'BE',
+  'PT',
+  'IE',
+  'PL',
+  'SE',
+];
 
 // Maerkte, die der Shop anbietet (Shopify Markets, localization-API belegt
 // 2026-07-18): DE Default · AT EUR · CH/LI CHF · US USD · GB GBP.
-const MARKT_LAENDER = new Set(['DE', 'AT', 'CH', 'LI', 'US', 'GB']);
+// Seit 2026-10-04 auch die EU-Länder mit gemessenem Kassensatz (Markt eu:
+// FR, IT, ES, NL, BE, PT, IE in EUR, PL in PLN, SE in SEK).
+const MARKT_LAENDER = new Set([
+  'DE',
+  'AT',
+  'CH',
+  'LI',
+  'US',
+  'GB',
+  'FR',
+  'IT',
+  'ES',
+  'NL',
+  'BE',
+  'PT',
+  'IE',
+  'PL',
+  'SE',
+]);
 
 /**
  * Markt-Land eines Requests: ?markt-Preview > Geo (nur freigeschaltet) > DE.

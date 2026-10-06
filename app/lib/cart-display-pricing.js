@@ -143,6 +143,7 @@ const SATZ_JE_LAND = {
   DE: {regel: 0.19, ermaessigt: 0.07},
   AT: {regel: 0.2, ermaessigt: 0.1},
   CH: {regel: 0.081, ermaessigt: 0.081},
+  LI: {regel: 0.081, ermaessigt: 0.081},
   FR: {regel: 0.2, ermaessigt: 0.055},
   IT: {regel: 0.22, ermaessigt: 0.1},
   ES: {regel: 0.21, ermaessigt: 0.1},
@@ -165,15 +166,23 @@ const SATZ_JE_LAND = {
 // tragen 8,1 Prozent obendrauf, auch auf den Kakao (36 bzw. 39 Zeilen). Bis
 // zu diesem Job galt CHF als Endbetrag, und die Seite nannte 8,1 Prozent zu
 // wenig.
-// BENANNTE LÜCKEN (kein Satz, also Status quo): LI, weil der Kakao-Satz nur
-// von der adresslosen Kassenseite kommt und dieselbe Quelle in CH nachweislich
-// falsch liegt; die EU-Länder ohne Messung (BG, CY, CZ, DK, EE, FI, GR, HR,
+// LI (seit 2026-10-06, Job 20261006-preisanzeige-rest): der Normalsatz
+// kommt aus LI-Bestellungen (2 von 2 Zeilen 8,1 Prozent). Eine LI-Kakao-
+// Bestellung gibt es nicht; der Kakao-Satz folgt der CH-Analogie, weil die
+// LI-Kasse in beiden gemessenen Punkten genau wie die CH-Kasse rechnet:
+// Normalsatz 8,1 Prozent wie CH, und die adresslose Kassenseite zeigt 0
+// Prozent wie in CH, wo die Bestellungen 8,1 Prozent tragen. In CH trägt der
+// Kakao denselben Satz wie alles andere (39 von 39 Zeilen 8,1 Prozent).
+// Liegt die erste LI-Kakao-Bestellung anders, meldet die Preisanzeige-Messung
+// den Widerspruch (saetze.json, widerspruch).
+// BENANNTE LÜCKEN (kein Satz, also Status quo): die EU-Länder ohne Messung (BG, CY, CZ, DK, EE, FI, GR, HR,
 // HU, LT, LU, LV, MT, RO, SI, SK). Ein Land ohne Zeile bekommt in EUR den
 // DE-Satz und in jeder anderen Währung keinen Aufschlag, siehe kassenSatz.
 
 /** Kassenwährung je Land mit Nicht-EUR-Kasse (gemessen 2026-10-04, s02). */
 const KASSEN_WAEHRUNG = {
   CH: 'CHF',
+  LI: 'CHF',
   PL: 'PLN',
   SE: 'SEK',
   GB: 'GBP',
