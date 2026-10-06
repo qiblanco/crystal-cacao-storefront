@@ -20,7 +20,7 @@
 // diese Dateien gibt (siehe Kopf von produkt-seo.js). Vite loest den
 // relativen Pfad identisch auf; cart-display-pricing importiert selbst
 // nichts, die Kette ist damit vollstaendig node-aufloesbar.
-import {STEUER_LAND_DEFAULT, taxRateForHandle} from './cart-display-pricing.js';
+import {STEUER_LAND_DEFAULT, kassenSatz} from './cart-display-pricing.js';
 import {istBrutto} from './preismodus.js';
 
 /**
@@ -37,82 +37,93 @@ import {istBrutto} from './preismodus.js';
  * @param {string} handle Produkt-Handle
  * @param {string} [currencyCode] Waehrung des API-Preises (Default EUR)
  * @param {string} [land] ISO-Land des aufgeloesten Marktes (Default DE)
- * @returns {number} AUFZUSCHLAGENDER Satz: der des Landes für EUR im Preismodus
- *   netto, 0 sonst (Nicht-EUR oder Preismodus brutto: Betrag ist Endbetrag)
+ * @returns {number} AUFZUSCHLAGENDER Satz: im Preismodus netto der gemessene
+ *   Kassensatz des Landes (kassenSatz), 0 im Preismodus brutto
  */
 export function anzeigeSatz(handle, currencyCode, land) {
-  if ((currencyCode || 'EUR') !== 'EUR') return 0;
+  // SATZ-ACHSE LAND (Grossjob 20261004 preisanzeige, s03): die Währung
+  // entscheidet nicht mehr,
+  // OB Steuer aufkommt. CH zahlt auf den CHF-Preis 8,1 Prozent obendrauf;
+  // kassenSatz() kennt die gemessenen Länder und lässt ungemessene in
+  // Fremdwährung beim Endbetrag.
   // DRITTE ACHSE, der PREISMODUS (Grossjob 20260924-kasse-zeigt-brutto-
   // preise-wie-produktseite-prio10, s02): steht der Shop auf brutto, ist auch
   // der EUR-Preis schon der Endbetrag -- in DE ohnehin, in AT über Shopifys
   // "Dynamisch" (Heimatsatz heraus, Landessatz drauf). Aufschlagen hieße dann
   // doppelte Steuer. Der ENTHALTENE Satz bleibt über taxRateForHandle lesbar.
   if (istBrutto()) return 0;
-  return taxRateForHandle(handle, land);
+  return kassenSatz(handle, currencyCode, land);
 }
 
 /**
- * Brutto-Anzeigewert eines API-Preises (Warenkorb-Kanon: Math.round).
+ * Brutto-Anzeigewert eines API-Preises: der Kassenbetrag (kassenAnzeige).
  * @param {string|number} amount API-Betrag (Netto bei EUR, Endbetrag sonst)
  * @param {string} handle Produkt-Handle (Steuersatz-Zuordnung)
  * @param {string} [currencyCode]
  * @param {string} [land] ISO-Land des aufgeloesten Marktes (Default DE)
- * @returns {number|null} gerundeter Anzeigewert oder null (Betrag fehlt)
+ * @returns {number|null} Anzeigewert auf den Cent oder null (Betrag fehlt)
  */
 export function bruttoAnzeige(amount, handle, currencyCode, land) {
   const zahl = Number.parseFloat(amount);
   if (!Number.isFinite(zahl)) return null;
-  return ganzEuroAnzeige(
+  return kassenAnzeige(
     zahl * (1 + anzeigeSatz(handle, currencyCode, land)),
     land,
   );
 }
 
 /**
- * GANZ-EURO-ANZEIGE: aus dem Kundenbetrag die Zahl, die die Seite nennt.
- * Die Regel heißt: die Seite nennt nie weniger, als die Kasse nimmt.
+ * KASSENBETRAG-ANZEIGE: aus dem Kundenbetrag die Zahl, die die Seite nennt.
+ * Die Regel heißt: die Seite nennt den Betrag, den die Kasse des Landes nimmt
+ * (Grossjob 20261004 preisanzeige, Konzept Abschnitt 2, Christian
+ * 2026-10-04: "1 Euro mehr
+ * anzeigen macht keinen Sinn").
  *
- * Gerechnet wird auf den Cent, dann auf den nächsten ganzen Euro AUFgerundet.
- * Das gilt in jedem Land (AT seit Job 20260926-at-kakao-einzelpackung-78-
- * beworben-kasse-78-13-beide-laeden: netto 71,03 x 1,10 = 78,13, die Seite
- * nennt 79 statt 78).
+ * Gerechnet wird auf den Cent. Ist der Betrag ein ganzer Euro, zeigt die Seite
+ * ihn ohne Cent ("1.087,- €"), sonst cent-genau ("78,13 €").
  *
- * DE hat EINE Toleranz von 1 Cent (Job 20261001-kakao-sets-ab-4-seite-nennt-
- * weniger-als-kasse-prio30). DE ist das Kalibrierland: dort sind Nettopreise
+ * Davor standen drei Fixe an derselben Frage, der Rundungsrichtung: round
+ * (2026-07-18), ceil außerhalb DE (2026-09-26, AT 78,13 -> 79), ceil auch in
+ * DE (2026-10-01, Sets 266,06 -> 267). Für keine Richtung ist eine
+ * Ganz-Euro-Zahl eines nicht ganzen Kassenbetrags richtig: abgerundet nennt
+ * die Seite weniger, aufgerundet mehr als die Kasse.
+ *
+ * NOTBEHELF DE, mit Verfall: DE ist das Kalibrierland, dort sind Nettopreise
  * so gesetzt, dass brutto ein ganzer Euro herauskommt. Ein Nettopreis auf den
- * Cent trifft das Ziel aber nur auf höchstens einen halben Netto-Cent mal
- * (1 + Satz) genau, nach Cent-Rundung also auf +-1 Cent: QiOne 2 Pro
- * 913,45 x 1,19 = 1087,0055 bleibt 1.087 (reines ceil zeigte 1.088, deshalb
- * wurde ceil in ProductPrice einmal entfernt), Kakao 71,03 x 1,07 = 76,0021
- * bleibt 76. Was mehr als 1 Cent über dem ganzen Euro liegt, ist nicht
- * kalibriert und wird aufgerundet: die Kakao-Sets ab 4 Packungen kosten
- * 49,73 netto je Packung, 5 Packungen 248,65 x 1,07 = 266,06 an der Kasse.
- * Kaufmännisch gerundet nannte die Seite 266, jetzt 267.
- * Gemessen über alle 48 DE-Produkte (preis_soll, 2026-10-01): es ändern sich
- * genau die Sets mit 5, 6 und 7 Packungen (266/319/372 -> 267/320/373).
+ * Cent trifft das aber nur auf +-1 Cent (QiOne 2 Pro 913,45 x 1,19 =
+ * 1087,0055, Kasse 1087,01). Liegt der DE-Betrag 1 Cent neben einem ganzen
+ * Euro, nennt die Seite den ganzen Euro. Diese Toleranz endet mit dem
+ * Brutto-Kipp (Job 20260924-kasse-zeigt-bruttopreise-wie-produktseite-prio10):
+ * danach ist der DE-Kassenbetrag selbst ganz, und die Zeile hier kann weg.
  *
  * Für MODELLIERTE Beträge (die Kakao-Staffel rechnet einen Festbetragsrabatt
  * als Prozent nach) gilt staffelModellAnzeige(), nicht diese Funktion.
- *
- * Die Regel hängt NICHT am Preismodus: nach dem Brutto-Kipp liefert Shopify
- * für AT mit "Dynamisch" wieder 78,13, und die Regel greift gleich.
- * Der Warenkorb zeigt cent-genau (getCartLinePriceDisplayExact) und ist davon
- * nicht berührt. Dieselbe Regel rechnet preiswatch nach
+ * Die Regel hängt NICHT am Preismodus. Dieselbe Regel rechnet preiswatch nach
  * (homepage-bauer/src/preiswatch.py, anzeige_ganz_euro).
  *
  * @param {number} betrag Kundenbetrag, ungerundet
  * @param {string} [land] ISO-Land des aufgelösten Marktes (Default DE)
- * @returns {number|null} ganzer Anzeigewert
+ * @returns {number|null} Anzeigewert auf den Cent
  */
-export function ganzEuroAnzeige(betrag, land) {
+export function kassenAnzeige(betrag, land) {
   const zahl = Number(betrag);
   if (!Number.isFinite(zahl)) return null;
   const l = String(land || STEUER_LAND_DEFAULT).toUpperCase();
   const cent = Math.round(zahl * 100);
-  // `|| 0`: bei 0,00 ergibt ceil(-0,01) sonst -0, und das formatiert als "-0".
-  if (l === STEUER_LAND_DEFAULT) return Math.ceil((cent - 1) / 100) || 0;
-  return Math.ceil(cent / 100);
+  if (l === STEUER_LAND_DEFAULT) {
+    const rest = ((cent % 100) + 100) % 100;
+    if (rest === 1) return (cent - 1) / 100;
+    if (rest === 99) return (cent + 1) / 100;
+  }
+  // `+ 0`: aus -0 wird 0, sonst formatiert es als "-0".
+  return cent / 100 + 0;
 }
+
+/**
+ * Alter Name, gleiche Funktion: die Aufrufer der früheren Ganz-Euro-Regel
+ * gehen ohne Änderung auf die Kassenbetrag-Regel mit.
+ */
+export const ganzEuroAnzeige = kassenAnzeige;
 
 /**
  * STAFFEL-MODELL-ANZEIGE: nur für die Kakao-Staffel (CacaoProductForm,
@@ -131,7 +142,7 @@ export function staffelModellAnzeige(betrag, land) {
   if (!Number.isFinite(zahl)) return null;
   const l = String(land || STEUER_LAND_DEFAULT).toUpperCase();
   if (l === STEUER_LAND_DEFAULT) return Math.round(zahl);
-  return ganzEuroAnzeige(zahl, l);
+  return kassenAnzeige(zahl, l);
 }
 
 /**
@@ -141,7 +152,7 @@ export function staffelModellAnzeige(betrag, land) {
  * - 'cart-cent' (Warenkorb, cent-genau, aiceo:digest54:p3): "76,00 €" ·
  *   "159,63 €" — NUR für bereits cent-genaue Werte aus
  *   cart-display-pricing.js (getCartLine*Exact); kein zweites Runden hier.
- * @param {number|null} wert gerundeter Anzeigewert (bzw. cent-genau bei 'cart-cent')
+ * @param {number|null} wert Anzeigewert auf den Cent (ganz -> ohne Nachkommastellen)
  * @param {string} [currencyCode]
  * @param {'lp'|'pdp'|'cart-cent'} [stil]
  * @returns {string|null}
@@ -149,7 +160,10 @@ export function staffelModellAnzeige(betrag, land) {
 export function formatPreis(wert, currencyCode = 'EUR', stil = 'lp') {
   if (wert == null || !Number.isFinite(Number(wert))) return null;
   const n = Number(wert);
-  const digits = stil === 'cart-cent' ? 2 : 0;
+  // Ganz -> ohne Cent, sonst cent-genau, in jedem Stil (Kassenbetrag-Regel,
+  // s03 2026-10-04): "78,13 €" · "1.132,89 CHF" · "$1,234.56".
+  const ganz = Math.round(n * 100) % 100 === 0;
+  const digits = stil === 'cart-cent' || !ganz ? 2 : 0;
   if (currencyCode === 'USD') {
     return `$${n.toLocaleString('en-US', {
       minimumFractionDigits: digits,
@@ -161,7 +175,7 @@ export function formatPreis(wert, currencyCode = 'EUR', stil = 'lp') {
     maximumFractionDigits: digits,
   });
   const symbol = currencyCode === 'EUR' ? '€' : currencyCode;
-  if (stil === 'cart-cent') return `${de} ${symbol}`;
+  if (stil === 'cart-cent' || !ganz) return `${de} ${symbol}`;
   return stil === 'pdp' ? `${de},- ${symbol}` : `${de} ${symbol}`;
 }
 

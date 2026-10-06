@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "691e1acb91b0379e8bb189229f8a0c1ef4479d5a",
-  "erzeugt_utc": "2026-10-02T19:44:24Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 691e1acb91b0; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 0005c81b0466). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "7be088dbfa38c45bcff3dab62a087cc2f4ca8af7",
+  "erzeugt_utc": "2026-10-06T02:01:12Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 7be088dbfa38; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 691e1acb91b0). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -84,8 +84,7 @@
     {
       "upstream": "app/lib/cart-display-pricing.js",
       "klasse": "K1",
-      "sha256": "ff57cbb3b7c822e5ddf1299708111e04b5bba31de67244d85ac3c6348ab59319",
-      "nachzug_grund": "NACHZUG 2026-09-30 (Elina EL-20260930-9c7bdd63): gemischte Kakao-Sets (1+1, 2+1, 1+2) als Set-Zeile, damit ein Partnercode auch bei Awake+Create greift; byte-gleich aus qiblanco-storefront Branch feat/kakao-gemischte-sets-20260930. || NACHZUG 2026-09-30 (Grossjob 20260930-GROSSJOB-kakao-partnercodes-alle-mengen-und-mengenrabatt-gemischt, s03): Kakao-Sets 4-7 als Set-Zeile und Zerlegung jeder Menge ab 8, Preisschutz mit benanntem Anker, damit ein Partnercode fuer jede Kakaomenge greift; byte-gleich aus qiblanco-storefront Branch feat/kakao-sets-jede-menge-20260930."
+      "sha256": "6cb2f8fecb31885108efb9942e0919309c64c160b2c6a46dbaa875b86b2b14a1"
     },
     {
       "upstream": "app/lib/datum.js",
@@ -105,7 +104,7 @@
     {
       "upstream": "app/lib/markt-pricing.js",
       "klasse": "K1",
-      "sha256": "67ead9d6a8cacd73962f52dcdf9cae26de0d99361b83da28c7eedfee2b9c04cc"
+      "sha256": "fc27d1e94e98306856b40266aefb7cbfcb58b62cbcbe99ea10f629e1aac4f799"
     },
     {
       "upstream": "app/lib/produkt-schema.js",
@@ -382,7 +381,7 @@
     {
       "upstream": "app/components/reusables/amazonstil-daten.js",
       "klasse": "K1",
-      "sha256": "21bcfac69ccc1df885efca6c37668600e81793aece3c593b900f4e6c9643f63a"
+      "sha256": "5ef4d5b1cdcc422bc0f452818149670364f97ddba784ff27df6ddf753102477e"
     },
     {
       "upstream": "app/styles/amazonstil.css",
