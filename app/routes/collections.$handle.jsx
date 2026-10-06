@@ -95,9 +95,15 @@ export const meta = ({data}) => {
  * @type {Record<string, string>}
  */
 const ERSATZ_BESCHREIBUNG = {
+  // Beide Sorten, also keine Einzelregion: Awake kommt aus dem Piura-Tal,
+  // Create aus dem Departamento Amazonas (SORTEN.<sorte>.herkunft in
+  // app/lib/sorten-profil.js). Bis 2026-10-05 stand hier „zwei Sorten aus dem
+  // Piura-Tal" — für Create falsch. Formulierung wie bei den gemischten Sets in
+  // app/lib/produkt-seo.js; Randprobe: partner-manager/portal/
+  // partnerseite-update/folgeauftraege/probe_fa1_kakao_herkunft_rand.py.
   'zeremonie-kakao':
-    'Zeremonie-Kakao von Crystal Cacao® in Bio-Qualität (DE-ÖKO-006): zwei ' +
-    'Sorten aus dem Piura-Tal in Peru, schonend kalt verarbeitet.',
+    'Zeremonie-Kakao von Crystal Cacao® in Bio-Qualität (DE-ÖKO-006): Awake ' +
+    'und Create aus zwei Anbaugebieten im Norden Perus, schonend kalt verarbeitet.',
 };
 
 /**
