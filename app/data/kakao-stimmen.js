@@ -36,13 +36,16 @@ export const GOOGLE_PROFIL_URL =
  * `gemeldet` = Zahl, die der Feed fuer das Profil meldet; `geliefert` = Zahl
  * der Bewertungen, die er im Wortlaut ausliefert; `stand` = Tag des Abrufs
  * (Kalendertag, ISO). Wer KAKAO_STIMMEN neu erntet, zieht alle drei nach.
+ * NACHGEZAEHLT 2026-10-07 (derselbe Job): der Feed meldet 443 und liefert 40;
+ * unter den 40 nennen weiterhin genau diese drei den Kakao (dieselben ids und
+ * Zeitstempel, Wortlaut zeichengleich). Die Stimmen selbst sind unveraendert.
  * crystal-cacao-node/proben/probe_erfahrungen_am_kundenrand.py (Arm I) haelt
  * die Seite gegen diese drei Werte.
  */
 export const FEED_STAND = Object.freeze({
-  gemeldet: 439,
-  geliefert: 38,
-  stand: '2026-09-08',
+  gemeldet: 443,
+  geliefert: 40,
+  stand: '2026-10-07',
 });
 
 export const KAKAO_STIMMEN = Object.freeze([
