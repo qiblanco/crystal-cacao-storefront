@@ -31,8 +31,11 @@
  *
  * DREI ABGRENZUNGEN, DIE WÖRTLICH AUS DEM VERTRAG STAMMEN UND KUNDENSICHTBAR SIND:
  *  - Primoris prüft SCHADSTOFFE an der ROHBOHNE.
- *  - Dartsch misst NÄHRSTOFFE der fertigen Mischung und enthält KEINEN
- *    Schadstoffwert.
+ *  - Die Nährstoff-Analysen (Messung PLENUM Dr. Born, Ennepetal; Bericht
+ *    Dartsch) messen NÄHRSTOFFE der fertigen Mischung und enthalten KEINEN
+ *    Schadstoffwert. Bis 2026-10-07 stand hier und im Labor-Feld nur Dartsch;
+ *    der Bericht selbst nennt PLENUM als messendes Labor (am PDF nachgelesen,
+ *    Job 20261007-repair-kakaotiefe-satz-quecksilber-arsen-nicht-im-primoris-zeugnis).
  *  - Die Mineralstoff-Analysen (Messung SAS hagmann, Zusammenfassung Dartsch)
  *    messen Mineralstoffe und Spurenelemente der fertigen Mischung — ebenfalls
  *    OHNE Schadstoffwert. Sie heißen deshalb nicht „vollständige Analyse":
@@ -64,7 +67,7 @@ export const KAKAO_BELEGE = [
     art: "naehrstoff-analyse",
     titel: "Nährstoff-Analyse · Crystal Cacao Create",
     geprueft: "Nährstoffe der fertigen Mischung",
-    labor: "Dartsch Scientific",
+    labor: "PLENUM Dr. Born (Messung), Dartsch Scientific (Bericht)",
     datum: "27.10.2025",
     kennung: "Analyse DARTSCH/21/10/25",
     url: "https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-create-2025-10-27.pdf?v=1788373349",
@@ -109,7 +112,7 @@ export const KAKAO_BELEGE = [
     art: "naehrstoff-analyse",
     titel: "Nährstoff-Analyse · Crystal Cacao Awake",
     geprueft: "Nährstoffe der fertigen Mischung",
-    labor: "Dartsch Scientific",
+    labor: "PLENUM Dr. Born (Messung), Dartsch Scientific (Bericht)",
     datum: "04.11.2025",
     kennung: "Analyse DARTSCH/04/11/25",
     url: "https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-awake-2025-11-04.pdf?v=1788373343",
