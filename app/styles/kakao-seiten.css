@@ -3124,25 +3124,29 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
    SPEZIFITAET: `main .cc-absicht h2` (0-2-2) schlaegt `main h2` (0-1-1) ohne
    `!important`. Ein `!important` waere hier die falsche Loesung — es
    gewaenne auch gegen jede spaetere, absichtliche Regel. */
-main .cc-absicht h2 {
+main .cc-absicht h2,
+main .cc-erfahrungen h2 {
   font-size: var(--cc-fs-5);
   text-align: left;
   text-wrap: balance;
   margin-top: var(--cc-space-6);
 }
 
-main .cc-absicht section:first-of-type h2 {
+main .cc-absicht section:first-of-type h2,
+main .cc-erfahrungen section:first-of-type h2 {
   margin-top: var(--cc-space-5);
 }
 
 /* Die H1 bleibt auf ihrer Stufe (--cc-fs-7), aber linksbuendig wie der Text
    darunter: sie ist der Anfang einer Lesespalte, nicht die Mitte eines
    Plakats. */
-main .cc-absicht h1 {
+main .cc-absicht h1,
+main .cc-erfahrungen h1 {
   text-align: left;
 }
 
-.cc-absicht p {
+.cc-absicht p,
+.cc-erfahrungen p {
   line-height: 1.7;
   margin-bottom: var(--cc-space-2);
 }
@@ -3180,7 +3184,8 @@ main .cc-absicht h1 {
    Sprung (1,56) als „keine modulare Skala" angekreidet, sobald die 12,8 px
    der alten Pruefdokumente wegfielen. Die Leiter lautet jetzt 16 / 20 / 25 /
    31,25 / 48,8 — ein Schritt 1,25 je Stufe, H1 ausgenommen. */
-.cc-absicht .cc-lead {
+.cc-absicht .cc-lead,
+.cc-erfahrungen .cc-lead {
   line-height: 1.45;
   hyphens: auto;
   overflow-wrap: break-word;
@@ -3192,6 +3197,7 @@ main .cc-absicht h1 {
    matisierung", „Kör-perbewusstsein", „natür-licher", „för-dern"). */
 @media (min-width: 48em) {
   .cc-absicht .cc-lead,
+  .cc-erfahrungen .cc-lead,
   .cc-absicht__zitat p {
     font-size: var(--cc-fs-4);
   }
@@ -3202,7 +3208,8 @@ main .cc-absicht h1 {
    kleinere Schrift liest sich wie Kleingedrucktes, und Kleingedrucktes ist
    genau die Form, in der man etwas versteckt. Dieselbe Groesse, ruhigerer
    Ton — so sieht man, dass sie freiwillig dastehen. */
-.cc-absicht__ehrlich {
+.cc-absicht__ehrlich,
+.cc-erfahrungen__grenze {
   border-left: 1px solid var(--cc-linie);
   padding-left: var(--cc-space-3);
   color: var(--cc-muted);
@@ -3240,27 +3247,55 @@ main .cc-absicht h1 {
    Der Block nimmt dieselbe Breite wie auf den Kaufseiten (72rem) und bleibt
    auf die Mitte der Spalte zentriert; am Telefon faellt die Rechnung auf
    einen Rand von 1rem zurueck, wie ihn der Seitenrahmen ohnehin hat. */
-.cc-absicht .cc-belege {
+.cc-absicht .cc-belege,
+.cc-erfahrungen .cc-belege {
   width: min(72rem, calc(100vw - 2rem));
   max-width: none;
   margin-inline: calc(50% - min(36rem, 50vw - 1rem));
   padding-inline: 0;
 }
 
-.cc-absicht .cc-belege .cc-belege__titel {
+.cc-absicht .cc-belege .cc-belege__titel,
+.cc-erfahrungen .cc-belege .cc-belege__titel {
   font-size: var(--cc-fs-4);
   text-align: left;
 }
 
-.cc-absicht .cc-belege .cc-belege__grenze {
+.cc-absicht .cc-belege .cc-belege__grenze,
+.cc-erfahrungen .cc-belege .cc-belege__grenze {
   margin-inline: 0;
   text-align: left;
 }
 
-.cc-absicht a {
+.cc-absicht a,
+.cc-erfahrungen a:not(.cc-knopf) {
   color: var(--cc-gold-text);
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* --- Die Erfahrungsseite /pages/erfahrungen (2026-10-07, Hypothese GS-098) ---
+ *
+ * SIE LIEST SICH WIE DIE ABSICHTSSEITE und benutzt deshalb deren Regeln: die
+ * Selektorlisten oben tragen `.cc-erfahrungen` neben `.cc-absicht` (Lesespalte,
+ * linksbuendige H2 auf --cc-fs-5, Vorspann, leise Grenz-Absaetze, breite
+ * Pruefdokumente, Goldtext-Links). Eine Regel, zwei Seiten -- eine Kopie der
+ * Werte waere die zweite Skala, die das Beauty-Gate verbietet.
+ * Die Links nehmen `.cc-knopf` aus: `.cc-absicht a` (0-1-1) schluege sonst die
+ * Knopfklasse (0-1-0) und faerbte den Kaufknopf als Textlink.
+ *
+ * Neu ist nur, was die Absichtsseite nicht hat: */
+
+/* Die Stimmen stehen untereinander. In der 70ch-Lesespalte ergaebe das Raster
+   der Startseite zwei Spalten, und die lange Stimme stuende neben einer
+   kurzen mit einem Loch darunter. Ein Zitat je Zeile liest sich wie Text. */
+.cc-erfahrungen .cc-va-stimmen-gitter {
+  grid-template-columns: 1fr;
+}
+
+/* Die Knoepfe am Schluss, mit Luft zum letzten Absatz. */
+.cc-erfahrungen__knoepfe {
+  margin-top: var(--cc-space-4);
 }
 
 /* --- Christians Zeile auf den drei Kundenflaechen (neu 2026-09-26) ---

@@ -375,7 +375,13 @@ export const KAKAO_SEITEN = Object.freeze(['crystal-cacao', 'kristall-kakao']);
  * traegt keinen Wert — eine Code-Route hat kein Aenderungsdatum im Bestand,
  * und ein erfundenes waere schlechter als keines.
  */
-export const KAKAO_CODE_SEITEN = Object.freeze(['warum-crystal-cacao']);
+export const KAKAO_CODE_SEITEN = Object.freeze([
+  'warum-crystal-cacao',
+  // 2026-10-07 (Hypothese GS-098): die Erfahrungsseite. Ohne diese Zeile
+  // waere sie live und bei keiner Suchmaschine angemeldet -- ihr ganzer
+  // Zweck ist die Suche "Crystal Cacao Erfahrungen".
+  'erfahrungen',
+]);
 
 /**
  * SEITEN, DIE DAUERHAFT WOANDERS HIN ZEIGEN — Handle -> Ziel.
@@ -694,6 +700,19 @@ export const KAKAO_FUSSMENUE = Object.freeze({
       // und werden dort einzeln gemessen -- dieser hier ist der Boden, nicht
       // der Nachweis.
       url: '/pages/warum-crystal-cacao',
+      items: [],
+    },
+    {
+      id: 'kakao-erfahrungen',
+      title: 'Crystal Cacao Erfahrungen',
+      // 2026-10-07 (Hypothese GS-098, Job km-entw-hebel-umsetzen-seo-top3-
+      // zwei-crystal-erfahrungen-de-gs-098-20261007): die zweite Inhaltsseite
+      // nach der Absicht, vor den Rechtstexten. Die Startseite verlinkt sie
+      // (noch) nicht -- die gehoert dem laufenden Grossjob 20261002-GROSSJOB-
+      // crystal-cacao-startseite-hochwertig. Dieses Menue ist deshalb heute der
+      // einzige Weg zu ihr, und probe_erfahrungen_am_kundenrand.py (Arm F)
+      // misst ihn auf JEDER Sitemap-Seite.
+      url: '/pages/erfahrungen',
       items: [],
     },
     {
