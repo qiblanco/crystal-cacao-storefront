@@ -66,12 +66,12 @@ export const KT_PROFIL = Object.freeze([
 export const KT_DOKUMENTE = Object.freeze({
   awake: Object.freeze([
     {art: 'schadstoff', titel: {de: 'Schadstoff-Prüfzeugnis · Piura Blanco', en: 'Contaminant test certificate · Piura Blanco'}, geprueft: {de: 'Schadstoffe an der rohen Bohne', en: 'Contaminants in the raw bean'}, labor: 'Primoris Belgium', datum: '2025-08-21', kennung: {de: 'Zertifikat 25/049938', en: 'Certificate 25/049938'}, sprache: 'en', seiten: 9, url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/pruefzeugnis-primoris-piura-blanco-2025-08-21.pdf?v=1788373365'},
-    {art: 'naehrstoff', titel: {de: 'Nährstoff-Analyse · Crystal Cacao Awake', en: 'Nutrient analysis · Crystal Cacao Awake'}, geprueft: {de: 'Nährstoffe der fertigen Mischung', en: 'Nutrients in the finished blend'}, labor: 'Dartsch Scientific', datum: '2025-11-04', kennung: {de: 'Analyse DARTSCH/04/11/25', en: 'Analysis DARTSCH/04/11/25'}, sprache: 'en', seiten: 1, url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-awake-2025-11-04.pdf?v=1788373343'},
+    {art: 'naehrstoff', titel: {de: 'Nährstoff-Analyse · Crystal Cacao Awake', en: 'Nutrient analysis · Crystal Cacao Awake'}, geprueft: {de: 'Nährstoffe der fertigen Mischung', en: 'Nutrients in the finished blend'}, labor: 'PLENUM Dr. Born (Messung), Dartsch Scientific (Bericht)', labor_en: 'PLENUM Dr. Born (testing), Dartsch Scientific (report)', datum: '2025-11-04', kennung: {de: 'Analyse DARTSCH/04/11/25', en: 'Analysis DARTSCH/04/11/25'}, sprache: 'en', seiten: 1, url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-awake-2025-11-04.pdf?v=1788373343'},
     {art: 'mineralstoff', titel: {de: 'Mineralstoff-Analyse · Crystal Cacao Awake', en: 'Mineral analysis · Crystal Cacao Awake'}, geprueft: {de: 'Mineralstoffe und Spurenelemente (ICP-MS)', en: 'Minerals and trace elements (ICP-MS)'}, labor: 'SAS hagmann (Messung), Dartsch Scientific (Bericht)', labor_en: 'SAS hagmann (testing), Dartsch Scientific (report)', datum: '2026-03-24', kennung: {de: 'Bericht 202511123716 engl.', en: 'Report 202511123716 engl.'}, sprache: 'en', seiten: 3, url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/mineralstoffanalyse-dartsch-crystal-cacao-awake-2026-03-24.pdf?v=1789034539'},
   ]),
   create: Object.freeze([
     {art: 'schadstoff', titel: {de: 'Schadstoff-Prüfzeugnis · Amazonas Nativo', en: 'Contaminant test certificate · Amazonas Nativo'}, geprueft: {de: 'Schadstoffe an der rohen Bohne', en: 'Contaminants in the raw bean'}, labor: 'Primoris Belgium', datum: '2025-08-19', kennung: {de: 'Zertifikat 25/049940', en: 'Certificate 25/049940'}, sprache: 'en', seiten: 9, url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/pruefzeugnis-primoris-amazonas-nativo-2025-08-19.pdf?v=1788373357'},
-    {art: 'naehrstoff', titel: {de: 'Nährstoff-Analyse · Crystal Cacao Create', en: 'Nutrient analysis · Crystal Cacao Create'}, geprueft: {de: 'Nährstoffe der fertigen Mischung', en: 'Nutrients in the finished blend'}, labor: 'Dartsch Scientific', datum: '2025-10-27', kennung: {de: 'Analyse DARTSCH/21/10/25', en: 'Analysis DARTSCH/21/10/25'}, sprache: 'de', seiten: 1, url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-create-2025-10-27.pdf?v=1788373349'},
+    {art: 'naehrstoff', titel: {de: 'Nährstoff-Analyse · Crystal Cacao Create', en: 'Nutrient analysis · Crystal Cacao Create'}, geprueft: {de: 'Nährstoffe der fertigen Mischung', en: 'Nutrients in the finished blend'}, labor: 'PLENUM Dr. Born (Messung), Dartsch Scientific (Bericht)', labor_en: 'PLENUM Dr. Born (testing), Dartsch Scientific (report)', datum: '2025-10-27', kennung: {de: 'Analyse DARTSCH/21/10/25', en: 'Analysis DARTSCH/21/10/25'}, sprache: 'de', seiten: 1, url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-create-2025-10-27.pdf?v=1788373349'},
     {art: 'mineralstoff', titel: {de: 'Mineralstoff-Analyse · Crystal Cacao Create', en: 'Mineral analysis · Crystal Cacao Create'}, geprueft: {de: 'Mineralstoffe und Spurenelemente (ICP-MS)', en: 'Minerals and trace elements (ICP-MS)'}, labor: 'SAS hagmann (Messung), Dartsch Scientific (Bericht)', labor_en: 'SAS hagmann (testing), Dartsch Scientific (report)', datum: '2026-03-12', kennung: {de: 'Bericht 202510143565-engl.-E', en: 'Report 202510143565-engl.-E'}, sprache: 'en', seiten: 3, url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/mineralstoffanalyse-dartsch-crystal-cacao-create-2026-03-12.pdf?v=1789034532'},
   ]),
 });
@@ -101,14 +101,14 @@ export const KT_TEXTE = Object.freeze({
       fund: 'Selbst Silber und Platin weist das Labor in Spuren nach: {ag} und {pt} mg/kg.',
       quelle: 'Quelle: Dartsch Scientific, Zusammenfassung des Prüfberichts {nr} der SAS hagmann GmbH (DAkkS-akkreditiert) vom {datum}, Probe {probe}.',
       quelle_link: 'Bericht öffnen (PDF, englisch, 3 Seiten)',
-      schadstoff: 'Blei, Cadmium, Quecksilber und Arsen führt dieser Bericht nicht. Sie prüft das Schadstoff-Prüfzeugnis an der rohen Bohne:',
+      schadstoff: 'Blei, Cadmium, Quecksilber und Arsen führt dieser Bericht nicht. Zu Quecksilber und Arsen gibt es eine gesonderte, einmalige Untersuchung aller Elemente von Dartsch Scientific. Quecksilber war darin nicht nachweisbar, Arsen fand sich in sehr geringen Spuren, die nicht quantifizierbar sind. Blei und Cadmium prüft das Schadstoff-Prüfzeugnis an der rohen Bohne:',
       schadstoff_link: 'Primoris Belgium, {datum} (PDF)',
       und: 'und',
     },
     profil: {
       augenbraue: 'Analyseprofil · je 100 g',
       titel: 'Das Profil von {name}',
-      lead: 'Dartsch Scientific hat die fertige Mischung untersucht. Daneben steht {andere} zum Vergleich.',
+      lead: 'Das Labor PLENUM Dr. Born hat die fertige Mischung untersucht, Prof. Dr. Peter C. Dartsch verantwortet den Bericht. Daneben steht {andere} zum Vergleich.',
       deutung: {
         awake: 'Awake hat den höchsten L-Tryptophan-Gehalt unserer Sorten: für präsente Klarheit, emotionale Tiefe und ein Gefühl innerer Weite.',
         create: 'Create hat das stärkste aktivierende Profil unserer Sorten: für sanfte Wachheit, kognitive Klarheit und stabile innere Ausrichtung.',
@@ -198,14 +198,14 @@ export const KT_TEXTE = Object.freeze({
       fund: 'The lab even detects traces of silver and platinum: {ag} and {pt} mg/kg.',
       quelle: 'Source: Dartsch Scientific, summary of test report {nr} by SAS hagmann GmbH (DAkkS-accredited), dated {datum}, sample {probe}.',
       quelle_link: 'Open the report (PDF, English, 3 pages)',
-      schadstoff: 'This report does not cover lead, cadmium, mercury and arsenic. They are tested in the contaminant certificate on the raw bean:',
+      schadstoff: 'This report does not cover lead, cadmium, mercury and arsenic. Mercury and arsenic were checked once, in a separate analysis of all elements from Dartsch Scientific. Mercury was not detectable, and arsenic appeared in very small traces that could not be quantified. Lead and cadmium are tested in the contaminant certificate on the raw bean:',
       schadstoff_link: 'Primoris Belgium, {datum} (PDF)',
       und: 'and',
     },
     profil: {
       augenbraue: 'Analysis profile · per 100 g',
       titel: 'The profile of {name}',
-      lead: 'Dartsch Scientific tested the finished blend. {andere} is shown alongside for comparison.',
+      lead: 'The PLENUM Dr. Born lab tested the finished blend, and Prof. Dr. Peter C. Dartsch is responsible for the report. {andere} is shown alongside for comparison.',
       deutung: {
         awake: 'Awake has the highest L-tryptophan content of our varieties: for present-moment clarity, emotional depth and a sense of inner openness.',
         create: 'Create has the most activating profile of our varieties: for gentle alertness, mental clarity and a steady inner balance.',

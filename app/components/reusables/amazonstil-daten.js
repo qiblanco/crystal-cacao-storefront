@@ -472,7 +472,7 @@ export const SORTENVERGLEICH = {
         },
         {
           art: 'Nährstoff-Analyse',
-          labor: 'Dartsch Scientific',
+          labor: 'PLENUM Dr. Born und Dartsch Scientific',
           datum: '04.11.2025',
           sprache: 'en',
           url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-awake-2025-11-04.pdf?v=1788373343',
@@ -519,7 +519,7 @@ export const SORTENVERGLEICH = {
         },
         {
           art: 'Nährstoff-Analyse',
-          labor: 'Dartsch Scientific',
+          labor: 'PLENUM Dr. Born und Dartsch Scientific',
           datum: '27.10.2025',
           sprache: 'de',
           url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-create-2025-10-27.pdf?v=1788373349',
