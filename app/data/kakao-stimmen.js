@@ -24,6 +24,27 @@
 export const GOOGLE_PROFIL_URL =
   'https://search.google.com/local/reviews?placeid=ChIJafc6o-z3okcRPlf__D3fDBM';
 
+/**
+ * DIE MESSGRENZE ALS DATUM, nicht nur als Kommentar (2026-10-07, Job
+ * km-entw-hebel-umsetzen-seo-top3-zwei-crystal-erfahrungen-de-gs-098-20261007).
+ *
+ * /pages/erfahrungen nennt dem Besucher, aus wie vielen Bewertungen die drei
+ * Stimmen stammen. Stuenden die Zahlen nur im Kommentar oben, fuehrte die
+ * Seite eine zweite Kopie davon — und beim naechsten Abruf des Feeds liefe
+ * genau eine der beiden mit. Kommentar und Seite lesen deshalb DIESE Stelle.
+ *
+ * `gemeldet` = Zahl, die der Feed fuer das Profil meldet; `geliefert` = Zahl
+ * der Bewertungen, die er im Wortlaut ausliefert; `stand` = Tag des Abrufs
+ * (Kalendertag, ISO). Wer KAKAO_STIMMEN neu erntet, zieht alle drei nach.
+ * crystal-cacao-node/proben/probe_erfahrungen_am_kundenrand.py (Arm I) haelt
+ * die Seite gegen diese drei Werte.
+ */
+export const FEED_STAND = Object.freeze({
+  gemeldet: 439,
+  geliefert: 38,
+  stand: '2026-09-08',
+});
+
 export const KAKAO_STIMMEN = Object.freeze([
   Object.freeze({
     id: 'AbFvOqkb7S3bjbMTPSzd0WwHieMG8zTKcHqUehyA1E20PcZiQ_uNkQrj5_VxbNcuCoQR_BPZ1uts',
