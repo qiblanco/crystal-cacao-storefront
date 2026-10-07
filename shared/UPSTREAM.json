@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "650af9cca1fdce1f3bc7ea484c1b62d7b8cecdb8",
-  "erzeugt_utc": "2026-10-07T10:13:38Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 650af9cca1fd; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 606c99c59452). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "81a972e37bbbd53c3ce58099e15692342738878d",
+  "erzeugt_utc": "2026-10-07T14:53:22Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 81a972e37bbb; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 650af9cca1fd). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -99,7 +99,7 @@
     {
       "upstream": "app/lib/entity-schema.js",
       "klasse": "K1",
-      "sha256": "a9a6ccb5786cd61ec6dfdd950642031b1955703ae6502bebf58683b1f2e37171"
+      "sha256": "68f23292ba98a33f7c9b3c4ef445f54252fa0ef6e8738132f1c70da7d7766580"
     },
     {
       "upstream": "app/lib/faq-schema.js",

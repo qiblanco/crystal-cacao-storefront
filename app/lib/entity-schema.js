@@ -30,6 +30,13 @@
  * SEITE IN DIE CLOSURE — dann gilt Gate 12 auch dort. Das ist gewollt und
  * der Grund, warum hier kein Sammel-Helper entstehen soll.
  *
+ * STAND 2026-10-07: das ist eingetreten. Inzwischen importieren mehrere
+ * Routen und Schema-Bibliotheken dieses Modul (`grep -rl entity-schema app`
+ * nennt sie), meist nur ORG_ID und SITE_ID. Gate 12 prüft seither je Seite,
+ * ob ihre Bindestelle eines der GEÄNDERTEN Symbole bindet: ein Diff an
+ * organizationSchema erreicht so nur die Seiten, die den Knoten ausgeben
+ * (Startseite und /pages/affiliate-partnerprogramm).
+ *
  * CANONICAL_ORIGIN wird aus seo.js GELESEN (nicht kopiert): Lesen erzeugt
  * keinen Diff und damit keine Gate-12-Reichweite, hält aber die eine
  * kanonische Domain-Definition als Single Source of Truth.
@@ -67,6 +74,40 @@ export const ORGANISATION = {
 /** Stabile Knoten-IDs, damit die Knoten aufeinander zeigen können. */
 export const ORG_ID = `${CANONICAL_ORIGIN}/#organization`;
 export const SITE_ID = `${CANONICAL_ORIGIN}/#website`;
+
+/**
+ * Der Gründer für `founder` am Organization-Knoten (Christian 2026-10-07:
+ * „Markenfakten überall gleich: Gründer, Sitz, Produkte").
+ *
+ * DER NAME STEHT OHNE AKADEMISCHEN GRAD. So führt ihn das Impressum in der
+ * Zeile nach § 18 Abs. 2 MStV, und so nennen ihn die Seiten, die ihn als
+ * Gründer zeigen (app/data/absicht.js: „Gründer und Geschäftsführer von Qi
+ * Blanco"; app/data/hypothesen.js: „Christian Bernd Bauer, Gründer von Qi
+ * Blanco"). test/seo-structured-data.test.mjs hält beides fest: der Name
+ * steht wörtlich im Impressum, und die Rolle „Gründer" steht bei demselben
+ * Namen auf einer öffentlichen Seite.
+ *
+ * WARUM NUR EINE PERSON, obwohl die eigene FAQ zwei nennt („Gegründet haben
+ * Qi Blanco Christian und Anna", app/data/fragen.js): die Firma nennt die
+ * Mitgründerin in ihren eigenen Texten nur beim Vornamen, und ein Vorname
+ * löst keine Person als Entität auf. Ihr voller Name steht im Bestand allein
+ * in Titeln von YouTube-Videos (Abzug in app/lib/podcast-daten.server.js,
+ * „Gründer Interview … Anna & Christian Bernd Bauer"). Das ist ein Hinweis,
+ * aber kein Satz der Firma über ihre Gründer; hier eingetragen wäre er eine
+ * abgeleitete Angabe über einen Menschen. `founder` behauptet „ist Gründer",
+ * nicht „ist einziger Gründer". Hat ein Mensch den Namen bestätigt, wird aus
+ * dem Feld ein Array mit zwei Personen.
+ *
+ * DIE @id IST DIE DES PERSON-KNOTENS AUF /pages/ueber-uns (dessen Route,
+ * Funktion aboutSchema: absoluteCanonical(PFAD) + '#person'). Dort steht
+ * der volle Knoten mit jobTitle, worksFor und Anschrift. Startseite und
+ * Über-uns-Seite beschreiben damit EINE Person statt zweier. Die Route baut
+ * ihre @id selbst und importiert diese Konstante nicht; der Test liest die
+ * Formel deshalb im Quelltext der Route nach und wird rot, wenn eine der
+ * beiden Stellen allein umzieht.
+ */
+export const FOUNDER = {name: 'Christian Bernd Bauer'};
+export const FOUNDER_ID = `${CANONICAL_ORIGIN}/pages/ueber-uns#person`;
 
 /**
  * Belegte Marken-Profile für `sameAs`.
@@ -310,6 +351,11 @@ export function organizationSchema({logoUrl} = {}) {
       addressLocality: o.addressLocality,
       addressCountry: o.addressCountry,
     },
+    // Typ und Name stehen inline neben der @id. Ein reiner @id-Verweis bliebe
+    // auf der Startseite leer: der volle Person-Knoten steht nur im JSON-LD
+    // von /pages/ueber-uns, und kein Leser holt für einen Verweis eine zweite
+    // Seite.
+    founder: {'@type': 'Person', '@id': FOUNDER_ID, name: FOUNDER.name},
     // identifier ist bewusst IMMER ein Array, auch bei einem einzigen Eintrag.
     // schema.org erlaubt jeder Property mehrere Werte, und eine Form, die je
     // nach Listenlänge zwischen Objekt und Array springt, ist für jeden Leser
