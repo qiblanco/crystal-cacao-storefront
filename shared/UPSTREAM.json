@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "606c99c59452b76da82067c4769fd999736ccb7f",
-  "erzeugt_utc": "2026-10-07T06:58:40Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 606c99c59452; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit ad3006fb4226). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "650af9cca1fdce1f3bc7ea484c1b62d7b8cecdb8",
+  "erzeugt_utc": "2026-10-07T10:13:38Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 650af9cca1fd; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 606c99c59452). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -383,7 +383,7 @@
     {
       "upstream": "app/components/reusables/amazonstil-daten.js",
       "klasse": "K1",
-      "sha256": "5ef4d5b1cdcc422bc0f452818149670364f97ddba784ff27df6ddf753102477e"
+      "sha256": "8b74a216427bc24b2ee90ec58e2ddc248eee4008ab364ae5191c43ae38cfa3ea"
     },
     {
       "upstream": "app/styles/amazonstil.css",
@@ -399,8 +399,7 @@
     {
       "upstream": "app/components/reusables/kakao-tiefe-daten.js",
       "klasse": "K1",
-      "sha256": "23214f325d577999603535c28580f1df5f8be44901b7de610c883575e1ef9d01",
-      "nachzug_grund": "Neu 2026-10-02 (Grossjob 20261002-GROSSJOB-kakaoseiten-mineralstoffe-dartsch-und-crystal-niveau-auf-dach-und-us, qiblanco #760/#761): die Kakao-Tiefe unter dem Amazon-Bereich, Mineralstoffe aus dem Dartsch-Bericht. Byte-gleich gebaut und gezogen; der Laden ruft KakaoTiefe aus SortenSeite.jsx."
+      "sha256": "f7791e8111a0cdd6ca031314b005d5208da7bedbfe7ec29db9a4acc1e3464160"
     },
     {
       "upstream": "app/styles/kakao-tiefe.css",
