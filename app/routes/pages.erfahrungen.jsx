@@ -30,7 +30,7 @@ import {canonicalLink} from '~/lib/seo';
  * WAS DIESE SEITE TRAEGT UND WOHER JEDER SATZ KOMMT:
  *   * die Stimmen: app/data/kakao-stimmen.js, woertlich, mit Name und Datum,
  *     genau wie im Abschnitt #kundenstimmen der Startseite. Die Messgrenze
- *     (439 gemeldet, 38 geliefert) liest FEED_STAND aus derselben Datei.
+ *     (gemeldet, geliefert, Stichtag) liest FEED_STAND aus derselben Datei.
  *   * die Schadstoff-Antwort: jede Zahl aus qi-salesbot/docs/belege-crystal-
  *     cacao-laborwerte.md, der Quelle, aus der auch Anna antwortet. Sie wird
  *     mit DENSELBEN Detektoren gemessen wie Annas Antwort (qi-salesbot/eval/
@@ -41,6 +41,16 @@ import {canonicalLink} from '~/lib/seo';
  *   * Inhaltsstoffe: die Zahlen von /pages/warum-crystal-cacao; die 21 mg je
  *     Tasse von der Startseite (KaffeeVergleich), dazu Awake aus denselben
  *     Dartsch-Werten gerechnet (120 mg je 100 g, 15 g je Tasse = 18 mg).
+ *     WER GEMESSEN HAT, steht im Bericht selbst und nicht im Briefkopf: die
+ *     Naehrstoff-Analysen nennen als verantwortlichen Laborleiter Dr. Markus
+ *     Born, PLENUM Dr. Born, Ennepetal; Dartsch Scientific verantwortet den
+ *     Inhalt des Berichts (am PDF nachgelesen 2026-10-07, Gegenpruefer Z2).
+ *     Die Absichtsseite schreibt die Messung Dartsch zu; das korrigiert der
+ *     Auftrag 20261007-repair-kakaotiefe-satz-quecksilber-arsen-nicht-im-
+ *     primoris-zeugnis mit, zusammen mit dem Labor-Feld der Pruefdokumente.
+ *   * "jede Charge" nennt die Stoffe, die Primoris tatsaechlich prueft
+ *     (Cadmium, Blei, Pestizide; laborwerte.md §1). "Schwermetalle" laese
+ *     sich als "auch Quecksilber und Arsen" -- die stehen NICHT im Zeugnis.
  *   * Zubereitung und „Fuer wen": FAQ_CACAO, woertlich. Ein zweiter Text
  *     daneben waere die Drift, die eine FAQ-Quelle verhindern soll.
  *   * Rueckgabe: der Wortlaut des Garantie-Blocks der Startseite.
@@ -181,8 +191,8 @@ export default function ErfahrungenPage() {
           </p>
           <p>
             Gemessen hat Primoris in Belgien, ein nach EN ISO/IEC 17025
-            akkreditiertes Labor. Dort lassen wir jede Charge auf Schwermetalle
-            prüfen.{' '}
+            akkreditiertes Labor. Dort lassen wir jede Charge auf Cadmium, Blei
+            und Pestizide prüfen.{' '}
             <a href="#pruefdokumente">
               Beide Prüfzeugnisse kannst du selbst öffnen.
             </a>
@@ -210,9 +220,10 @@ export default function ErfahrungenPage() {
           <p>
             In 100 Gramm Create stecken 5,62 Gramm Polyphenole und Flavanole,
             1,05 Gramm Theobromin und 140 Milligramm Koffein. Bei Awake sind es
-            5,03 Gramm, 0,95 Gramm und 120 Milligramm. Gemessen hat Dartsch
-            Scientific in Dießen am Ammersee, an der fertigen Mischung aus der
-            verschlossenen Originalpackung.
+            5,03 Gramm, 0,95 Gramm und 120 Milligramm. Gemessen hat das Labor
+            PLENUM Dr. Born in Ennepetal, an der fertigen Mischung aus der
+            verschlossenen Originalpackung. Den Bericht verantwortet Dartsch
+            Scientific.
           </p>
           <p>
             Den Mineralstoffgehalt hat die SAS hagmann GmbH in Horb am Neckar mit
