@@ -236,7 +236,7 @@
     {
       "upstream": "public/qiblanco-qpx-basis.js",
       "klasse": "K3",
-      "sha256_upstream": "7908d1d022c101e1606eb12173bc8ebfc93fdbe7a926e5bf8004b2e3d6816da8",
+      "sha256_upstream": "5c3d2574c9ed9f0fa47d23713e93fbeb0ecb3412ac7a6bad29a8e1485a86d18f",
       "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_basis_beacon.py  # Repo-Vorbereitung + ab Livegang die reale Auslieferung und ankommende Hits",
       "grund": "Cookielose Basis-Ebene (einwilligungsfrei, setzt nichts auf dem Endgeraet). Nicht in der Import-Huelle: public/-Assets werden per <script src> geladen, nicht importiert. Sie ist der NENNER, gegen den die consent-gegatete Ebene gemessen wird -- ohne sie ist der Abdeckungsgrad nicht schlecht, sondern unmessbar. crystal fuehrt sie BYTE-GLEICH zur Vorlage: eine eigene Fassung erzeugte zwei Nenner mit unterschiedlicher Semantik, und ein Quotient aus zwei verschiedenen Grundmengen ist eine Zahl, die es nicht gibt. Bewegt sich die Vorlage OBEN, ist der Nachzug hier faellig."
     },

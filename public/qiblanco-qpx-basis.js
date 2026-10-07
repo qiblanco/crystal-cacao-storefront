@@ -9,10 +9,19 @@
  *     (History-Hook, siehe unten). Das aendert NICHTS an der Einwilligungs-
  *     freiheit: es wird weiterhin nichts auf dem Endgeraet gelesen oder
  *     gespeichert, es entsteht keine besuchsuebergreifende ID, und die Nutzlast
- *     bleibt Pfad/Verweis/Plattform-Klasse ohne Query.
+ *     bleibt Pfad/Verweis/Plattform-Klasse ohne Query (plus Klick-Name und
+ *     utm_medium/utm_content, siehe unten).
  *   - Erzeugt KEINE persistente Besucher-ID (kein anon_id, kein Fingerprint).
  *   - Sendet nur: Seite (Origin+Pfad, OHNE Query), Referrer, grobe Ad-Plattform-
  *     KLASSE (aus einer evtl. vorhandenen Klick-ID abgeleitet — NIE die ID selbst).
+ *   - Seit 2026-10-07 zusätzlich, falls in der Einstiegs-URL vorhanden: den
+ *     NAMEN des Klick-Parameters (`klick`, z. B. "fbclid" — nie seinen Wert)
+ *     sowie die Kampagnen-Angaben utm_medium und utm_content (je höchstens
+ *     100 Zeichen). Das sind Angaben des Werbetreibenden zum Link, nicht zur
+ *     Person; sie werden aus der aufgerufenen URL gelesen wie der Pfad, nicht
+ *     vom Endgerät. Der Receiver wertet sie nur als Paid-Beleg aus
+ *     (bezahlt / organisch / unentscheidbar) und SPEICHERT SIE NICHT. Die
+ *     übrige Query (inkl. Klick-ID-Wert) geht weiterhin nicht in die Nutzlast.
  *   - Die Besucher-Unterscheidung entsteht ERST serverseitig aus einem TAEGLICH
  *     rotierenden Salt-Hash(IP+UA), der nach 24h verworfen wird (siehe Receiver).
  *
@@ -52,16 +61,40 @@
       fbclid: 'meta', msclid: 'bing', msclkid: 'bing',
       ttclid: 'tiktok', twclid: 'twitter', epik: 'pinterest', sccid: 'snapchat',
     };
+    // PAID-BELEG (seit 2026-10-07): zusätzlich der NAME des Klick-Parameters
+    // (`klick`, nie sein Wert) und die Werte von utm_medium/utm_content. Der
+    // Browser klassifiziert nichts; der Receiver entscheidet daraus, ob ein
+    // Klick belegt bezahlt, belegt organisch oder unentscheidbar ist
+    // (basis_hit.bezahlt_belegt). Ohne sie ist jeder fbclid-Klick unentscheidbar,
+    // weil Meta fbclid an bezahlte UND organische Auslinks hängt.
     var platform = '';
+    var klick = '';
+    var utmMedium = '';
+    var utmContent = '';
+    function dekodiere(s) {
+      try {
+        return decodeURIComponent(String(s || '').replace(/\+/g, ' '));
+      } catch (errDec) {
+        void errDec; // kaputte Kodierung: Feld bleibt leer, das Pixel läuft weiter
+        return '';
+      }
+    }
     var qs = w.location.search.replace(/^\?/, '');
     if (qs) {
       var parts = qs.split('&');
       for (var i = 0; i < parts.length; i++) {
-        var key = decodeURIComponent(parts[i].split('=')[0] || '');
-        if (klass[key]) { platform = klass[key]; break; }
+        var gl = parts[i].indexOf('=');
+        var key = dekodiere(gl < 0 ? parts[i] : parts[i].slice(0, gl));
+        if (klass[key]) {
+          if (!platform) { platform = klass[key]; klick = key; } // erste Klick-ID
+        } else if (key === 'utm_medium' && !utmMedium && gl >= 0) {
+          utmMedium = dekodiere(parts[i].slice(gl + 1)).slice(0, 100);
+        } else if (key === 'utm_content' && !utmContent && gl >= 0) {
+          utmContent = dekodiere(parts[i].slice(gl + 1)).slice(0, 100);
+        }
       }
     }
-    // Verweis und Plattform-Klasse werden EINMAL beim Einstieg bestimmt und für
+    // Verweis, Plattform-Klasse, Klick-Name und utm werden EINMAL beim Einstieg bestimmt und für
     // alle weiteren Hits desselben Besuchs beibehalten. Grund: d.referrer ändert
     // sich bei clientseitiger Navigation nicht, und die Klick-ID steht nur in der
     // Einstiegs-URL. Die Spalte heißt serverseitig `entry_platform` — genau das
@@ -92,7 +125,12 @@
     function sende(pfad) {
       // Seite OHNE Query/Fragment (keine Klick-ID/PII im Nutzlast-URL).
       var url = w.location.protocol + '//' + w.location.host + pfad;
-      sendeAn(endpoint, JSON.stringify({url, referrer, platform}));
+      var nutzlast = {url, referrer, platform};
+      // Nur gesetzte Felder: ein Besuch ohne Klick/utm sendet wie vorher.
+      if (klick) nutzlast.klick = klick;
+      if (utmMedium) nutzlast.utm_medium = utmMedium;
+      if (utmContent) nutzlast.utm_content = utmContent;
+      sendeAn(endpoint, JSON.stringify(nutzlast));
     }
 
     // DOPPELZÄHLUNG BAULICH AUSGESCHLOSSEN: `letzterPfad` wird vom Erstaufruf
