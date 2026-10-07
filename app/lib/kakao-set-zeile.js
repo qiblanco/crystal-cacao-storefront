@@ -366,6 +366,26 @@ export function stepperZusammensetzung(je, packungen) {
  */
 export const ANKER_TOLERANZ_CENT_JE_ZEILE = 1;
 
+/*
+ * Länder, deren Markt KEINE Preisliste in der Landeswährung hat (gemessen
+ * 2026-10-07): LI und GB im Markt international (Basis USD), PL und SE im
+ * Markt eu (Basis EUR). Shopify rechnet dort Einzelpackung und Set aus der
+ * Basis um und rundet jeden Preis auf eine ganze Einheit AUF. In der Basis
+ * kostet das Set auf den Cent die Stufe; in der Landeswährung entsteht die
+ * Abweichung allein aus diesen Aufrundungen: die der Einzelpackung wirkt im
+ * Einzelweg mit 0,7 je Packung, die des Sets einmal je Set. Gemessen an allen
+ * 26 Sets: LI -2,00 bis -3,50 CHF, GB -1,60 bis -3,30 GBP, PL +0,40 bis
+ * +0,70 PLN, SE -0,40 bis +0,20 SEK. Ein Festpreis kann das nicht heilen,
+ * weil es keine Preisliste in dieser Währung gibt. Vor dem 06.10. legten
+ * diese Besucher im EUR-Warenkorb ab und zahlten an der Kasse genau diesen
+ * umgerechneten Set-Betrag mit Code. Spielraum ab 4 Packungen deshalb die
+ * Rundung selbst: höchstens UMRECHNUNG_EINHEIT_CENT je Packung darunter und
+ * je Set-Stück darüber. Ein neu freigeschalteter Markt ohne eigene Preisliste
+ * gehört hier hinein (die Nachtmessung des Partner-Managers meldet ihn).
+ */
+export const UMRECHNUNGS_LAENDER = ['LI', 'GB', 'PL', 'SE'];
+export const UMRECHNUNG_EINHEIT_CENT = 100;
+
 /**
  * Preisschutz des Set-Tauschs, in Cent und im Markt des Warenkorbs.
  *
@@ -380,9 +400,13 @@ export const ANKER_TOLERANZ_CENT_JE_ZEILE = 1;
  *       Automatik (s03, 2026-09-30). Für 4 bis 7 sind die Sorten-Sets selbst
  *       neu, ein älteres Set als Maßstab gibt es nicht. Toleranz
  *       ANKER_TOLERANZ_CENT_JE_ZEILE je Einzelzeile.
+ *   UMGERECHNETE WÄHRUNG (umgerechnet, Land in UMRECHNUNGS_LAENDER), ab 4
+ *   Packungen: Spielraum ist Shopifys Aufrundung, höchstens
+ *   UMRECHNUNG_EINHEIT_CENT je Set-Stück darüber und je Packung darunter.
  *
  * @param {{packungen: number, gemischt: boolean, setCent: number,
- *   zeileCent: number, einzelZeilen: number, sortenSetCent?: number}} p
+ *   zeileCent: number, einzelZeilen: number, sortenSetCent?: number,
+ *   umgerechnet?: boolean, setStueck?: number}} p
  * @returns {{ok: boolean, grund: string}}
  */
 export function kakaoPreisschutz({
@@ -392,9 +416,20 @@ export function kakaoPreisschutz({
   zeileCent,
   einzelZeilen,
   sortenSetCent,
+  umgerechnet,
+  setStueck,
 }) {
   if (!Number.isFinite(setCent) || !Number.isFinite(zeileCent)) {
     return {ok: false, grund: 'preis_unlesbar'};
+  }
+  if (umgerechnet && packungen >= SET_GROESSE_MIN) {
+    if (setCent > zeileCent + UMRECHNUNG_EINHEIT_CENT * (setStueck || 1)) {
+      return {ok: false, grund: 'nie_teurer_als_umrechnung'};
+    }
+    if (setCent < zeileCent - UMRECHNUNG_EINHEIT_CENT * packungen) {
+      return {ok: false, grund: 'nie_billiger_als_umrechnung'};
+    }
+    return {ok: true, grund: 'anker_einzelweg_umrechnung'};
   }
   if (setCent > zeileCent) return {ok: false, grund: 'nie_teurer'};
   if (packungen >= SET_GROESSE_MIN) {

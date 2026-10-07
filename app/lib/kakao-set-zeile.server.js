@@ -1,6 +1,7 @@
 import {CartForm} from '@shopify/hydrogen';
 import {
   SET_GROESSE_MIN,
+  UMRECHNUNGS_LAENDER,
   kakaoPreisschutz,
   kakaoZeilenPlan,
   sortenSetsGleicherMenge,
@@ -47,9 +48,11 @@ import {
  * Untergrenze ist dort der gemessene Betrag der Einzelzeilen vor Code, also
  * genau das, was der Kunde ohne Set heute zahlt. Zusammen mit "nie teurer"
  * heißt das: centgleich, bis auf ANKER_TOLERANZ_CENT_JE_ZEILE (Rundung je
- * Einzelzeile). In EUR und USD sind die Sets centgleich (gemessen s02). In CHF
- * rundet Shopify die Sets auf ganze Franken und sie liegen 0,40 bis 4,50 CHF
- * über dem Einzelweg — dort bleibt ab 4 Packungen der alte Weg.
+ * Einzelzeile). In EUR und USD sind die Sets centgleich (gemessen s02). In CH
+ * hält der Takt partner-manager/bin/kakao-set-chf die Festpreise der Sets auf
+ * dem gemessenen Einzelweg. In Ländern ohne Preisliste in der Landeswährung
+ * (UMRECHNUNGS_LAENDER: LI, GB, PL, SE) gilt das Rundungsband der Umrechnung,
+ * Herleitung bei der Konstante.
  *
  * MEHRERE SET-ZEILEN (ab 8 Packungen): verglichen wird die SUMME aller
  * Set-Zeilen gegen die Summe der Einzelzeilen. Die Einzelzeilen werden an Ort
@@ -278,6 +281,10 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
           setCent,
           zeileCent,
           einzelZeilen: einzelZeilen.length,
+          umgerechnet: UMRECHNUNGS_LAENDER.includes(
+            String(storefront.i18n?.country || '').toUpperCase(),
+          ),
+          setStueck: sets.reduce((summe, s) => summe + s.quantity, 0),
           sortenSetCent:
             kandidat.gemischt && kandidat.packungen < SET_GROESSE_MIN
               ? await sortenSetUntergrenzeCent(storefront, kandidat.packungen, waehrung)

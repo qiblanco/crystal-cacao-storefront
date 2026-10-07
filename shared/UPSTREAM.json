@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "ad3006fb42261c10475c5bb43dda924c2295a3a5",
-  "erzeugt_utc": "2026-10-06T11:38:29Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen ad3006fb4226; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 115245d4bcb2). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "606c99c59452b76da82067c4769fd999736ccb7f",
+  "erzeugt_utc": "2026-10-07T06:58:40Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 606c99c59452; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit ad3006fb4226). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -356,19 +356,17 @@
     {
       "upstream": "app/lib/kakao-set-zeile.js",
       "klasse": "K1",
-      "sha256": "07bfe60de4f2edee0f54b4397f03edbc2e55e73af1c0e69d736ea1aa19b556bb",
-      "nachzug_grund": "Nachgezogen 2026-09-29 (Grossjob 20260929-GROSSJOB-partnercodes-gelten-fuer-3er-sets-und-julie-nachtragen, s03): Kakao-Sets als Set-Zeile im Warenkorb, damit ein Partnercode greift. Byte-gleich aus qiblanco-storefront #709 (39ee087). Ausserhalb der Import-Huelle der drei Wurzeln (eingebunden in cart.jsx, cart.$lines.jsx, CartLineItem.jsx, alle nicht geteilt); steht hier, damit die Drift-Wache die geteilte Regel in BEIDEN Richtungen bewacht. || NACHZUG 2026-09-30 (Elina EL-20260930-9c7bdd63): gemischte Kakao-Sets (1+1, 2+1, 1+2) als Set-Zeile, damit ein Partnercode auch bei Awake+Create greift; byte-gleich aus qiblanco-storefront Branch feat/kakao-gemischte-sets-20260930. || NACHZUG 2026-09-30 (Grossjob 20260930-GROSSJOB-kakao-partnercodes-alle-mengen-und-mengenrabatt-gemischt, s03): Kakao-Sets 4-7 als Set-Zeile und Zerlegung jeder Menge ab 8, Preisschutz mit benanntem Anker, damit ein Partnercode fuer jede Kakaomenge greift; byte-gleich aus qiblanco-storefront Branch feat/kakao-sets-jede-menge-20260930."
+      "sha256": "d508c656aca89df1bd5593efd749fa4ba764f61c59cc7f1333f557d37d2a3ea2"
     },
     {
       "upstream": "app/lib/kakao-set-zeile.server.js",
       "klasse": "K1",
-      "sha256": "d8cb449dbc597edfe49cb626df546ab2715d7615e4fc6e145585fdf2af7da7de",
-      "nachzug_grund": "Nachgezogen 2026-09-29 (Grossjob 20260929-GROSSJOB-partnercodes-gelten-fuer-3er-sets-und-julie-nachtragen, s03): Kakao-Sets als Set-Zeile im Warenkorb, damit ein Partnercode greift. Byte-gleich aus qiblanco-storefront #709 (39ee087). Ausserhalb der Import-Huelle der drei Wurzeln (eingebunden in cart.jsx, cart.$lines.jsx, CartLineItem.jsx, alle nicht geteilt); steht hier, damit die Drift-Wache die geteilte Regel in BEIDEN Richtungen bewacht. || NACHZUG 2026-09-30 (Elina EL-20260930-9c7bdd63): gemischte Kakao-Sets (1+1, 2+1, 1+2) als Set-Zeile, damit ein Partnercode auch bei Awake+Create greift; byte-gleich aus qiblanco-storefront Branch feat/kakao-gemischte-sets-20260930. || NACHZUG 2026-09-30 (Grossjob 20260930-GROSSJOB-kakao-partnercodes-alle-mengen-und-mengenrabatt-gemischt, s03): Kakao-Sets 4-7 als Set-Zeile und Zerlegung jeder Menge ab 8, Preisschutz mit benanntem Anker, damit ein Partnercode fuer jede Kakaomenge greift; byte-gleich aus qiblanco-storefront Branch feat/kakao-sets-jede-menge-20260930."
+      "sha256": "d84c3702a1d7fcd07900f6928b4658d31316081281ff9f97332e536a77c2e4cc"
     },
     {
       "upstream": "app/lib/partnercode-daten.server.js",
       "klasse": "K1",
-      "sha256": "ef6a3414073c2a09f3c735e3052f05b1ef87b953bf11bef3d340489ba4e9d37c"
+      "sha256": "ef09b772d77661ca838c476f49028ce4e9e4f09f03a47298514d1f73be2e988e"
     },
     {
       "upstream": "app/lib/partnercode.server.js",
