@@ -190,10 +190,10 @@ export function Belege({sorte, titel = 'Prüfdokumente zum Nachlesen', id}) {
           Abschnitt an `cc-belege` und `cc-belege__grenze` ab. Stünde er oben,
           fiele jede Sortengruppe aus ihrer Messung. */}
       <p className="cc-belege__grenze">
-        Primoris Belgium prüft die rohe Bohne auf Schadstoffe. Dartsch
-        Scientific misst an der fertigen Mischung die Nährstoffe, die
-        Mineralstoff-Analysen dazu Mineralstoffe und Spurenelemente. Jedes
-        Dokument trägt sein Prüfdatum.
+        Primoris Belgium prüft die rohe Bohne auf Schadstoffe. An der fertigen
+        Mischung misst das Labor PLENUM Dr. Born die Nährstoffe, SAS hagmann
+        die Mineralstoffe und Spurenelemente. Die Berichte dazu verantwortet
+        Dartsch Scientific. Jedes Dokument trägt sein Prüfdatum.
       </p>
     </div>
   );
