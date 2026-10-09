@@ -386,6 +386,44 @@ export const ANKER_TOLERANZ_CENT_JE_ZEILE = 1;
 export const UMRECHNUNGS_LAENDER = ['LI', 'GB', 'PL', 'SE'];
 export const UMRECHNUNG_EINHEIT_CENT = 100;
 
+/*
+ * FESTBETRÄGE AB 4 PACKUNGEN (Christian 09.10.2026 auf die Frage "Kakao-Staffel
+ * ab 4 Packungen als Festbeträge 213, 319 und 372 €: ja oder nein?": "ja zu 5";
+ * Job 20261009-update-kakao-staffel-ab-4-festbetraege). Die 30-%-Stufe der
+ * Automatik ergibt nach dem Brutto-Kipp bei 4, 6 und 7 Packungen Cent
+ * (4 x 76 x 0,7 = 212,80; 319,20; 372,40). Der Kipp schreibt die Sets auf
+ * ganze Beträge (213 / 266 / 319 / 372), und der Anker "Einzelweg" lehnte den
+ * Tausch dann ab: der Partnercode griff ab 4 Packungen nicht mehr. Hier ist
+ * der Festbetrag selbst der Anker.
+ *
+ * SCHARF NUR, WENN ALLES ZUSAMMEN STIMMT: Land DE, Währung EUR, Preismodus
+ * brutto (Shop-Metafeld qb_preis.modus, das der Kipp setzt) und JEDE Set-Zeile
+ * kostet auf den Cent den Festbetrag ihrer Größe. Vor dem Kipp stehen die Sets
+ * netto (198,92 usw.), dann greift der Anker nie und alles bleibt wie es ist.
+ * Andere Länder sind nicht Teil der Entscheidung und bleiben beim Einzelweg.
+ * Ab 8 Packungen zählt jede Set-Zeile mit ihrem Festbetrag (4+4 = 426 €).
+ */
+export const KAKAO_FESTBETRAG_CENT = {
+  DE: {EUR: {4: 21300, 5: 26600, 6: 31900, 7: 37200}},
+};
+
+/**
+ * Trifft der Warenkorb die Festbeträge? Alle Bedingungen oben, sonst false.
+ *
+ * @param {{land?: string, waehrung?: string, brutto?: boolean,
+ *   sets?: Array<{packungen: number, cent: number}>}} p
+ * @returns {boolean}
+ */
+export function kakaoFestbetragGetroffen({land, waehrung, brutto, sets}) {
+  if (brutto !== true) return false;
+  const tabelle =
+    KAKAO_FESTBETRAG_CENT[String(land || '').toUpperCase()]?.[waehrung];
+  if (!tabelle || !Array.isArray(sets) || !sets.length) return false;
+  return sets.every(
+    (s) => Number.isFinite(s?.cent) && tabelle[s?.packungen] === s.cent,
+  );
+}
+
 /**
  * Preisschutz des Set-Tauschs, in Cent und im Markt des Warenkorbs.
  *
@@ -403,10 +441,12 @@ export const UMRECHNUNG_EINHEIT_CENT = 100;
  *   UMGERECHNETE WÄHRUNG (umgerechnet, Land in UMRECHNUNGS_LAENDER), ab 4
  *   Packungen: Spielraum ist Shopifys Aufrundung, höchstens
  *   UMRECHNUNG_EINHEIT_CENT je Set-Stück darüber und je Packung darunter.
+ *   FESTBETRAG (festbetrag, siehe kakaoFestbetragGetroffen), ab 4 Packungen:
+ *   der entschiedene Betrag ist der Anker, ohne Vergleich mit dem Einzelweg.
  *
  * @param {{packungen: number, gemischt: boolean, setCent: number,
  *   zeileCent: number, einzelZeilen: number, sortenSetCent?: number,
- *   umgerechnet?: boolean, setStueck?: number}} p
+ *   umgerechnet?: boolean, setStueck?: number, festbetrag?: boolean}} p
  * @returns {{ok: boolean, grund: string}}
  */
 export function kakaoPreisschutz({
@@ -418,9 +458,13 @@ export function kakaoPreisschutz({
   sortenSetCent,
   umgerechnet,
   setStueck,
+  festbetrag,
 }) {
   if (!Number.isFinite(setCent) || !Number.isFinite(zeileCent)) {
     return {ok: false, grund: 'preis_unlesbar'};
+  }
+  if (festbetrag === true && packungen >= SET_GROESSE_MIN) {
+    return {ok: true, grund: 'anker_festbetrag'};
   }
   if (umgerechnet && packungen >= SET_GROESSE_MIN) {
     if (setCent > zeileCent + UMRECHNUNG_EINHEIT_CENT * (setStueck || 1)) {
