@@ -49,7 +49,13 @@ export function Aside({children, heading, type}) {
           Positionsliste, bei Suche und Menü die Zone selbst. Ohne diesen
           Haken müsste das CSS über :has() raten. */}
       <aside className={`aside--${type}`}>
-        <main>
+        {/* Bewusst KEIN <main>: ein Dokument hat genau ein main-Landmark
+            (axe landmark-no-duplicate-main), und das steht in PageLayout.jsx.
+            Bis 2026-10-09 lag hier ein <main> je Schublade -- vier auf jeder
+            Seite, und document.querySelector('main') traf den Warenkorb statt
+            den Seiteninhalt. Die Klasse trägt die bisherigen Regeln
+            (app.css .overlay > aside > .aside-zone, reset.css). */}
+        <div className="aside-zone">
         <header>
           <h3>{heading === "MENU" ? 'Menü' : heading}</h3>
           <button className="close reset" onClick={close} aria-label="Schließen">
@@ -58,7 +64,7 @@ export function Aside({children, heading, type}) {
         </header>
           {children}
 
-          </main>
+          </div>
       </aside>
     </div>
   );

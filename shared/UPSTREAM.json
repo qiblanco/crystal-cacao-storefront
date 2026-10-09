@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "81a972e37bbbd53c3ce58099e15692342738878d",
-  "erzeugt_utc": "2026-10-07T14:53:22Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 81a972e37bbb; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 650af9cca1fd). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "44e57f4793392f31f073252d1adfdd56eb0f2a1e",
+  "erzeugt_utc": "2026-10-09T10:53:26Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 44e57f479339; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 81a972e37bbb). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -22,7 +22,7 @@
     {
       "upstream": "app/components/Aside.jsx",
       "klasse": "K1",
-      "sha256": "0e01175538285b9f3ba001446998266dbdeee50754fcb6e7416de5c91cda915c"
+      "sha256": "43754434aa7bcdb0414d4ec6b690a1ce8bb2d8687dafa47ea30654a40d7f381a"
     },
     {
       "upstream": "app/components/CacaoPriceDisplay.jsx",
@@ -377,8 +377,7 @@
     {
       "upstream": "app/components/reusables/AmazonStil.jsx",
       "klasse": "K1",
-      "sha256": "f57a5fbc00805bc6ba407130217da10c84d1ba41013dc2a6584060daca3ffa0f",
-      "nachzug_grund": "Neu 2026-09-30 (Grossjob 20260930-GROSSJOB-amazonstil-crystal-cacao-und-us-seite-genau-wie-deutsch-mit-paritaetspruefer, s04): Amazon-Stil der Kakao-Kaufseiten (Sortenvergleich mit Analyseberichten, Kunden fragen), Christian 30.09.2026 'das gleiche bitte auch bei Crystal Cacao machen ... im Shop-Bereich'. Byte-gleich aus qiblanco-storefront origin/main 1376176671 (Bau dort: #713 a26a504). Import-Huelle der zwei Kakao-Kaufseiten; blockLinks.js/raten-angebot.js/redesign3themen.js/CdnBild.jsx sind reine Importe von AmazonStil.jsx bzw. amazonstil-daten.js (Geraetevergleich-Zweig, im Laden ungerendert). Die zwei Luecken des Ladens (qb-tokens, .btn--text) fuellt die laden-eigene app/styles/amazonstil-laden.css, damit diese Datei byte-gleich bleibt."
+      "sha256": "1449064d80666c808bf7d4aef34e6e1cb0ed774d586b4e3b505b74a76e5a9dcd"
     },
     {
       "upstream": "app/components/reusables/amazonstil-daten.js",

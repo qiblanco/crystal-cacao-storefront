@@ -75,6 +75,7 @@ export function Geraetevergleich({
             <CdnBild
               src={s.bild}
               alt=""
+              role="presentation"
               anzeigeBreite={120}
               breite={120}
               hoehe={120}
@@ -197,6 +198,7 @@ export function Sortenvergleich({handle, varianten = null, eigeneVariante = null
             <CdnBild
               src={s.bild}
               alt=""
+              role="presentation"
               anzeigeBreite={120}
               breite={s.breite}
               hoehe={s.hoehe}
