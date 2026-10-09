@@ -2,11 +2,13 @@ import {CartForm} from '@shopify/hydrogen';
 import {
   SET_GROESSE_MIN,
   UMRECHNUNGS_LAENDER,
+  kakaoFestbetragGetroffen,
   kakaoPreisschutz,
   kakaoZeilenPlan,
   sortenSetsGleicherMenge,
   stepperEinzelZeilen,
 } from '~/lib/kakao-set-zeile';
+import {istBrutto} from '~/lib/preismodus';
 
 /*
  * Stellt nach jeder Zeilen-Aktion die Kakao-Normalform her (Regel und Messung
@@ -53,6 +55,12 @@ import {
  * dem gemessenen Einzelweg. In Ländern ohne Preisliste in der Landeswährung
  * (UMRECHNUNGS_LAENDER: LI, GB, PL, SE) gilt das Rundungsband der Umrechnung,
  * Herleitung bei der Konstante.
+ *
+ * FESTBETRÄGE DE AB 4 PACKUNGEN (Christian 09.10.2026): nach dem Brutto-Kipp
+ * kosten die Sets in DE 213 / 266 / 319 / 372 €, der Einzelweg mit 30 %
+ * 212,80 / 266,00 / 319,20 / 372,40 €. Dort ist der Festbetrag der Anker
+ * (kakaoFestbetragGetroffen: DE, EUR, Preismodus brutto, jede Set-Zeile auf
+ * den Cent). Vor dem Kipp greift er nie.
  *
  * MEHRERE SET-ZEILEN (ab 8 Packungen): verglichen wird die SUMME aller
  * Set-Zeilen gegen die Summe der Einzelzeilen. Die Einzelzeilen werden an Ort
@@ -271,6 +279,15 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
       einzelZeilen.reduce((summe, z) => summe + z.vorCode, 0) * 100,
     );
     const benannt = sets.map((s) => `${s.handle} x${s.quantity}`).join(' + ');
+    const festbetrag = kakaoFestbetragGetroffen({
+      land: storefront.i18n?.country,
+      waehrung,
+      brutto: istBrutto(),
+      sets: sets.map((s) => ({
+        packungen: (s.je?.awake || 0) + (s.je?.create || 0),
+        cent: Math.round(Number.parseFloat(s.variante.price?.amount) * 100),
+      })),
+    });
     const waehrungGleich =
       sets.every((s) => s.variante.price?.currencyCode === waehrung) &&
       einzelZeilen.every((z) => z.waehrung === waehrung);
@@ -285,6 +302,7 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
             String(storefront.i18n?.country || '').toUpperCase(),
           ),
           setStueck: sets.reduce((summe, s) => summe + s.quantity, 0),
+          festbetrag,
           sortenSetCent:
             kandidat.gemischt && kandidat.packungen < SET_GROESSE_MIN
               ? await sortenSetUntergrenzeCent(storefront, kandidat.packungen, waehrung)
