@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "1e9e5c846e06ccc4fef0c0eafafbdecb8ba0acb3",
-  "erzeugt_utc": "2026-10-09T16:53:32Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 1e9e5c846e06; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 44e57f479339). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "0d39f0b6acb473bab546ef4f3a2e4fbca518692a",
+  "erzeugt_utc": "2026-10-09T19:36:35Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 0d39f0b6acb4; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 1e9e5c846e06). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -306,7 +306,7 @@
     {
       "upstream": "app/lib/preismodus.js",
       "klasse": "K1",
-      "sha256": "8fe5cfafddbf4066494213f96e4070e526ddd57f818f1afd77c5f1bb293ec35b"
+      "sha256": "f3e95e98088fd267963f3b3c7d2d69f3ef7e006044f18cd3c2d3219a34026afa"
     },
     {
       "upstream": "app/components/reusables/IgTestimonialSlideshow.jsx",

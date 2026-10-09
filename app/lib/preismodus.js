@@ -41,8 +41,12 @@
 
 export const PREISMODI = ['netto', 'brutto'];
 
-/** Zustand des Shops beim Deploy. NACH DEM KIPP per Folge-Deploy auf 'brutto'. */
-export const PREISMODUS_VORGABE = 'netto';
+/**
+ * Zustand des Shops beim Deploy. Seit dem Kipp 2026-10-09T14:48Z
+ * (shop.taxesIncluded=true, Basispreise brutto) per Folge-Deploy 'brutto'
+ * (Nachzug 20260924-kasse-brutto-nachzug-nach-kipp).
+ */
+export const PREISMODUS_VORGABE = 'brutto';
 
 export const PREISMODUS_METAFELD = {namespace: 'qb_preis', key: 'modus'};
 
