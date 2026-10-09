@@ -1,3 +1,4 @@
+import {startTransition, useEffect, useMemo, useState} from 'react';
 import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
 import {
   Outlet,
@@ -387,9 +388,58 @@ export default function App() {
   }
 
   return (
+    <AnalytikNachHydration data={data}>
+      <Outlet />
+    </AnalytikNachHydration>
+  );
+}
+
+/**
+ * React #421: das Analytik-Update bekommt einen eigenen Lane, nicht den der Hydration.
+ *
+ * DIESELBE BAUFORM WIE IN DER VORLAGE (qiblanco app/root.jsx, Komponente
+ * gleichen Namens, Job 20261009-react421-huellenklasse-ausliefern-qiblanco-und-
+ * crystal-prio20; Herleitung homepage-bauer FEHLER-DB F-2372, gemessen am Doppelbau
+ * 38/270 gegen 0/270). Übernommen wird die NAHT, nicht die Datei: diese root.jsx
+ * ist K3 nach ADR 0056 und trägt eigene Tracking-Kinder (MetaPixel mit eigener
+ * Pixel-ID, UpPromote, QpxCommerce) — die bleiben unverändert, nur ihre Montage
+ * wandert eine Ebene tiefer.
+ *
+ * WARUM. React 18.3.1 wirft #421, sobald eine noch nicht hydrierte Suspense-Grenze
+ * in demselben Lane ein Update sieht (`didReceiveUpdate || includesSomeLane(...)`).
+ * Diese Hülle hat vier solche Grenzen (Warenkorb-Schublade in PageLayout,
+ * Anmeldestand und Warenkorb-Zähler im Header, Fußzeile), und genau vier Meldungen
+ * zeigt jeder Treffer am Kundenrand. Das Update kommt aus `Analytics.Provider`
+ * (@shopify/hydrogen): seine Zustände (aufgelöster Shop, Ladezustand, Einwilligung,
+ * Warenkorb, consentCollected) hängen alle an `!!shop`. Solange `shop` null ist,
+ * bewegt sich keiner. Der Shop kommt deshalb erst nach dem ersten Commit, in einem
+ * `startTransition` — Transition-Lane statt Hydrations-Lane.
+ *
+ * `seitengeruest` hält die Element-Identität von PageLayout über diesen
+ * Zustandswechsel fest; ohne das Festhalten bekämen die vier Grenzen frische
+ * Props, und `didReceiveUpdate` löste denselben Fehler aus.
+ *
+ * TRACKING: nichts fällt weg, die Analytik-Kinder melden sich einen Tick nach dem
+ * ersten Commit an. Gegenrichtung am Rand: homepage-bauer/pruefungen/
+ * probe_analytik_kette_startet.py. Rückweg: git revert dieses Commits in beiden
+ * Bauen (Node-Bau und Oxygen-Zwilling), danach bin/bau-nachzieher --jetzt.
+ */
+function AnalytikNachHydration({data, children}) {
+  const [hydriert, setHydriert] = useState(false);
+
+  useEffect(() => {
+    startTransition(() => setHydriert(true));
+  }, []);
+
+  const seitengeruest = useMemo(
+    () => <PageLayout {...data}>{children}</PageLayout>,
+    [data, children],
+  );
+
+  return (
     <Analytics.Provider
       cart={data.cart}
-      shop={data.shop}
+      shop={hydriert ? data.shop : null}
       consent={data.consent}
     >
       {/*
@@ -420,9 +470,7 @@ export default function App() {
         Anweisung eines Menschen waere auf dieser Storefront weiter verletzt.
         Die beiden Nachzuege sind EIN Vorgang, nicht zwei.
       */}
-      <PageLayout {...data}>
-        <Outlet />
-      </PageLayout>
+      {seitengeruest}
       {(data.isProductionHost || data.enableTrackingInPreview) && (
         <>
           <MetaPixel metaPixelId={data.metaPixelId} />
