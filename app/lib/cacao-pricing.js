@@ -4,6 +4,7 @@ import {
   kassenAnzeige,
   staffelModellAnzeige,
 } from './markt-pricing.js';
+import {KAKAO_EINZEL, KAKAO_SETS} from './kakao-set-zeile.js';
 
 /**
  * KAKAO-MENGENSTAFFEL — die Rechnung hinter Kaufbox, Preisblock und
@@ -339,6 +340,85 @@ async function zeileLesen(storefront, variantId, land, menge) {
   return {amount, currencyCode: geld.currencyCode};
 }
 
+/*
+ * DER LADEN LEGT 2 UND 3 PACKUNGEN ALS SET (kakao-set-zeile.server.js): ist
+ * das Sorten-Set im Markt nicht teurer als die Einzelzeile, wird die
+ * Einzelpackung x2/x3 an Ort zum Set, und die Kasse nimmt den Set-Preis.
+ * Gemessen 2026-10-10 am Ladenweg ?markt=CH: 2 Awake = bundle-2x-awake
+ * 124,00 CHF, der Warenkorb mit Einzelpackung x2 127,53 CHF; US 159 gegen
+ * 163,75 USD. Die Seite nannte den Einzelweg, die Kasse nahm das Set (Job
+ * 20261010-update-kakao-mengen-schweiz-ganze-franken, "Seite = Kasse, ganze
+ * Franken"). Darum liest der Loader die Sorten-Sets mit und nimmt dieselbe
+ * Regel wie der Laden: Set, wenn verfügbar, gleiche Währung und nicht teurer.
+ * Fehlt die Antwort, bleibt der Warenkorb-Betrag (Stand davor).
+ */
+const STAFFEL_SET_FELDER = `selectedOrFirstAvailableVariant {
+      availableForSale
+      price {
+        amount
+        currencyCode
+      }
+    }`;
+
+function setSchluesselFuer(sorte, menge) {
+  return sorte === 'awake' ? `${menge}+0` : `0+${menge}`;
+}
+
+// Bewusst ohne #graphql-Kennung (wie kakao-set-zeile.server.js): gehört nicht
+// in die Codegen-Typen.
+const STAFFEL_SET_QUERY = `
+  query StaffelSets($id: ID!, $country: CountryCode, $language: LanguageCode)
+  @inContext(country: $country, language: $language) {
+    variante: node(id: $id) {
+      ... on ProductVariant {
+        product {
+          handle
+        }
+      }
+    }
+    ${['awake', 'create']
+      .flatMap((sorte) =>
+        STAFFEL_MENGEN.map(
+          (menge) =>
+            `${sorte}${menge}: product(handle: "${KAKAO_SETS[setSchluesselFuer(sorte, menge)]}") {
+    ${STAFFEL_SET_FELDER}
+  }`,
+        ),
+      )
+      .join('\n    ')}
+  }
+`;
+
+/**
+ * Set-Preis je Staffel-Menge für die Sorte der Variante, oder {} (fail-soft).
+ * @returns {Promise<Object<string, {amount: number, currencyCode: string}>>}
+ */
+async function setsLesen(storefront, variantId, land) {
+  if (!storefront?.query) return {};
+  try {
+    const d = await storefront.query(STAFFEL_SET_QUERY, {
+      variables: {id: variantId, country: land},
+    });
+    const handle = d?.variante?.product?.handle;
+    const sorte = Object.keys(KAKAO_EINZEL).find((s) => KAKAO_EINZEL[s] === handle);
+    if (!sorte) return {};
+    const aus = {};
+    for (const menge of STAFFEL_MENGEN) {
+      const v = d?.[`${sorte}${menge}`]?.selectedOrFirstAvailableVariant;
+      const amount = Number.parseFloat(v?.price?.amount);
+      if (v?.availableForSale && Number.isFinite(amount) && amount > 0) {
+        aus[String(menge)] = {amount, currencyCode: v.price.currencyCode};
+      }
+    }
+    return aus;
+  } catch (fehler) {
+    if (typeof console !== 'undefined') {
+      console.warn(`[staffel-kasse] Sets ${land}: ${fehler?.message || fehler}; es gilt der Warenkorb.`);
+    }
+    return {};
+  }
+}
+
 /**
  * Netto-Zeilenbeträge der Kasse je Staffel-Menge, oder null.
  *
@@ -358,12 +438,15 @@ export async function ladeStaffelKasse(storefront, angabe, optionen = {}) {
   const alt = ablage.get(schluessel);
   if (alt && jetzt - alt.ts < ABLAGE_MS) return alt.wert;
   try {
-    const gelesen = await mitFrist(
-      Promise.all(
-        STAFFEL_MENGEN.map((menge) =>
-          zeileLesen(storefront, variantId, land, menge),
+    const [gelesen, sets] = await mitFrist(
+      Promise.all([
+        Promise.all(
+          STAFFEL_MENGEN.map((menge) =>
+            zeileLesen(storefront, variantId, land, menge),
+          ),
         ),
-      ),
+        setsLesen(storefront, variantId, land),
+      ]),
       optionen.fristMs ?? FRIST_MS,
     );
     const liste = Number.parseFloat(listenpreis);
@@ -375,7 +458,12 @@ export async function ladeStaffelKasse(storefront, angabe, optionen = {}) {
       // Plausibel heißt: ein Rabatt, kein Aufschlag. Ein Zeilenbetrag über
       // Listenpreis mal Menge wäre kein Mengenrabatt mehr.
       if (Number.isFinite(liste) && amount > liste * menge + 0.005) return null;
-      zeilen[String(menge)] = amount;
+      // Der Laden legt das Sorten-Set, wenn es nicht teurer ist (oben).
+      const set = sets[String(menge)];
+      zeilen[String(menge)] =
+        set && set.currencyCode === waehrung && set.amount <= amount + 0.005
+          ? set.amount
+          : amount;
     }
     const wert = {waehrung, land, zeilen};
     if (ablage.size >= ABLAGE_MAX) ablage.clear();

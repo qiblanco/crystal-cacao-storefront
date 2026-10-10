@@ -60,7 +60,8 @@ import {istBrutto} from '~/lib/preismodus';
  * kosten die Sets in DE 213 / 266 / 319 / 372 €, der Einzelweg mit 30 %
  * 212,80 / 266,00 / 319,20 / 372,40 €. Dort ist der Festbetrag der Anker
  * (kakaoFestbetragGetroffen: DE, EUR, Preismodus brutto, jede Set-Zeile auf
- * den Cent). Vor dem Kipp greift er nie.
+ * den Cent). Vor dem Kipp greift er nie. Seit dem 10.10. ebenso CH (ganze
+ * Franken je Zusammensetzung) und US (ganze Dollar je Größe).
  *
  * MEHRERE SET-ZEILEN (ab 8 Packungen): verglichen wird die SUMME aller
  * Set-Zeilen gegen die Summe der Einzelzeilen. Die Einzelzeilen werden an Ort
@@ -285,6 +286,7 @@ export async function legeKakaoSetZeile({cart, storefront, env, action, result})
       brutto: istBrutto(),
       sets: sets.map((s) => ({
         packungen: (s.je?.awake || 0) + (s.je?.create || 0),
+        je: s.je,
         cent: Math.round(Number.parseFloat(s.variante.price?.amount) * 100),
       })),
     });

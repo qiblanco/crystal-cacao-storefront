@@ -1,16 +1,16 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "0d39f0b6acb473bab546ef4f3a2e4fbca518692a",
-  "erzeugt_utc": "2026-10-09T19:36:35Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 0d39f0b6acb4; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 1e9e5c846e06). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "df9231c44b6f738f7263b52317c9590d5d842d52",
+  "erzeugt_utc": "2026-10-10T04:34:02Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen df9231c44b6f; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 0d39f0b6acb4). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
       "app/routes/products.crystal-cacao-awake.jsx",
       "app/routes/products.crystal-cacao-create.jsx"
     ],
-    "dateien_soll": 57,
+    "dateien_soll": 58,
     "vollstaendigkeit": "streng"
   },
   "dateien": [
@@ -84,7 +84,7 @@
     {
       "upstream": "app/lib/cacao-pricing.js",
       "klasse": "K1",
-      "sha256": "293a5a792235ac7136795c65585e71587e582fc198a5cc03512752a0821e6ccb"
+      "sha256": "3c0a43f8062628e75b2a6f32313192fb6b003abb401799610b3ef51ecf251e0f"
     },
     {
       "upstream": "app/lib/cart-display-pricing.js",
@@ -356,12 +356,12 @@
     {
       "upstream": "app/lib/kakao-set-zeile.js",
       "klasse": "K1",
-      "sha256": "ce4928ec5eac30638f55593c5aa4385599d8de1c4687ba0b874740e8195e3aff"
+      "sha256": "44c7771ae87a716f1f41bd488716e432896d56ee8796085e6e52b8b28daba830"
     },
     {
       "upstream": "app/lib/kakao-set-zeile.server.js",
       "klasse": "K1",
-      "sha256": "87776dc07a2634754555651a84f7eba7a319d918e2b7cd8229f6f2caec8412ec"
+      "sha256": "66995a193731a6cec3662f8aafec1fba9e06a45b31c561f4f12ecd151227e56c"
     },
     {
       "upstream": "app/lib/partnercode-daten.server.js",
