@@ -19,6 +19,7 @@ import {
 } from '~/lib/kakao-zone';
 import {produktMeta} from '~/lib/produkt-seo';
 import {istNichtIndexierbaresProdukt, noindexMeta} from '~/lib/seo';
+import {istVorlageOhneIndexwert} from '~/lib/sitemap-zaun';
 
 /**
  * @type {Route.MetaFunction}
@@ -71,7 +72,12 @@ export const meta = ({data}) => {
   // Canonical und kein Product-Knoten: strukturierte Daten auf einer Seite,
   // die nicht in den Index soll, waeren ein widerspruechliches Signal. Die
   // Seite selbst rendert und verkauft unveraendert.
-  if (istNichtIndexierbaresProdukt(produkt.handle)) {
+  // Dazu die Mengen-Vorlagen ohne eigenen Indexwert (GEO M3, 2026-10-10),
+  // Liste in ~/lib/sitemap-zaun, die Sitemap liest dieselbe.
+  if (
+    istNichtIndexierbaresProdukt(produkt.handle) ||
+    istVorlageOhneIndexwert(produkt.handle)
+  ) {
     return [
       {title: `${produkt.title ?? 'Produkt'} | ${ABSENDER_MARKE}`},
       noindexMeta(),

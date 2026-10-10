@@ -56,6 +56,42 @@ import {
 } from '~/lib/kakao-zone';
 import {istNichtIndexierbaresProdukt} from '~/lib/seo';
 
+/**
+ * Mengen-Vorlagen ohne eigenen Indexwert (GEO-Maßnahme M3, Job
+ * 20261010-geo-sageo-m3-index-hygiene-vorlagen-hilfsseiten, Grossjob
+ * Christians vom 2026-10-10): kaufbar, aber weder im Index noch in der
+ * Sitemap. Gemessen im Inventar s01 des Grossjobs: je 15 Wörter, fast gleich
+ * untereinander und mit den Sorten-Seiten. Christian am 2026-09-25: „Dünne
+ * Vorlagenseiten … zählen nicht als eigene Kandidaten."
+ *
+ * WARUM HIER UND NICHT IN ~/lib/seo: jene Datei ist K2 zu qiblanco
+ * (shared/UPSTREAM.json); ihre Liste führt Handles „ohne Zweck für Kunden",
+ * und diese Produkte haben einen: man kauft sie. Diese Datei gehört dem Laden
+ * allein. Zwei Leser: die Produkt-Sitemap unten und das robots-Meta in
+ * routes/products.$handle.jsx. Warenkorb, Preise und kakao-set-zeile lesen sie
+ * nicht, der Kaufweg bleibt unverändert. Kein canonical neben dem noindex.
+ *
+ * Dieselbe Entscheidung trägt qiblanco.com in app/lib/sitemap-bestand.js
+ * (VORLAGEN_OHNE_INDEXWERT_DEF, PR #876); dort steht zusätzlich
+ * crystal-cacao-angebot; die Maßnahme nennt es für crystal-cacao.com nicht.
+ *
+ * Rückweg: Eintrag entfernen, committen, bin/bau-nachzieher --jetzt.
+ */
+export const VORLAGEN_OHNE_INDEXWERT = [
+  'bundle-2x-awake',
+  'bundle-3x-awake',
+  'mengenrabatt-2x',
+  'mengenrabatt-3x-create',
+];
+
+/**
+ * @param {string|undefined} handle
+ * @returns {boolean}
+ */
+export function istVorlageOhneIndexwert(handle) {
+  return !!handle && VORLAGEN_OHNE_INDEXWERT.includes(handle);
+}
+
 /** Wieviele Produkte höchstens gezogen werden. Deckelt die Antwort, entscheidet nichts. */
 const PRODUKTE_MAX = 250;
 
@@ -282,6 +318,9 @@ export async function sitemapSeiten({storefront, origin}) {
     //      noindex der Produktseite; Sitemap und robots-Meta laufen damit
     //      nicht auseinander. Erkannt wird am Handle-Muster, nicht per Liste.
     if (istNichtIndexierbaresProdukt(produkt.handle)) continue;
+    // (b3) Mengen-Vorlage ohne eigenen Indexwert (GEO M3, 2026-10-10), Liste
+    //      oben in dieser Datei; dieselbe setzt das noindex der Produktseite.
+    if (istVorlageOhneIndexwert(produkt.handle)) continue;
     // (c) Dublette: derselbe Inhalt unter einer zweiten Adresse. Die schwächere
     //     Adresse zieht Ranking-Signal von der starken ab — Suchmaschinen
     //     müssen raten, welche die echte ist.
