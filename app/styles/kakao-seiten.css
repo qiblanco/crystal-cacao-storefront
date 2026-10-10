@@ -933,7 +933,11 @@
 }
 .ProductImages .product-image-list img {
   width: 100%;
-  transition: .2s all linear;
+  /* Nur die Deckkraft des Hover blendet. `all` animierte nach dem Hydratisieren
+     flex-grow 0->1 und die Rahmen; bei belegtem Hauptthread stand die Spalte
+     dann sekundenlang auf 6 px (gemessen 2026-10-09, Probe
+     homepage-bauer/pruefungen/probe_galerie_lcp_und_vorschau.py Arm C). */
+  transition: opacity .2s linear;
 }
 .ProductImages .product-image-list img:hover {
   opacity: .8;
