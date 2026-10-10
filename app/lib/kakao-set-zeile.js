@@ -396,22 +396,50 @@ export const UMRECHNUNG_EINHEIT_CENT = 100;
  * Tausch dann ab: der Partnercode griff ab 4 Packungen nicht mehr. Hier ist
  * der Festbetrag selbst der Anker.
  *
- * SCHARF NUR, WENN ALLES ZUSAMMEN STIMMT: Land DE, Währung EUR, Preismodus
+ * SCHARF NUR, WENN ALLES ZUSAMMEN STIMMT: Land DE (seit 10.10. auch CH/CHF
+ * und US/USD, siehe unten), Währung EUR, Preismodus
  * brutto (Shop-Metafeld qb_preis.modus, das der Kipp setzt) und JEDE Set-Zeile
  * kostet auf den Cent den Festbetrag ihrer Größe. Vor dem Kipp stehen die Sets
  * netto (198,92 usw.), dann greift der Anker nie und alles bleibt wie es ist.
- * Andere Länder sind nicht Teil der Entscheidung und bleiben beim Einzelweg.
+ * Länder ohne Tabelle bleiben beim Einzelweg.
  * Ab 8 Packungen zählt jede Set-Zeile mit ihrem Festbetrag (4+4 = 426 €).
+ */
+/*
+ * GANZE FRANKEN UND DOLLAR (Christian 09./10.10.2026: "man müsste den Wert in
+ * Schweizer Franken auf keine Nachkommastelle reduzieren", "einfach lösen
+ * lassen"; Job 20261010-update-kakao-mengen-schweiz-ganze-franken). Derselbe
+ * Weg wie DE. In CH kostet Awake 78 und Create 77 CHF, darum hat jede
+ * Zusammensetzung ihren eigenen Betrag; der Schlüssel ist dort "<awake>+<create>"
+ * (wie KAKAO_SETS), in DE und US die Packungszahl. Die Regel: Sorten-Sets so
+ * ganz, dass der Stückpreis mit der Menge nie steigt (Awake 219 / 273 / 327 /
+ * 381 statt 218,40 / 273 / 327,60 / 382,20), gemischte Sets der nächste
+ * Franken zwischen Create- und Awake-Set. Hergeleitet und geprüft in
+ * partner-manager/src/pm_kakao_festbetrag.py, dort muss dieselbe Tabelle
+ * stehen (Naht-Probe probe_kakao_festbetrag_naht__20261010.py). Die
+ * CHF-Festpreise schreibt der Takt kakao-set-chf, die USD-Festpreise stehen
+ * in der Preisliste International.
  */
 export const KAKAO_FESTBETRAG_CENT = {
   DE: {EUR: {4: 21300, 5: 26600, 6: 31900, 7: 37200}},
+  CH: {
+    CHF: {
+      '4+0': 21900, '3+1': 21800, '2+2': 21700, '1+3': 21600, '0+4': 21600,
+      '5+0': 27300, '4+1': 27200, '3+2': 27200, '2+3': 27100, '1+4': 27000, '0+5': 27000,
+      '6+0': 32700, '5+1': 32700, '4+2': 32600, '3+3': 32600, '2+4': 32500, '1+5': 32400, '0+6': 32400,
+      '7+0': 38100, '6+1': 38100, '5+2': 38100, '4+3': 38000, '3+4': 37900, '2+5': 37900, '1+6': 37800, '0+7': 37700,
+    },
+  },
+  US: {USD: {4: 27800, 5: 34700, 6: 41600, 7: 48500}},
 };
 
 /**
  * Trifft der Warenkorb die Festbeträge? Alle Bedingungen oben, sonst false.
+ * Je Set-Zeile zählt zuerst der Betrag ihrer Zusammensetzung (`je`), sonst
+ * der ihrer Packungszahl.
  *
  * @param {{land?: string, waehrung?: string, brutto?: boolean,
- *   sets?: Array<{packungen: number, cent: number}>}} p
+ *   sets?: Array<{packungen: number, cent: number,
+ *     je?: {awake: number, create: number}}>}} p
  * @returns {boolean}
  */
 export function kakaoFestbetragGetroffen({land, waehrung, brutto, sets}) {
@@ -419,9 +447,11 @@ export function kakaoFestbetragGetroffen({land, waehrung, brutto, sets}) {
   const tabelle =
     KAKAO_FESTBETRAG_CENT[String(land || '').toUpperCase()]?.[waehrung];
   if (!tabelle || !Array.isArray(sets) || !sets.length) return false;
-  return sets.every(
-    (s) => Number.isFinite(s?.cent) && tabelle[s?.packungen] === s.cent,
-  );
+  return sets.every((s) => {
+    if (!Number.isFinite(s?.cent)) return false;
+    const soll = s?.je ? tabelle[setSchluessel(s.je)] : undefined;
+    return (soll ?? tabelle[s?.packungen]) === s.cent;
+  });
 }
 
 /**
