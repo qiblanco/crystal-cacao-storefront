@@ -247,10 +247,15 @@ function absichtsGraph() {
  * das Suchergebnis: zwei Versprechen fuer eine Seite.
  */
 const SEITEN_TITEL = `Warum es Crystal Cacao gibt | ${ABSENDER_MARKE}`;
+// GEO M5-F2 (2026-10-11, SAGEO), Job
+// 20261011-geo-sageo-m5f2-strukturfelder-ratgeber-de-us-crystal: Meta auf
+// 120-160 Zeichen (Seitenregel R4; vorher 173). „Prüfdokumente zum Nachlesen“
+// ist die H3 der Seite; „alle Laborergebnisse“ sagte mehr als die sechs
+// gezeigten Dokumente. Title unverändert (R3 schon grün).
 const SEITEN_BESCHREIBUNG =
   'Christian Bernd Bauer erzählt, wie er in Mexiko zum Kakao kam und warum ' +
-  'er Crystal Cacao macht: Mineralmedizin, Kakao statt Kaffee, mit allen ' +
-  'Laborergebnissen zum Nachlesen.';
+  'er Crystal Cacao macht: Mineralmedizin, Kakao statt Kaffee, ' +
+  'Prüfdokumente zum Nachlesen.';
 
 /**
  * OPEN GRAPH, ergaenzt 2026-09-12 vom Grossjob-Segment s06.
