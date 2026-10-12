@@ -503,6 +503,7 @@ function ComparisonTable() {
                     width={50}
                     height={50}
                     alt=""
+                    role="presentation"
                     loading="lazy"
                     className="mx-auto! mb-1"
                   />
@@ -526,6 +527,7 @@ function ComparisonTable() {
                     width={50}
                     height={50}
                     alt=""
+                    role="presentation"
                     loading="lazy"
                     className="mx-auto! mb-1"
                   />
@@ -560,6 +562,7 @@ function ComparisonTable() {
                     width={50}
                     height={50}
                     alt=""
+                    role="presentation"
                     loading="lazy"
                     className="mx-auto! mb-1"
                   />

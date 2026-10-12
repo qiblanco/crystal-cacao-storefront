@@ -480,6 +480,7 @@ export function PodcastEinstieg({
               height={standbild.hoehe}
               className="cc-podcast__fuellung"
               alt=""
+              role="presentation"
               loading="lazy"
               decoding="async"
               aria-hidden={laeuft ? 'true' : undefined}
