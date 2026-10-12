@@ -86,6 +86,7 @@ export function KaffeeVergleich({kurve, logos}) {
                       width={40}
                       height={40}
                       alt=""
+                      role="presentation"
                       loading="lazy"
                       className="cc-vgl__logo"
                     />
