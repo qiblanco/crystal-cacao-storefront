@@ -1,16 +1,16 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "df9231c44b6f738f7263b52317c9590d5d842d52",
-  "erzeugt_utc": "2026-10-10T04:34:02Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen df9231c44b6f; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 0d39f0b6acb4). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "00043fb10a3915c87f5b68770484c7fd7c7df460",
+  "erzeugt_utc": "2026-10-12T12:53:30Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 00043fb10a39; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit df9231c44b6f). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
       "app/routes/products.crystal-cacao-awake.jsx",
       "app/routes/products.crystal-cacao-create.jsx"
     ],
-    "dateien_soll": 58,
+    "dateien_soll": 59,
     "vollstaendigkeit": "streng"
   },
   "dateien": [
@@ -64,7 +64,7 @@
     {
       "upstream": "app/components/reusables/LazyImage.jsx",
       "klasse": "K1",
-      "sha256": "ffc8e8637fbfae9b7aadaabd3ddee6b9e468891acc5a4823adc21a80f5883c14"
+      "sha256": "e2cb78e8477a8fc7e78e1df06792d0ae1f6b2ef5e5a41c5330150ce160c4359e"
     },
     {
       "upstream": "app/components/reusables/StarRating.jsx",
@@ -79,7 +79,7 @@
     {
       "upstream": "app/components/reusables/useDragSwipe.js",
       "klasse": "K1",
-      "sha256": "85000e847bf342a8d3c34e57ee05cd183dafdb8daa52741b5cd4eeee22fd5314"
+      "sha256": "e6ad29d1ac116c5fec19f2548eb2375f62fba732da4d889d4fa5f35db4a0031d"
     },
     {
       "upstream": "app/lib/cacao-pricing.js",
@@ -99,7 +99,7 @@
     {
       "upstream": "app/lib/entity-schema.js",
       "klasse": "K1",
-      "sha256": "68f23292ba98a33f7c9b3c4ef445f54252fa0ef6e8738132f1c70da7d7766580"
+      "sha256": "ffd1d044f672b352d4cd9a78ee711cb62ee2be2cae2411c36ad915152ee50608"
     },
     {
       "upstream": "app/lib/faq-schema.js",
@@ -280,7 +280,7 @@
     {
       "upstream": "app/lib/pixel-content.js",
       "klasse": "K1",
-      "sha256": "a4481d8073e29151cd5ddea4c35fcf11da4dd991ecb785e1ff4fd22ad31b3d6a"
+      "sha256": "2455ad289ba406960fa37589e91e2b47bee5f5c384c90bb9e47ca5166cefe812"
     },
     {
       "upstream": "app/lib/qpx-commerce.js",
@@ -366,7 +366,7 @@
     {
       "upstream": "app/lib/partnercode-daten.server.js",
       "klasse": "K1",
-      "sha256": "ef09b772d77661ca838c476f49028ce4e9e4f09f03a47298514d1f73be2e988e"
+      "sha256": "5bb6c5ca7d7623070e0861ecb26db25601cc7866ef9f3407daa63b4b6d385da8"
     },
     {
       "upstream": "app/lib/partnercode.server.js",
@@ -444,6 +444,11 @@
       "upstream": "app/components/reusables/anmeldeformular.css",
       "klasse": "K1",
       "sha256": "5b3b0dfaf95a896b1806b84b8a15c1ab076d39565d4c5b2ca8a91fa4babf1673"
+    },
+    {
+      "upstream": "app/components/reusables/snapZiel.js",
+      "klasse": "K1",
+      "sha256": "0da53a983d4b8a8f0b282231a6f06e6d0dba6a3cfda6f0da33bc6593957c6898"
     }
   ]
 }

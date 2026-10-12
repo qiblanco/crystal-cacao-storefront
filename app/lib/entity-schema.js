@@ -98,16 +98,64 @@ export const SITE_ID = `${CANONICAL_ORIGIN}/#website`;
  * nicht „ist einziger Gründer". Hat ein Mensch den Namen bestätigt, wird aus
  * dem Feld ein Array mit zwei Personen.
  *
- * DIE @id IST DIE DES PERSON-KNOTENS AUF /pages/ueber-uns (dessen Route,
- * Funktion aboutSchema: absoluteCanonical(PFAD) + '#person'). Dort steht
- * der volle Knoten mit jobTitle, worksFor und Anschrift. Startseite und
- * Über-uns-Seite beschreiben damit EINE Person statt zweier. Die Route baut
- * ihre @id selbst und importiert diese Konstante nicht; der Test liest die
- * Formel deshalb im Quelltext der Route nach und wird rot, wenn eine der
- * beiden Stellen allein umzieht.
+ * DIE @id IST DIE DES PERSON-KNOTENS AUF /pages/ueber-uns. Dort steht der
+ * volle Knoten (founderPerson) mit jobTitle, worksFor und Anschrift. Startseite und
+ * Über-uns-Seite beschreiben damit EINE Person statt zweier. Seit dem
+ * 2026-10-10 baut keine Route ihre Person-@id mehr selbst: /pages/ueber-uns
+ * und /pages/warum-qi-blanco geben den Knoten aus founderPerson() aus (unten).
+ * Vorher baute jede Route `${url}#person` aus ihrem eigenen Pfad, und
+ * /pages/warum-qi-blanco lieferte damit eine zweite @id für denselben
+ * Menschen.
  */
-export const FOUNDER = {name: 'Christian Bernd Bauer'};
+export const FOUNDER = {
+  name: 'Christian Bernd Bauer',
+  // NACHTRAG 2026-10-10 (Auftrag 20261010-geo-flanke-gruender-person-schema-
+  // eine-konstante-prio45): der Grad steht ab jetzt NEBEN dem Namen, nicht
+  // in ihm. Wörtlich aus dem Impressum („Geschäftsführer: Dipl.-Ing.
+  // Christian Bernd Bauer"), also OHNE „(FH)". Bis zu diesem Tag führte der
+  // Shop drei Namensformen derselben Person: „Dipl.-Ing. Christian Bernd
+  // Bauer" (/pages/ueber-uns), „Dipl.-Ing. (FH) Christian Bernd Bauer"
+  // (/pages/warum-qi-blanco, app/data/absicht.js) und „Christian Bernd Bauer"
+  // (founder), dazu zwei @id. Für eine Maschine waren das bis zu drei
+  // Menschen. test/seo-structured-data.test.mjs prüft den Grad gegen das
+  // Impressum wie den Namen.
+  honorificPrefix: 'Dipl.-Ing.',
+};
 export const FOUNDER_ID = `${CANONICAL_ORIGIN}/pages/ueber-uns#person`;
+
+/** Die Anzeigeform mit Grad, so wie das Impressum den Geschäftsführer nennt. */
+export const FOUNDER_ANZEIGE = `${FOUNDER.honorificPrefix} ${FOUNDER.name}`;
+
+/**
+ * DER EINE Person-Knoten des Gründers. /pages/ueber-uns (dort der
+ * Verantwortliche) und /pages/warum-qi-blanco (dort der Autor) geben ihn
+ * beide aus dieser Funktion aus: dieselbe @id, derselbe Name, derselbe Grad,
+ * dieselbe Anschrift. Eine Seite darf nur ERGÄNZEN (`zusatz`, etwa das
+ * Portrait), nie einen Kernwert überschreiben — deshalb steht der Zusatz
+ * vorn und die Kernfelder dahinter.
+ *
+ * Die Anschrift ist die der Gesellschaft, weil § 18 Abs. 2 MStV genau sie
+ * nennt. Eine Privatanschrift stünde hier nicht und wäre auch nicht belegt.
+ */
+export function founderPerson(zusatz = {}) {
+  const o = ORGANISATION;
+  return {
+    ...zusatz,
+    '@type': 'Person',
+    '@id': FOUNDER_ID,
+    name: FOUNDER.name,
+    honorificPrefix: FOUNDER.honorificPrefix,
+    jobTitle: 'Geschäftsführer',
+    worksFor: {'@id': ORG_ID},
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: o.streetAddress,
+      postalCode: o.postalCode,
+      addressLocality: o.addressLocality,
+      addressCountry: o.addressCountry,
+    },
+  };
+}
 
 /**
  * Belegte Marken-Profile für `sameAs`.
@@ -355,7 +403,12 @@ export function organizationSchema({logoUrl} = {}) {
     // auf der Startseite leer: der volle Person-Knoten steht nur im JSON-LD
     // von /pages/ueber-uns, und kein Leser holt für einen Verweis eine zweite
     // Seite.
-    founder: {'@type': 'Person', '@id': FOUNDER_ID, name: FOUNDER.name},
+    founder: {
+      '@type': 'Person',
+      '@id': FOUNDER_ID,
+      name: FOUNDER.name,
+      honorificPrefix: FOUNDER.honorificPrefix,
+    },
     // identifier ist bewusst IMMER ein Array, auch bei einem einzigen Eintrag.
     // schema.org erlaubt jeder Property mehrere Werte, und eine Form, die je
     // nach Listenlänge zwischen Objekt und Array springt, ist für jeden Leser

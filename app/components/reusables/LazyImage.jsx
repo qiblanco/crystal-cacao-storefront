@@ -55,7 +55,14 @@ import {bildQuellen} from './shopifyBildQuellen';
  * @param {object} p
  * @param {string} p.compressedLink   kleine Vorstufe (nur im Beobachter-Modus)
  * @param {string} p.highQualityLink  scharfe Datei
- * @param {string} [p.alt]
+ * @param {string} p.alt            PFLICHT: beschreibender deutscher Text,
+ *   oder "" für ein rein dekoratives Bild. Es gibt bewusst KEINEN Default:
+ *   bis 2026-10-10 stand hier `alt = 'image'`, und 6 von 7 Aufrufern trugen
+ *   damit live ein englisches Platzhalter-alt, das keine Wache sah (sie
+ *   zählten nur LEERES alt). Ein Default "" wäre die zweite Falle — er
+ *   markiert jedes vergessene Bild still als Deko. Ohne alt rendert das
+ *   <img> jetzt OHNE alt-Attribut, und genau das zählt die Rand-Probe
+ *   (seo-manager/alt-texte/probe_rand_dach_code_bilder.py) als Befund.
  * @param {boolean} [p.sofort]        LCP-Modus: kein Platzhalter, kein
  *   Beobachter, `loading="eager"` + `fetchpriority="high"`. NUR für ein
  *   Bild setzen, das oberhalb der Falte steht — `high` auf allem ist
@@ -70,7 +77,7 @@ import {bildQuellen} from './shopifyBildQuellen';
 export default function LazyImage({
   compressedLink,
   highQualityLink,
-  alt = 'image',
+  alt,
   sofort = false,
   breite,
   hoehe,

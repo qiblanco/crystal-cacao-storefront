@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {snapPunktNahe, snapGeometrie} from './snapZiel';
 
 /*
  * Gemeinsamer Drag-/Swipe-Hook fuer ALLE Slider der Storefront
@@ -35,6 +36,10 @@ const SNAP_RATIO = 0.5; // Weg-Schwelle: halber slideStep
 // als das Fenster, das ihn zeigt — und lässt Desktop unverändert
 // (min(210, 374) = 210, exakt der Bestandswert).
 const VIEWPORT_RATIO = 0.3;
+// restoreSnap: Snap wieder an, sobald der Slider so nah am Ziel steht
+// (fraktionales scrollLeft), spätestens nach SNAP_RESTORE_MAX_MS.
+const SNAP_ANKUNFT_PX = 1;
+const SNAP_RESTORE_MAX_MS = 1000;
 
 function prefersReducedMotion() {
   return (
@@ -79,6 +84,7 @@ export function useDragSwipe({
 
   const stopMomentum = useCallback(() => {
     const s = state.current;
+    const offen = s.momentumRaf || s.snapRestoreTimer;
     if (s.momentumRaf) {
       window.cancelAnimationFrame(s.momentumRaf);
       s.momentumRaf = 0;
@@ -87,6 +93,11 @@ export function useDragSwipe({
       window.clearTimeout(s.snapRestoreTimer);
       s.snapRestoreTimer = 0;
     }
+    // Abgebrochenes Ausschwingen (neuer pointerdown, Unmount): Snap sofort
+    // zurück. Sonst bliebe es nach einem bloßen Klick auf 'none' stehen;
+    // ein neuer Drag schaltet es in onPointerMove wieder ab.
+    const track = opts.current.trackRef?.current;
+    if (offen && track) track.style.scrollSnapType = '';
   }, []);
 
   const resetDrag = useCallback(() => {
@@ -110,30 +121,32 @@ export function useDragSwipe({
     // scroll-snap war fuer den Drag ausgeschaltet (mandatory-Snap wuerde
     // waehrend scrollLeft-Updates springen); sanft auf den naechsten
     // Snap-Punkt setteln, dann CSS-Snap wieder aktivieren.
+    // Das Ziel ist der Punkt, den das CSS-Snap selbst wählen würde
+    // (snapZiel.js) -- nicht child.offsetLeft: das ist relativ zum
+    // offsetParent und lag @1440 61 px daneben, das Snap ruckte dann ein
+    // zweites Mal (Job 20261010-hb-dragswipe-restoresnap-offsetleft-ziel).
+    // Snap kommt erst zurück, wenn der Slider angekommen ist, sonst kann es
+    // eine noch laufende Bewegung abfangen.
     const s = state.current;
     if (!track) return;
-    const children = Array.from(track.children);
-    if (children.length) {
-      let nearest = null;
-      let nearestDist = Infinity;
-      for (const child of children) {
-        const dist = Math.abs(child.offsetLeft - track.scrollLeft);
-        if (dist < nearestDist) {
-          nearestDist = dist;
-          nearest = child;
-        }
-      }
-      if (nearest) {
-        track.scrollTo({
-          left: nearest.offsetLeft,
-          behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-        });
-      }
+    const ziel = snapPunktNahe(snapGeometrie(track));
+    if (ziel !== null) {
+      track.scrollTo({
+        left: ziel,
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+      });
     }
-    s.snapRestoreTimer = window.setTimeout(() => {
-      track.style.scrollSnapType = '';
-      s.snapRestoreTimer = 0;
-    }, 320);
+    const start = performance.now();
+    const warteAufAnkunft = () => {
+      const da = ziel === null || Math.abs(track.scrollLeft - ziel) <= SNAP_ANKUNFT_PX;
+      if (da || performance.now() - start >= SNAP_RESTORE_MAX_MS) {
+        track.style.scrollSnapType = '';
+        s.snapRestoreTimer = 0;
+      } else {
+        s.snapRestoreTimer = window.setTimeout(warteAufAnkunft, 50);
+      }
+    };
+    s.snapRestoreTimer = window.setTimeout(warteAufAnkunft, 50);
   }, []);
 
   const velocityFromSamples = useCallback(() => {
