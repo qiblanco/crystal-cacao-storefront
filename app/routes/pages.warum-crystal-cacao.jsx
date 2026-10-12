@@ -485,6 +485,7 @@ export default function WarumCrystalCacaoPage() {
               width={72}
               height={72}
               alt=""
+              role="presentation"
               loading="lazy"
               decoding="async"
             />
