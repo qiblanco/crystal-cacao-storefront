@@ -1,11 +1,12 @@
 import {CartForm, Image} from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {Link} from 'react-router';
-import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
+import {BetragLaedt} from './BetragLaedt';
 import {getCartLinePriceDisplayExact} from '~/lib/cart-display-pricing';
 import {useMarktLand} from '~/lib/markt-land';
 import {kakaoSetArt} from '~/lib/kakao-set-zeile';
+import {useWarenkorbAktion, warenkorbBetrag} from '~/lib/warenkorb-anzeige';
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -41,6 +42,20 @@ export function CartLineItem({layout, line, childrenMap}) {
   // Der Satz haengt am aufgeloesten Markt (AT 10 statt 7 %, Vorlage #422).
   const marktLand = useMarktLand();
   const anzeigePreis = getCartLinePriceDisplayExact(line, marktLand);
+  // KEIN PLATZHALTER-PREIS (2026-10-13, Christian: „dass da 0 euro angezeigt
+  // wurde ist die ladezeit"). Eine optimistische Zeile hat noch keinen
+  // `cost`; der Kanon oben macht daraus 0. Solange eine Warenkorb-Aktion
+  // laeuft oder der Betrag fehlt, steht hier die Ladeanzeige. Ganze Betraege
+  // ohne Nachkommastellen, Begruendung in ~/lib/warenkorb-anzeige.js.
+  const {blockiert} = useWarenkorbAktion();
+  const hatBetrag = line?.cost?.totalAmount?.amount != null;
+  const preisText =
+    hatBetrag && !blockiert
+      ? warenkorbBetrag(
+          anzeigePreis.price.amount,
+          anzeigePreis.price.currencyCode,
+        )
+      : null;
 
   return (
     <li key={id} className="cart-line">
@@ -70,7 +85,11 @@ export function CartLineItem({layout, line, childrenMap}) {
               <strong>{product.title}</strong>
             </p>
           </Link>
-          <ProductPrice price={anzeigePreis.price} />
+          {/* Dieselbe Huelle wie ProductPrice (div.product-price, Rolle
+              und Name), damit Layout und Proben unveraendert greifen. */}
+          <div aria-label="Preis" className="product-price" role="group">
+            {preisText ? <span>{preisText}</span> : <BetragLaedt />}
+          </div>
           {/* Ohne Shopifys Platzhalter-Variante: ein Produkt mit nur einer
               Variante (jede Set-Zeile, jede Einzelpackung) trägt die Option
               "Title: Default Title". Sie sagt dem Kunden nichts und stand bis
@@ -119,6 +138,8 @@ export function CartLineItem({layout, line, childrenMap}) {
  * @param {{line: CartLine}}
  */
 function CartLineQuantity({line}) {
+  // Hooks vor jedem frühen Ausstieg (Regeln der Hooks).
+  const {blockiert, zielPackungen} = useWarenkorbAktion();
   if (!line || typeof line?.quantity === 'undefined') return null;
   const {id: lineId, quantity, isOptimistic} = line;
   // Eine Kakao-Set-Zeile (Menge 1) trägt 2 oder 3 Packungen. Der Stepper
@@ -126,7 +147,16 @@ function CartLineQuantity({line}) {
   // wieder auf Set oder Einzelpackung (lib/kakao-set-zeile.server.js).
   const handle = line.merchandise?.product?.handle;
   const set = kakaoSetArt(handle);
-  const menge = set ? set.packungen * quantity : quantity;
+  // Läuft der Stepper dieser Set-Zeile gerade, steht schon die Zielmenge da
+  // (useOptimisticCart kennt `kakaoPackungen` nicht und zeigte sonst die alte
+  // Zahl, bis der Server fertig war).
+  const ziel = zielPackungen.get(lineId);
+  const menge =
+    set && ziel != null ? ziel : set ? set.packungen * quantity : quantity;
+  // Solange irgendeine Warenkorb-Aktion läuft, warten alle Knöpfe: ein
+  // zweiter Klick brach sonst die erste Anfrage im Browser ab, während der
+  // Server beide rechnete (Korb sprang am 13.10. über 6, 5, 4, 7 Packungen).
+  const warten = !!isOptimistic || blockiert;
   const prevQuantity = Number(Math.max(0, menge - 1).toFixed(0));
   const nextQuantity = Number((menge + 1).toFixed(0));
   const eingabe = (neu) =>
@@ -152,14 +182,14 @@ function CartLineQuantity({line}) {
         <CartLineUpdateButton {...eingabe(prevQuantity)}>
           <button
             aria-label="Menge verringern"
-            disabled={menge <= 1 || !!isOptimistic}
+            disabled={menge <= 1 || warten}
             name="decrease-quantity"
             value={prevQuantity}
           >
             <span>&#8722;</span>
           </button>
         </CartLineUpdateButton>
-        <small>
+        <small aria-busy={blockiert || undefined}>
           <span className="sr-only">Menge: </span>
           {menge}
         </small>
@@ -168,13 +198,13 @@ function CartLineQuantity({line}) {
             aria-label="Menge erhöhen"
             name="increase-quantity"
             value={nextQuantity}
-            disabled={!!isOptimistic}
+            disabled={warten}
           >
             <span>&#43;</span>
           </button>
         </CartLineUpdateButton>
       </div>
-      <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
+      <CartLineRemoveButton lineIds={[lineId]} disabled={warten} />
     </div>
   );
 }
