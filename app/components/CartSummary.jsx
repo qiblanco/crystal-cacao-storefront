@@ -1,5 +1,4 @@
 import {CartForm} from '@shopify/hydrogen';
-import {Preis} from './Preis';
 import {getCartLineGrossDisplayTotalExact} from '~/lib/cart-display-pricing';
 import {useMarktLand} from '~/lib/markt-land';
 import {useEffect, useId, useRef, useState} from 'react';
@@ -7,6 +6,8 @@ import {useFetcher} from 'react-router';
 import {cartLineContentIds} from '~/lib/pixel-content';
 import {buildInitiateCheckoutEvent, qpxTrack} from '~/lib/qpx-commerce';
 import {KasseImBrowser} from '~/components/reusables/KasseImBrowser';
+import {BetragLaedt} from './BetragLaedt';
+import {useWarenkorbAktion, warenkorbBetrag} from '~/lib/warenkorb-anzeige';
 
 /**
  * @param {CartSummaryProps}
@@ -44,6 +45,21 @@ export function CartSummary({cart, layout}) {
     0,
   );
   const waehrung = cart?.cost?.subtotalAmount?.currencyCode ?? 'EUR';
+  // KEIN PLATZHALTER-BETRAG (2026-10-13, Christian: „dass da 0 euro angezeigt
+  // wurde ist die ladezeit"). Bis hierher stand die Zwischensumme, sobald
+  // `cost.subtotalAmount.amount` gesetzt war — und das ist auch beim LEEREN
+  // Korb gesetzt ("0.0" ist ein nicht-leerer Text). Eine optimistische Zeile
+  // ohne `cost` zählte dabei 0: „Zwischensumme: 0,00 €" bei Menge 3. Jetzt:
+  // Ladeanzeige, solange eine Warenkorb-Aktion läuft oder einer Zeile der
+  // Betrag fehlt; danach ganze Beträge ohne Nachkommastellen.
+  const {blockiert} = useWarenkorbAktion();
+  const zeileOhneBetrag = zeilen.some(
+    (zeile) => zeile?.cost?.totalAmount?.amount == null,
+  );
+  const summeText =
+    blockiert || zeileOhneBetrag
+      ? null
+      : warenkorbBetrag(bruttoSumme.toFixed(2), waehrung);
 
   return (
     // AUFBAU DER VORLAGE qiblanco.com (Christian 2026-09-10): Zwischensumme ->
@@ -59,13 +75,10 @@ export function CartSummary({cart, layout}) {
     <div aria-labelledby={summaryId} className={className}>
       <div className="cart-aside-subtotal">
         <div id={summaryId}>Zwischensumme:</div>{' '}
-        {cart?.cost?.subtotalAmount?.amount ? (
-          <Preis
-            data={{
-              amount: bruttoSumme.toFixed(2),
-              currencyCode: waehrung,
-            }}
-          />
+        {summeText ? (
+          <span>{summeText}</span>
+        ) : cart?.cost?.subtotalAmount?.amount || zeilen.length ? (
+          <BetragLaedt />
         ) : (
           '-'
         )}
@@ -83,6 +96,7 @@ export function CartSummary({cart, layout}) {
         />
       </CodeFalz>
       <CartCheckoutActions
+        wartet={blockiert}
         checkoutUrl={cart?.checkoutUrl}
         subtotal={{amount: bruttoSumme.toFixed(2), currencyCode: waehrung}}
         numItems={zeilen.length}
@@ -124,7 +138,13 @@ function CodeFalz({layout, children}) {
  *   contentIds?: string[];
  * }}
  */
-function CartCheckoutActions({checkoutUrl, subtotal, numItems, contentIds}) {
+function CartCheckoutActions({
+  checkoutUrl,
+  subtotal,
+  numItems,
+  contentIds,
+  wartet,
+}) {
   if (!checkoutUrl) return null;
 
   // DER KASSENKNOPF IST DER KERN (Christian 2026-09-10): "Jetzt sicher zur
@@ -151,16 +171,26 @@ function CartCheckoutActions({checkoutUrl, subtotal, numItems, contentIds}) {
   // Der Wert ist die angezeigte Brutto-Zwischensumme (Vorlage: taxedSubtotal).
   return (
     <div className="cartSummaryWrapper">
+      {/* WARTET (2026-10-13): solange eine Warenkorb-Aktion läuft, legt der
+          Server noch die Set-Zeile. Ein Klick in dieser Zeit führte in eine
+          Kasse, deren Korb sich danach noch ändert. Das href bleibt stehen
+          (Proben und Tracking lesen es), nur der Sprung wartet; der
+          Notausgang in ~/lib/warenkorb-anzeige.js gibt ihn nach 15 s frei. */}
       <a
-        className="cc-knopf cart-kasse"
+        className={`cc-knopf cart-kasse${wartet ? ' ist-wartend' : ''}`}
         href={checkoutUrl}
         target="_self"
-        onClick={() =>
+        aria-disabled={wartet || undefined}
+        onClick={(e) => {
+          if (wartet) {
+            e.preventDefault();
+            return;
+          }
           qpxTrack(
             'initiate_checkout',
             buildInitiateCheckoutEvent({subtotal, numItems, contentIds}),
-          )
-        }
+          );
+        }}
       >
         <p>Jetzt sicher zur Kasse</p>
       </a>
@@ -324,7 +354,12 @@ function CartGiftCard({giftCardCodes, giftCardHeadingId, giftCardInputId}) {
               >
                 <code>***{giftCard.lastCharacters}</code>
                 &nbsp;
-                <Preis data={giftCard.amountUsed} />
+                <span>
+                  {warenkorbBetrag(
+                    giftCard.amountUsed?.amount,
+                    giftCard.amountUsed?.currencyCode,
+                  )}
+                </span>
               </RemoveGiftCardForm>
             </dd>
           ))}
