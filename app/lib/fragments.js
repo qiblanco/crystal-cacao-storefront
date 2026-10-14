@@ -171,6 +171,65 @@ export const CART_QUERY_FRAGMENT = `#graphql
   }
 `;
 
+// ANTWORT JEDER WARENKORB-MUTATION (Hydrogen `mutateFragment`, eingehängt in
+// app/lib/context.js). Grossjob 20261013 „Warenkorb hängt", Segment s02;
+// Christian 13.10.: „hängt voll im warenkorb … dauerhaft abstellen".
+//
+// Hydrogens Vorgabe trägt nur id, totalQuantity und checkoutUrl. Der
+// Set-Schritt (legeKakaoSetZeile, K1) las deshalb nach jeder Kundenaktion die
+// Zeilen mit einer eigenen Abfrage nach (0,10 bis 0,15 s, gemessen 14.10.).
+// Hier stehen dieselben Felder wie in ZEILEN_QUERY von
+// kakao-set-zeile.server.js, auch dieselben ersten 100 Zeilen. Dann liest der
+// Set-Schritt sie aus der Antwort (zeilenAusAntwort). Gemessen am 14.10. in
+// DE, CH, US und AT: die Antwort ist in 15 von 15 Fällen gleich der Abfrage
+// danach, samt Rabatt-Zuteilungen der Automatik und des Partnercodes. Fehlt
+// ein Feld, liest der Set-Schritt wie bisher nach: kein stiller Fehler, nur
+// die alte Abfrage. Probe der Naht: crystal-cacao-node/proben/
+// probe_set_schritt_rundreisen.py --modus naht (Server-Timing setzeile q=0).
+//
+// BEWUSST OHNE `attributes`: persistAttributionOnCartResult
+// (cart-attribution.server.js) ersetzt die Attribute, wenn es in der Antwort
+// keine findet, und mischt sie mit den vorhandenen, wenn es welche findet.
+// Ohne das Feld bleibt die Ersetzen-Semantik genau wie vorher.
+//
+// Ohne #graphql-Kennung wie die Abfragen in kakao-set-zeile.server.js: das
+// Fragment gehört nicht in die Codegen-Typen, deren Fragmentnamen schon heute
+// kollidieren (README Abschnitt „Was offen bleibt" 5).
+export const CART_MUTATE_FRAGMENT = `
+  fragment CartApiMutation on Cart {
+    id
+    totalQuantity
+    checkoutUrl
+    lines(first: 100) {
+      nodes {
+        id
+        quantity
+        merchandise {
+          ... on ProductVariant {
+            product {
+              handle
+            }
+          }
+        }
+        cost {
+          totalAmount {
+            amount
+            currencyCode
+          }
+        }
+        discountAllocations {
+          discountedAmount {
+            amount
+          }
+          ... on CartCodeDiscountAllocation {
+            code
+          }
+        }
+      }
+    }
+  }
+`;
+
 const MENU_FRAGMENT = `#graphql
   fragment MenuItem on MenuItem {
     id
