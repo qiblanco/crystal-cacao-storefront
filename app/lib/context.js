@@ -1,6 +1,6 @@
 import {createHydrogenContext} from '@shopify/hydrogen';
 import {AppSession} from '~/lib/session';
-import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
+import {CART_MUTATE_FRAGMENT, CART_QUERY_FRAGMENT} from '~/lib/fragments';
 import {resolveCountry} from '~/lib/markt-pricing';
 import {ladePreismodus} from '~/lib/preismodus';
 
@@ -64,6 +64,14 @@ export async function createHydrogenRouterContext(
       i18n: {language: 'DE', country},
       cart: {
         queryFragment: CART_QUERY_FRAGMENT,
+        // Jede Warenkorb-Mutation antwortet mit ihren Zeilen; der Set-Schritt
+        // liest sie dort statt sie nachzufragen (Grossjob 20261013, s02).
+        // Eigene Fassung, nicht die von qiblanco.com: dort traegt das Fragment
+        // `attributes` fuer ad_params_seen, hier bewusst nicht (Begruendung
+        // bei CART_MUTATE_FRAGMENT in app/lib/fragments.js). Rueckweg: diese
+        // Zeile loeschen, dann gilt Hydrogens Vorgabe und der Set-Schritt
+        // liest wie vorher nach.
+        mutateFragment: CART_MUTATE_FRAGMENT,
         getBuyerIdentity: () => ({countryCode: country}),
       },
     },

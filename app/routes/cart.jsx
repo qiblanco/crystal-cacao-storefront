@@ -10,6 +10,8 @@ import {
 import {mergeCartAttributes} from '~/lib/checkout-tracking';
 import {
   kakaoPackungenEingabe,
+  kakaoStepperDirekt,
+  kakaoVariantenVorladen,
   legeKakaoSetZeile,
 } from '~/lib/kakao-set-zeile.server';
 import {ABSENDER_MARKE} from '~/lib/kakao-zone';
@@ -52,6 +54,24 @@ export const headers = ({actionHeaders}) => actionHeaders;
  *      herkunft, gesamt). Die Funktionswache und jeder Browser sehen damit,
  *      wo die Zeit bleibt, ohne Serverlog.
  * Kill-Schalter: env WARENKORB_HERKUNFT_SPAREN=off stellt 1. und 2. ab.
+ *
+ * s02 (derselbe Grossjob): auch der Set-Schritt stellt im Regelfall keine
+ * Abfrage mehr hinter die Kundenaktion (kakao-set-zeile.server.js, K1,
+ * Abschnitt WENIGER RUNDREISEN; die Preisregel bleibt, wie sie ist):
+ *   4. Jede Mutation bringt die Zeilen mit (fragments.js,
+ *      CART_MUTATE_FRAGMENT), der Set-Schritt liest nicht mehr nach.
+ *   5. Die Varianten aller Kakao-Zeilen kommen in EINER Abfrage, ab dem
+ *      Anfang der Aktion (kakaoVariantenVorladen).
+ *   6. Der Stepper schreibt beim Festbetrag-Anker (ab 4 Packungen, DE/CH/US)
+ *      das Set direkt in die eine Mutation (kakaoStepperDirekt), sonst wie
+ *      bisher ueber die Einzelpackungen. Kill: env KAKAO_SET_DIREKT=off.
+ *   7. Die Attribute eines vorhandenen Korbs werden ab dem Anfang gelesen,
+ *      parallel zur Kundenaktion. Sonst stuende diese Abfrage nach einem
+ *      Set-Schritt ohne Mutation allein hintereinander.
+ *   8. Server-Timing zaehlt je Schritt: aktion desc="direkt|klassisch m=N
+ *      q=N", setzeile desc="m=N q=N" (Mutationen, Abfragen des Schritts;
+ *      das eine Vorladen je Anfrage zaehlt nicht). Die Funktionswache
+ *      schreibt das ins Log, Probe: proben/probe_set_schritt_rundreisen.py.
  */
 const ATTRIBUTE_QUERY = `
   query WarenkorbAttribute($cartId: ID!) {
@@ -119,6 +139,19 @@ export async function action({request, context}) {
   let status = 200;
   let result;
 
+  const zeilenAktion = [
+    CartForm.ACTIONS.LinesAdd,
+    CartForm.ACTIONS.LinesUpdate,
+    CartForm.ACTIONS.LinesRemove,
+  ].includes(action);
+  if (zeilenAktion) kakaoVariantenVorladen(storefront);
+  const korbVorher = cart.getCartId();
+  const vorhandenFrueh =
+    sparen && korbVorher ? attributeLesen(storefront, korbVorher) : null;
+  const zaehlungAktion = {};
+  const zaehlungSetzeile = {};
+  let weg = 'klassisch';
+
   switch (action) {
     case CartForm.ACTIONS.LinesAdd:
       if (sparen && !cart.getCartId()) {
@@ -143,12 +176,32 @@ export async function action({request, context}) {
         result = await cart.addLines(inputs.lines);
       }
       break;
-    case CartForm.ACTIONS.LinesUpdate:
+    case CartForm.ACTIONS.LinesUpdate: {
       // Stepper einer Kakao-Set-Zeile: Menge in Packungen (kakao-set-zeile.server.js).
-      result = await cart.updateLines(
-        await kakaoPackungenEingabe({storefront, inputs, cart}),
-      );
+      // Beim Festbetrag-Anker direkt aufs Set; null = nicht anwendbar oder
+      // nicht so gelandet, dann der bisherige Weg (oben 6.).
+      const direkt = await kakaoStepperDirekt({
+        storefront,
+        inputs,
+        cart,
+        env,
+        messung: zaehlungAktion,
+      });
+      if (direkt) {
+        weg = 'direkt';
+        result = direkt;
+      } else {
+        result = await cart.updateLines(
+          await kakaoPackungenEingabe({
+            storefront,
+            inputs,
+            cart,
+            messung: zaehlungAktion,
+          }),
+        );
+      }
       break;
+    }
     case CartForm.ACTIONS.LinesRemove:
       result = await cart.removeLines(inputs.lineIds);
       break;
@@ -194,16 +247,33 @@ export async function action({request, context}) {
   // faelschlich "direct"). Consent-gegated in cart-attribution.server.js.
   // 2 oder 3 Packungen einer Kakao-Sorte liegen als Set-Zeile im Warenkorb,
   // damit ein Partnercode neben dem Staffelpreis greift (Großjob 20260929
-  // partnercodes x Sets, s03). Liest nach jeder Zeilen-Aktion nach.
+  // partnercodes x Sets, s03). Liest nach jeder Zeilen-Aktion nach, seit
+  // s02 aus der Antwort der Mutation (oben 4.).
   zeiten.aktion = Date.now() - t0;
+  // Die eine Mutation des Zweigs oben; was kakaoStepperDirekt und
+  // kakaoPackungenEingabe selbst stellen, zaehlen sie selbst (auch eine
+  // direkte, die danach nicht so lag).
+  if (weg === 'klassisch') {
+    zaehlungAktion.mutationen = (zaehlungAktion.mutationen || 0) + 1;
+  }
   const korbId = result?.cart?.id;
   const vorhanden =
     sparen && korbId && !attributeGesetzt
-      ? attributeLesen(storefront, korbId)
+      ? korbId === korbVorher && vorhandenFrueh
+        ? vorhandenFrueh
+        : attributeLesen(storefront, korbId)
       : Promise.resolve(attributeGesetzt);
 
   const t1 = Date.now();
-  result = await legeKakaoSetZeile({cart, storefront, env, action, result});
+  result = await legeKakaoSetZeile({
+    cart,
+    storefront,
+    env,
+    action,
+    result,
+    direkt: true,
+    messung: zaehlungSetzeile,
+  });
   zeiten.setzeile = Date.now() - t1;
 
   const t2 = Date.now();
@@ -222,11 +292,12 @@ export async function action({request, context}) {
 
   const cartId = result?.cart?.id;
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
+  const zaehlung = (z) => `m=${z.mutationen || 0} q=${z.abfragen || 0}`;
   headers.set(
     'Server-Timing',
     [
-      `aktion;dur=${zeiten.aktion}`,
-      `setzeile;dur=${zeiten.setzeile}`,
+      `aktion;dur=${zeiten.aktion};desc="${weg} ${zaehlung(zaehlungAktion)}"`,
+      `setzeile;dur=${zeiten.setzeile};desc="${zaehlung(zaehlungSetzeile)}"`,
       `herkunft;dur=${zeiten.herkunft};desc="${herkunft}"`,
       `gesamt;dur=${zeiten.gesamt}`,
     ].join(', '),
