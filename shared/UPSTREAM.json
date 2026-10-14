@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "00043fb10a3915c87f5b68770484c7fd7c7df460",
-  "erzeugt_utc": "2026-10-12T12:53:30Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 00043fb10a39; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit df9231c44b6f). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "d33a8dcb89b974630780de87426f292b19843065",
+  "erzeugt_utc": "2026-10-14T07:05:25Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen d33a8dcb89b9; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 00043fb10a39). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -361,7 +361,7 @@
     {
       "upstream": "app/lib/kakao-set-zeile.server.js",
       "klasse": "K1",
-      "sha256": "66995a193731a6cec3662f8aafec1fba9e06a45b31c561f4f12ecd151227e56c"
+      "sha256": "53f0d4bb118c1641a08af0e184f195882a2a68e9f3fd5325fb9a80d394f9f62a"
     },
     {
       "upstream": "app/lib/partnercode-daten.server.js",
