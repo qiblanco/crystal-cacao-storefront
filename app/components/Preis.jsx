@@ -31,6 +31,14 @@
  * nicht `69,00 $`. Dieselbe Zuordnung faehrt der Preis-Kanon
  * app/lib/markt-pricing.js seit dem 2026-07-18 (dort ohne Nachkommastellen,
  * weil er PAKETPREISE zeigt; hier MIT, weil ein Warenkorb centgenau ist).
+ *
+ * GANZ OHNE NACHKOMMASTELLEN (Christian 13.10.2026: "glatte euros und somit
+ * keine notwendigkeit für nachkommastellen im warenkorb oder sonstigen
+ * anzeigen"): ein Betrag, der auf den Cent ganz ist, steht als "76 €" bzw.
+ * "$69"; ein Betrag mit Cent bleibt cent-genau ("71,03 €"). Gemessen vorher
+ * am 14.10. 01:1xZ (rt-Wache preisformat-ganze-betraege-wache): die Suche
+ * zeigte "76,00 €", "122,00 €", "159,00 €". Dieselbe Regel wie
+ * warenkorbBetrag() in app/lib/warenkorb-anzeige.js.
  */
 
 const LOCALE_JE_WAEHRUNG = Object.freeze({
@@ -50,17 +58,20 @@ export function formatGeld(betrag, waehrung) {
   if (!Number.isFinite(zahl)) return null;
   const code = waehrung || 'EUR';
   const locale = LOCALE_JE_WAEHRUNG[code] || 'de-DE';
+  const stellen = Math.round(zahl * 100) % 100 === 0 ? 0 : 2;
   try {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: code,
+      minimumFractionDigits: stellen,
+      maximumFractionDigits: stellen,
     }).format(zahl);
   } catch {
     // FAIL-SOFT: eine Waehrung, die Intl nicht kennt, darf die Seite nicht
     // kosten — dann eben Zahl und Code, aber in deutscher Schreibweise.
     return `${zahl.toLocaleString('de-DE', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: stellen,
+      maximumFractionDigits: stellen,
     })} ${code}`;
   }
 }
