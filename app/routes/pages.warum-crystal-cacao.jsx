@@ -5,7 +5,7 @@ import {
   GRUENDER_FOTO,
   gruenderFotoQuellen,
 } from '~/components/reusables/AbsichtHinweis';
-import {ABSENDER_MARKE, markenOrganisation} from '~/lib/kakao-zone';
+import {ABSENDER_MARKE, gruenderId, markenOrganisation} from '~/lib/kakao-zone';
 import {canonicalLink, CANONICAL_ORIGIN} from '~/lib/seo';
 import {ORG_ID, ORGANISATION, organizationSchema} from '~/lib/entity-schema';
 import {MARKEN_TEILBILD, teilbildSignale} from '~/lib/kakao-seo';
@@ -138,7 +138,8 @@ const VEROEFFENTLICHT = '2026-09-11';
 const GEAENDERT = '2026-09-26';
 const PFAD = '/pages/warum-crystal-cacao';
 const SEITEN_URL = `${CANONICAL_ORIGIN}${PFAD}`;
-const AUTOR_ID = `${CANONICAL_ORIGIN}/#christian-bauer`;
+// Dieselbe Kennung wie der `founder` aller anderen Seiten (Befund H11).
+const AUTOR_ID = gruenderId(CANONICAL_ORIGIN);
 
 /** Menschenlesbares Datum. Aus derselben Konstante wie das maschinenlesbare —
  *  zwei Stellen für dasselbe Datum wären zwei Stellen für denselben Zustand. */

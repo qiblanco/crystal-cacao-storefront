@@ -214,6 +214,25 @@ function CartDiscounts({
     discountCodes
       ?.filter((discount) => discount.applicable)
       ?.map(({code}) => code) || [];
+  // UNGUELTIGER CODE SAGT ETWAS (Befund C02, 13.10.2026): Shopify nimmt einen
+  // Code, der fuer diesen Warenkorb nicht gilt, mit `applicable: false` in den
+  // Korb auf und antwortet 200 ohne Fehler. Vorher zeigte der Korb nur die
+  // geltenden Codes, und der Kunde sah nach ~3,5 s einfach nichts. Die Meldung
+  // steht in einer immer vorhandenen role=status-Zone, damit ein Screenreader
+  // sie beim Erscheinen vorliest. Der naechste gueltige Code raeumt den
+  // ungueltigen mit ab (UpdateDiscountForm schickt nur `codes`).
+  const nichtGeltend =
+    discountCodes
+      ?.filter((discount) => discount && !discount.applicable)
+      ?.map(({code}) => code)
+      ?.filter(Boolean) || [];
+  const rabattMeldung = nichtGeltend.length
+    ? nichtGeltend.length === 1
+      ? `Der Code „${nichtGeltend[0]}“ gilt für diesen Warenkorb nicht.`
+      : `Die Codes ${nichtGeltend
+          .map((c) => `„${c}“`)
+          .join(', ')} gelten für diesen Warenkorb nicht.`
+    : '';
 
   return (
     <section aria-label="Rabatte">
@@ -248,6 +267,7 @@ function CartDiscounts({
             type="text"
             name="discountCode"
             placeholder="Rabattcode"
+            required
           />
           &nbsp;
           <button type="submit" aria-label="Rabattcode einlösen">
@@ -255,6 +275,9 @@ function CartDiscounts({
           </button>
         </div>
       </UpdateDiscountForm>
+      <p className="cc-warenkorb-meldung" role="status">
+        {rabattMeldung}
+      </p>
     </section>
   );
 }
@@ -293,12 +316,46 @@ function CartGiftCard({giftCardCodes, giftCardHeadingId, giftCardInputId}) {
   const giftCardAddFetcher = useFetcher({key: 'gift-card-add'});
   const [removedCardIndex, setRemovedCardIndex] = useState(null);
 
+  // GUTSCHEIN NUR LEEREN, WENN ER GEGRIFFEN HAT (Befund C07, 13.10.2026).
+  // Vorher leerte jede Antwort das Feld. Ein unbekannter Code („abc“) kommt
+  // aber mit 200 und ohne Fehlerkennung zurueck (gemessen 514 Byte), und der
+  // Kunde sah sein Wort kommentarlos verschwinden. Beim Absenden merken wir
+  // uns, wie viele Gutscheine eingeloest sind; die Antwort der Mutation traegt
+  // seit diesem Befund `appliedGiftCards` (fragments.js, CART_MUTATE_FRAGMENT).
+  // Mehr Gutscheine -> Feld leeren; gleich viele -> Meldung, der Text bleibt.
+  // Fehlt das Feld in der Antwort, bleibt es beim alten Leeren ohne Meldung
+  // (nie eine falsche Meldung). Ein Verbindungsabbruch meldet sich ueber
+  // CartMain (warenkorb-meldung.js).
+  const [gutscheinMeldung, setGutscheinMeldung] = useState('');
+  const gutscheinVorgang = useRef(null);
+
   useEffect(() => {
-    if (giftCardAddFetcher.data) {
+    if (giftCardAddFetcher.state !== 'submitting') return;
+    gutscheinVorgang.current = {
+      anzahl: giftCardCodes?.length ?? 0,
+      code: String(giftCardAddFetcher.formData?.get('giftCardCode') ?? '').trim(),
+    };
+    setGutscheinMeldung('');
+  }, [giftCardAddFetcher.state, giftCardAddFetcher.formData, giftCardCodes]);
+
+  useEffect(() => {
+    const antwort = giftCardAddFetcher.data;
+    const vorgang = gutscheinVorgang.current;
+    if (!antwort || !vorgang) return;
+    gutscheinVorgang.current = null;
+    if (antwort.verbindungsfehler) return;
+    const karten = antwort.cart?.appliedGiftCards;
+    if (!Array.isArray(karten) || karten.length > vorgang.anzahl) {
       if (giftCardCodeInput.current !== null) {
         giftCardCodeInput.current.value = '';
       }
+      return;
     }
+    setGutscheinMeldung(
+      vorgang.code
+        ? `Gutscheincode „${vorgang.code}“ nicht gefunden – bitte prüf die Schreibweise.`
+        : 'Gutscheincode nicht gefunden – bitte prüf die Schreibweise.',
+    );
   }, [giftCardAddFetcher.data]);
 
   useEffect(() => {
@@ -377,6 +434,7 @@ function CartGiftCard({giftCardCodes, giftCardHeadingId, giftCardInputId}) {
             name="giftCardCode"
             placeholder="Gutscheincode"
             ref={giftCardCodeInput}
+            required
           />
           &nbsp;
           <button
@@ -388,6 +446,9 @@ function CartGiftCard({giftCardCodes, giftCardHeadingId, giftCardInputId}) {
           </button>
         </div>
       </AddGiftCardForm>
+      <p className="cc-warenkorb-meldung" role="status">
+        {gutscheinMeldung}
+      </p>
     </section>
   );
 }

@@ -55,16 +55,35 @@ const KACHEL_MENGE = '3';
  * Kaufseite das Dropdown darunter liefert („3x 420g … pro Packung"). Ohne sie
  * waere „53,- €" auf einer Kachel ohne Mengenwahl eine halbe Wahrheit.
  */
-export function KachelPreis({produkt}) {
+export function KachelPreis({produkt, staffelKasse = produkt?.kachelKasse ?? null}) {
   // Derselbe Markt wie auf der Kaufseite (AT 10 statt 7 %, Vorlage #422) --
   // sonst liefen Kachel und Kaufseite in AT auseinander.
   const marktLand = useMarktLand();
+  const variante = {price: produkt?.priceRange?.minVariantPrice};
+  // AUSSERHALB DES EUR-MARKTS braucht der Set-Preis den Kassenbetrag
+  // (app/lib/kachel-kasse.js, Befund H01 vom 13.10.2026): ohne ihn nennt
+  // cacaoPricing() den Listenpreis und meldet `rabattImWarenkorb`. Die Kachel
+  // stand dann mit 78,- CHF „pro Packung im 3er-Set“ da, die Kaufseite mit
+  // 53,67 CHF.
   const preis = cacaoPricing(
     KACHEL_MENGE,
-    {price: produkt?.priceRange?.minVariantPrice},
+    variante,
     produkt?.handle,
     marktLand,
+    staffelKasse,
   );
+  if (preis.rabattImWarenkorb) {
+    // Kein Kassenbetrag (Frist, Fehler): dann gibt es auf der Kachel keine
+    // Set-Aussage. Der Einzelpreis steht als das da, was er ist — der Preis
+    // einer Packung —, nie unter dem Zusatz „3er-Set“.
+    const einzel = cacaoPricing('1', variante, produkt?.handle, marktLand);
+    return (
+      <div className="cc-kachel-preis">
+        <span className="cc-kachel-preis-jetzt">{einzel.price}</span>
+        <span className="cc-kachel-preis-hinweis">pro Packung</span>
+      </div>
+    );
+  }
   return (
     <div className="cc-kachel-preis">
       <span className="cc-kachel-preis-jetzt">{preis.price}</span>

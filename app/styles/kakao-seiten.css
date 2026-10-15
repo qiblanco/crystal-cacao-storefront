@@ -258,6 +258,20 @@
   --cc-sorte-awake-flaeche: #FFF0F5; /* --cc-text darauf 12,98:1 */
   --cc-sorte-create-flaeche: #F0F7FF;/* --cc-text darauf 13,27:1 */
 
+  /* ---- Der neutrale Vergleichsbalken (Befund C24, 13.10.2026) ----
+   * #AAA196 = rgb(170, 161, 150) fuellt in den Kakao-Tiefe-Kacheln beider
+   * Kaufseiten den Balken der ANDEREN Sorte (.kt-balken__fuellung,
+   * data-kt-farbe="neutral"; gemessen 48 000 bzw. 58 000 px2). Er kommt aus
+   * der Vorlagen-Komponente: app/styles/kakao-tiefe.css --kt-neutral, Klasse
+   * K1, dort kommentiert „Balken der Vergleichssorte, kein Akzent“. GEWOLLT:
+   * die eigene Sorte steht farbig, die andere unbunt daneben. Der Laden
+   * aendert die K1-Datei nicht; der Ton steht HIER, damit das Token-System
+   * des Ladens jede ausgelieferte Farbe kennt, und die Farbwelt-Wache
+   * (homepage-bauer/pruefungen/probe_crystal_farbwelt.py, Weissliste HAUS)
+   * fuehrt ihn unter diesem Namen. Traegt keinen Text; zieht die Vorlage
+   * den Ton um, meldet die Wache den neuen Wert als systemfremd. */
+  --cc-neutral-vergleich: #AAA196;
+
   /* ---- DIE WORTMARKEN-BILDER: DIE FRAGE IST GEMESSEN BEANTWORTET ----
    * 2026-09-13, offener Vollzug ov3588271528. Er stand da, weil ein
    * Vorgaenger gemeldet hatte, die zwei Schriftzug-GRAFIKEN wichen von der

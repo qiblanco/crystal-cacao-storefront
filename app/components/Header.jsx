@@ -215,13 +215,19 @@ function HeaderCtas({cart}) {
 }
 
 function HeaderMenuMobileToggle() {
-  const {open} = useAside();
+  const {open, type} = useAside();
+  // Befund C09 (13.10.2026): ein Screenreader las den Knopf als „☰“, ohne
+  // Zustand. Das Zeichen bleibt sichtbar (aria-hidden), der Name steht am
+  // Knopf, aria-expanded folgt der Schublade.
   return (
     <button
       className="header-menu-mobile-toggle reset"
       onClick={() => open('mobile')}
+      aria-label="Menü"
+      aria-expanded={type === 'mobile'}
+      aria-haspopup="dialog"
     >
-      <h3>☰</h3>
+      <h3 aria-hidden="true">☰</h3>
     </button>
   );
 }

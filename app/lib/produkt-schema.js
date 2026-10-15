@@ -43,8 +43,18 @@
  * 7 % statt 19 % bei den Kakao-Handles und inkl. der Regel, dass Nicht-EUR-
  * Märkte den Endbetrag bereits liefern). Eine eigene Umrechnung an dieser
  * Stelle wäre eine zweite Wahrheit über den Preis — genau der Fehler, den
- * der Kanon verhindern soll. So zeigt das Schema exakt den Betrag, der auch
- * auf der Seite steht.
+ * der Kanon verhindern soll. So zeigt das Schema den Bruttobetrag der ersten
+ * Variante, so wie die Seite ihn für diese Variante nennt.
+ *
+ * WELCHER BETRAG DAS IST (richtiggestellt am 2026-10-15, Befund H09 vom
+ * 13.10.2026): auf den Kakao-Kaufseiten ist das der Preis der kaufbaren
+ * Einheit, der Variante „1x 420g“ (76 € in DE). Der groß gesetzte Hauptpreis
+ * der Seite ist ein anderer: 53 € je Packung im vorgewählten 3er-Set. Diesen
+ * Satz gab es hier früher als „exakt der Betrag, der auch auf der Seite
+ * steht“ — das traf den Hauptpreis nicht. Entschieden ist: offers.price
+ * bleibt der Einzelpreis, weil das die Einheit ist, die man allein kaufen
+ * kann; 53 € gibt es nur im 3er-Set. Er steht auf der Seite in der
+ * Mengenauswahl („1x 420g | 76,- € pro Packung“).
  *
  * KEIN KNOTEN OHNE PREIS-NACHWEIS — DER VORBEHALT IST AM 2026-09-12
  * EINGELÖST UND DIE LISTE DESHALB LEER. Der Vollständigkeit halber, weil ein
@@ -127,6 +137,10 @@
 import {CANONICAL_ORIGIN} from './seo.js';
 import {ORG_ID, ORGANISATION} from './entity-schema.js';
 import {bruttoAnzeige} from './markt-pricing.js';
+import {KAKAO_KOLLEKTION} from './kakao-zone.js';
+
+/** Name der Übersicht als Brotkrumen-Stufe = ihr Seitentitel ohne Marke. */
+const KAKAO_UEBERSICHT_NAME = 'Zeremonie Kakao';
 
 /**
  * Der Produktname ohne Schutzrechts-Zeichen — die SUCHFORM.
@@ -448,6 +462,12 @@ export function produktSchema(produkt, marktLand) {
  * Marken-Suffix. Eine erfundene Zwischenstufe („Shop", „Produkte") wäre eine
  * Brotkrume auf eine URL, die es nicht gibt — Google prüft die `item`-URLs.
  *
+ * AUF crystal-cacao.com GILT DAS NICHT MEHR (Befund H10, 13.10.2026):
+ * `/collections/all` antwortet dort mit einer Weiterleitung auf die
+ * Übersicht `/collections/zeremonie-kakao` — die Stufe zeigte also auf eine
+ * Adresse, die selbst keine Seite ist. Die zweite Stufe ist hier die
+ * Übersicht selbst, mit ihrem Seitentitel („Zeremonie Kakao“).
+ *
  * @param {{handle?: string, title?: string}|undefined} produkt
  * @returns {object|null} BreadcrumbList-Knoten oder null
  */
@@ -471,8 +491,8 @@ export function brotkrumeSchema(produkt) {
       {
         '@type': 'ListItem',
         position: 2,
-        name: 'Alle Produkte',
-        item: `${CANONICAL_ORIGIN}/collections/all`,
+        name: KAKAO_UEBERSICHT_NAME,
+        item: `${CANONICAL_ORIGIN}/collections/${KAKAO_KOLLEKTION}`,
       },
       {'@type': 'ListItem', position: 3, name: produkt.title, item: url},
     ],

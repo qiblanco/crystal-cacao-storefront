@@ -6,11 +6,97 @@ import {getEmptyPredictiveSearchResult} from '~/lib/search';
 import {noindexMeta, noindexHeader, istZusammensetzungsSet} from '~/lib/seo';
 import {
   ABSENDER_MARKE,
+  KAKAO_KOLLEKTION,
+  UMGELEITETE_PRODUKTE,
+  UMGELEITETE_SEITEN,
   istKakaoProdukt,
   istKakaoSeite,
   istKakaoKollektion,
   istKakaoBlog,
+  istTestartefakt,
 } from '~/lib/kakao-zone';
+import {istVorlageOhneIndexwert} from '~/lib/sitemap-zaun';
+
+/**
+ * WAS ALS PRODUKT-TREFFER ZAEHLT — EINE Regel fuer BEIDE Suchwege.
+ *
+ * GEMESSEN am 13.10.2026 (Befunde C04/H05): die Suche zeigte Create doppelt
+ * (Dublette `crystal-cacao-adfiefiale`), unter "kakao" dazu die vier
+ * Mengen-Vorlagen und die umgeleitete Seite /pages/crystal-cacao — auf der
+ * Ergebnisseite UND im Vorschlags-Weg. Der Filter kannte nur zwei Gruende
+ * (Fremdsortiment, Zusammensetzungs-Set); die Listen, die der Laden fuer
+ * genau diese Faelle ohnehin fuehrt, las er nicht:
+ *   - UMGELEITETE_PRODUKTE (kakao-zone.js): Adresse antwortet 301 woandershin,
+ *     ein Treffer darauf ist ein Umweg zu einer Seite, die schon in der
+ *     Liste steht.
+ *   - VORLAGEN_OHNE_INDEXWERT (sitemap-zaun.js): kaufbar, aber ohne eigenen
+ *     Inhalt; der Laden legt sie selbst in den Warenkorb. Sie bleiben
+ *     erreichbar und kaufbar, nur nicht als Suchtreffer.
+ *   - istTestartefakt(): ein Titel, der seinen Wegwerf-Zweck nennt.
+ * Beide Wege lesen diese EINE Funktion. Ein Filter je Weg war die Ursache
+ * des Befunds vom 2026-09-10 (Ergebnisseite 2x, Vorschlagsliste 1x).
+ *
+ * @param {{handle?: string, title?: string, collections?: {nodes?: Array<{handle: string}>}}} n
+ * @returns {boolean}
+ */
+function istSuchbaresProdukt(n) {
+  const handle = n?.handle;
+  return (
+    istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)) &&
+    !istZusammensetzungsSet(handle) &&
+    !Object.prototype.hasOwnProperty.call(UMGELEITETE_PRODUKTE, handle ?? '') &&
+    !istVorlageOhneIndexwert(handle) &&
+    !istTestartefakt(n?.title)
+  );
+}
+
+/**
+ * Eine Seite ist ein Treffer, wenn sie zur Kakao-Welt gehoert UND nicht
+ * weiterleitet (UMGELEITETE_SEITEN: /pages/crystal-cacao -> /). Dieselbe
+ * Liste laesst die Seite schon aus der Sitemap weg.
+ * @param {string|undefined} handle
+ * @returns {boolean}
+ */
+function istSuchbareSeite(handle) {
+  return (
+    istKakaoSeite(handle) &&
+    !Object.prototype.hasOwnProperty.call(UMGELEITETE_SEITEN, handle ?? '')
+  );
+}
+
+/**
+ * Normalform fuer den Kollektions-Treffer: klein, ohne Akzente, Bindestriche
+ * als Leerzeichen.
+ * @param {string} text
+ * @returns {string}
+ */
+function suchNormal(text) {
+  return String(text ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Trifft der Suchbegriff die Uebersicht? (Befund C10, 13.10.2026: "zeremonie"
+ * gab 0 Treffer, obwohl die Uebersicht "Zeremonie Kakao" heisst. Die Produkte
+ * tragen das Wort nicht, und die Storefront-Suche kennt Kollektionen nicht
+ * als Suchtyp.) Jedes Wort des Begriffs ab drei Zeichen muss in Titel oder
+ * Handle stehen.
+ * @param {string} term
+ * @param {{title?: string, handle?: string}|null|undefined} kollektion
+ * @returns {boolean}
+ */
+function trifftKollektion(term, kollektion) {
+  if (!kollektion?.handle) return false;
+  const worte = suchNormal(term).split(' ').filter((w) => w.length >= 3);
+  if (!worte.length) return false;
+  const heu = suchNormal(`${kollektion.title} ${kollektion.handle}`);
+  return worte.every((w) => heu.includes(w));
+}
 
 /**
  * Wie viele Treffer je Gattung von Shopify geholt werden — OHNE Cursor.
@@ -98,7 +184,12 @@ export default function SearchPage() {
       <SearchForm>
         {({inputRef}) => (
           <>
+            {/* Befund C11: das Feld hatte keinen zugaenglichen Namen. */}
+            <label htmlFor="cc-suche-begriff" className="sr-only">
+              Suchbegriff
+            </label>
             <input
+              id="cc-suche-begriff"
               defaultValue={term}
               name="q"
               placeholder="Suchen…"
@@ -111,12 +202,17 @@ export default function SearchPage() {
         )}
       </SearchForm>
       {error && <p style={{color: 'red'}}>{error}</p>}
-      {!term || !result?.total ? (
+      {/* Befund C11: ohne Begriff stand sofort "nichts gefunden" da — eine
+          Antwort auf eine Frage, die niemand gestellt hat. */}
+      {!term ? (
+        <SearchResults.Start />
+      ) : !result?.total ? (
         <SearchResults.Empty />
       ) : (
         <SearchResults result={result} term={term}>
-          {({articles, pages, products, term}) => (
+          {({articles, pages, products, collections, term}) => (
             <div>
+              <SearchResults.Collections collections={collections} />
               <SearchResults.Products products={products} term={term} />
               <SearchResults.Pages pages={pages} term={term} />
               <SearchResults.Articles articles={articles} term={term} />
@@ -228,7 +324,16 @@ export const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
+    $kollektion: String!
   ) @inContext(country: $country, language: $language) {
+    # Befund C10: die Uebersicht als Treffer, verglichen im Loader
+    # (trifftKollektion), weil die Suche Kollektionen nicht als Typ kennt.
+    kollektion: collection(handle: $kollektion) {
+      __typename
+      id
+      handle
+      title
+    }
     articles: search(
       query: $term,
       types: [ARTICLE],
@@ -292,9 +397,14 @@ async function regularSearch({request, context}) {
   const term = String(url.searchParams.get('q') || '');
 
   // Search articles, pages, and products for the `q` term
-  const {errors, ...items} = await storefront.query(SEARCH_QUERY, {
-    variables: {...variables, term},
+  const {errors, kollektion, ...items} = await storefront.query(SEARCH_QUERY, {
+    variables: {...variables, term, kollektion: KAKAO_KOLLEKTION},
   });
+  if (items) {
+    items.collections = {
+      nodes: trifftKollektion(term, kollektion) ? [kollektion] : [],
+    };
+  }
 
   if (!items) {
     throw new Error('Die Suche lieferte keine Daten von Shopify zurück');
@@ -343,13 +453,12 @@ function nurKakaoTreffer(items) {
     if (gattung === 'products') {
       // Kakao-Zusammensetzungs-Sets sind Warenkorb-Ziele, keine Suchtreffer
       // (Elina EL-20261001-397a9719; Begruendung an istZusammensetzungsSet).
-      behalten = nodes.filter(
-        (n) =>
-          istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)) &&
-          !istZusammensetzungsSet(n?.handle),
-      );
+      // Dazu Dublette, Vorlagen, Testartefakte: istSuchbaresProdukt oben.
+      behalten = nodes.filter(istSuchbaresProdukt);
     } else if (gattung === 'pages') {
-      behalten = nodes.filter((n) => istKakaoSeite(n?.handle));
+      behalten = nodes.filter((n) => istSuchbareSeite(n?.handle));
+    } else if (gattung === 'collections') {
+      behalten = nodes.filter((n) => istKakaoKollektion(n?.handle));
     } else if (gattung === 'articles') {
       behalten = nodes.filter((n) => istKakaoBlog(n?.blog?.handle));
     }
@@ -536,17 +645,10 @@ async function predictiveSearch({request, context}) {
     Object.entries(items).map(([gattung, liste]) => {
       if (!Array.isArray(liste)) return [gattung, liste];
       if (gattung === 'products') {
-        return [
-          gattung,
-          liste.filter(
-            (n) =>
-              istKakaoProdukt(n?.collections?.nodes?.map((k) => k.handle)) &&
-              !istZusammensetzungsSet(n?.handle),
-          ),
-        ];
+        return [gattung, liste.filter(istSuchbaresProdukt)];
       }
       if (gattung === 'pages') {
-        return [gattung, liste.filter((n) => istKakaoSeite(n?.handle))];
+        return [gattung, liste.filter((n) => istSuchbareSeite(n?.handle))];
       }
       if (gattung === 'collections') {
         return [gattung, liste.filter((n) => istKakaoKollektion(n?.handle))];

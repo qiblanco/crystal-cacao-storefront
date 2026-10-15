@@ -747,6 +747,25 @@ aside .cart-details {
   background: transparent;
 }
 
+/* Meldungen im Warenkorb (Befunde C02, C07, C16, 13.10.2026): ungueltiger
+ * Rabattcode, unbekannter Gutschein, Verbindungsabbruch. Nur Tokens des
+ * Ladens; leer nimmt die role=status-Zone keinen Platz ein. */
+.cc-warenkorb-meldung {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cc-linie, #e6ded3);
+  border-radius: 10px;
+  background: var(--cc-flaeche, #f6f1ea);
+  color: var(--cc-text, #2c2a26);
+  font-size: 0.95rem;
+}
+
+.cc-warenkorb-meldung:empty {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 /*
  * SUMMENBLOCK WIE DIE VORLAGE — 2026-09-10. Zwischensumme als EINE Zeile
  * (Bezeichner links, Betrag rechts, 1.1rem / 500, gedaempft), darunter der

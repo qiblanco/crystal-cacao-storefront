@@ -33,7 +33,13 @@ async function loadCriticalData({context, request}) {
   // (gemessen 2026-09-02: /collections fuehrte 4 Qi-Blanco-Kollektionen). Sie wird NICHT auf 404 gesetzt, sondern auf die
   // Kakao-Kollektion umgeleitet: der leere Warenkorb verlinkt sichtbar
   // "Weiter einkaufen" auf /collections, und ein 404 dort braeche den Kaufweg.
-  throw redirect(`/collections/${KAKAO_KOLLEKTION}`);
+  // 301 statt des Vorgabewerts 302 (Befund H10, 13.10.2026): die Umleitung
+  // ist dauerhaft, und eine 302 sagt Suchmaschinen, die alte Adresse bleibe
+  // die richtige. Parameter wie ?markt= reisen mit.
+  throw redirect(
+    `/collections/${KAKAO_KOLLEKTION}${new URL(request.url).search}`,
+    301,
+  );
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 4,
   });

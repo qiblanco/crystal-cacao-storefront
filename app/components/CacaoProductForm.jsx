@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState, useId} from 'react';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import {EuGewaehrleistungsHinweis} from './EuGewaehrleistungsLabel';
@@ -133,6 +133,7 @@ export function CacaoProductForm({
   const marktLand = useMarktLand();
   const optionen = cacaoSizeOptions(selectedVariant, handle, marktLand, staffelKasse);
   const selectRef = useRef(null);
+  const groesseId = useId();
   const kurz = useKurzfassung(
     selectRef,
     optionen.map((o) => o.label),
@@ -141,10 +142,14 @@ export function CacaoProductForm({
   return (
     <div className="product-form">
       <div className="product-options">
-        <h5>Größe</h5>
+        {/* Befund C08 (13.10.2026): die Auswahl hatte keinen zugaenglichen
+            Namen — die Ueberschrift stand nur davor. aria-labelledby macht
+            sie zum Namen, ohne die Gestalt zu aendern. */}
+        <h5 id={groesseId}>Größe</h5>
         <select
           ref={selectRef}
           className="CacaoVariantSelect"
+          aria-labelledby={groesseId}
           value={quantity}
           onChange={(e) => onQuantityChange(e.target.value)}
         >
