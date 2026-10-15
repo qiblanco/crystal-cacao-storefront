@@ -39,18 +39,15 @@ const CACAO_FALLBACK = {
 
 export const PACKUNG_GRAMM = 420;
 
+/**
+ * Grundpreis je 100 g: "12,62 € / 100 g" · "13,52 CHF / 100 g" · "$4.20 / 100 g".
+ * Leerzeichen vor dem Währungszeichen und vor der Einheit (Auftrag Christian
+ * 15.10.2026; vorher "12,62€ / 100g"). Die Zahl schreibt formatPreis(): ganz
+ * ohne Nachkommastellen, sonst cent-genau (Hausregel 13.10.2026).
+ */
 function formatPer100g(wert, waehrung) {
-  if (waehrung === 'USD') {
-    return `$${wert.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })} / 100g`;
-  }
-  const de = wert.toLocaleString('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  return waehrung === 'EUR' ? `${de}€ / 100g` : `${de} ${waehrung} / 100g`;
+  const betrag = formatPreis(wert, waehrung);
+  return betrag == null ? null : `${betrag} / 100 g`;
 }
 
 /**
