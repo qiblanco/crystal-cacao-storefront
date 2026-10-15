@@ -84,7 +84,7 @@ export function bruttoAnzeige(amount, handle, currencyCode, land) {
  * anzeigen macht keinen Sinn").
  *
  * Gerechnet wird auf den Cent. Ist der Betrag ein ganzer Euro, zeigt die Seite
- * ihn ohne Cent ("1.087,- €"), sonst cent-genau ("78,13 €").
+ * ihn ohne Cent ("1.087 €"), sonst cent-genau ("78,13 €").
  *
  * Davor standen drei Fixe an derselben Frage, der Rundungsrichtung: round
  * (2026-07-18), ceil außerhalb DE (2026-09-26, AT 78,13 -> 79), ceil auch in
@@ -134,7 +134,7 @@ export function kassenAnzeige(betrag, land) {
  * 1,19 gegen 1238 unversteuert). PL (5533 PLN) und SE (14220 SEK) rechnet
  * Shopify aus denselben 1238 um, mit demselben Kurs wie den Preis. Darum gilt
  * für einen API-Wert: heraus mit dem DE-Satz der Ware, hinein mit dem Satz
- * des Landes. DE bleibt so byte-gleich 1.238,-; AT zeigt 1.248,40 neben
+ * des Landes. DE bleibt so byte-gleich 1.238 €; AT zeigt 1.248,40 neben
  * 1.096,14, also denselben Rabatt wie DE (12,2 Prozent).
  *
  * Der Paritäts-Ersatz aus streichpreis-paritaet.js (CHF 1420, USD 1599)
@@ -192,24 +192,30 @@ export function staffelModellAnzeige(betrag, land) {
 }
 
 /**
- * Anzeigeformat je Waehrung. Stile:
- * - 'lp'        (Campaign-/Paket-Karten): "7.345 €" · "1.048 CHF" · "$1,383"
- * - 'pdp'       (ProductPrice-Kanon):    "1.087,- €" · "1.048,- CHF" · "$1,383"
- * - 'cart-cent' (Warenkorb, cent-genau, aiceo:digest54:p3): "76,00 €" ·
- *   "159,63 €" — NUR für bereits cent-genaue Werte aus
- *   cart-display-pricing.js (getCartLine*Exact); kein zweites Runden hier.
+ * Anzeigeformat je Waehrung — EINE Schreibweise für jeden Stil:
+ * ein ganzer Betrag steht ohne Nachkommastellen und ohne ",-"
+ * ("53 €" · "1.087 €" · "1.048 CHF" · "$1,383"), ein Betrag mit Cent
+ * cent-genau ("159,63 €" · "1.132,89 CHF" · "$277.20").
+ * Christian 13.10.2026: "keine Nachkommastellen im Warenkorb", die Preise
+ * sind auf ganze Euro bereinigt; 14./15.10.2026: "ja dann auch 76 € statt
+ * ,-". Bis zum 15.10.2026 haengte der Stil 'pdp' an einen ganzen Betrag
+ * ",-" an ("1.087,- €"), der Stil 'cart-cent' zwei Nullen ("1.087,00 €").
+ * Die Aufrufer geben weiter ihren Stil als drittes Argument mit ('lp'
+ * Campaign-/Paket-Karten, 'pdp' ProductPrice-Kanon und Kakao-Staffel,
+ * 'cart-cent' Warenkorb, aiceo:digest54:p3); er aendert die Schreibweise
+ * nicht mehr. 'cart-cent' bekommt weiterhin NUR bereits cent-genaue Werte
+ * aus cart-display-pricing.js (getCartLine*Exact); kein zweites Runden hier.
  * @param {number|null} wert Anzeigewert auf den Cent (ganz -> ohne Nachkommastellen)
  * @param {string} [currencyCode]
- * @param {'lp'|'pdp'|'cart-cent'} [stil]
  * @returns {string|null}
  */
-export function formatPreis(wert, currencyCode = 'EUR', stil = 'lp') {
+export function formatPreis(wert, currencyCode = 'EUR') {
   if (wert == null || !Number.isFinite(Number(wert))) return null;
   const n = Number(wert);
   // Ganz -> ohne Cent, sonst cent-genau, in jedem Stil (Kassenbetrag-Regel,
   // s03 2026-10-04): "78,13 €" · "1.132,89 CHF" · "$1,234.56".
   const ganz = Math.round(n * 100) % 100 === 0;
-  const digits = stil === 'cart-cent' || !ganz ? 2 : 0;
+  const digits = ganz ? 0 : 2;
   if (currencyCode === 'USD') {
     return `$${n.toLocaleString('en-US', {
       minimumFractionDigits: digits,
@@ -221,8 +227,7 @@ export function formatPreis(wert, currencyCode = 'EUR', stil = 'lp') {
     maximumFractionDigits: digits,
   });
   const symbol = currencyCode === 'EUR' ? '€' : currencyCode;
-  if (stil === 'cart-cent' || !ganz) return `${de} ${symbol}`;
-  return stil === 'pdp' ? `${de},- ${symbol}` : `${de} ${symbol}`;
+  return `${de} ${symbol}`;
 }
 
 /* ───────── M3: Markt-Dynamik (Geo -> Markt-Kontext) ─────────
