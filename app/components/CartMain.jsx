@@ -1,5 +1,7 @@
 import {useOptimisticCart} from '@shopify/hydrogen';
+import {useEffect, useState} from 'react';
 import {Link} from 'react-router';
+import {VERBINDUNG_EREIGNIS} from '~/lib/warenkorb-meldung';
 import {useAside} from '~/components/Aside';
 import {CartLineItem} from '~/components/CartLineItem';
 import {CartSummary} from './CartSummary';
@@ -27,6 +29,37 @@ function getLineItemChildrenMap(lines) {
   return children;
 }
 /**
+ * VERBINDUNG UNTERBROCHEN (Befund C16, 13.10.2026): bricht eine
+ * Warenkorb-Aktion im Netz ab, faengt cart.jsx (clientAction) den Fehler,
+ * der Warenkorb bleibt stehen und hier erscheint fuer 15 s ein Hinweis.
+ * Die role=status-Zone ist immer da, damit ein Screenreader den Text beim
+ * Erscheinen vorliest.
+ */
+const VERBINDUNG_HINWEIS_MS = 15000;
+
+function VerbindungsHinweis() {
+  const [text, setText] = useState('');
+  useEffect(() => {
+    let zeitgeber = null;
+    const zeigen = () => {
+      setText('Verbindung unterbrochen – bitte versuch es gleich noch einmal.');
+      clearTimeout(zeitgeber);
+      zeitgeber = setTimeout(() => setText(''), VERBINDUNG_HINWEIS_MS);
+    };
+    window.addEventListener(VERBINDUNG_EREIGNIS, zeigen);
+    return () => {
+      window.removeEventListener(VERBINDUNG_EREIGNIS, zeigen);
+      clearTimeout(zeitgeber);
+    };
+  }, []);
+  return (
+    <p className="cc-warenkorb-meldung" role="status">
+      {text}
+    </p>
+  );
+}
+
+/**
  * The main cart component that displays the cart items and summary.
  * It is used by both the /cart route and the cart aside dialog.
  * @param {CartMainProps}
@@ -49,6 +82,7 @@ export function CartMain({layout, cart: originalCart}) {
       className={className}
       aria-label={layout === 'page' ? 'Warenkorb-Seite' : 'Warenkorb-Schublade'}
     >
+      <VerbindungsHinweis />
       <CartEmpty hidden={linesCount} layout={layout} />
       <div className="cart-details">
         <p id="cart-lines" className="sr-only">

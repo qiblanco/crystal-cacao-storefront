@@ -15,6 +15,10 @@ import {
   legeKakaoSetZeile,
 } from '~/lib/kakao-set-zeile.server';
 import {ABSENDER_MARKE} from '~/lib/kakao-zone';
+import {
+  istVerbindungsfehler,
+  meldeVerbindungsfehler,
+} from '~/lib/warenkorb-meldung';
 
 /**
  * @type {Route.MetaFunction}
@@ -121,6 +125,34 @@ async function attributeLesen(storefront, cartId) {
 /**
  * @param {Route.ActionArgs}
  */
+/**
+ * NETZFEHLER BLEIBEN IM WARENKORB (Befund C16, 13.10.2026): ohne diese
+ * Funktion stieg ein abgebrochener POST bis zur Wurzel-Fehlergrenze auf, und
+ * an der Stelle des Warenkorbs stand „Da ist etwas schiefgelaufen 500“.
+ * Jetzt bleibt der Warenkorb stehen, und CartMain zeigt „Verbindung
+ * unterbrochen“ (app/lib/warenkorb-meldung.js).
+ *
+ * Nur der Verbindungsabbruch wird gefangen; jede Antwort des Servers
+ * (auch Fehler und Weiterleitungen) laeuft unveraendert durch. Der Status 503
+ * haelt React Router davon ab, nach der gescheiterten Aktion alle Daten neu
+ * zu laden — die Neuladung liefe in denselben Netzausfall. Die Wurzel prueft
+ * dafuer zusaetzlich `verbindungsfehler` (root.jsx shouldRevalidate).
+ *
+ * @param {Route.ClientActionArgs}
+ */
+export async function clientAction({serverAction}) {
+  try {
+    return await serverAction();
+  } catch (fehler) {
+    if (!istVerbindungsfehler(fehler)) throw fehler;
+    meldeVerbindungsfehler();
+    return data(
+      {cart: null, errors: [], warnings: [], verbindungsfehler: true},
+      {status: 503},
+    );
+  }
+}
+
 export async function action({request, context}) {
   const {cart, env, storefront} = context;
   const t0 = Date.now();

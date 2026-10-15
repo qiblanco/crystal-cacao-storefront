@@ -209,6 +209,29 @@ export const MUTTER_ORGANISATION = Object.freeze({
 export const MARKEN_LOGO_PFAD = '/apple-touch-icon.png';
 
 /**
+ * DIE EINE @id DES GRÜNDERS AUF DIESEM LADEN (Befund H11, 13.10.2026).
+ *
+ * GEMESSEN am ausgelieferten JSON-LD: dieselbe Person stand mit zwei
+ * Kennungen da — `…/pages/ueber-uns#person` (aus `organizationSchema()` der
+ * Vorlage, FOUNDER_ID in entity-schema.js, K1) auf Startseite, Übersicht und
+ * Erfahrungsseite, `…/#christian-bauer` auf /pages/warum-crystal-cacao. Für
+ * eine Maschine sind das zwei Menschen. Und /pages/ueber-uns gibt es auf
+ * diesem Laden nicht (404): die Kennung zeigte auf eine Seite, die keine ist.
+ *
+ * Die Vorlagen-Kennung ist auf qiblanco.com richtig (dort steht die
+ * Über-uns-Seite). Hier gilt die Kennung, die /pages/warum-crystal-cacao
+ * seit dem 2026-09-11 führt; sie löst auf die Startseite auf (200).
+ * `markenOrganisation()` biegt den `founder` darauf um, die Seite liest
+ * dieselbe Funktion — eine Stelle für die Kennung.
+ *
+ * @param {string} origin `origin` dieses Ladens
+ * @returns {string}
+ */
+export function gruenderId(origin) {
+  return `${origin}/#christian-bauer`;
+}
+
+/**
  * Macht aus dem Organization-Knoten der Vorlage den Knoten DIESER Marke.
  *
  * WARUM HIER UND NICHT IN app/lib/entity-schema.js: die Datei ist im
@@ -271,6 +294,10 @@ export function markenOrganisation(knoten, {origin} = {}) {
   else delete eigen.identifier;
   if (origin) {
     eigen.logo = {'@type': 'ImageObject', url: `${origin}${MARKEN_LOGO_PFAD}`};
+    // Eine Person, eine Kennung (gruenderId oben, Befund H11).
+    if (eigen.founder && typeof eigen.founder === 'object') {
+      eigen.founder = {...eigen.founder, '@id': gruenderId(origin)};
+    }
   }
   eigen.parentOrganization = {
     '@type': 'Organization',

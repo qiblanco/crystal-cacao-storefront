@@ -10,6 +10,7 @@ import {
   uebersichtAuswahl,
 } from '~/lib/kakao-zone';
 import {KachelPreis} from '~/components/KachelPreis';
+import {kachelKassenAnhaengen} from '~/lib/kachel-kasse';
 import {canonicalLink, absoluteCanonical} from '~/lib/seo';
 import {kollektionSignale, produktEintraege} from '~/lib/kakao-seo';
 
@@ -153,13 +154,37 @@ async function loadCriticalData({context, params, request}) {
     throw fremdinhaltAbweisen();
   }
   const {storefront} = context;
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 8,
-  });
 
   if (!handle) {
     throw redirect('/collections');
   }
+
+  // RUECKWEG OHNE DEPLOY: UEBERSICHT_ZAUN=off in repo/.env -> Dienst neu
+  // starten (Begruendung unten am Zaun). Hier schon gelesen, weil er auch
+  // entscheidet, OB die Seite blaettert.
+  const zaunAus =
+    String(context.env?.UEBERSICHT_ZAUN ?? '').toLowerCase() === 'off';
+
+  // KEIN BLAETTERN UEBER DEM ZAUN (Befund C03/H04, 13.10.2026): die Seite
+  // paginierte mit pageBy 8 und filterte ERST DANACH auf die Sorten. Gemessen:
+  // "Mehr laden" brachte 0 neue Karten, der Knopf blieb stehen, und dahinter
+  // hingen vier crawlbare, leere Folgeseiten. Dieselbe Klasse hat die Suche
+  // am 2026-09-02 schon gehabt (search.jsx SUCHE_TREFFER_MAX): eine
+  // Cursor-Paginierung ueber einem nachgelagerten Filter liefert leere Seiten.
+  // Mit Zaun holt der Loader deshalb die ganze (kleine) Kollektion auf einmal
+  // und blaettert nicht; eine alte Folgeseiten-Adresse antwortet 301 auf die
+  // Uebersicht (ohne cursor/direction, uebrige Parameter wie ?markt= bleiben).
+  if (!zaunAus) {
+    const url = new URL(request.url);
+    if (url.searchParams.has('cursor') || url.searchParams.has('direction')) {
+      url.searchParams.delete('cursor');
+      url.searchParams.delete('direction');
+      throw redirect(`${url.pathname}${url.search}`, 301);
+    }
+  }
+  const paginationVariables = zaunAus
+    ? getPaginationVariables(request, {pageBy: 8})
+    : {first: UEBERSICHT_KANDIDATEN_MAX};
 
   const [{collection}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
@@ -199,13 +224,18 @@ async function loadCriticalData({context, params, request}) {
   // starten. Fail-closed in die SICHERE Richtung: nur der ausdrueckliche Wert
   // 'off' hebt den Zaun auf, jeder andere Wert (und ein fehlender) laesst ihn
   // wirken.
-  const zaunAus =
-    String(context.env?.UEBERSICHT_ZAUN ?? '').toLowerCase() === 'off';
   let restbericht = [];
   if (!zaunAus && collection?.products?.nodes) {
     const {gezeigt, ausgelassen} = uebersichtAuswahl(collection.products.nodes);
     restbericht = ausgelassen;
     collection.products.nodes = gezeigt;
+    // Alles ist geladen (siehe oben): es gibt keine Folgeseite.
+    collection.products.pageInfo = {
+      hasPreviousPage: false,
+      hasNextPage: false,
+      startCursor: null,
+      endCursor: null,
+    };
     // RESTBERICHT statt stiller Auswahl: ein Einschluss-Selektor sagt nur, was
     // er NIMMT — seine ausgelassene Menge ist von aussen nicht pruefbar.
     // Deshalb zaehlt er sie hier auf, MIT Grund, im Serverprotokoll.
@@ -218,11 +248,23 @@ async function loadCriticalData({context, params, request}) {
     }
   }
 
+  // Kassenbetrag des 3er-Sets fuer die Kacheln ausserhalb des EUR-Markts
+  // (app/lib/kachel-kasse.js, Befund H01). Im EUR-Markt kein Abruf.
+  await kachelKassenAnhaengen(storefront, collection?.products?.nodes);
+
   return {
     collection,
     restbericht,
   };
 }
+
+/**
+ * Wie viele Kollektionsmitglieder der Zaun hoechstens sieht. Gemessen am
+ * 2026-09-09 fuehrte die Kollektion neun, am 13.10.2026 zwoelf Produkte. 100
+ * deckelt nur die Antwortgroesse und entscheidet nichts (wie
+ * SUCHE_TREFFER_MAX in search.jsx).
+ */
+const UEBERSICHT_KANDIDATEN_MAX = 100;
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -281,6 +323,13 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     id
     handle
     title
+    # Fuer den Kassenbetrag der Kachel (app/lib/kachel-kasse.js).
+    selectedOrFirstAvailableVariant {
+      id
+      price {
+        ...MoneyProductItem
+      }
+    }
     featuredImage {
       id
       altText

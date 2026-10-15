@@ -45,8 +45,9 @@
 // Bewusst RELATIV statt über den '~'-Alias: der Alias wird nur von Vite
 // aufgelöst, nicht von Node. Der hermetische Test (node --test, ohne Bundler)
 // könnte diese Datei sonst gar nicht laden.
-import {absoluteCanonical} from './seo.js';
-import {ABSENDER_MARKE, markenProdukt} from './kakao-zone.js';
+import {absoluteCanonical, CANONICAL_ORIGIN} from './seo.js';
+import {ABSENDER_MARKE, markenOrganisation, markenProdukt} from './kakao-zone.js';
+import {organizationSchema} from './entity-schema.js';
 import {brotkrumeSchema, produktSchema} from './produkt-schema.js';
 
 /**
@@ -411,11 +412,35 @@ function mitBild(knoten, bildUrl) {
   if (!knoten || typeof knoten !== 'object') return null;
   const roh = Array.isArray(knoten.image) ? knoten.image : [knoten.image];
   const bilder = roh.filter((u) => typeof u === 'string' && u.trim());
-  if (bilder.length) return {...knoten, image: bilder};
+  if (bilder.length) return {...knoten, image: bilder.map(ldBildBreite)};
   if (typeof bildUrl === 'string' && bildUrl.trim()) {
-    return {...knoten, image: [bildUrl]};
+    return {...knoten, image: [ldBildBreite(bildUrl)]};
   }
   return null;
+}
+
+/*
+ * JSON-LD-BILDER MIT BREITENDECKEL (Befund H14, 13.10.2026): die Bilder des
+ * Product-Knotens kamen als Master-Datei der Shopify-CDN, gemessen
+ * Kakao2.png 1.400.622 B und kakao-bohne-awake.png 588.472 B. Mit
+ * `width=1200` liefert dieselbe Adresse 189.438 B bzw. 176.846 B. 1200 px ist
+ * die Breite, die Google fuer Produktbilder empfiehlt; die CDN skaliert nur
+ * herunter, kleinere Master bleiben, wie sie sind. Nur cdn.shopify.com und
+ * nur ohne vorhandenen width-Parameter. Probe: proben/probe_bilder_500kb.py.
+ */
+const LD_BILD_BREITE = 1200;
+
+function ldBildBreite(url) {
+  try {
+    const u = new URL(url);
+    if (u.hostname !== 'cdn.shopify.com' || u.searchParams.has('width')) {
+      return url;
+    }
+    u.searchParams.set('width', String(LD_BILD_BREITE));
+    return u.toString();
+  } catch {
+    return url;
+  }
 }
 
 /**
@@ -521,22 +546,30 @@ export function produktMeta({pfad, titel, bildUrl, produkt, marktLand}) {
     : null;
   if (schema) {
     descriptoren.push({'script:ld+json': schema});
+    // DER VERKÄUFER-KNOTEN STEHT AUF DER SEITE, DIE IHN NENNT (Befund H11,
+    // 13.10.2026): `offers.seller` verweist per @id auf den Organization-
+    // Knoten dieses Ladens, aber die Kaufseiten trugen ihn nicht — der Verweis
+    // zeigte ins Leere, und kein Leser holt dafür die Startseite. Derselbe
+    // Knoten wie auf der Startseite, durch markenOrganisation() (Marke
+    // Crystal Cacao®, Verkäuferin Qi Blanco UG als legalName).
+    descriptoren.push({
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        ...markenOrganisation(organizationSchema(), {origin: CANONICAL_ORIGIN}),
+      },
+    });
   }
   // Brotkrume als EIGENER ld+json-Knoten neben dem Product-Knoten (Vorlage
   // a0ab2e8, #322). Bewusst NICHT in den Product-Knoten hineingefaltet:
   // BreadcrumbList ist kein Produktfeld. Die Bedingung ist absichtlich
   // `produkt` und nicht `schema` — Begründung an brotkrumeSchema().
   //
-  // GEMESSENE EINSCHRÄNKUNG AUF DIESER STOREFRONT, offen benannt statt
-  // versteckt: brotkrumeSchema() setzt Stufe 2 fest auf
-  // `${CANONICAL_ORIGIN}/collections/all`. Hier ist CANONICAL_ORIGIN
-  // https://crystal-cacao.com, und /collections/all ist KEIN 404, sondern
-  // eine Weiterleitung auf /collections/zeremonie-kakao
-  // (app/routes/collections.all.jsx — bewusst so gebaut, weil ein 404 dort
-  // den Kaufweg bräche). Die item-URL löst also auf; sie zeigt nur auf eine
-  // Weiterleitung statt direkt aufs Ziel. Das hier zu begradigen köstete eine
-  // NEUE Abweichung an produkt-schema.js, das sonst byte-gleich zur Vorlage
-  // bleibt — gegen den Grundsatz "eine Abweichung statt dreier".
+  // STUFE 2 ZEIGT SEIT DEM 2026-10-15 DIREKT AUF DIE ÜBERSICHT
+  // (/collections/zeremonie-kakao, Befund H10 vom 13.10.2026). Bis dahin
+  // stand hier die Einschränkung, dass sie auf /collections/all zeigte, eine
+  // Weiterleitung (app/routes/collections.all.jsx). produkt-schema.js ist K2,
+  // der Laden ändert es selbst; die Begradigung steht dort an
+  // brotkrumeSchema().
   const brotkrume = produkt ? brotkrumeSchema(produkt) : null;
   if (brotkrume) {
     descriptoren.push({'script:ld+json': brotkrume});

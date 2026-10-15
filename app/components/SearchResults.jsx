@@ -18,6 +18,8 @@ SearchResults.Articles = SearchResultsArticles;
 SearchResults.Pages = SearchResultsPages;
 SearchResults.Products = SearchResultsProducts;
 SearchResults.Empty = SearchResultsEmpty;
+SearchResults.Start = SearchResultsStart;
+SearchResults.Collections = SearchResultsCollections;
 
 /**
  * @param {PartialSearchResult<'articles'>}
@@ -127,6 +129,54 @@ function SearchResultsProducts({term, products}) {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+/**
+ * DIE UEBERSICHT ALS TREFFER (Befund C10, 13.10.2026): "zeremonie" fand
+ * nichts, obwohl die Uebersicht "Zeremonie Kakao" heisst. Der Loader
+ * (search.jsx trifftKollektion) vergleicht den Begriff mit Titel und Handle
+ * der Kakao-Kollektion; hier steht nur der Verweis.
+ * @param {{collections?: {nodes?: Array<{id: string, handle: string, title: string}>}}}
+ */
+function SearchResultsCollections({collections}) {
+  if (!collections?.nodes?.length) {
+    return null;
+  }
+  return (
+    <div className="search-result">
+      <h2>Übersicht</h2>
+      <div>
+        {collections.nodes.map((kollektion) => (
+          <div className="search-results-item" key={kollektion.id}>
+            <Link prefetch="intent" to={`/collections/${kollektion.handle}`}>
+              {kollektion.title}
+            </Link>
+          </div>
+        ))}
+      </div>
+      <br />
+    </div>
+  );
+}
+
+/**
+ * DIE SUCHE OHNE BEGRIFF (Befund C11, 13.10.2026): bisher stand hier sofort
+ * "Dazu haben wir nichts gefunden" — eine Antwort ohne Frage. Jetzt eine
+ * Einladung mit denselben zwei Wegen wie der Leerzustand.
+ */
+function SearchResultsStart() {
+  return (
+    <div className="cc-leerzustand">
+      <p>Wonach suchst du?</p>
+      <p className="cc-leerzustand-hinweis">
+        Gib ein Wort ein, zum Beispiel Awake, Create oder Zeremonie. Oder sieh
+        dir gleich unsere zwei Sorten an.
+      </p>
+      <Link className="cc-knopf" to="/">
+        Unseren Kakao ansehen
+      </Link>
     </div>
   );
 }

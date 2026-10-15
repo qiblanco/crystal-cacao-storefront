@@ -35,7 +35,7 @@ import {QpxCommerce} from './components/QpxCommerce';
 import {UpPromoteTracking} from './components/UpPromoteTracking';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
 import {strictRegions} from '~/lib/consent-policy';
-import {sorteZuPfad} from '~/lib/kakao-zone';
+import {ABSENDER_MARKE, sorteZuPfad} from '~/lib/kakao-zone';
 import {
   preismodusStand,
   rootDatenGesehen,
@@ -66,7 +66,39 @@ const QPX_BASIS_ENDPOINT_DEFAULT = 'https://qpx.65-108-150-121.sslip.io/b';
  * This is important to avoid re-fetching root queries on sub-navigations
  * @type {ShouldRevalidateFunction}
  */
-export const shouldRevalidate = ({formMethod, currentUrl, nextUrl}) => {
+/**
+ * TITEL DER FEHLERSEITE (Befund H13, 13.10.2026): eine erfundene Adresse
+ * antwortete 404 OHNE <title>. Die Fehlergrenze unten rendert ins Layout,
+ * aber `<Meta />` nahm die Angaben nur von den Routen — und die Route, die
+ * geworfen hat, liefert keine. Bei einem Fehler endet die Kette an dieser
+ * Wurzel; ihre `meta` bekommt dann `error` und ist die einzige, die zaehlt.
+ *
+ * OHNE FEHLER GIBT SIE NICHTS ZURUECK: eine Route ohne eigene `meta` erbt die
+ * der Eltern, und eine leere Liste ist genau der Zustand davor (die Wurzel
+ * hatte keine `meta`). Kein Seitentitel einer normalen Seite aendert sich.
+ * Dazu `noindex`: eine Fehlerseite gehoert nicht in den Index.
+ *
+ * @type {Route.MetaFunction}
+ */
+export const meta = ({error}) => {
+  if (!error) return [];
+  const status = isRouteErrorResponse(error) ? error.status : 500;
+  return [
+    {
+      title:
+        status === 404
+          ? `Seite nicht gefunden | ${ABSENDER_MARKE}`
+          : `Fehler | ${ABSENDER_MARKE}`,
+    },
+    {name: 'robots', content: 'noindex'},
+  ];
+};
+
+export const shouldRevalidate = ({formMethod, currentUrl, nextUrl, actionResult}) => {
+  // Befund C16: ist eine Warenkorb-Aktion an der Verbindung gescheitert
+  // (clientAction in routes/cart.jsx), laedt die Seite nicht nach — sonst
+  // traefe derselbe Netzausfall gleich die Wurzel-Daten.
+  if (actionResult?.verbindungsfehler) return false;
   // PREISMODUS (s02 Grossjob 20260924-kasse-zeigt-bruttopreise-...): der
   // Client kennt den Modus nur aus den root-Daten. Ohne Altersdeckel rechnete
   // ein vor dem Kipp geöffneter Tab bei Client-Navigation mit dem alten Modus

@@ -192,6 +192,10 @@ export const CART_QUERY_FRAGMENT = `#graphql
 // keine findet, und mischt sie mit den vorhandenen, wenn es welche findet.
 // Ohne das Feld bleibt die Ersetzen-Semantik genau wie vorher.
 //
+// `appliedGiftCards { id }` (Befund C07, 13.10.2026): CartGiftCard
+// (CartSummary.jsx) vergleicht die Zahl der Gutscheine vor und nach dem
+// Einloesen und meldet „nicht gefunden“, statt das Feld still zu leeren.
+//
 // Ohne #graphql-Kennung wie die Abfragen in kakao-set-zeile.server.js: das
 // Fragment gehört nicht in die Codegen-Typen, deren Fragmentnamen schon heute
 // kollidieren (README Abschnitt „Was offen bleibt" 5).
@@ -200,6 +204,9 @@ export const CART_MUTATE_FRAGMENT = `
     id
     totalQuantity
     checkoutUrl
+    appliedGiftCards {
+      id
+    }
     lines(first: 100) {
       nodes {
         id

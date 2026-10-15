@@ -3,6 +3,7 @@ import {Suspense} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
 import {KachelPreis} from '~/components/KachelPreis';
+import {kachelKassenAnhaengen} from '~/lib/kachel-kasse';
 import {
   Aufmacher as VaAufmacher,
   Vorteile as VaVorteile,
@@ -198,6 +199,10 @@ async function loadCriticalData({context, request}) {
         return null;
       }),
   ]);
+
+  // Kassenbetrag des 3er-Sets fuer die Sortenkacheln ausserhalb des
+  // EUR-Markts (app/lib/kachel-kasse.js, Befund H01). Im EUR-Markt kein Abruf.
+  await kachelKassenAnhaengen(context.storefront, [sorten?.awake, sorten?.create]);
 
   return {
     isShopLinked: Boolean(context.env.PUBLIC_STORE_DOMAIN),
@@ -736,6 +741,15 @@ const SORTEN_QUERY = `#graphql
     id
     title
     handle
+    # Fuer den Kassenbetrag der Kachel (app/lib/kachel-kasse.js): dieselbe
+    # Variante, die die Kaufseite an ladeStaffelKasse gibt.
+    selectedOrFirstAvailableVariant {
+      id
+      price {
+        amount
+        currencyCode
+      }
+    }
     priceRange {
       minVariantPrice {
         amount
