@@ -171,8 +171,8 @@ function SearchResultsStart() {
     <div className="cc-leerzustand">
       <p>Wonach suchst du?</p>
       <p className="cc-leerzustand-hinweis">
-        Gib ein Wort ein, zum Beispiel Awake, Create oder Zeremonie — oder
-        sieh dir gleich unsere zwei Sorten an.
+        Gib ein Wort ein, zum Beispiel Awake, Create oder Zeremonie. Oder sieh
+        dir gleich unsere zwei Sorten an.
       </p>
       <Link className="cc-knopf" to="/">
         Unseren Kakao ansehen
