@@ -82,6 +82,12 @@ import {canonicalLink} from '~/lib/seo';
  */
 
 const PFAD = '/pages/erfahrungen';
+// TITLE BLEIBT bis zum Urteil ueber GS-098 (live 2026-10-07, Wirkzeit 28 Tage):
+// er IST die Massnahme der Hypothese „Crystal Cacao Erfahrungen“ und wird von
+// proben/probe_erfahrungen_am_kundenrand.py Arm B gehalten. Der Job
+// 20261015-m5f2-crystal-liest-kakao-liste hat dafuer am 2026-10-16 den
+// geprueften Kakao-Title „Kakao-Erfahrungen: Stimmen und Laborwerte | Crystal
+// Cacao®“ vorbereitet; er wartet auf das GS-098-Urteil (Folgejob im RESULT).
 const TITEL = 'Crystal Cacao Erfahrungen: echte Stimmen und Laborwerte';
 const BESCHREIBUNG =
   'Echte Google-Bewertungen zu Crystal Cacao im Wortlaut, dazu die ' +
