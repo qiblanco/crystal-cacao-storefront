@@ -10,7 +10,7 @@ import {
 } from '~/data/kakao-stimmen';
 import {FAQ_CACAO} from '~/data/product-faqs';
 import {tagLang} from '~/lib/datum';
-import {ABSENDER_MARKE, KAKAO_KOLLEKTION} from '~/lib/kakao-zone';
+import {KAKAO_KOLLEKTION} from '~/lib/kakao-zone';
 import {seitenSignale} from '~/lib/kakao-seo';
 import {canonicalLink} from '~/lib/seo';
 
@@ -82,14 +82,13 @@ import {canonicalLink} from '~/lib/seo';
  */
 
 const PFAD = '/pages/erfahrungen';
-// GEO M5-F2 Folge (2026-10-16), Job 20261015-m5f2-crystal-liest-kakao-liste:
-// vorher 'Crystal Cacao Erfahrungen: echte Stimmen und Laborwerte'. Der stand
-// schon in R3 rot (Marke am Anfang statt am Ende) und trug kein Wort der
-// gezaehlten Kakao-Kundenliste (kanon.yaml kundenvokabular.kakao_dach_haeufig).
-// „Kakao-Erfahrungen“ traegt die Seite: die drei gezeigten Stimmen sind genau
-// die, die den Kakao nennen. „echte“ faellt nur wegen der 60 Zeichen weg.
-// „Crystal Cacao“ und „Erfahrungen“ bleiben im Title, die H1 traegt die Phrase.
-const TITEL = `Kakao-Erfahrungen: Stimmen und Laborwerte | ${ABSENDER_MARKE}`;
+// TITLE BLEIBT bis zum Urteil ueber GS-098 (live 2026-10-07, Wirkzeit 28 Tage):
+// er IST die Massnahme der Hypothese „Crystal Cacao Erfahrungen“ und wird von
+// proben/probe_erfahrungen_am_kundenrand.py Arm B gehalten. Der Job
+// 20261015-m5f2-crystal-liest-kakao-liste hat dafuer am 2026-10-16 den
+// geprueften Kakao-Title „Kakao-Erfahrungen: Stimmen und Laborwerte | Crystal
+// Cacao®“ vorbereitet; er wartet auf das GS-098-Urteil (Folgejob im RESULT).
+const TITEL = 'Crystal Cacao Erfahrungen: echte Stimmen und Laborwerte';
 const BESCHREIBUNG =
   'Echte Google-Bewertungen zu Crystal Cacao im Wortlaut, dazu die ' +
   'Laborwerte zu Cadmium und Schwermetallen, die Zubereitung und 20 Tage ' +
