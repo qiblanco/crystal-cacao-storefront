@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "fb58e8d416d9ee13e740415756f8a221827422f8",
-  "erzeugt_utc": "2026-10-15T17:53:28Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen fb58e8d416d9; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit d33a8dcb89b9). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "f358e0b08f2835e2bc9a3b5abfc833f111e0a21f",
+  "erzeugt_utc": "2026-10-16T19:53:35Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen f358e0b08f28; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit fb58e8d416d9). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -41,8 +41,7 @@
     {
       "upstream": "app/components/ProductFAQ.jsx",
       "klasse": "K1",
-      "sha256": "c5830c696d5f811e8f7c419bf2de103528d702ceca10d5ea68decc13b2e334bc",
-      "nachzug_grund": "NACHTRAG 2026-09-26 (Job 20260911-crystal-cacao-upstream-drift-21-befunde-je-datei-en-vollzug-ov311816504c, Vollzug ov311816504c): byte-gleich nachgezogen (#518/#580): die Akkordeon-Liste ist in reusables/FaqListe.jsx extrahiert, Klassen unveraendert .ProductFAQ__*, 0 Fremdmarken-Treffer im Markup. FAQ-Inhalt kommt weiter aus FAQ_CACAO (product-faqs.js, K2)."
+      "sha256": "d36975e99c2a6bc225f2e538ba9142d0383250315c902303799f1e3a335e3eeb"
     },
     {
       "upstream": "app/components/ProductImage.jsx",
