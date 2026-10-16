@@ -176,6 +176,19 @@ function CartLineQuantity({line}) {
   // zweiter Klick brach sonst die erste Anfrage im Browser ab, während der
   // Server beide rechnete (Korb sprang am 13.10. über 6, 5, 4, 7 Packungen).
   const warten = !!isOptimistic || blockiert;
+  // EINHEIT AM STEPPER (2026-10-16, Grossjob design-update s06, Auslieferung
+  // D3; Register F-013/F-437/F-470/F-471). Neben "Bundle: 3x AWAKE" las sich
+  // die nackte 3 als drei Bundles, also neun Packungen; der Zusatz "für 3
+  // Packungen" am Betrag (D1) reichte dem Bild-Urteil nicht. Der Stepper zaehlt
+  // bei jeder Kakao-Zeile Packungen (Set wie Einzelpackung), darum steht die
+  // Einheit jetzt an der Zahl selbst: als Beschriftung UNTER dem Stepper, weil
+  // sie daneben die Zeile bei 375 px um 10 px ueber die Schublade schob
+  // (vorab-d3). Andere Artikel bleiben ohne Einheit.
+  const einheit = KAKAO_ZEILEN[handle]
+    ? menge === 1
+      ? 'Packung'
+      : 'Packungen'
+    : null;
   const prevQuantity = Number(Math.max(0, menge - 1).toFixed(0));
   const nextQuantity = Number((menge + 1).toFixed(0));
   const eingabe = (neu) =>
@@ -195,33 +208,37 @@ function CartLineQuantity({line}) {
     // Text auf halber Hoehe neben zwei goldenen Quadraten und "Entfernen" als
     // umrandeter Knopf in eigener Zeile.
     // "Menge" bleibt fuer Screenreader als sr-only-Text erhalten; sichtbar
-    // ist wie in der Vorlage nur die Zahl.
+    // ist wie in der Vorlage nur die Zahl, bei Kakao-Zeilen mit der Einheit
+    // darunter (D3).
     <div className="cart-line-quantity">
-      <div className="quantity-wrapper">
-        <CartLineUpdateButton {...eingabe(prevQuantity)}>
-          <button
-            aria-label="Menge verringern"
-            disabled={menge <= 1 || warten}
-            name="decrease-quantity"
-            value={prevQuantity}
-          >
-            <span>&#8722;</span>
-          </button>
-        </CartLineUpdateButton>
-        <small aria-busy={blockiert || undefined}>
-          <span className="sr-only">Menge: </span>
-          {menge}
-        </small>
-        <CartLineUpdateButton {...eingabe(nextQuantity)}>
-          <button
-            aria-label="Menge erhöhen"
-            name="increase-quantity"
-            value={nextQuantity}
-            disabled={warten}
-          >
-            <span>&#43;</span>
-          </button>
-        </CartLineUpdateButton>
+      <div className="cc-menge">
+        <div className="quantity-wrapper">
+          <CartLineUpdateButton {...eingabe(prevQuantity)}>
+            <button
+              aria-label="Menge verringern"
+              disabled={menge <= 1 || warten}
+              name="decrease-quantity"
+              value={prevQuantity}
+            >
+              <span>&#8722;</span>
+            </button>
+          </CartLineUpdateButton>
+          <small aria-busy={blockiert || undefined}>
+            <span className="sr-only">Menge: </span>
+            {menge}
+          </small>
+          <CartLineUpdateButton {...eingabe(nextQuantity)}>
+            <button
+              aria-label="Menge erhöhen"
+              name="increase-quantity"
+              value={nextQuantity}
+              disabled={warten}
+            >
+              <span>&#43;</span>
+            </button>
+          </CartLineUpdateButton>
+        </div>
+        {einheit ? <span className="cc-menge-einheit">{einheit}</span> : null}
       </div>
       <CartLineRemoveButton lineIds={[lineId]} disabled={warten} />
     </div>
