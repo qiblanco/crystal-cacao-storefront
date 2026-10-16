@@ -236,7 +236,15 @@ export default function Product() {
           <strong>Beschreibung</strong>
         </p>
         <br />
-        <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+        {/* Der Schlusssatz der Beschreibung („6.300 Jahre …") ist ein eigener
+            Absatz und bekommt wie auf Awake/Create einen Raster-Schritt
+            Abstand zur Liste (Register F-115, kakao-seiten.css). Eigene
+            Klasse statt .ProductDescription: deren Listenregeln sollen nicht
+            auf fremde Produktbeschreibungen dieser Route wirken. */}
+        <div
+          className="cc-beschreibung"
+          dangerouslySetInnerHTML={{__html: descriptionHtml}}
+        />
         <br />
       </div>
       <Analytics.ProductView

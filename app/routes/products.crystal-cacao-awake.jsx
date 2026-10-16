@@ -22,6 +22,7 @@ import {
   SortenAufmacherBestand,
 } from '~/components/product-pages/SortenAufmacher';
 import {waehleAufmacherFassung} from '~/lib/sortenaufmacher-fassung';
+import {waehleKaufblockFassung} from '~/lib/kaufblock-fassung';
 
 import {produktMeta, MARKE} from '~/lib/produkt-seo';
 import {StarRating} from '~/components/reusables/StarRating';
@@ -135,6 +136,9 @@ async function loadCriticalData({context, request}, handle) {
     sortenPreise,
     staffelKasse,
     aufmacherFassung: waehleAufmacherFassung(request),
+    // Kauf-Block zuerst (?kaufblock=neu, Default) oder die Anordnung davor
+    // (?kaufblock=bestand) -- lib/kaufblock-fassung.js.
+    kaufblockFassung: waehleKaufblockFassung(request),
     // Markt-Land für die Produkt-Auszeichnung: `meta()` hat keinen Kontext,
     // und der ausgezeichnete Preis muss derselbe sein wie der sichtbare
     // (AT 10 statt 7 % beim Kakao). Vorlage c5941ee (#422).
@@ -151,7 +155,8 @@ function loadDeferredData({context, params}) {
 
 export default function Product() {
   /** @type {LoaderReturnData} */
-  const {product, aufmacherFassung, sortenPreise, staffelKasse} = useLoaderData();
+  const {product, aufmacherFassung, kaufblockFassung, sortenPreise, staffelKasse} =
+    useLoaderData();
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -176,14 +181,38 @@ export default function Product() {
   // Reihenfolge in amazonstil-daten.js). Schalter aus: oben leer, unten die
   // volle Liste, Seite wie vorher.
   const fragen = teileFragen('crystal-cacao-awake', FAQ_CACAO);
+  const aufmacher =
+    aufmacherFassung === 'bestand' ? (
+      <SortenAufmacherBestand sorte="awake" />
+    ) : (
+      <SortenAufmacher sorte="awake" />
+    );
+  /*
+   * KAUF-BLOCK ZUERST (?kaufblock=neu, lib/kaufblock-fassung.js). Christian
+   * zur Desktopansicht: „das passiert alles bloß kein Kauf". Gemessen am
+   * 2026-10-16 bei 1440x900: Aufmacher 360 px und Beschreibung vor dem
+   * Preis, Groessenwahl ab y=918, Kaufknopf ab y=991 -- unter dem Falz.
+   * Neu steht der Kauf-Block oben, in der Reihenfolge des Designstandards
+   * (bausteine.kauf_block: Bild, Titel, Preiszeile, Variante, Kaufknopf,
+   * Zusage), die Beschreibung folgt der Zusage, der Aufmacher dem
+   * Kauf-Block. Kein Text ist neu oder weg, nur die Reihenfolge.
+   * ?kaufblock=bestand liefert die Anordnung davor, Markup unveraendert.
+   */
+  const kaufblockZuerst = kaufblockFassung !== 'bestand';
+  const beschreibung = (
+    <div
+      className="ProductDescription"
+      dangerouslySetInnerHTML={{__html: descriptionHtml}}
+    />
+  );
   return (
     <>
-      {aufmacherFassung === 'bestand' ? (
-        <SortenAufmacherBestand sorte="awake" />
-      ) : (
-        <SortenAufmacher sorte="awake" />
-      )}
-      <div className="product" id="cc-kaufen">
+      {kaufblockZuerst ? null : aufmacher}
+      <div
+        className="product"
+        id="cc-kaufen"
+        data-cc-kaufblock={kaufblockZuerst ? '' : undefined}
+      >
         <div className="ProductImages">
           <div className="ProductImageWrapperSticky">
           <ProductImage image={featuredImage} />
@@ -241,10 +270,7 @@ export default function Product() {
             />{' '}
             <span>Über {KAKAO_KENNZAHLEN.nutzer} Nutzer</span>
           </p>
-          <div
-            className="ProductDescription"
-            dangerouslySetInnerHTML={{__html: descriptionHtml}}
-          />
+          {kaufblockZuerst ? null : beschreibung}
 
           {/*
             * 2026-09-10 ENTFERNT — Christian: „Mehr als 1.000+ aktive Nutzer
@@ -280,6 +306,7 @@ export default function Product() {
             gewaehrleistungsHinweis={false}
           />
           <CacaoBenefitList />
+          {kaufblockZuerst ? beschreibung : null}
         </div>
         <Analytics.ProductView
           data={{
@@ -297,6 +324,7 @@ export default function Product() {
           }}
         />
       </div>
+      {kaufblockZuerst ? aufmacher : null}
       {/*
         DIE INSTAGRAM-STIMME, weit oben: direkt nach dem Kaufblock und vor dem
         langen Inhaltsteil, wie in der Vorlage. Dort entsteht der Zweifel vor

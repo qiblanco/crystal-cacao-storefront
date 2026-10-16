@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import {SortenSlider} from './SortenSlider';
 import {Analyseprofile} from './Analyseprofile';
 import {KaffeeVergleich} from './KaffeeVergleich';
@@ -81,10 +82,16 @@ const SIZES_KURVE_START =
  * @param {{produkte: object|null, stimmen: import('react').ReactNode, sorten: import('react').ReactNode, podcast: import('react').ReactNode}} props
  */
 export function Startseite({produkte, stimmen, sorten, podcast}) {
+  // Aus welcher Sorten-Folie „Profile vergleichen“ kam (Register F-021):
+  // Slider meldet, Analyseprofile zeigt Zustand und Rueckweg.
+  const [vergleich, setVergleich] = useState(null);
   return (
     <div className="home cc-start">
-      <SortenSlider produkte={produkte} />
-      <Analyseprofile />
+      <SortenSlider produkte={produkte} onVergleich={setVergleich} />
+      <Analyseprofile
+        vergleich={vergleich}
+        onZurueck={() => setVergleich(null)}
+      />
       <Mehrwert />
       <section className="cc-akt cc-akt--flaeche cc-start-podcast">
         <div className="cc-akt__innen">{podcast}</div>

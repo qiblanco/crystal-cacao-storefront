@@ -1,0 +1,95 @@
+/* ERZEUGT — nicht von Hand aendern.
+ * designstandard crystal v1 (Stand 2026-10-15) — Quelle: design-meister/db/designstandard/crystal.yaml + _basis.yaml
+ * Neu erzeugen: design-meister/bin/designstandard erzeuge --marke crystal --format css --ziel app/styles/designstandard-crystal.css
+ * Pruefen:      design-meister/bin/designstandard drift --marke crystal --repo <laden-repo>
+ * Werte aendern nur im Standard (YAML), dann neu erzeugen. Herkunft je Zahl: designstandard zeige.
+ */
+:root {
+  /* --- typo_skala --- */
+  --cc-fs-1: 0.8rem;  /* typo.stufe.1 */
+  --cc-fs-2: 1rem;  /* typo.stufe.2 */
+  --cc-fs-3: 1.25rem;  /* typo.stufe.3 */
+  --cc-fs-4: 1.5625rem;  /* typo.stufe.4 */
+  --cc-fs-5: 1.9531rem;  /* typo.stufe.5 */
+  --cc-fs-6: min(2.4414rem, 10.1vw);  /* typo.stufe.6 */
+  --cc-fs-7: min(3.0518rem, 12.6vw);  /* typo.stufe.7 */
+  --cc-knopf-schrift: 1.1rem;  /* typo.stufe.knopf */
+
+  /* --- typo_rollen --- */
+  --cc-schrift-h1: var(--cc-fs-7);  /* typo.h1.groesse */
+  --cc-schrift-h2: var(--cc-fs-5);  /* typo.h2.groesse */
+  --cc-schrift-h3: var(--cc-fs-4);  /* typo.h3.groesse */
+  --cc-schrift-lead: var(--cc-fs-3);  /* typo.lead.groesse */
+  --cc-schrift-fliess: var(--cc-fs-2);  /* typo.fliess.groesse */
+  --cc-schrift-klein: var(--cc-fs-2);  /* typo.klein.groesse */
+  --cc-schrift-fein: var(--cc-fs-1);  /* typo.fein.groesse */
+  --cc-schrift-preis: var(--cc-fs-5);  /* typo.preis.groesse */
+  --cc-schrift-knopf: var(--cc-knopf-schrift);  /* typo.knopf.groesse */
+  --cc-lh-h1: 1.15;  /* typo.h1.zeilenhoehe */
+  --cc-lh-h2: 1.2;  /* typo.h2.zeilenhoehe */
+  --cc-lh-h3: 1.25;  /* typo.h3.zeilenhoehe */
+  --cc-lh-lead: 1.5;  /* typo.lead.zeilenhoehe */
+  --cc-lh-fliess: 1.6;  /* typo.fliess.zeilenhoehe */
+  --cc-fw-ueberschrift: 700;  /* typo.ueberschrift.gewicht */
+  --cc-fw-fliess: 400;  /* typo.fliess.gewicht */
+  --cc-fw-preis: 700;  /* typo.preis.gewicht */
+  --cc-knopf-gewicht: 600;  /* typo.knopf.gewicht */
+
+  /* --- raster --- */
+  --cc-space-1: 0.5rem;  /* raster.1 */
+  --cc-space-2: 1rem;  /* raster.2 */
+  --cc-space-3: 1.5rem;  /* raster.3 */
+  --cc-space-4: 2rem;  /* raster.4 */
+  --cc-space-5: 3rem;  /* raster.5 */
+  --cc-space-6: 4rem;  /* raster.6 */
+  --cc-space-7: 6rem;  /* raster.7 */
+
+  /* --- layout --- */
+  --cc-inhalt-max: 1350px;  /* layout.inhalt_max */
+  --cc-rand: var(--cc-space-2);  /* layout.rand */
+  --cc-zeile-max: 70ch;  /* layout.zeile_max */
+  --header-height: 64px;  /* kopf.hoehe_basis */
+  --cc-kopf-hoehe: var(--header-height);  /* kopf.hoehe */
+  --cc-anker-abstand: calc(var(--cc-kopf-hoehe) + var(--cc-space-2));  /* kopf.anker_abstand */
+  --aside-width: 400px;  /* schublade.breite */
+  --cc-kaufblock-max: 400px;  /* kaufblock.breite_max */
+
+  /* --- knopf --- */
+  --cc-knopf-hoehe: 70px;  /* knopf.hoehe */
+  --cc-treffer-min: 44px;  /* knopf.treffer_min */
+
+  /* --- radien --- */
+  --cc-radius-bild: 10px;  /* radius.bild */
+  --cc-radius-knopf: 10px;  /* radius.knopf */
+  --cc-radius-rund: 50%;  /* radius.rund */
+
+  /* --- farben --- */
+  --cc-grund: #fbf8f4;  /* farbe.grund */
+  --cc-flaeche: #f6f1ea;  /* farbe.flaeche */
+  --cc-text: #2c2a26;  /* farbe.text */
+  --cc-muted: #6b665d;  /* farbe.gedaempft */
+  --cc-dunkel: #171310;  /* farbe.dunkel */
+  --cc-linie: #e6ded3;  /* farbe.linie */
+  --cc-gold: rgb(242, 191, 114);  /* farbe.akzent_kauf */
+  --cc-gold-text: #90671D;  /* farbe.akzent_tinte */
+  --cc-schrift-auf-gold: var(--cc-dunkel);  /* farbe.schrift_auf_akzent */
+  --cc-fokus: var(--cc-gold-text);  /* farbe.fokus */
+  --cc-schatten-hover: 0 8px 24px rgba(74, 71, 65, 0.14);  /* schatten.hover */
+
+  /* --- sorten_und_marke --- */
+  --cc-kraft: #BE9A77;  /* marke.kraft */
+  --cc-kraft-hell: #D7C3A9;  /* marke.kraft_hell */
+  --cc-kraft-tief: #846142;  /* marke.kraft_tief */
+  --cc-goldbraun: #846142;  /* marke.goldbraun */
+  --cc-goldbraun-auf: var(--cc-dunkel);  /* marke.goldbraun_auf */
+  --cc-sorte-awake: #D94076;  /* sorte.awake */
+  --cc-sorte-create: #5BA3F8;  /* sorte.create */
+  --cc-sorte-awake-text: #C23C6B;  /* sorte.awake_text */
+  --cc-sorte-create-text: #1771BD;  /* sorte.create_text */
+  --cc-sorte-awake-flaeche: #FFF0F5;  /* sorte.awake_flaeche */
+  --cc-sorte-create-flaeche: #F0F7FF;  /* sorte.create_flaeche */
+  --cc-neutral-vergleich: #AAA196;  /* sorte.neutral_vergleich */
+  --cc-sorte: var(--cc-gold);  /* sorte.aktiv */
+  --cc-sorte-text: var(--cc-gold-text);  /* sorte.aktiv_text */
+  --cc-sorte-flaeche: var(--cc-flaeche);  /* sorte.aktiv_flaeche */
+}

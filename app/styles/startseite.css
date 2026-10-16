@@ -111,6 +111,28 @@
   margin-inline: 0;
   max-width: 44rem;
 }
+/* DER GRUENDER-KASTEN (2026-10-16, s06, Register F-078, F-080).
+ * (1) `.cc-akt section { padding-block: 0 }` oben trifft auch diesen Kasten
+ *     (er ist eine <section>) und nahm ihm den Innenabstand oben und unten:
+ *     der Satz stand 12 px unter der Kante, seitlich 32 px. Hier steht der
+ *     Innenabstand des Bausteins wieder ringsum gleich (Raster 32 px), und
+ *     nebeneinander beginnen Foto und Satz auf derselben Hoehe.
+ * (2) 44rem endeten mitten ueber der dritten Bewertungskarte. Ab 50em stehen
+ *     die Karten in drei Spalten (Gitter mit 14rem-Mindestspur und 24 px
+ *     Abstand), und der Kasten endet auf der Kante der zweiten. */
+.home.cc-start .cc-akt .cc-absicht-hinweis {
+  padding-block: var(--cc-space-4);
+}
+@media (min-width: 40em) {
+  .home.cc-start .cc-akt .cc-absicht-hinweis {
+    align-items: flex-start;
+  }
+}
+@media (min-width: 50em) {
+  .home.cc-start .cc-absicht-hinweis {
+    max-width: calc((100% - 2 * var(--cc-space-3)) * 2 / 3 + var(--cc-space-3));
+  }
+}
 .home.cc-start li {
   margin-bottom: 0;
 }
@@ -209,10 +231,13 @@
   background: transparent;
   color: var(--cc-dunkel);
 }
+/* Beim Zeigen nur der Rand in Kauf-Gold, Flaeche und Schrift bleiben
+ * (Designstandard crystal, knopf_sekundaer.hover; 2026-10-16, s06). Bis dahin
+ * wurde der Zweitknopf beim Zeigen dunkel GEFUELLT und sah damit fuer einen
+ * Augenblick aus wie eine zweite Haupthandlung. Alle Traeger der Klasse
+ * (Analyse anzeigen, Analysedaten, Profile vergleichen) aendern sich gleich. */
 .home.cc-start .cc-knopf-ruhig:hover {
-  background: var(--cc-dunkel);
-  border-color: var(--cc-dunkel);
-  color: var(--cc-grund);
+  border-color: var(--cc-gold);
 }
 
 .cc-visuell-versteckt {
@@ -472,15 +497,9 @@
   max-width: none;
   padding: 0 var(--cc-space-5);
 }
-.home.cc-start .cc-folie__link {
-  color: var(--cc-dunkel);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-}
+/* „Profile vergleichen“ ist seit 2026-10-16 ein Zweitknopf (.cc-knopf-ruhig,
+ * Register F-020); die Regel fuer den frueheren Textlink .cc-folie__link
+ * entfaellt mit ihrem Traeger. */
 .home.cc-start .cc-folie__bild img {
   display: block;
   width: 100%;
@@ -644,6 +663,35 @@
   height: 100%;
   border-radius: 6px;
   background: var(--cc-sorte-text);
+  transition: background-color 200ms linear;
+}
+/* ZUSTAND NACH „PROFILE VERGLEICHEN“ (2026-10-16, s06, Register F-021): die
+ * Sorte, von deren Folie der Kunde kommt, bleibt farbig; Balken und
+ * Legendenfeld der anderen Sorte werden unbunt, ihr Name gedaempft. Ein
+ * blauer Name neben einem grauen Balken las sich als zwei verschiedene
+ * Dinge. --cc-muted haelt den Text-Kontrast (5,07:1 auf --cc-flaeche). */
+.home.cc-start .cc-profil[data-cc-vergleich='awake'] [data-cc-sorte='create'] .cc-profil__balken,
+.home.cc-start .cc-profil[data-cc-vergleich='create'] [data-cc-sorte='awake'] .cc-profil__balken,
+.home.cc-start .cc-profil[data-cc-vergleich='awake'] .cc-profil__legende [data-cc-sorte='create']::before,
+.home.cc-start .cc-profil[data-cc-vergleich='create'] .cc-profil__legende [data-cc-sorte='awake']::before {
+  background: var(--cc-neutral-vergleich);
+}
+.home.cc-start .cc-profil[data-cc-vergleich='awake'] [data-cc-sorte='create'] .cc-profil__sorte,
+.home.cc-start .cc-profil[data-cc-vergleich='create'] [data-cc-sorte='awake'] .cc-profil__sorte,
+.home.cc-start .cc-profil[data-cc-vergleich='awake'] .cc-profil__legende [data-cc-sorte='create'],
+.home.cc-start .cc-profil[data-cc-vergleich='create'] .cc-profil__legende [data-cc-sorte='awake'] {
+  color: var(--cc-muted);
+}
+/* Der Rueckweg ist ein Zweitknopf in Textbreite, kein Balken ueber die
+ * Spalte: als Kind eines Absatzes zog ihn display:flex auf 630 px. */
+.home.cc-start .cc-profil__zurueck {
+  display: flex;
+  margin: var(--cc-space-3) 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home.cc-start .cc-profil__balken {
+    transition: none;
+  }
 }
 .home.cc-start .cc-profil__wert {
   min-width: 5.5em;

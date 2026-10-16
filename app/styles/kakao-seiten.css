@@ -645,17 +645,22 @@
   color: var(--color-dark);
   transition: 0.2s all linear;
 }
+/* ZUSTAENDE NACH DEM DESIGNSTANDARD — 2026-10-16 (Grossjob design-update s06,
+ * Register F-060). Der Kaufknopf wurde beim Zeigen rgb(208, 164, 98): ein
+ * drittes Gold neben --cc-gold und --cc-gold-text, als freier Wert. Der
+ * Standard (knopf_primaer.hover) laesst Flaeche und Rand stehen und gibt die
+ * Rueckmeldung ueber den Schatten. Der Zweitknopf faerbte beim Zeigen seine
+ * SCHRIFT gold (1,6:1 auf dem Grund, unlesbar); jetzt wird nur der Rand
+ * Kauf-Gold, die Schrift bleibt (knopf_sekundaer.hover). */
 .btn--primary:hover {
   cursor: pointer;
   text-decoration: none;
-  border: 2px solid rgb(208, 164, 98);
-  background: rgb(208, 164, 98);
+  box-shadow: var(--cc-schatten-hover);
 }
 .btn--secondary:hover {
   cursor: pointer;
   text-decoration: none;
-  color: var(--color-accent-primary);
-  border: 2px solid var(--color-accent-primary);
+  border-color: var(--cc-gold);
 }
 .cartSummaryWrapper .btn--primary {
   max-width: 100% !important;
@@ -714,12 +719,17 @@
 .ProductFAQ__item {
   border-bottom: 1px solid rgba(0,0,0,0.1);
 }
+/* Innenabstand links und rechts aus dem Raster (2026-10-16, s06, Register
+ * F-016/F-061/F-098; Designstandard crystal, Baustein akkordeon: >= 16 px) —
+ * Frage und Antwort stehen auf derselben Kante. Rueckmeldung beim Zeigen nur
+ * ueber die Deckkraft darunter; die Gold-Flaeche kam aus der Knopf-Basis in
+ * app.css (Abschnitt 17) und ist dort an der Wurzel abgestellt. */
 .ProductFAQ__question {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 1.2rem 0;
+  padding: 1.2rem var(--cc-space-2);
   background: none;
   border: none;
   cursor: pointer;
@@ -734,7 +744,7 @@
   opacity: 0.7;
 }
 .ProductFAQ__answer {
-  padding: 0 0 1.5rem;
+  padding: 0 var(--cc-space-2) 1.5rem;
   line-height: 1.7;
   color: rgba(0,0,0,0.8);
 }
@@ -806,17 +816,42 @@
  * margin ist entfernt und die 8 px margin des letzten Punkts auf 0 gesetzt.
  * Die .product-main hat hier mobil kein padding, daher volle 72 px.
  */
-.product:has(> .product-main > .CacaoBenefitList:last-child) {
+.product:has(> .product-main > .CacaoBenefitList:last-child),
+.product[data-cc-kaufblock] {
   padding-bottom: 96px;
 }
 .product-main > .CacaoBenefitList:last-child li:last-child {
   margin-bottom: 0;
 }
 @media screen and (max-width: 749px) {
-  .product:has(> .product-main > .CacaoBenefitList:last-child) {
+  .product:has(> .product-main > .CacaoBenefitList:last-child),
+  .product[data-cc-kaufblock] {
     padding-bottom: 72px;
   }
 }
+/* KAUF-BLOCK ZUERST (?kaufblock=neu, app/lib/kaufblock-fassung.js; Grossjob
+ * 20261015 design-update s06). Dieselben 96/72 px wie darueber, jetzt am
+ * Kauf-Block selbst: die Vertrauensliste ist dort nicht mehr das letzte Kind,
+ * die Beschreibung folgt ihr. Der Aufmacher steht danach und bringt seinen
+ * eigenen Innenabstand mit. Die Beschreibung ist nicht Teil des Kauf-Blocks
+ * (bausteine.kauf_block endet mit der Zusage): eine Linie und ein
+ * Raster-Schritt trennen sie von der Vertrauensliste, sonst liefen zwei
+ * Listen mit Haekchen ineinander. */
+.product[data-cc-kaufblock] .product-main > .ProductDescription {
+  margin-top: var(--cc-space-4);
+  padding-top: var(--cc-space-4);
+  border-top: 1px solid var(--cc-linie);
+}
+/* Der Schlusssatz der Beschreibung („6.300 Jahre alte Kakaolinie aus Peru.")
+ * ist ein eigener Absatz ohne Haekchen und stand 8 px unter der Liste — er
+ * las sich als sechster Punkt, dem das Haekchen fehlt (Register F-092,
+ * F-101, F-103, F-104, F-109, F-110, F-115, F-281). Ein Raster-Schritt
+ * Abstand macht ihn zu dem, was er ist: ein Satz nach der Liste. */
+.ProductDescription p + p,
+.cc-beschreibung p + p {
+  margin-top: var(--cc-space-3);
+}
+
 .CacaoBenefitList ul {
   list-style: none;
   padding: 0;
@@ -828,6 +863,14 @@
 .CacaoBenefitList li {
   font-size: var(--cc-fs-1);
   line-height: 1.5;
+  /* EINE ZEILENHOEHE FUER ALLE SECHS (2026-10-16, Register F-105): die
+   * Gewaehrleistungszeile ist wegen ihrer Trefferflaeche 24 px hoch, die
+   * fuenf anderen 19,2 px — ihr Text sass 2,4 px tiefer, der Abstand davor
+   * sah groesser aus. Jetzt tragen alle sechs den Boden (raster.tippziel_boden
+   * 24 px = --cc-space-3) und stehen mittig darin. */
+  display: flex;
+  align-items: center;
+  min-height: var(--cc-space-3);
 }
 
 /* ------------------------------------------------------------------ */
@@ -1128,15 +1171,17 @@
     width: 100%;
   }
 }
-@media screen and (max-width: 749px) {
+/* VORSCHAUBILDER ALS REIHE IN FUENFTELN BIS 1023 px (2026-10-16, Grossjob
+ * design-update s06). Bis hierher galt die Reihe nur unter 750 px; zwischen
+ * 750 und 1023 px nahm jedes Vorschaubild die volle Spaltenbreite (gemessen
+ * bei 768 px: zwei Bilder sichtbar, der Rest hinter einem Rollbalken). Ab
+ * 1024 px steht die Reihe als Spalte (Regel darueber). */
+@media screen and (max-width: 1023.98px) {
   .product-image-list {
     padding: 10px;
   }
   .product-image-list .thumb-image, .product-image-list .ImageSeeMore {
     flex: 0 0 calc(20% - 0.5em);
-  }
-  .ProductImages {
-    margin-bottom: 75px;
   }
   .ImageSeeMore,
   .product-image-list img {
@@ -1145,6 +1190,44 @@
   }
   .ImageSeeMore img {
     width: 100% !important;
+  }
+}
+@media screen and (max-width: 749px) {
+  .ProductImages {
+    margin-bottom: 75px;
+  }
+}
+
+/* ZWEI SPALTEN ZWISCHEN 750 UND 1023 px (2026-10-16, s06, Register F-071).
+ * Der Kaufknopf der Angebotsseite stand bei 768 px genau auf Hoehe der
+ * Bildunterkante in der Nachbarspalte (Knopf 438..509, Kante 472) -- der
+ * Knopf sass optisch auf einer Kante. Ursache ist die Geometrie, nicht eine
+ * Seite: die Bildspalte waechst mit der Breite, die Kaufspalte schrumpft, und
+ * irgendwo zwischen 750 und 1023 px kreuzen sich Bildkante und Knopf. Eine
+ * Schriftgroesse allein verschiebt die Kreuzung nur (gemessen an zehn
+ * Breiten, s06 belege/naht). Drei Regeln, alle aus dem Standard:
+ *  - die Ueberschrift nimmt in der halben Spalte die Stufe darunter (fs-6):
+ *    die Spalte ist schmaler als ein Telefonfenster, und 49 px liefen dort
+ *    auf vier Zeilen;
+ *  - traegt die Galerie Vorschaubilder, bekommt die Kaufspalte 7/12 (Preis,
+ *    Groessenwahl und Zusage brauchen die Breite, die Galerie nicht);
+ *  - die fuenf Vorschaubilder passen in die Reihe (min-width 0) statt hinter
+ *    einen Rollbalken, und stehen auf der Bildkante.
+ * Ergebnis: an allen zehn gemessenen Breiten liegt kein Kaufknopf naeher als
+ * 24 px an einer Kante (Angebot, Awake, Create). */
+@media screen and (min-width: 750px) and (max-width: 1023.98px) {
+  .product .product-main h1 {
+    font-size: var(--cc-fs-6);
+  }
+  .product:has(> .ProductImages) {
+    grid-template-columns: 5fr 7fr;
+  }
+  .product-image-list {
+    padding-inline: 0;
+  }
+  .product-image-list .thumb-image,
+  .product-image-list .ImageSeeMore {
+    min-width: 0;
   }
 }
 .ProductDescription ul {
@@ -1340,8 +1423,8 @@ h4,
 .ProductPageKakao h2,
 main h2 {
   font-size: var(--cc-fs-6);
-  font-weight: 700;
-  line-height: 1.2;
+  font-weight: var(--cc-fw-ueberschrift);
+  line-height: var(--cc-lh-h2);
   text-align: center;
   text-wrap: balance;
   color: var(--cc-dunkel);
@@ -2937,6 +3020,53 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   align-items: center;
   margin-top: var(--cc-space-2);
 }
+/* AB 48em LINKSBUENDIG, WIE DIE ZWEI-SPALTEN-REGEL OBEN ES VORSIEHT — jetzt
+ * auch wirksam (2026-10-16, Register F-091, F-108: Ueberschrift zentriert,
+ * Satz linksbuendig, Knopf und Link wieder zentriert, keine gemeinsame
+ * Kante). Zwei Ursachen: die Grundregel der Wege steht in der Datei NACH der
+ * Breitenregel und gewann bei gleicher Spezifitaet, und die Grundregel
+ * `.ProductPageKakao h2, main h2` (diese Datei) setzt `text-align: center`
+ * an der Ueberschrift selbst, die geerbte Ausrichtung der Textspalte kam
+ * dort nie an. */
+@media (min-width: 48em) {
+  .cc-sortenaufmacher h2 {
+    text-align: inherit;
+  }
+  .cc-sortenaufmacher__wege {
+    justify-content: flex-start;
+  }
+  /* Der Zweitweg ist ein Textlink: sein Seitenpolster rueckte den Text 8 px
+   * von der gemeinsamen Kante weg. Die Trefferhoehe bleibt (min-height aus
+   * `.cc-knopf`). */
+  .cc-sortenaufmacher__wege .cc-knopf--ruhig {
+    padding-inline: 0;
+  }
+}
+
+/* STEHT DER KAUF-BLOCK OBEN, IST DER SPRUNG DORTHIN DIE ZWEITE HANDLUNG
+ * (2026-10-16, s06, Register F-111/F-282). „Preis und Bestellung ansehen"
+ * war goldene Erst-Handlung, solange der Aufmacher den ersten Bildschirm
+ * hatte. Mit Kauf-Block zuerst (?kaufblock=neu, data-cc-kaufblock) traegt
+ * der Kaufknopf darueber das Gold; ein zweiter goldener Knopf ohne Preis
+ * waere der freistehende Kaufknopf, den der Standard ausschliesst
+ * (knopf_primaer: nie freistehend). Text und Ziel bleiben, die Gestalt wird
+ * knopf_sekundaer: Grundflaeche, 2 px Rand in Tinte, beim Zeigen Rand
+ * Kauf-Gold. In der Bestandsfassung (Aufmacher oben) gilt die Regel nicht. */
+.product[data-cc-kaufblock]
+  ~ .cc-sortenaufmacher
+  .cc-sortenaufmacher__wege
+  .cc-knopf:not(.cc-knopf--ruhig) {
+  background: var(--cc-grund);
+  border: 2px solid var(--cc-text);
+  color: var(--cc-text);
+}
+.product[data-cc-kaufblock]
+  ~ .cc-sortenaufmacher
+  .cc-sortenaufmacher__wege
+  .cc-knopf:not(.cc-knopf--ruhig):hover {
+  box-shadow: none;
+  border-color: var(--cc-gold);
+}
 
 /* DER ZWEITWEG IST EIN TEXTLINK UND TRAEGT DESHALB TEXTGROESSE.
  * `.cc-knopf--ruhig` erbt von `.cc-knopf` die KNOPF-Schrift (17,6 px). Das
@@ -3020,13 +3150,20 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   }
 }
 
-/* DAS SPRUNGZIEL DES ERSTEN WEGES.
+/* JEDES SPRUNGZIEL, NICHT EINZELNE IDS — 2026-10-16 (Grossjob design-update
+ * s06, Register F-018).
  * `scroll-margin-top` ist nicht Kosmetik: die Kopfzeile steht `sticky` und
- * verdeckt sonst die obersten Pixel des Ziels. Der Wert ist die gemessene
- * Kopfhoehe (ca. 72 px) plus eine Zeile Luft aus dem 8er-Raster. */
-#cc-kaufen,
-#kundenstimmen {
-  scroll-margin-top: calc(72px + var(--cc-space-2));
+ * verdeckt sonst die obersten Pixel des Ziels. Bis heute stand der Abstand nur
+ * an #cc-kaufen und #kundenstimmen (als 72 px + Raster, die Kopfzeile misst
+ * 64 px). "Profile vergleichen" sprang deshalb nach #cc-analyseprofile und
+ * landete UNTER der Kopfzeile (gemessen live: Ziel-Oberkante 0 px, Kopf bis
+ * 64 px, bei 390/1440/2560). Die Liste der Ziele war der Fehler: jedes neue
+ * Ziel brauchte eine neue Zeile hier, und keines hat sie bekommen.
+ * Jetzt traegt JEDES Element mit id im Hauptbereich den Abstand, und zwar aus
+ * EINEM Token (Designstandard crystal, kopf.anker_abstand =
+ * Kopfhoehe + ein Raster-Schritt). */
+main [id] {
+  scroll-margin-top: var(--cc-anker-abstand);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
