@@ -686,7 +686,9 @@ aside .cart-details {
  */
 .cart-line-quantity {
   display: flex;
-  align-items: center;
+  /* Oben buendig statt mittig, seit die Einheit unter dem Stepper steht
+   * (D3): Muelleimer und Stepper teilen dieselbe 44-px-Zeile. */
+  align-items: flex-start;
   justify-content: space-between;
   width: 100%;
   margin-top: 8px;
@@ -703,6 +705,21 @@ aside .cart-details {
   display: inline-block;
   margin: 0 10px;
   font-size: 1.1rem;
+}
+
+/* Einheit unter dem Stepper (D3, s06): mittig unter der Zahl, leiser als
+ * sie, im Ton und in der Stufe von .cc-zeile-packungen. Darunter statt
+ * daneben, damit die Zeile auch bei 320 px in die Schublade passt. */
+.cart-line-quantity .cc-menge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cart-line-quantity .cc-menge-einheit {
+  color: var(--cc-muted);
+  font-size: var(--cc-fs-2);
+  line-height: 1.2;
 }
 
 .cart-line-quantity .quantity-wrapper button {

@@ -3228,6 +3228,17 @@ main [id] {
   scroll-margin-top: var(--cc-anker-abstand);
 }
 
+/* Der Kauf-Block selbst (nur in der neuen Anordnung, ?kaufblock=neu) steht
+ * ganz oben im ersten Fenster. Ein Sprung dorthin ("Preis und Bestellung
+ * ansehen" im Aufmacher) scrollte mit dem Kopf-Abstand nur um die halbe
+ * Ankuendigungsleiste und schnitt deren Text waagrecht an (Register F-460,
+ * D3 2026-10-16). Ziel ist hier der Seitenanfang: ein Abstand von einer
+ * Fensterhoehe laesst den Browser auf 0 klemmen. In der alten Anordnung
+ * (?kaufblock=bestand) fehlt das Attribut, dort gilt der Kopf-Abstand. */
+main [data-cc-kaufblock][id] {
+  scroll-margin-top: 100vh;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    LADEZEICHEN DER VIDEO-EINBETTUNG
    Job 20260911-BAU-videoumschaltung-seite-bricht-beim-play-klick-zusammen.
