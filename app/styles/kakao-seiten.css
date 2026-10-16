@@ -852,6 +852,52 @@
   margin-top: var(--cc-space-3);
 }
 
+/* KAUFLEISTE (mobil) — app/components/product-pages/Kaufleiste.jsx.
+ * Designstandard bausteine.kauf_block: „Klebende Kaufleiste (mobil)
+ * wiederholt Preis UND Knopf"; seitenregeln.pdp_falz mobil: Preis und
+ * Kaufknopf im ersten Fenster ODER eine klebende Kaufleiste mit beiden
+ * (Register F-063, F-082, F-106, F-107, F-458: bei 390x844 lagen Preis und
+ * Knopf bei y = 1533 und 1713). Nur bis 749 px (mobil_bis_px), nur solange
+ * der Kaufknopf des Kauf-Blocks nicht ganz im Fenster steht (`hidden` setzt
+ * die Komponente). Ueber ihr liegen Schublade (z-index 10) und Dialoge
+ * (oberste Ebene); unter ihr die klebende Kopfzeile (z-index 1). Der Fuss
+ * bekommt so viel Luft, wie die Leiste hoch ist, damit nichts dauerhaft
+ * hinter ihr liegt. */
+.cc-kaufleiste {
+  display: none;
+}
+@media screen and (max-width: 749px) {
+  .cc-kaufleiste {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 2;
+    display: grid;
+    gap: var(--cc-space-1);
+    padding: var(--cc-space-1) var(--cc-rand)
+      max(var(--cc-space-1), env(safe-area-inset-bottom));
+    background: var(--cc-grund);
+    border-top: 1px solid var(--cc-linie);
+  }
+  .cc-kaufleiste[hidden] {
+    display: none;
+  }
+  .cc-kaufleiste .cc-kaufleiste__preis {
+    margin: 0;
+    font-size: var(--cc-schrift-fliess);
+    font-weight: var(--cc-knopf-gewicht);
+    line-height: var(--cc-lh-fliess);
+    color: var(--cc-text);
+  }
+  body:has(.cc-kaufleiste:not([hidden])) {
+    padding-bottom: calc(
+      var(--cc-knopf-hoehe) + 3 * var(--cc-space-1) +
+        var(--cc-schrift-fliess) * var(--cc-lh-fliess) +
+        env(safe-area-inset-bottom)
+    );
+  }
+}
+
 .CacaoBenefitList ul {
   list-style: none;
   padding: 0;
@@ -1192,9 +1238,25 @@
     width: 100% !important;
   }
 }
+/* UNTER 750 px (2026-10-16, s06):
+ *  - die 75 px unter der Galerie sind entfernt (Register F-089: leeres Band
+ *    zwischen Vorschaubildern und Titel; der Wert kam 2026-08 mit der Huelle
+ *    aus der Vorlage und hatte hier keinen Traeger). Den Abstand zum Titel
+ *    setzt jetzt das Raster selbst (`.product` row-gap, app.css);
+ *  - die fuenf Vorschaubilder passen in die Reihe statt hinter einen
+ *    Rollbalken (Register F-459, F-467: graue System-Leiste mit Pfeilen, das
+ *    „+6" rechts angeschnitten). Ursache wie zwischen 750 und 1023 px: die
+ *    Mindestbreite eines Flex-Bildes ist seine Breite (20 %), fuenf davon plus
+ *    vier Luecken sind mehr als die Reihe. min-width 0 laesst die Basis
+ *    calc(20% - 0.5em) gelten; ohne Seitenpolster stehen die Vorschaubilder
+ *    auf der Bildkante. */
 @media screen and (max-width: 749px) {
-  .ProductImages {
-    margin-bottom: 75px;
+  .product-image-list {
+    padding-inline: 0;
+  }
+  .product-image-list .thumb-image,
+  .product-image-list .ImageSeeMore {
+    min-width: 0;
   }
 }
 

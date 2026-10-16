@@ -23,6 +23,7 @@ import {
 } from '~/components/product-pages/SortenAufmacher';
 import {waehleAufmacherFassung} from '~/lib/sortenaufmacher-fassung';
 import {waehleKaufblockFassung} from '~/lib/kaufblock-fassung';
+import {Kaufleiste} from '~/components/product-pages/Kaufleiste';
 
 import {produktMeta, MARKE} from '~/lib/produkt-seo';
 import {StarRating} from '~/components/reusables/StarRating';
@@ -324,6 +325,18 @@ export default function Product() {
           }}
         />
       </div>
+      {/* Mobil (bis 749 px) wiederholt die Kaufleiste Preis und Knopf, solange
+          der Knopf des Kauf-Blocks nicht ganz im Fenster steht
+          (Kaufleiste.jsx). Gehoert zur neuen Anordnung: ?kaufblock=bestand
+          liefert die Seite wie vorher, ohne Leiste. */}
+      {kaufblockZuerst ? (
+        <Kaufleiste
+          selectedVariant={selectedVariant}
+          handle={product.handle}
+          quantity={quantity}
+          staffelKasse={staffelKasse}
+        />
+      ) : null}
       {kaufblockZuerst ? aufmacher : null}
       {/*
         DIE INSTAGRAM-STIMME, weit oben: direkt nach dem Kaufblock und vor dem

@@ -1118,6 +1118,11 @@ aside .cart-details {
   display: grid;
   max-width: var(--cc-inhalt-max);
   margin-inline: auto;
+  /* Einspaltig (unter 45em) trennt ein Raster-Schritt Galerie und Titel —
+   * auf der Angebotsseite stiessen sie aneinander, auf Awake/Create lag
+   * dort ein 75-px-Band (F-089). Zweispaltig setzt grid-gap darunter beide
+   * Richtungen. */
+  row-gap: var(--cc-space-3);
   @media (min-width: 45em) {
     grid-template-columns: 1fr 1fr;
     grid-gap: 4rem;
@@ -1809,10 +1814,15 @@ aside .cc-leerzustand .cc-knopf {
  * Kopfzeile ueberhaupt schrumpfbar gebaut ist, und das gilt unveraendert.
  * Eine Regel auf einen Selektor ohne Element waere dagegen genau der tote
  * Code, der spaeter wie eine vergessene Bedingung aussieht. */
+/* KEIN EIGENER INNENABSTAND MEHR AM TELEFON (2026-10-16, Grossjob
+ * design-update s06, Register F-072, F-075, F-076, F-284, F-468): hier stand
+ * `padding: 0 0.75rem` — das Logo begann bei 12 px, Produktbild, Titel und
+ * Zurueck-Link bei 16 px (layout.rand). Den Rand setzt jetzt allein die
+ * Grundregel `.header` oben (padding-inline aus --cc-rand und
+ * --cc-inhalt-max); unter 48em ergibt sie genau --cc-rand. */
 @media (max-width: 47.99em) {
   .header {
     gap: var(--cc-space-1, 0.5rem);
-    padding: 0 0.75rem;
   }
   .header-ctas {
     gap: var(--cc-space-2, 1rem);
@@ -2295,11 +2305,16 @@ main table {
  * kleiner gesetzt: Marke auf --cc-fs-2, CTAs auf --cc-fs-1, Abstaende auf die
  * kleinste Rasterstufe. Beides sind Token, keine freien Werte. Die
  * Trefferflaechen bleiben unangetastet bei >= 44px — kleiner wird die Schrift,
- * nicht der Knopf. */
+ * nicht der Knopf.
+ *
+ * DER SEITENRAND BLEIBT AUCH HIER --cc-rand (2026-10-16, s06): die drei CTAs
+ * gibt es seit dem 2026-09-09 nicht mehr (nur Menue-Schalter und Warenkorb).
+ * Nachgemessen am Kandidaten bei 320 und 360 px mit 8 px Rand: Marke 8..127,
+ * ganz sichtbar, kein Ueberlauf — die 8 px, die 16 px Rand mehr kosten, sind
+ * da. Damit steht das Logo auch hier auf der Inhaltskante (16 px). */
 @media (max-width: 22.5em) {
   .header {
     gap: var(--cc-space-1, 0.5rem);
-    padding: 0 var(--cc-space-1, 0.5rem);
   }
   .header-ctas {
     gap: var(--cc-space-1, 0.5rem);
