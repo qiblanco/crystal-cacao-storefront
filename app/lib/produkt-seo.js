@@ -327,10 +327,22 @@ export function produktBeschreibung(pfad) {
  * Wirkzusage — der Claim-Korridor des Dateikopfs bleibt damit unberührt.
  * Die Risikoumkehr ist zugleich das für DACH gemessene Closer-Thema
  * (SSoT kaufueberzeugung/kanon: Rückgabe/20-Tage-Test/Garantie, n=22).
+ *
+ * LADEN-EIGEN (2026-10-16, Job 20261015-m5f2-crystal-liest-kakao-liste): die
+ * drei Kakao-Kaufseiten. Vorher „Crystal Cacao® Awake – Bio“ usw.: Marke vorn
+ * statt am Ende, Title = Produktname, kein Wort der gezaehlten Kakao-Kundenliste
+ * (kanon.yaml kundenvokabular.kakao_dach_haeufig). „Bio“ belegt die Seite
+ * („Bio-zertifiziert nach DE-ÖKO-006“), „zeremoniell“ ihre FAQ („bevor du
+ * zeremoniellen Kakao trinkst“); das Set nennt kein „zeremoniell“ und bekommt es
+ * deshalb nicht. Von einem unabhaengigen Pruefer gegen den sichtbaren Text
+ * gelesen. Die H1 bleibt der Produktname. Rueckweg: die drei Zeilen streichen.
  * @type {Record<string, string>}
  */
 export const PRODUKT_TITEL = {
   '/products/qione-2-pro': `QiOne® 2 Pro kaufen — 20 Tage risikofrei | ${MARKE}`,
+  '/products/crystal-cacao-awake': `Awake: zeremonieller Bio-Kakao | ${MARKE}`,
+  '/products/crystal-cacao-create': `Create: zeremonieller Bio-Kakao | ${MARKE}`,
+  '/products/crystal-cacao-angebot': `Create & Awake: Bio-Kakao im Set | ${MARKE}`,
 };
 
 /**

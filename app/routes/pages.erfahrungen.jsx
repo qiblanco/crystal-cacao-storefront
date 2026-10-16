@@ -10,7 +10,7 @@ import {
 } from '~/data/kakao-stimmen';
 import {FAQ_CACAO} from '~/data/product-faqs';
 import {tagLang} from '~/lib/datum';
-import {KAKAO_KOLLEKTION} from '~/lib/kakao-zone';
+import {ABSENDER_MARKE, KAKAO_KOLLEKTION} from '~/lib/kakao-zone';
 import {seitenSignale} from '~/lib/kakao-seo';
 import {canonicalLink} from '~/lib/seo';
 
@@ -82,7 +82,14 @@ import {canonicalLink} from '~/lib/seo';
  */
 
 const PFAD = '/pages/erfahrungen';
-const TITEL = 'Crystal Cacao Erfahrungen: echte Stimmen und Laborwerte';
+// GEO M5-F2 Folge (2026-10-16), Job 20261015-m5f2-crystal-liest-kakao-liste:
+// vorher 'Crystal Cacao Erfahrungen: echte Stimmen und Laborwerte'. Der stand
+// schon in R3 rot (Marke am Anfang statt am Ende) und trug kein Wort der
+// gezaehlten Kakao-Kundenliste (kanon.yaml kundenvokabular.kakao_dach_haeufig).
+// „Kakao-Erfahrungen“ traegt die Seite: die drei gezeigten Stimmen sind genau
+// die, die den Kakao nennen. „echte“ faellt nur wegen der 60 Zeichen weg.
+// „Crystal Cacao“ und „Erfahrungen“ bleiben im Title, die H1 traegt die Phrase.
+const TITEL = `Kakao-Erfahrungen: Stimmen und Laborwerte | ${ABSENDER_MARKE}`;
 const BESCHREIBUNG =
   'Echte Google-Bewertungen zu Crystal Cacao im Wortlaut, dazu die ' +
   'Laborwerte zu Cadmium und Schwermetallen, die Zubereitung und 20 Tage ' +

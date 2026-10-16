@@ -247,7 +247,15 @@ function absichtsGraph() {
  * driften auseinander, und dann zeigt ein geteilter Link etwas anderes als
  * das Suchergebnis: zwei Versprechen fuer eine Seite.
  */
-const SEITEN_TITEL = `Warum es Crystal Cacao gibt | ${ABSENDER_MARKE}`;
+// GEO M5-F2 Folge (2026-10-16), Job 20261015-m5f2-crystal-liest-kakao-liste:
+// crystal liest ab jetzt die gezaehlte Kakao-Kundenliste (kanon.yaml
+// kundenvokabular.kakao_dach_haeufig: Kakao, Zubereitung, zubereiten). Der alte
+// Title „Warum es Crystal Cacao gibt“ trug keins dieser Woerter („Cacao“ ist
+// Marke, nicht Kundenwort). „Kakao statt Kaffee“ ist der erste Satz der Seite
+// („Ich möchte Kaffee ablösen.“) und ihre H2; „uns“ sind Christian und Anna.
+// Vorher von einem unabhaengigen Pruefer gegen den sichtbaren Text gelesen.
+// Rueckweg: alter Wert oben in dieser Zeile, oder git revert.
+const SEITEN_TITEL = `Kakao statt Kaffee: Warum es uns gibt | ${ABSENDER_MARKE}`;
 // GEO M5-F2 (2026-10-11, SAGEO), Job
 // 20261011-geo-sageo-m5f2-strukturfelder-ratgeber-de-us-crystal: Meta auf
 // 120-160 Zeichen (Seitenregel R4; vorher 173). „Prüfdokumente zum Nachlesen“
