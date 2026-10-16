@@ -23,13 +23,24 @@ import {SORTEN} from '~/lib/sorten-profil';
  * Der Knopf „Analyse anzeigen“ ist der Zwilling von „Analysedaten“ im
  * Kaffee-Vergleich: gleiches Ziel (#cc-pruefdokumente), gleicher Stil
  * (proben/probe_startseite_kanten_und_kopf.py, Achse D).
+ *
+ * VERGLEICH MIT ZUSTAND UND RUECKWEG (2026-10-16, Grossjob design-update s06,
+ * Register F-021). Kommt der Kunde ueber „Profile vergleichen“ aus einer
+ * Sorten-Folie, traegt der Abschnitt diese Sorte (`data-cc-vergleich`): ihre
+ * Balken bleiben farbig, die der anderen Sorte werden unbunt
+ * (--cc-neutral-vergleich, „die eigene Sorte steht farbig, die andere unbunt
+ * daneben“ wie in der Vorlage), und unter dem Lead steht der Weg zurueck zur
+ * Sortenwahl. Ohne diesen Weg in den Abschnitt (gescrollt, ohne JavaScript)
+ * bleibt er unveraendert.
  */
-export function Analyseprofile() {
+export function Analyseprofile({vergleich = null, onZurueck = null}) {
+  const sorte = vergleich && SORTEN[vergleich] ? vergleich : null;
   return (
     <section
       className="cc-akt cc-akt--flaeche cc-profil"
       id="cc-analyseprofile"
       aria-labelledby="cc-analyseprofile-titel"
+      data-cc-vergleich={sorte || undefined}
     >
       <div className="cc-akt__innen">
         <header className="cc-akt__kopf">
@@ -39,6 +50,17 @@ export function Analyseprofile() {
             Awake und Create stammen aus zwei verschiedenen Edelkakao-Bohnen.
             Im Labor zeigt sich, worin sie sich unterscheiden.
           </p>
+          {sorte ? (
+            <p className="cc-profil__zurueck">
+              <a
+                className="btn--secondary cc-knopf-ruhig"
+                href="#cc-start-titel"
+                onClick={() => onZurueck?.()}
+              >
+                Zurück zu {SORTEN[sorte].name}
+              </a>
+            </p>
+          ) : null}
         </header>
 
         <div className="cc-profil__legende" aria-hidden="true">

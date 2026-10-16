@@ -5,7 +5,7 @@ import {useAside} from './Aside';
 import {BetragLaedt} from './BetragLaedt';
 import {getCartLinePriceDisplayExact} from '~/lib/cart-display-pricing';
 import {useMarktLand} from '~/lib/markt-land';
-import {kakaoSetArt} from '~/lib/kakao-set-zeile';
+import {KAKAO_ZEILEN, kakaoSetArt} from '~/lib/kakao-set-zeile';
 import {useWarenkorbAktion, warenkorbBetrag} from '~/lib/warenkorb-anzeige';
 
 /**
@@ -56,6 +56,18 @@ export function CartLineItem({layout, line, childrenMap}) {
           anzeigePreis.price.currencyCode,
         )
       : null;
+  // WIE VIELE PACKUNGEN DER BETRAG MEINT (2026-10-16, Grossjob design-update
+  // s06, Register F-013/F-437). Eine Set-Zeile ist EIN Produkt ("Bundle: 3x
+  // AWAKE", Zeilenmenge 1), ihr Stepper zaehlt aber Packungen (3). Neben
+  // "159 €" stand damit eine 3, und ob der Betrag einem Bundle oder allen drei
+  // gilt, war nicht zu erkennen. Darum nennt die Zeile ab zwei Packungen, wofuer
+  // der Betrag steht — in derselben Wendung wie die Mengenauswahl der Kaufseite
+  // ("… für 3 Packungen", lib/cacao-pricing.js). Der Betrag selbst bleibt
+  // unveraendert in .product-price (Proben lesen ihn dort).
+  const jeEinheit = KAKAO_ZEILEN[product?.handle];
+  const packungen = jeEinheit
+    ? (jeEinheit.awake + jeEinheit.create) * (line?.quantity || 0)
+    : 0;
 
   return (
     <li key={id} className="cart-line">
@@ -87,8 +99,15 @@ export function CartLineItem({layout, line, childrenMap}) {
           </Link>
           {/* Dieselbe Huelle wie ProductPrice (div.product-price, Rolle
               und Name), damit Layout und Proben unveraendert greifen. */}
-          <div aria-label="Preis" className="product-price" role="group">
-            {preisText ? <span>{preisText}</span> : <BetragLaedt />}
+          <div className="cc-zeile-preis">
+            <div aria-label="Preis" className="product-price" role="group">
+              {preisText ? <span>{preisText}</span> : <BetragLaedt />}
+            </div>
+            {preisText && packungen > 1 ? (
+              <small className="cc-zeile-packungen">
+                für {packungen} Packungen
+              </small>
+            ) : null}
           </div>
           {/* Ohne Shopifys Platzhalter-Variante: ein Produkt mit nur einer
               Variante (jede Set-Zeile, jede Einzelpackung) trägt die Option

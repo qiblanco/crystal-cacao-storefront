@@ -85,7 +85,7 @@ function Pfeil() {
 /**
  * @param {{produkte: {awake?: any, create?: any} | null}} props
  */
-export function SortenSlider({produkte = null}) {
+export function SortenSlider({produkte = null, onVergleich = null}) {
   const [aktiv, setAktiv] = useState(0);
   const [slideStep, setSlideStep] = useState(420);
   const buehneRef = useRef(null);
@@ -218,6 +218,7 @@ export function SortenSlider({produkte = null}) {
                 index={i}
                 aktiv={aktiv === i}
                 produkt={produkte?.[sorte] || null}
+                onVergleich={onVergleich}
               />
             ))}
           </div>
@@ -279,7 +280,7 @@ function wortmarkeSizes(marke) {
   return `(min-width: 48em) ${Math.ceil(WORTMARKE_HOEHE_BREIT * v)}px, ${Math.ceil(WORTMARKE_HOEHE_MOBIL * v)}px`;
 }
 
-function Folie({sorte, index, aktiv, produkt}) {
+function Folie({sorte, index, aktiv, produkt, onVergleich}) {
   const profil = SORTEN[sorte];
   const marke = profil.wortmarke;
   const bild = produkt?.featuredImage || null;
@@ -324,7 +325,21 @@ function Folie({sorte, index, aktiv, produkt}) {
             <a className="btn--primary cc-folie__knopf" href={profil.pfad}>
               {profil.name} kaufen
             </a>
-            <a className="cc-folie__link" href="#cc-analyseprofile">
+            {/* PROFILE VERGLEICHEN TUT SICHTBAR ETWAS (2026-10-16, Grossjob
+                design-update s06, Register F-020/F-021; Christian: „auch der
+                Profil-vergleichen-Knopf funktioniert nicht sauber“). Bis
+                hierher ein nackter Textlink, dessen Sprung unter der
+                klebenden Kopfzeile landete. Jetzt: Zweitknopf (dieselbe
+                Klasse wie „Analyse anzeigen“), Ziel mit Kopfabstand
+                (main [id], kakao-seiten.css), und der Zielabschnitt zeigt,
+                von welcher Sorte man kommt, samt Weg zurueck
+                (Analyseprofile.jsx). Der Sprung selbst bleibt ein echter
+                Anker: ohne JavaScript fuehrt er weiter zum Vergleich. */}
+            <a
+              className="btn--secondary cc-knopf-ruhig cc-folie__vergleich"
+              href="#cc-analyseprofile"
+              onClick={() => onVergleich?.(sorte)}
+            >
               Profile vergleichen
             </a>
           </div>

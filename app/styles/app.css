@@ -1,3 +1,12 @@
+/* DESIGNSTANDARD CRYSTAL — erzeugt aus design-meister/db/designstandard/crystal.yaml
+ * (2026-10-16, Grossjob design-update s06). Die Datei steht VOR allen
+ * Handregeln: sie liefert die Rollen-Tokens (--cc-rand, --cc-inhalt-max,
+ * --cc-anker-abstand, --cc-schatten-hover, --cc-fokus, ...), die bis heute in
+ * keiner Handdatei definiert waren. Wo eine Handdatei denselben Namen noch
+ * selbst setzt, gewinnt sie (spaeter geladen); jede Abweichung meldet
+ * `designstandard drift --marke crystal`. Nie von Hand aendern — neu erzeugen. */
+@import './designstandard-crystal.css';
+
 :root {
   --aside-width: 400px;
   --cart-aside-summary-height-with-discount: 300px;
@@ -123,19 +132,24 @@ aside {
  * 347,8 px hier gegen 2 px in der Vorlage. Auf dem Telefon bleibt der Fuss
  * unten (so auch die Vorlage: 386 px Loch bei einer Position, Kaufknopf in
  * Daumenreichweite). `.overlay > aside` gewinnt ueber `aside` oben.
+ *
+ * BUENDIG STATT SCHWEBEND — 2026-10-16 (Grossjob design-update s06, Register
+ * F-095): das Panel stand 25 px vor dem rechten Fensterrand. Rechts daneben
+ * schaute das Warenkorb-Abzeichen der Kopfzeile hervor, und der Kasten wirkte
+ * wie vor die Bildlaufleiste gelegt. Die Panel-Bauform (Hoehe nach Inhalt,
+ * Summe direkt unter der letzten Position) bleibt, wie Christian sie am
+ * 2026-09-10 bestellt hat; das Panel haengt jetzt buendig in der Ecke. Darum
+ * rundet nur noch die freie Ecke unten links (Radius-Token des Ladens statt
+ * 20 px), und die Hoehengrenze ist das Fenster selbst statt "Fenster - 50 px".
  */
 @media screen and (min-width: 1024px) {
   .overlay > aside {
     transform: translate(0, 0) !important;
     min-height: 0 !important;
     height: auto !important;
-    max-height: calc(100dvh - 50px);
-    right: 25px;
-    border-radius: 0 0 20px 20px;
-  }
-  .overlay > aside > main {
-    padding-bottom: 0 !important;
-    border-radius: 0 0 10px 10px;
+    max-height: 100dvh;
+    right: 0;
+    border-radius: 0 0 0 var(--cc-radius-bild);
   }
 }
 
@@ -145,7 +159,7 @@ aside header {
   display: flex;
   height: var(--header-height);
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 var(--cc-rand);
 }
 
 aside header h3 {
@@ -170,80 +184,61 @@ aside header h2 {
 }
 
 /*
- * ANGLEICHUNG an die uebernommene Aside.jsx (K1, ADR 0056) — 2026-08-22, s06.
- * Die geteilte Fassung schiebt den <header> IN das <main>: aus
- * <aside><header/><main>{children}</main></aside> wird
- * <aside><main><header/>{children}</main></aside>. Ein Rand auf `main` legte
- * sich damit UM den Kopf der Schublade und schnitte seine Trennlinie ein.
- * Deshalb traegt der Rand jetzt der Inhalt, nicht der Container.
+ * DER EINE HAKEN DER SCHUBLADE — 2026-10-16 (Grossjob design-update s06,
+ * Register F-008..F-011, F-073/F-074, F-083..F-086, F-093, F-094, F-096).
  *
- * Die Aenderung steht bewusst HIER, in einer crystal-eigenen Datei, und nicht
- * in Aside.jsx: eine Aenderung in einer K1-Datei waere eine Klassen-Verletzung
- * und machte die Drift-Wache dauerhaft rot ("um die Datei herum, nicht in sie
- * hinein").
+ * WURZEL: die Regeln hier zielten bis heute auf `aside main`. Der K1-Nachzug
+ * 191492d (2026-10-09) hat in Aside.jsx das <main> zu <div class="aside-zone">
+ * gemacht. Seitdem traf keine dieser Regeln mehr: kein Innenabstand (Bild,
+ * Summe und Kassenknopf an der Kante), keine Flex-Spalte (am Telefon stand der
+ * Fuss nicht mehr unten), kein eigener Scroller fuer Suche und Menue. Gemessen
+ * 2026-10-16 live, 390/1440/2560: Zone padding 0, overflow visible,
+ * Produktbild bei x = Schubladenkante.
  *
- * ABWEICHUNG VON DER VORLAGE, ausdruecklich: qiblanco setzt hier
- * `overflow: scroll` — das erzwingt eine Bildlaufleiste auch ohne Ueberlauf und
- * steht woertlich auf der Prueflatte dieses Auftrags ("kein overflow:scroll wo
- * overflow:auto gehoert"). Uebernommen wird `auto`. Einen benannten Fehler
- * mitzukopieren, nur weil er in der Vorlage steht, waere das Gegenteil von
- * Uebertragung.
+ * DER HAKEN IST EINE EIGENSCHAFT, KEIN NAME: "das Kind des Panels, das nicht
+ * der Kopf ist" — `.overlay > aside > :not(header)`. Er traegt, ob die Zone
+ * <main>, <div class="aside-zone"> oder kuenftig anders heisst, und auch dann,
+ * wenn ein Nachzug den Kopf vor die Zone zieht. Aside.jsx bleibt K1 und
+ * unberuehrt ("um die Datei herum, nicht in sie hinein").
  *
- * NACHTRAG 2026-08-22 (Doppelscroller-Job): `overflow: auto` war die halbe
- * Korrektur. `main` blieb damit ein ZWEITER Scroll-Container neben
- * `.cart-main` — zwei geschachtelte Scroller greifen bei mehreren Artikeln
- * ineinander (der innere faengt die Geste, der aeussere scrollt nicht mit).
- * `main` gibt das Scrollen jetzt vollstaendig ab und beschneidet nur noch.
+ * INNENABSTAND EINMAL AUF DEM WRAPPER (Designstandard crystal, Baustein
+ * schublade): Kopf, Zeilen, Summe und Kassenknopf teilen dieselbe linke Kante.
+ * Der Kopf zieht nur seine Trennlinie mit negativem Rand bis an die Panelkanten
+ * und holt den Abstand als Innenabstand zurueck.
  *
- * ENTFERNT: `max-height: 100vh`. Das war ein Symptomdeckel derselben Wurzel,
- * die der qiblanco-Repair benannt hat — ein Flex-Kind traegt per Default
- * `min-height: auto` und weigert sich, unter seinen Inhalt zu schrumpfen. Wer
- * das nicht weiss, deckelt die Hoehe von Hand. Behoben wird die Ursache
- * (`min-height: 0`), nicht das Symptom; der Deckel entfaellt ersatzlos.
+ * Unveraendert gilt, was die Bloecke vom 2026-08-22 begruendet haben: genau EIN
+ * Scroller (Suche/Menue: die Zone; Warenkorb: die Positionsliste),
+ * `min-height: 0` statt eines Hoehendeckels, `overflow: auto` statt `scroll`.
  */
-aside main {
+.overlay > aside > :not(header) {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
+  padding-inline: var(--cc-rand);
+  background: inherit;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
-/*
- * NUR DIE WARENKORB-SCHUBLADE gibt das Scrollen ab — und das ist der Grund fuer
- * `:has()` statt einer eigenen Klasse. `<aside><main>` stammt aus Aside.jsx, und
- * Aside.jsx ist K1 (ADR 0056): dort eine Klasse zu ergaenzen waere eine
- * Klassen-Verletzung und machte die Drift-Wache dauerhaft rot. Also wird von
- * aussen am Inhalt erkannt, um welche Schublade es geht — "um die Datei herum,
- * nicht in sie hinein".
- *
- * Die anderen Schubladen (Suche, mobiles Menue) behalten ihren eigenen Scroller
- * aus der Regel darueber; sie haben keinen ruhenden Fuss, den ein innerer
- * Scroller freihalten muesste. Wer hier pauschal `overflow: hidden` setzt,
- * macht die Suchergebnisse unscrollbar.
- */
-aside main:has(.cart-main) {
+/* Nur die Warenkorb-Schublade gibt das Scrollen an ihre Positionsliste ab; ihr
+ * Fuss mit dem Kassenknopf ruht. Die Art steht als Klasse am Panel
+ * (`aside--cart`, Aside.jsx) — das fruehere `:has(.cart-main)` entfaellt. */
+.overlay > aside.aside--cart > :not(header) {
   overflow: hidden;
 }
 
-
-aside main > *:not(header) {
-  margin-left: 1rem;
-  margin-right: 1rem;
-}
-
-/*
- * ZONE 1 — der ruhende Kopf. `flex: 0 0 auto` seit 2026-08-22: er scrollt nicht
- * mehr mit und schrumpft nicht, weil `main` das Scrollen abgegeben hat.
- * `position: sticky` bleibt als Rueckfall fuer die uebrigen Aside-Varianten
- * (Suche, mobiles Menue), deren `main` weiterhin selbst scrollt.
- */
-aside main > header {
+/* ZONE 1 — der ruhende Kopf: schrumpft nicht, klebt in den Schubladen, deren
+ * Zone selbst scrollt, und fuehrt seine Trennlinie bis an die Panelkanten. */
+.overlay > aside > :not(header) > header {
   flex: 0 0 auto;
   position: sticky;
   top: 0;
-  background: inherit;
   z-index: 1;
+  background: inherit;
+  margin-inline: calc(-1 * var(--cc-rand));
+  padding-inline: var(--cc-rand);
 }
 
 aside p {
@@ -342,12 +337,22 @@ button.reset:hover:not(:has(> *)) {
 * components/Header
 * --------------------------------------------------
 */
+/* KOPFZEILE AUF DEM INHALTSRASTER — 2026-10-16 (Grossjob design-update s06,
+ * Register F-022, F-057/F-058, F-064, F-066, F-068..F-070, F-072, F-075..F-077,
+ * F-081, F-099, F-283, F-284, F-289, F-438). Die Flaeche der Kopfzeile laeuft
+ * ueber die ganze Breite, ihr INHALT steht auf derselben Kante wie der
+ * Seiteninhalt: bis --cc-inhalt-max (1350 px) mit dem Seitenrand --cc-rand,
+ * darueber mittig. Bis heute klebten Logo und Warenkorb bei jeder Breite
+ * 16 px am Fensterrand (2560: Logo x=16, Inhalt ab x=598) und am Telefon
+ * 12 px statt 16 px. Werte nur aus dem Designstandard (layout.inhalt_max,
+ * layout.rand; kopfzeile: "Logo-Kante = Inhaltskante in jeder Breite"). */
 .header {
   align-items: center;
   background: #fff;
   display: flex;
   height: var(--header-height);
-  padding: 0 1rem;
+  padding-block: 0;
+  padding-inline: max(var(--cc-rand), calc((100% - var(--cc-inhalt-max)) / 2));
   position: sticky;
   top: 0;
   z-index: 1;
@@ -534,6 +539,12 @@ aside .cart-main {
   height: auto;
   max-height: none;
   overflow: hidden;
+  /* 2026-10-16 (s06, Register F-008/F-096): reset.css gibt JEDER <section>
+   * 1rem bzw. ab 768 px 2rem Innenabstand oben und unten. In der Schublade war
+   * das das leere Band zwischen Kopf und erster Zeile (gemessen 32 px am
+   * Schreibtisch, 16 px am Telefon; Soll hoechstens ein Raster-Schritt). Der
+   * Abstand kommt hier allein aus der Zeile selbst. */
+  padding: 0;
 }
 
 /* Der Rabatt-Deckel deckte dieselbe Wurzel — in der Schublade ebenfalls hinfaellig. */
@@ -610,10 +621,24 @@ aside .cart-details {
   font-weight: 600;
 }
 
+/* Betrag und "für 3 Packungen" auf EINER Grundlinie; die Angabe gedaempft und
+ * eine Stufe kleiner als der Betrag (Register F-013/F-437). */
+.cc-zeile-preis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--cc-space-1);
+}
+
+.cc-zeile-packungen {
+  color: var(--cc-muted);
+  font-size: var(--cc-fs-2);
+}
+
 .cart-line img {
   height: 100%;
   display: block;
-  margin-right: 0.75rem;
+  margin-right: var(--cc-space-2);
 }
 
 .cart-summary-page {
@@ -640,7 +665,9 @@ aside .cart-details {
   position: static;
   flex: 0 0 auto;
   width: auto;
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  /* Unter dem Kassenknopf derselbe Abstand wie seitlich (Wrapper-Rand), seit
+   * das Panel am Schreibtisch nach Inhalt endet (2026-10-16, s06). */
+  padding-bottom: max(var(--cc-rand), env(safe-area-inset-bottom));
 }
 
 /*
@@ -697,7 +724,12 @@ aside .cart-details {
   background: transparent;
   color: var(--cc-dunkel, #171310);
   font-size: 1.3rem;
-  opacity: 0.2;
+  /* 0,2 -> 0,6 (2026-10-16, s06, Register F-014/F-087/F-285/F-287): mit 0,2
+   * lag das Zeichen unter 3:1 zum Grund und war als Bedienelement kaum zu
+   * sehen. Designstandard crystal, Baustein schublade: Deckkraft >= 0,6
+   * (gerechnet 4,7:1 auf --cc-grund), beim Zeigen 1. Leiser als Stepper und
+   * Kassenknopf bleibt es trotzdem: kein Rand, keine Flaeche. */
+  opacity: 0.6;
   transition: 0.2s all linear;
   display: flex;
   align-items: center;
@@ -714,7 +746,7 @@ aside .cart-details {
 }
 
 .cart-line-quantity button[type='submit']:hover {
-  opacity: 0.5;
+  opacity: 1;
 }
 
 .cart-line-quantity button:disabled {
@@ -780,6 +812,26 @@ aside .cart-details {
   padding-top: 8px;
   background: transparent;
   border-radius: 0;
+}
+
+/* /cart: RABATT- UND GUTSCHEINFELD IM RASTER (2026-10-16, s06, Register
+ * F-286/F-290). reset.css gibt jeder <section> ab 768 px 2rem Innenabstand
+ * oben und unten; zwischen den beiden Feldern standen so 64 px Luft plus die
+ * Raender des Eingabefelds, zwischen Summe und erstem Feld nur 8 px. Jetzt
+ * aus dem Raster: Summe -> erstes Feld 24, Feld -> Feld 16, letztes Feld ->
+ * Kassenknopf 32. */
+.cart-summary-page > section {
+  padding-block: 0;
+  margin-top: var(--cc-space-2);
+}
+.cart-summary-page > section:first-of-type {
+  margin-top: var(--cc-space-3);
+}
+.cart-summary-page > section input {
+  margin-block: 0;
+}
+.cart-summary-page > .cartSummaryWrapper {
+  margin-top: var(--cc-space-4);
 }
 
 .cart-aside-subtotal {
@@ -880,7 +932,10 @@ aside .cart-details {
 }
 
 .cartSummaryWrapper .cc-knopf:hover {
-  border-color: var(--cc-gold-tief, rgb(200, 152, 90));
+  /* Designstandard crystal, knopf_primaer.hover: Flaeche und Rand bleiben
+   * Kauf-Gold, die Rueckmeldung kommt ueber den Schatten — kein drittes Gold
+   * (bis 2026-10-16 wurde der Rand --cc-gold-tief). */
+  box-shadow: var(--cc-schatten-hover);
 }
 
 .cartSummaryWrapper .cc-knopf p {
@@ -1052,11 +1107,26 @@ aside .cart-details {
 * routes/products.$handle.tsx
 * --------------------------------------------------
 */
+/* AM INHALTSRASTER (2026-10-16, Grossjob design-update s06, Register F-006,
+ * F-065, F-067): das Raster lief bis 2900 px ueber die volle Fensterbreite,
+ * die Bildspalte klebte links am Rand (x=16 bei 2545 px Fenster). Der Standard
+ * (layout.inhalt_max) setzt 1350 px — dieselbe Kante wie die Kopfzeile.
+ * Steht der Kauf-Block als erstes im main (Kaufseiten mit ?kaufblock=neu, der
+ * Catch-all products.$handle), bekommt er Luft unter der Kopfzeile (F-113:
+ * Bildecken sassen auf der Trennlinie). */
 .product {
   display: grid;
+  max-width: var(--cc-inhalt-max);
+  margin-inline: auto;
   @media (min-width: 45em) {
     grid-template-columns: 1fr 1fr;
     grid-gap: 4rem;
+  }
+}
+body > main > .product:first-child {
+  padding-top: var(--cc-space-4);
+  @media screen and (max-width: 749px) {
+    padding-top: var(--cc-space-2);
   }
 }
 
@@ -1077,11 +1147,33 @@ aside .cart-details {
 
 .product-price-on-sale {
   display: flex;
+  align-items: baseline;
   grid-gap: 0.5rem;
 }
 
+/* STREICHPREIS NACH DEM STANDARD (bausteine.preiszeile; 2026-10-16, Register
+ * F-112, F-114): gedaempft heisst --cc-muted (5,5:1 auf dem Grund), nicht
+ * halbe Deckkraft — `opacity: 0.5` machte aus dunkler Schrift ein Hellgrau
+ * unter 3:1, ueberall, wo ein Streichpreis steht. */
 .product-price-on-sale s {
-  opacity: 0.5;
+  color: var(--cc-muted);
+}
+
+/* PREISZEILE DER KAUFSEITE (Catch-all products.$handle, z. B. das Angebot;
+ * Register F-116): der Preis stand in Fliesstextgroesse unter dem Titel.
+ * Standard: Preis in der Preisstufe, fett; der Streichpreis kleiner und
+ * davor. `order` stellt ihn nur fuer das Auge nach vorn — DOM und Textfolge
+ * bleiben (Preis zuerst), Proben und Vorleser lesen wie bisher. */
+.product-main > .product-price {
+  font-size: var(--cc-schrift-preis);
+  font-weight: var(--cc-fw-preis);
+  line-height: var(--cc-lh-h2);
+  color: var(--cc-text);
+}
+.product-main > .product-price .product-price-on-sale s {
+  order: -1;
+  font-size: var(--cc-schrift-klein);
+  font-weight: var(--cc-fw-fliess);
 }
 
 .product-options-grid {
@@ -1408,7 +1500,7 @@ main h1,
    * bei 320 px eingezogen hat. Die Startseite laeuft ueber `text-6xl!`
    * bereits auf dieser Stufe; die Kaufseite zieht hier nach. */
   font-size: var(--cc-fs-7, 3.05rem);
-  line-height: 1.15;
+  line-height: var(--cc-lh-h1);
   letter-spacing: -0.01em;
   margin: var(--cc-space-5, 3rem) 0 var(--cc-space-2, 1rem);
   color: var(--cc-dunkel, #171310);
@@ -1416,21 +1508,21 @@ main h1,
 
 main h2 {
   font-size: var(--cc-fs-5, 1.95rem);
-  line-height: 1.2;
+  line-height: var(--cc-lh-h2);
   margin: var(--cc-space-5, 3rem) 0 var(--cc-space-2, 1rem);
   color: var(--cc-dunkel, #171310);
 }
 
 main h3 {
   font-size: var(--cc-fs-4, 1.56rem);
-  line-height: 1.25;
+  line-height: var(--cc-lh-h3);
   margin: var(--cc-space-4, 2rem) 0 var(--cc-space-1, 0.5rem);
   color: var(--cc-dunkel, #171310);
 }
 
 main p {
   font-size: var(--cc-fs-2, 1rem);
-  line-height: 1.6;
+  line-height: var(--cc-lh-fliess);
 }
 
 /* --- 4. Der Seitenrahmen: eine Zeilenlaenge, ein Takt ---
@@ -1474,11 +1566,16 @@ main p {
   padding: var(--cc-space-2, 1rem) var(--cc-space-3, 1.5rem);
   text-align: center;
   text-decoration: none;
-  transition: background 160ms ease;
+  transition: box-shadow 160ms ease;
 }
 
+/* Beim Zeigen bleibt die Flaeche Kauf-Gold; die Rueckmeldung ist der Schatten
+ * des Designstandards (knopf_primaer.hover, 2026-10-16 s06). Bis dahin wurde
+ * der Knopf --cc-gold-tief: das dritte Gold, das der Standard ausschliesst
+ * (Register F-060 fuer den Kaufknopf, hier dieselbe Klasse fuer jeden
+ * .cc-knopf: Kasse auf /cart, Sprungknopf im Aufmacher, Leerzustand). */
 .cc-knopf:hover {
-  background: var(--cc-gold-tief, rgb(200, 152, 90));
+  box-shadow: var(--cc-schatten-hover);
   text-decoration: none;
 }
 
@@ -1513,6 +1610,7 @@ main p {
 
 .cc-knopf--ruhig:hover {
   background: transparent;
+  box-shadow: none;
   color: var(--cc-dunkel, #171310);
   text-decoration: underline;
 }
@@ -1916,7 +2014,8 @@ aside .cc-leerzustand .cc-knopf {
 .search form input,
 .predictive-search-form input {
   background: var(--color-light);
-  border: 1px solid var(--cc-linie, #e6ded3);
+  /* Rand >= 3:1 wie jedes Eingabefeld (Abschnitt 17, Register F-288). */
+  border: 1px solid var(--cc-muted);
   border-radius: var(--cc-radius-knopf, 10px);
   flex: 1 1 auto;
   font-size: var(--cc-fs-2, 1rem);
@@ -1948,7 +2047,7 @@ aside .cc-leerzustand .cc-knopf {
 
 .search form button:hover,
 .predictive-search-form button:hover {
-  background: var(--cc-gold-tief, rgb(200, 152, 90));
+  box-shadow: var(--cc-schatten-hover);
   text-decoration: none;
 }
 
@@ -2003,6 +2102,20 @@ aside .cc-leerzustand .cc-knopf {
   border-top: 1px solid var(--cc-linie, #e6ded3);
 }
 
+/* In der Schublade traegt der Kopf schon die Trennlinie; eine zweite direkt
+ * darunter las sich als doppelte Linie mit Leerband (Register F-086/F-096). */
+.overlay > aside .cart-line:first-child {
+  border-top: 0;
+}
+
+/* Der Produktname ist fett; beim Zeigen wird er Gold-Tinte statt zusaetzlich
+ * unterstrichen — nie fett UND unterstrichen (Designstandard crystal,
+ * textlink.hover; Register F-012). */
+.cart-line-inner a:hover {
+  text-decoration: none;
+  color: var(--cc-gold-text);
+}
+
 .cart-line:last-child {
   border-bottom: none;
 }
@@ -2039,6 +2152,16 @@ main textarea {
   padding: var(--cc-space-1, 0.5rem) var(--cc-space-2, 1rem);
 }
 
+/* EIN LEERES FELD ERKENNT MAN NUR AM RAND (2026-10-16, s06, Register F-288).
+ * --cc-linie steht 1,25:1 auf --cc-grund; der Standard verlangt fuer
+ * Bedienelemente 3:1. Text- und Codefelder tragen deshalb den gedaempften Ton
+ * (--cc-muted, 5,38:1). Die Auswahlliste bleibt bei der Linie: sie zeigt ihren
+ * Wert und den Pfeil und ist daran zu erkennen. */
+main input:not([type='checkbox']):not([type='radio']),
+main textarea {
+  border-color: var(--cc-muted);
+}
+
 /* WARUM :where() UND NICHT :not() DIREKT — 2026-09-08, und es ist die Wurzel
  * von ZWEI Beanstandungen Christians auf einmal:
  * `main button:not(.reset):not(.cc-knopf)` hat die Spezifitaet 0-2-2 und
@@ -2061,8 +2184,21 @@ main textarea {
  * (0-0-2), die jedes Bauteil mit einer eigenen Klasse ueberschreiben DARF.
  * Das ist die Eigenschaft, um die es geht — "wer sich selbst gestaltet,
  * behaelt seine Gestalt" — statt einer Aufzaehlung derer, die es heute tun.
- * Der Ausschluss von .reset und .cc-knopf bleibt woertlich erhalten. */
-main button:where(:not(.reset)):where(:not(.cc-knopf)),
+ * Der Ausschluss von .reset und .cc-knopf bleibt woertlich erhalten.
+ *
+ * NACHTRAG 2026-10-16 (Grossjob design-update s06, Register F-015/F-059/F-097,
+ * F-060). Die Basis hatte noch ZWEI Luecken derselben Art:
+ *  (1) Ihr :hover stand mit 0-1-2 UEBER jeder Bauteilregel (0-1-0). Wer sich
+ *      selbst gestaltet, behielt seine Gestalt nur in Ruhe — beim Zeigen
+ *      faerbte die Basis die FAQ-Frage als goldenen Vollbalken. Jetzt steht
+ *      auch :hover in :where() und bleibt Basis (0-0-2).
+ *  (2) Ein Knopf, der etwas AUF- und ZUKLAPPT (aria-expanded: Akkordeon,
+ *      Ausklapper), ist keine Handlung im Sinn des Gold-Knopfs. Er bekommt die
+ *      Gold-Gestalt gar nicht erst — der Zaun ist die Eigenschaft
+ *      [aria-expanded], keine Liste von Bauteilen.
+ * Und die Rueckmeldung beim Zeigen ist der Schatten des Standards, nicht ein
+ * drittes Gold (knopf_primaer.hover: Flaeche unveraendert). */
+main button:where(:not(.reset)):where(:not(.cc-knopf)):where(:not([aria-expanded])),
 main input[type='submit'] {
   background: var(--cc-gold, rgb(242, 191, 114));
   border: 1px solid transparent;
@@ -2075,9 +2211,9 @@ main input[type='submit'] {
   padding: 0 var(--cc-space-3, 1.5rem);
 }
 
-main button:where(:not(.reset)):where(:not(.cc-knopf)):hover,
-main input[type='submit']:hover {
-  background: var(--cc-gold-tief, rgb(200, 152, 90));
+main button:where(:not(.reset)):where(:not(.cc-knopf)):where(:not([aria-expanded])):where(:hover),
+main input[type='submit']:where(:hover) {
+  box-shadow: var(--cc-schatten-hover);
 }
 
 /* --- 18. Der letzte Riegel gegen horizontalen Ueberlauf ---
