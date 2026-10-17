@@ -178,22 +178,33 @@ export default function ErfahrungenPage() {
           <h2 id="cc-erfahrungen-schadstoffe">
             Wie viel Cadmium und Schwermetalle stecken im Kakao?
           </h2>
+          {/* Cadmium-Antwort warm neu (Christian 2026-10-17, Job 20261017-update-
+              cadmium-antwort-warm-anna-stimme-pr-und-sales-manager-fuehren-
+              ueberall-ersetzen). Text und Belege: pr-manager/cadmium/texte.json
+              + quellen.md. Die Leuven-Zahl ist ein ANTEIL (Bioaccessibility),
+              keine Menge -- nie "fuenfmal weniger Cadmium" schreiben. */}
           <p>
-            Cadmium ist messbar vorhanden und liegt in beiden Sorten unter dem
-            EU-Höchstgehalt. Blei ist nicht nachweisbar, und bei den Pestiziden
-            gibt es keinen Befund.
+            Cadmium ist ein natürliches Element, das in Gestein und Boden
+            vorkommt. Die Kakaopflanze nimmt es mit ihren Wurzeln aus dem Boden
+            auf, so wie Weizen auch. Darum ist es auch in unserem Kakao messbar.
           </p>
           <p>
-            Gemessen am essbaren Anteil der rohen Bohne enthält Awake 0,59 mg/kg
-            Cadmium und Create 0,44 mg/kg. Für Schokolade ab 50 %
-            Kakaotrockenmasse erlaubt die EU höchstens 0,80 mg/kg. Crystal Cacao
-            ist Schokolade mit 100 % Kakao. Beide Werte bleiben darunter, auch
-            mit der Messunsicherheit von 20 %. Blei liegt unter der
-            Bestimmungsgrenze von 0,02 mg/kg.
+            Im Kakao ist das Cadmium an Pflanzenstoffe gebunden, etwa an
+            Ballaststoffe. Forscher der KU Leuven in Belgien haben die Verdauung
+            in Magen und Darm im Labor nachgestellt, veröffentlicht 2023. Beim
+            Kakaopulver löste sich dabei ein fünfmal kleinerer Teil des Cadmiums
+            als beim Weizenmehl, bei dunkler Schokolade ein halb so großer. Das
+            spricht dafür, dass dein Körper Cadmium aus Kakao schlechter
+            aufnimmt als aus Weizen.
           </p>
           <p>
-            Die Anbauregion bringt das Cadmium mit, die Verarbeitung erzeugt es
-            nicht.
+            Beide Sorten bleiben unter dem EU-Höchstgehalt. Gemessen am essbaren
+            Anteil der rohen Bohne enthält Awake 0,59 mg/kg Cadmium und Create
+            0,44 mg/kg. Für Schokolade ab 50 % Kakaotrockenmasse erlaubt die EU
+            höchstens 0,80 mg/kg, und Crystal Cacao ist Schokolade mit 100 %
+            Kakao. Das gilt auch, wenn man die mögliche Messabweichung von 20 %
+            dazurechnet. Blei liegt unter der Bestimmungsgrenze von 0,02 mg/kg,
+            und bei den Pestiziden gibt es keinen Befund.
           </p>
           <p>
             Gemessen hat Primoris in Belgien, ein nach EN ISO/IEC 17025
@@ -208,6 +219,10 @@ export default function ErfahrungenPage() {
             Scientific hat den Kakao einmal auf alle Elemente untersucht.
             Quecksilber war darin nicht nachweisbar. Arsen fand sich in sehr
             geringen Spuren, die nicht quantifizierbar sind.
+          </p>
+          <p>
+            Wir zeigen dir das alles so genau, weil du wissen sollst, was in
+            deiner Tasse ist. So kannst du deinen Kakao in Ruhe genießen.
           </p>
         </section>
 
