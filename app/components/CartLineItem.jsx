@@ -6,6 +6,7 @@ import {BetragLaedt} from './BetragLaedt';
 import {getCartLinePriceDisplayExact} from '~/lib/cart-display-pricing';
 import {useMarktLand} from '~/lib/markt-land';
 import {KAKAO_ZEILEN, kakaoSetArt} from '~/lib/kakao-set-zeile';
+import {ANGEBOT_HINWEIS, istBegrenztesAngebot} from '~/lib/angebot-limit';
 import {useWarenkorbAktion, warenkorbBetrag} from '~/lib/warenkorb-anzeige';
 
 /**
@@ -124,6 +125,13 @@ export function CartLineItem({layout, line, childrenMap}) {
                   </small>
                 </li>
               ))}
+            {/* Das Angebot gibt es einmal je Bestellung (lib/angebot-limit.js);
+                der Satz steht an der Mengenwahl, deren Plus dort gesperrt ist. */}
+            {istBegrenztesAngebot(product.handle) ? (
+              <li>
+                <small>{ANGEBOT_HINWEIS}</small>
+              </li>
+            ) : null}
           </ul>
           <CartLineQuantity line={line} />
         </div>
@@ -232,7 +240,7 @@ function CartLineQuantity({line}) {
               aria-label="Menge erhöhen"
               name="increase-quantity"
               value={nextQuantity}
-              disabled={warten}
+              disabled={warten || istBegrenztesAngebot(handle)}
             >
               <span>&#43;</span>
             </button>
