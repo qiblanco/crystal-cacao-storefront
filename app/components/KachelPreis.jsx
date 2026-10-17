@@ -84,6 +84,23 @@ export function KachelPreis({produkt, staffelKasse = produkt?.kachelKasse ?? nul
       </div>
     );
   }
+  // Geht der Packungspreis des Sets nicht ganz auf (CH 161 / 3 = 53,67 CHF),
+  // nennt die Kachel den Set-Betrag -- wie der Kopf der Kaufseite
+  // (CacaoPriceDisplay, Grossjob 20261006-repair-glatte-preise s04: Christian
+  // 06.10. "keine Nachkommastellen").
+  if (!preis.teilbar) {
+    return (
+      <div className="cc-kachel-preis">
+        <span className="cc-kachel-preis-jetzt">{preis.gesamt}</span>
+        {preis.compareAtGesamt ? (
+          <s className="cc-kachel-preis-vorher">{preis.compareAtGesamt}</s>
+        ) : null}
+        <span className="cc-kachel-preis-hinweis">
+          für {preis.menge} Packungen
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="cc-kachel-preis">
       <span className="cc-kachel-preis-jetzt">{preis.price}</span>
