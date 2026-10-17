@@ -1,5 +1,6 @@
 import {redirect} from 'react-router';
 import {legeKakaoSetZeile} from '~/lib/kakao-set-zeile.server';
+import {begrenzeAngebot} from '~/lib/angebot-limit.server';
 import {
   getAttributionCartAttributes,
   getOriginCartAttributes,
@@ -85,16 +86,21 @@ export async function loader({request, context, params}) {
       : {}),
   });
 
+  // Das Einführungsangebot höchstens einmal — auch über den Permalink, der
+  // direkt zur Kasse führt (/cart/<Angebot>:3).
+  const begrenzt = angelegt?.errors?.length
+    ? angelegt
+    : await begrenzeAngebot({cart, action: 'LinesAdd', result: angelegt});
   // Partner-Permalink mit 2/3 Packungen einer Kakao-Sorte: Set-Zeile, damit
   // der ?discount=-Code neben dem Staffelpreis greift (kakao-set-zeile.server.js).
-  const result = angelegt?.errors?.length
-    ? angelegt
+  const result = begrenzt?.errors?.length
+    ? begrenzt
     : await legeKakaoSetZeile({
         cart,
         storefront,
         env,
         action: 'LinesAdd',
-        result: angelegt,
+        result: begrenzt,
       });
 
   const cartResult = result.cart;

@@ -15,6 +15,7 @@ import {
   legeKakaoSetZeile,
 } from '~/lib/kakao-set-zeile.server';
 import {ABSENDER_MARKE} from '~/lib/kakao-zone';
+import {begrenzeAngebot} from '~/lib/angebot-limit.server';
 import {
   istVerbindungsfehler,
   meldeVerbindungsfehler,
@@ -295,6 +296,13 @@ export async function action({request, context}) {
         ? vorhandenFrueh
         : attributeLesen(storefront, korbId)
       : Promise.resolve(attributeGesetzt);
+
+  // Das Einführungsangebot liegt höchstens einmal im Warenkorb (Großjob
+  // 20261017 kakao-unter-herstellkosten, s02). Liest die Zeilen aus der
+  // Antwort der Mutation (CART_MUTATE_FRAGMENT trägt sie), kostet also nur
+  // dann eine Mutation, wenn wirklich zu viel drin liegt. Vor der
+  // Kakao-Normalform, die das Angebot als fremde Kakao-Zeile mitliest.
+  result = await begrenzeAngebot({cart, action, result});
 
   const t1 = Date.now();
   result = await legeKakaoSetZeile({

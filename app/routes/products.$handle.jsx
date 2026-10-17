@@ -10,6 +10,7 @@ import {
 import {ProductPriceKanon} from '~/components/ProductPrice';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
+import {ANGEBOT_HINWEIS, istBegrenztesAngebot} from '~/lib/angebot-limit';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {
   istKakaoProdukt,
@@ -230,6 +231,11 @@ export default function Product() {
           productOptions={productOptions}
           selectedVariant={selectedVariant}
         />
+        {/* Das Einführungsangebot gibt es einmal je Bestellung; die
+            Warenkorb-Action klemmt die Menge (lib/angebot-limit.server.js). */}
+        {istBegrenztesAngebot(product.handle) ? (
+          <p className="mt-2">{ANGEBOT_HINWEIS}</p>
+        ) : null}
         <br />
         <br />
         <p>
