@@ -158,13 +158,22 @@ export function cacaoPricing(quantity, selectedVariant, handle, land, staffelKas
     gesamtNum = einzel * menge;
     compareAtGesamtNum = compareAt != null ? compareAt * menge : null;
   }
-  // TEILBAR (Punkt 8 des Auftrags 20261006-preisanzeige-rest): ergibt der
-  // Packungspreis mal Menge den Zeilenbetrag auf den Cent? In DE immer (der
-  // Festbetrag trifft 61 und 53 genau). AT 3x nicht: 163,46 / 3 = 54,4867,
-  // "54,49 pro Packung" mal 3 wären 163,47. Dann nennt die Seite den
-  // Zeilenbetrag ("163,46 € für 3 Packungen") statt einer Rechnung, die um
-  // einen Cent danebenliegt.
-  const teilbar = Math.round(einzel * 100) * menge === Math.round(gesamtNum * 100);
+  // TEILBAR: darf die Seite den Packungspreis nennen? Zwei Bedingungen, eine
+  // Regel für jede Währung:
+  // (1) Packungspreis mal Menge ergibt den Zeilenbetrag auf den Cent (Punkt 8
+  //     des Auftrags 20261006-preisanzeige-rest). AT 3x nicht: 163,46 / 3 =
+  //     54,4867, "54,49 pro Packung" mal 3 wären 163,47.
+  // (2) Der Packungspreis ist ganz (Christian 06.10.2026: "keine
+  //     Nachkommastellen", Grossjob 20261006-repair-glatte-preise, s04). US 2x
+  //     geht auf (79,50 x 2 = 159), zeigte aber "$79.50 pro Packung"; GB 2x
+  //     "61,50 GBP pro Packung" (gemessen 13.10.2026).
+  // Sonst nennt die Seite den Zeilenbetrag ("$159 für 2 Packungen"). Für eine
+  // Packung gilt (2) nicht: ihr Packungspreis IST der Zeilenbetrag, und "für
+  // 1 Packungen" wäre keine Auskunft.
+  const centGenau =
+    Math.round(einzel * 100) * menge === Math.round(gesamtNum * 100);
+  const einzelGanz = Math.round(einzel * 100) % 100 === 0;
+  const teilbar = centGenau && (menge === 1 || einzelGanz);
   // GESAMTPREIS DES KAUFKNOPFS (Job rtbefund-kopfpreis-vs-kaufmenge-wache-
   // 20260924): der Knopf legt `quantity` Packungen in den Warenkorb, also ist
   // DAS der Betrag, den ein Klick kostet. In DE trifft der Festbetrag seit
@@ -194,8 +203,8 @@ export function cacaoPricing(quantity, selectedVariant, handle, land, staffelKas
 
 /**
  * Betrag einer Staffel-Option, wie die Auswahl ihn nennt: der Packungspreis,
- * wenn Packungspreis mal Menge den Zeilenbetrag trifft, sonst der
- * Zeilenbetrag selbst ("163,46 € für 3 Packungen").
+ * wenn er ganz ist und mal Menge den Zeilenbetrag trifft (teilbar, oben),
+ * sonst der Zeilenbetrag selbst ("$159 für 2 Packungen").
  * @param {ReturnType<typeof cacaoPricing>} pricing
  * @returns {string}
  */

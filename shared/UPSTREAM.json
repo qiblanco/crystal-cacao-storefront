@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "f358e0b08f2835e2bc9a3b5abfc833f111e0a21f",
-  "erzeugt_utc": "2026-10-16T19:53:35Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen f358e0b08f28; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit fb58e8d416d9). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "ccbb1616179324c762fa6dbfa92b788c5dea5351",
+  "erzeugt_utc": "2026-10-17T05:01:02Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen ccbb16161793; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit f358e0b08f28). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -83,7 +83,7 @@
     {
       "upstream": "app/lib/cacao-pricing.js",
       "klasse": "K1",
-      "sha256": "62db345b6e61075988e476e529bbb3cc020a9c6b9f43381f21af8c1611f44695"
+      "sha256": "3459a41e352fed0e2a97d00e7a955a764d7eff9ef056fdc43de1e94a936fffef"
     },
     {
       "upstream": "app/lib/cart-display-pricing.js",
