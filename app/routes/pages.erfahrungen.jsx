@@ -188,14 +188,28 @@ export default function ErfahrungenPage() {
             vorkommt. Die Kakaopflanze nimmt es mit ihren Wurzeln aus dem Boden
             auf, so wie Weizen auch. Darum ist es auch in unserem Kakao messbar.
           </p>
+          {/* Matrix-Teil (Christian 2026-10-17, Job 20261017-update-cadmium-
+              antwort-matrix-teil-polyphenole-zink-eisen-nach-christian): Kern
+              der Antwort, Vorlage Michelles Freshdesk-Antwort. Nur "kann
+              begrenzen", nie "verhindert". Belege: pr-manager/cadmium/
+              quellen-matrix.md. */}
           <p>
-            Im Kakao ist das Cadmium an Pflanzenstoffe gebunden, etwa an
-            Ballaststoffe. Forscher der KU Leuven in Belgien haben die Verdauung
-            in Magen und Darm im Labor nachgestellt, veröffentlicht 2023. Beim
-            Kakaopulver löste sich dabei ein fünfmal kleinerer Teil des Cadmiums
-            als beim Weizenmehl, bei dunkler Schokolade ein halb so großer. Das
-            spricht dafür, dass dein Körper Cadmium aus Kakao schlechter
-            aufnimmt als aus Weizen.
+            Dabei zählt nicht nur, wie viel Cadmium im Kakao steckt. Es zählt
+            auch, was sonst noch drin ist. Kakao ist reich an Pflanzenstoffen
+            wie Ballaststoffen und Polyphenolen, zu denen die Flavonoide
+            gehören. Sie können Metalle wie Cadmium im Darm zum Teil an sich
+            binden. Dazu bringt Kakao die Mineralstoffe Zink und Eisen mit. Sie
+            nehmen im Darm dieselben Wege in den Körper wie Cadmium und machen
+            ihm dort Konkurrenz. In der Forschung ist für beides beschrieben,
+            dass es die Aufnahme von Cadmium begrenzen kann.
+          </p>
+          <p>
+            Eine Studie der KU Leuven in Belgien passt dazu. Die Forscher haben
+            die Verdauung in Magen und Darm im Labor nachgestellt, veröffentlicht
+            2023. Beim Kakaopulver löste sich dabei ein fünfmal kleinerer Teil
+            des Cadmiums als beim Weizenmehl, bei dunkler Schokolade ein halb so
+            großer. Das spricht dafür, dass dein Körper Cadmium aus Kakao
+            schlechter aufnimmt als aus Weizen.
           </p>
           <p>
             Beide Sorten bleiben unter dem EU-Höchstgehalt. Gemessen am essbaren
