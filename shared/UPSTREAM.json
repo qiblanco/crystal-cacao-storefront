@@ -1,16 +1,16 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "ccbb1616179324c762fa6dbfa92b788c5dea5351",
-  "erzeugt_utc": "2026-10-17T05:01:02Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen ccbb16161793; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit f358e0b08f28). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "b10a9ed234031a77148e6f65ae5e95c8ffacedee",
+  "erzeugt_utc": "2026-10-18T20:18:10Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen b10a9ed23403; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit ccbb16161793). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
       "app/routes/products.crystal-cacao-awake.jsx",
       "app/routes/products.crystal-cacao-create.jsx"
     ],
-    "dateien_soll": 59,
+    "dateien_soll": 50,
     "vollstaendigkeit": "streng"
   },
   "dateien": [
