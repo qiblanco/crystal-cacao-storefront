@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "b10a9ed234031a77148e6f65ae5e95c8ffacedee",
-  "erzeugt_utc": "2026-10-18T20:18:10Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen b10a9ed23403; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit ccbb16161793). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "7f745e05b60a7a8b623dc3ca9b5fda6fa020ff79",
+  "erzeugt_utc": "2026-10-21T22:53:36Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 7f745e05b60a; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit b10a9ed23403). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -437,7 +437,7 @@
     {
       "upstream": "app/components/reusables/Anmeldeweiche.jsx",
       "klasse": "K1",
-      "sha256": "43eac34002a6ce0f6faccc952870bfd6941846c11d093c0433b5a2131c19b5f4"
+      "sha256": "3340bbe38f03f1e6338054c9faa0521371a6bd06fcde3b0bcdfe82ccb2b6db17"
     },
     {
       "upstream": "app/components/reusables/anmeldeformular.css",
