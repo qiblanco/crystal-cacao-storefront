@@ -395,3 +395,15 @@ function EigenesFormular({formId, anzeige: ersteAnzeige, versatz: ersterVersatz,
     </form>
   );
 }
+
+// Zugang für WiederLieferbar.jsx: derselbe /w-Abruf (ein Abruf je Seite, gleiche
+// Fehlerregeln) und dieselbe Vorschau-Regel. Als NEUE Namen statt `export` an
+// holeWege/vorschauEigen: so bleiben alle bestehenden Deklarationen byte-gleich,
+// und die Seiten, die nur AnmeldeWeiche binden, sind render-neutral (Gate 12).
+export function holeAnmeldewege(optionen) {
+  return holeWege(optionen);
+}
+
+export function anmeldeVorschauEigen(formId) {
+  return vorschauEigen(formId);
+}
