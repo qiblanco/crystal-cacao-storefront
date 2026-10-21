@@ -281,7 +281,6 @@ const SEITEN_BESCHREIBUNG =
  * Text mit Autor und Datum, und der Article-Knoten unten sagt genau das schon.
  */
 export const meta = () => [
-  {name: 'gewinner-fassung', content: '20261021'},
   {title: SEITEN_TITEL},
   {name: 'description', content: SEITEN_BESCHREIBUNG},
   {name: 'author', content: 'Christian Bernd Bauer'},
