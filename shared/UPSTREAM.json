@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "7f745e05b60a7a8b623dc3ca9b5fda6fa020ff79",
-  "erzeugt_utc": "2026-10-21T22:53:36Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 7f745e05b60a; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit b10a9ed23403). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "e67e3dfe0287aaad82d390e6a1190b86ac0cf4e2",
+  "erzeugt_utc": "2026-10-23T00:20:23Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen e67e3dfe0287; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 7f745e05b60a). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/pages.crystal-cacao.jsx",
@@ -22,7 +22,7 @@
     {
       "upstream": "app/components/Aside.jsx",
       "klasse": "K1",
-      "sha256": "43754434aa7bcdb0414d4ec6b690a1ce8bb2d8687dafa47ea30654a40d7f381a"
+      "sha256": "be0a47de080a699dad5a14978f64cc9aa16fcab40d057be31fdaafca57b00348"
     },
     {
       "upstream": "app/components/CacaoPriceDisplay.jsx",
@@ -392,7 +392,7 @@
     {
       "upstream": "app/components/reusables/KakaoTiefe.jsx",
       "klasse": "K1",
-      "sha256": "55a2de9ec375ae45d0e45a335af1bacb0ac9abcd259f9e1dfec573300d8b5cd6"
+      "sha256": "d3c87e14f7d606bedb419badd7767f9b8d181fe6afcdcd85030683d2584dba1e"
     },
     {
       "upstream": "app/components/reusables/kakao-tiefe-daten.js",

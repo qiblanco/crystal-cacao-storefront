@@ -70,13 +70,24 @@ function liste(namen, und) {
   return `${namen.slice(0, -1).join(', ')} ${und} ${namen[namen.length - 1]}`;
 }
 
-/** Shopify-CDN skaliert per &width=; nur Stufen unter dem Master. */
+/**
+ * Shopify-CDN skaliert per &width= nur herunter. Der größte Kandidat ist
+ * höchstens BILD_MAX breit und trägt selbst ein &width=, nie den Master:
+ * tal-kakao-awake.jpg wog als Master-Kandidat 1559w 724.008 B (webp), mit
+ * width=1200 466.018 B (gemessen 20.10.2026). Grenze: kein Bild einer
+ * Sitemap-Seite über 500 kB (crystal probe_bilder_500kb, Arm IMG). Bei
+ * 34rem Anzeigebreite deckt 1200w Bildschirme bis 2,2-fach.
+ */
+const BILD_MAX = 1200;
+
 function bildAttr(b, sizes) {
-  const stufen = [360, 540, 720, 960, 1200].filter((w) => w < b.breite);
+  const groesste = Math.min(b.breite, BILD_MAX);
+  const stufen = [360, 540, 720, 960].filter((w) => w < groesste);
+  stufen.push(groesste);
   const trenner = b.url.includes('?') ? '&' : '?';
   return {
-    src: `${b.url}${trenner}width=${stufen[stufen.length - 1] ?? b.breite}`,
-    srcSet: [...stufen.map((w) => `${b.url}${trenner}width=${w} ${w}w`), `${b.url} ${b.breite}w`].join(', '),
+    src: `${b.url}${trenner}width=${groesste}`,
+    srcSet: stufen.map((w) => `${b.url}${trenner}width=${w} ${w}w`).join(', '),
     sizes,
     width: b.breite,
     height: b.hoehe,
