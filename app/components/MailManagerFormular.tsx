@@ -1,5 +1,5 @@
 // app/components/MailManagerFormular.tsx
-// Formular des Qi Blanco Mail Managers fuer Hydrogen (React, serverseitig renderbar, ohne Fremd-Skript).
+// Formular des Qi Blanco Mail Managers für Hydrogen (React, serverseitig renderbar, ohne Fremd-Skript).
 // Absenden: an die eigene Route /api/mm-formular (app/routes/api.mm-formular.tsx), die an den Mail-Manager-
 // Endpunkt weitergibt. Spamschutz: Honigtopf-Feld "website" + Zeitpruefung (Anzeigedauer). Double-Opt-in macht
 // der Endpunkt (Bestaetigungsmail mit Knopf). Erfolg: Danke-Text oder Weiterleitung auf die Erfolgsseite.
@@ -35,15 +35,15 @@ export function MailManagerFormular({
     style?: React.CSSProperties}) {
   const fetcher = useFetcher<Antwort>();
   const T = FEHLER[konfig.sprache] ?? FEHLER.de;
-  // Anzeige-Zeitpunkt: serverseitig gerendert (ohne JavaScript traegt das Feld die Renderzeit des Servers),
-  // im Browser zaehlt die Anzeigedauer; die Route rechnet daraus den Zeitstempel fuer die Zeitpruefung.
+  // Anzeige-Zeitpunkt: serverseitig gerendert (ohne JavaScript trägt das Feld die Renderzeit des Servers),
+  // im Browser zählt die Anzeigedauer; die Route rechnet daraus den Zeitstempel für die Zeitprüfung.
   const [angezeigt] = useState(() => Date.now());
   const start = useRef<number>(0);
   const [meldung, setMeldung] = useState('');
   useEffect(() => { start.current = performance.now(); }, []);
 
   const a = fetcher.data;
-  const laeuft = fetcher.state !== 'idle';
+  const sendet = fetcher.state !== 'idle';
   useEffect(() => {
     if (!a) return;
     if (a.ok && a.weiter && typeof window !== 'undefined') window.location.assign(a.weiter);
@@ -70,7 +70,7 @@ export function MailManagerFormular({
         if (fehlt) { e.preventDefault(); setMeldung(T.pflicht); return; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { e.preventDefault(); setMeldung(T.adresse); return; }
         setMeldung('');
-        // Direkt ins Feld (nicht ueber State): fetcher.Form liest die Formulardaten noch in diesem Ereignis.
+        // Direkt ins Feld (nicht über State): fetcher.Form liest die Formulardaten noch in diesem Ereignis.
         (f.elements.namedItem('dauer_ms') as HTMLInputElement).value = String(Math.max(1, Math.round(performance.now() - start.current)));
       }}>
       {konfig.titel ? <h3 className={klassen.titel ?? 'mm-formular__titel'}>{konfig.titel}</h3> : null}
@@ -97,7 +97,7 @@ export function MailManagerFormular({
       <div aria-hidden="true" style={{position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden'}}>
         <label>Website<input name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" /></label>
       </div>
-      <button type="submit" className={klassen.knopf ?? 'mm-formular__knopf'} disabled={laeuft}>{konfig.knopf}</button>
+      <button type="submit" className={klassen.knopf ?? 'mm-formular__knopf'} disabled={sendet}>{konfig.knopf}</button>
       <p className={klassen.einwilligung ?? 'mm-formular__einwilligung'}>{konfig.einwilligung}</p>
       <p className={klassen.meldung ?? 'mm-formular__meldung'} role="status" aria-live="polite">{meldung}</p>
     </fetcher.Form>

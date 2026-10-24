@@ -1,5 +1,5 @@
 // app/routes/mm-formulare-vorschau.tsx
-// Pruefseite der Mail-Manager-Formulare fuer crystal-cacao.com (Elina EL-20261023-d0d76dd3).
+// Prüfseite der Mail-Manager-Formulare für crystal-cacao.com (Elina EL-20261023-d0d76dd3).
 // NICHT verlinkt, noindex. Ersetzt keine bestehende Seite und kein bestehendes AC-Formular:
 // sie zeigt nur die Nachbauten nebeneinander, damit Elina sie vor dem GO ansehen und absenden kann.
 // Rueckbau: diese Datei, app/styles/mm-formulare-vorschau.css und die Dateien unter
