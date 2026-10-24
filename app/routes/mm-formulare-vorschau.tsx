@@ -30,8 +30,8 @@ export default function MmFormulareVorschau() {
     <div className="mm-vorschau">
       <h1>Anmeldeformular aus dem Mail Manager</h1>
       <p className="mm-vorschau__hinweis">
-        Vorschau für crystal-cacao.com. Diese Seite ist nicht verlinkt und erscheint in keiner Suchmaschine.
-        Das Formular meldet echt an: Danach kommt die Bestätigungsmail.
+        Vorschau für crystal-cacao.com: im Shop nicht verlinkt und in keiner Suchmaschine. Das Formular meldet echt an.
+        Danach kommt die Bestätigungsmail.
       </p>
       {FORMULARE.map((f) => (
         <section key={f.m.KONFIG.formularId} className="mm-vorschau__kachel" id={`formular-${f.m.KONFIG.formularId}`}>
