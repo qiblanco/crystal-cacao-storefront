@@ -5,7 +5,6 @@ import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
 import {KAKAO_MENUE} from '~/lib/kakao-zone';
 import {CartMain} from '~/components/CartMain';
-import {SchubladenZugang} from '~/components/SchubladenZugang';
 
 /**
  * @param {PageLayoutProps}
@@ -19,8 +18,6 @@ export function PageLayout({
 }) {
   return (
     <Aside.Provider>
-      {/* Fokus, Name und Tab-Falle fuer die K1-Schublade (Befund C06). */}
-      <SchubladenZugang />
       <CartAside cart={cart} />
       {/* HIER STAND BIS 2026-09-09 <SearchAside />. Die Schublade war der
           einzige Zugang zur Suche; ihr Schalter ist mit der Kopfzeile
