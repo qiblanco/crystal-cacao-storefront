@@ -1,0 +1,81 @@
+/* Pruefseite /mm-formulare-vorschau (Mail-Manager-Formulare, Elina EL-20261023-d0d76dd3).
+   Nur fuer diese Seite geladen. Die Klassen mm-formular__* sind die Standardklassen der
+   geteilten Komponente app/components/MailManagerFormular.tsx. */
+.mm-vorschau {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  color: #4a4741;
+}
+.mm-vorschau h1 {
+  font-size: 1.75rem;
+  line-height: 1.25;
+  margin: 0 0 0.75rem;
+}
+.mm-vorschau__hinweis,
+.mm-vorschau__kennung {
+  font-size: 1rem;
+  color: #555;
+  margin: 0 0 1.5rem;
+}
+.mm-vorschau__kachel {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  padding: 1.5rem;
+  margin: 0 0 1.5rem;
+}
+.mm-vorschau__kachel h2 {
+  font-size: 1.25rem;
+  margin: 0 0 0.25rem;
+}
+.mm-vorschau__kachel .mm-vorschau__kennung {
+  margin-bottom: 1rem;
+}
+.mm-formular {
+  position: relative;
+}
+.mm-formular__feld {
+  margin: 0 0 0.75rem;
+}
+.mm-formular__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 1rem;
+}
+.mm-formular__input {
+  font-size: 1rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  background: #fff;
+  color: inherit;
+}
+.mm-formular__knopf {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  border: 0;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #fff;
+  cursor: pointer;
+}
+.mm-formular__knopf:disabled {
+  opacity: 0.6;
+}
+.mm-formular__einwilligung {
+  font-size: 0.8125rem;
+  color: #555;
+  margin: 0.75rem 0 0;
+}
+.mm-formular__meldung {
+  font-size: 1rem;
+  color: #a40000;
+  margin: 0.5rem 0 0;
+}
+.mm-formular__danke {
+  white-space: pre-line;
+  font-size: 1rem;
+}
