@@ -1175,31 +1175,53 @@
 .ImageGalleryModal__thumb:hover:not(.active) {
   border-color: #bbb;
 }
+/* GALERIE AB 1024 px: HAUPTBILD IN SPALTENBREITE, VORSCHAUBILDER DARUNTER
+ * (2026-10-25, Lueckenauftrag luecke-20261015-GROSSJOB-design-update s02,
+ * Sicht-Tor-Register F-082/F-088/F-106).
+ * Vorher standen die Vorschaubilder als Spalte NEBEN dem Hauptbild. Deren
+ * Breite ist der sizes-Wert aus ProductImageList (K1, 8.73vw - 15.6px) und
+ * waechst mit dem Fenster, die Galeriespalte bleibt aber bei 643 px
+ * (inhalt_max 1350). Gemessen am 2026-10-25 (Awake, Playwright): Hauptbild
+ * 1440 px 513, 1920 px 471, 2560 px 415, 2900 px 385 px; der Kauf-Block endet
+ * ueberall bei y 1087. Daneben blieb ein Leerband von 438 bis 565 px. Die
+ * Vorschaubilder sassen mittig in einer zu breiten Spalte, weit rechts vom Bild.
+ * Jetzt gilt dieselbe Anordnung wie zwischen 750 und 1023 px: das Hauptbild
+ * fuellt die Spalte, die fuenf Vorschaubilder stehen als Reihe in Fuenfteln
+ * darunter. Die Spaltenbreite haengt nicht mehr am sizes-Wert.
+ * Die Galerie klebt auf derselben Hoehe wie der Kauf-Block (top space-7). Der
+ * Kopf klebt mit 64 px, unter dem alten top: 20px lag die Bildoberkante. Die
+ * Breite ist so gedeckelt, dass Bild und Reihe ins Fenster passen:
+ * Hoehe = 1,2 x Breite + 1,6 px (Luecke space-1, Reihe = (Breite - 4 x 8) / 5).
+ * Das ersetzt das alte max-height: 75vh. */
 @media (min-width: 1024px) {
   .ProductImageWrapperSticky {
-    flex-direction: row;
+    flex-direction: column;
     align-items: stretch;
-    max-height: 75vh;
-    top: 20px;
+    gap: var(--cc-space-1);
+    width: min(100%, calc((100vh - var(--cc-space-7) - var(--cc-space-3)) / 1.2));
+    top: var(--cc-space-7);
+  }
+  .ProductImageWrapperSticky > .product-image {
+    width: 100%;
   }
   .ProductImages {
     position: relative;
     height: 100%;
+    align-items: flex-start;
   }
   .ProductImages .product-image-list {
     display: flex;
-    flex-direction: column;
-    align-self: stretch;
+    flex-direction: row;
     flex: none;
-    width: auto;
-    gap: 8px;
-    padding-bottom: 0;
+    width: 100%;
+    gap: var(--cc-space-1);
+    padding: 0;
     overflow: hidden;
   }
   .ProductImages .product-image-list > img.thumb-image,
   .ProductImages .product-image-list .ImageSeeMore {
     flex: 1 1 0 !important;
-    min-height: 0 !important;
+    min-width: 0 !important;
     width: auto !important;
     height: auto !important;
     aspect-ratio: 1 / 1;
