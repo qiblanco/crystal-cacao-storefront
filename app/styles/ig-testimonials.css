@@ -406,3 +406,139 @@ span.qb-igt__flaeche {
     transition: none !important;
   }
 }
+
+/* ─── Karussell-Bauart + Bild-Kachel (Elina, EL-20261026-28f53e7d) ──────────
+   Nur aktiv, wo die Seite die Komponente mit `karussell` aufruft (Kakao):
+   Pfeile links/rechts neben der Bahn, sichtbar nur bei Überlauf, auch am
+   Handy. Dazu die Bild-Kachel, deren Bilder sich in der Kachel blättern
+   lassen. Die Werte stehen als Tokens hier oben, nicht frei in den Regeln. */
+.qb-igt {
+  --igt-glas: rgba(255, 255, 255, 0.88);
+  --igt-glas-matt: rgba(255, 255, 255, 0.55);
+  --igt-pfeil-gross: 40px;
+  --igt-pfeil-klein: 44px; /* Tippfläche, wie die Bahn-Pfeile mindestens 44 px */
+  --igt-punkt: 6px;
+}
+
+.qb-igt__karussell {
+  position: relative;
+  max-width: var(--igt-breite);
+  margin: 0 auto;
+}
+
+/* Mitte der Bühne: Bahn-Abstand oben + halbe Bühnenhöhe (4:5 → 0,625 × Breite). */
+.qb-igt__karussell > .qb-igt__pfeil {
+  position: absolute;
+  top: calc(var(--igt-s1) + var(--igt-kachel) * 0.625);
+  transform: translateY(-50%);
+  z-index: 2;
+  display: grid;
+  box-shadow: var(--igt-shadow-md);
+}
+
+.qb-igt__karussell > .qb-igt__pfeil--links {
+  left: calc(-1 * var(--igt-s1));
+}
+
+.qb-igt__karussell > .qb-igt__pfeil--rechts {
+  right: calc(-1 * var(--igt-s1));
+}
+
+.qb-igt__karussell > .qb-igt__pfeil:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.qb-igt__karussell > .qb-igt__pfeil:disabled:hover {
+  border-color: var(--igt-linie);
+}
+
+/* `hidden` muss gegen das display der Pfeil-Regel gewinnen. */
+.qb-igt__karussell > .qb-igt__pfeil[hidden],
+.qb-igt__bildpfeil[hidden] {
+  display: none;
+}
+
+/* ─── Bild-Kachel: mehrere Bilder in einer Kachel ────────────────────────── */
+.qb-igt__bildspur {
+  cursor: grab;
+  touch-action: pan-x pan-y;
+}
+
+.qb-igt__bildspur.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.qb-igt__bildspur::-webkit-scrollbar {
+  display: none;
+}
+
+.qb-igt__bildpfeil {
+  /* UNTEN in der Kachel, nicht in der Mitte: dort liegen am Handy die
+     Karussell-Pfeile über dem Kachelrand, und beide Pfeile träfen sich. */
+  position: absolute;
+  bottom: var(--igt-s1);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--igt-pfeil-klein);
+  min-height: 0;
+  height: var(--igt-pfeil-klein);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--igt-glas);
+  color: var(--igt-dunkel);
+  font-size: var(--igt-fs-md);
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--igt-shadow-sm);
+}
+
+.qb-igt__bildpfeil--links {
+  left: var(--igt-s1);
+}
+
+.qb-igt__bildpfeil--rechts {
+  right: var(--igt-s1);
+}
+
+.qb-igt__bildpfeil:focus-visible {
+  outline: 2px solid var(--igt-akzent-tinte);
+  outline-offset: 2px;
+}
+
+.qb-igt__punkte {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--igt-s1) + (var(--igt-pfeil-klein) - var(--igt-punkt)) / 2);
+  display: flex;
+  justify-content: center;
+  gap: var(--igt-punkt);
+  pointer-events: none;
+}
+
+.qb-igt__punkt {
+  width: var(--igt-punkt);
+  height: var(--igt-punkt);
+  border-radius: 50%;
+  background: var(--igt-glas-matt);
+  box-shadow: var(--igt-shadow-sm);
+}
+
+.qb-igt__punkt.is-aktiv {
+  background: var(--igt-glas);
+}
+
+@media (max-width: 720px) {
+  /* Am Handy stehen die Pfeile IN der Bahn (der Rand ist dort nur 16 px). */
+  .qb-igt__karussell > .qb-igt__pfeil--links {
+    left: 0;
+  }
+
+  .qb-igt__karussell > .qb-igt__pfeil--rechts {
+    right: 0;
+  }
+}

@@ -263,6 +263,124 @@ const SCHICHT_STYLE = {
   display: 'block',
 };
 
+/*
+ * DIE BILD-KACHEL MIT MEHREREN BILDERN (Elina, EL-20261026-28f53e7d, Punkt 3):
+ * ein Bild-Beitrag mit mehreren Bildern steht im selben Stil wie eine
+ * Video-Kachel — dieselbe Bühne, dieselbe Größe, kein Instagram-Kopf —, und
+ * seine Bilder lassen sich INNERHALB der Kachel durchblättern.
+ *
+ * Die Spur ist ein eigener scroll-snap-Container in der Bühne: am Handy wischt
+ * der Daumen nativ, am Computer zieht die Maus über denselben Hook wie die
+ * Bahn (useDragSwipe, GL-DES-0012), dazu zwei kleine Pfeile in der Kachel.
+ * Der Maus-Druck auf die Spur wird NICHT an die Bahn weitergereicht: sonst
+ * zögen beide Hooks gleichzeitig, und die Bahn liefe unter dem Bild weg.
+ *
+ * Die Daten nennen die Bilder als `bilder: [url, …]` (eigene Dateien auf dem
+ * Shopify-CDN, nie die signierten Instagram-Adressen — siehe Kopf). Ohne das
+ * Feld, oder mit nur einem Bild, bleibt die Kachel, was sie vorher war.
+ */
+const SPUR_STYLE = {
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  overflowX: 'auto',
+  overflowY: 'hidden',
+  scrollSnapType: 'x mandatory',
+  scrollbarWidth: 'none',
+};
+const BILD_STYLE = {
+  flex: '0 0 100%',
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  scrollSnapAlign: 'start',
+  display: 'block',
+  margin: 0,
+};
+
+function BilderBuehne({t}) {
+  const spurRef = useRef(null);
+  const [stelle, setStelle] = useState(0);
+  const {handlers, isDragging} = useDragSwipe({mode: 'scroll', trackRef: spurRef});
+  const anzahl = t.bilder.length;
+  const wer = `@${t.profil}`;
+
+  const beiScroll = () => {
+    const spur = spurRef.current;
+    if (!spur || !spur.clientWidth) return;
+    const i = Math.round(spur.scrollLeft / spur.clientWidth);
+    setStelle(Math.max(0, Math.min(anzahl - 1, i)));
+  };
+  const gehe = (i) => {
+    const spur = spurRef.current;
+    if (!spur) return;
+    const ziel = Math.max(0, Math.min(anzahl - 1, i));
+    spur.scrollTo({left: ziel * spur.clientWidth, behavior: 'smooth'});
+  };
+
+  return (
+    <span
+      className="qb-igt__flaeche qb-igt__flaeche--bilder"
+      style={{display: 'block', width: '100%'}}
+    >
+      <span className="qb-igt__buehne" style={STAPEL_STYLE}>
+        <span
+          ref={spurRef}
+          className={`qb-igt__bildspur${isDragging ? ' is-dragging' : ''}`}
+          style={SPUR_STYLE}
+          role="group"
+          aria-roledescription="Bildergalerie"
+          aria-label={`${anzahl} Bilder des Instagram-Beitrags von ${wer}`}
+          onScroll={beiScroll}
+          {...handlers}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            handlers.onPointerDown(e);
+          }}
+        >
+          {t.bilder.map((src, i) => (
+            <img
+              key={src}
+              className="qb-igt__bild"
+              src={src}
+              alt={`Bild ${i + 1} von ${anzahl} des Instagram-Beitrags von ${wer}`}
+              loading="lazy"
+              draggable={false}
+              style={BILD_STYLE}
+            />
+          ))}
+        </span>
+        <button
+          type="button"
+          className="qb-igt__bildpfeil qb-igt__bildpfeil--links"
+          onClick={() => gehe(stelle - 1)}
+          hidden={stelle === 0}
+          aria-label="Vorheriges Bild"
+        >
+          {'‹'}
+        </button>
+        <button
+          type="button"
+          className="qb-igt__bildpfeil qb-igt__bildpfeil--rechts"
+          onClick={() => gehe(stelle + 1)}
+          hidden={stelle >= anzahl - 1}
+          aria-label="Nächstes Bild"
+        >
+          {'›'}
+        </button>
+        <span className="qb-igt__punkte" aria-hidden="true">
+          {t.bilder.map((src, i) => (
+            <span
+              key={src}
+              className={`qb-igt__punkt${i === stelle ? ' is-aktiv' : ''}`}
+            />
+          ))}
+        </span>
+      </span>
+    </span>
+  );
+}
+
 /* Die frühere Hilfsfunktion `einbettung(t)` ist hier ENTFERNT und nicht bloß
  * unbenutzt stehengelassen: sie baute die instagram.com/…/embed/-URL, und genau
  * die ist der behobene Fehler. Eine ungenutzte Funktion, die den alten Weg noch
@@ -452,7 +570,10 @@ function Kachel({t}) {
   /* Ein Bild-Post bekommt keinen Play-Knopf und deshalb auch keine Bühne, die
    * sich bedienen lässt — er ist reine Anschauung. Der Weg zum Beitrag führt
    * über die Profil-Zeile darunter (T1/T2) bzw. gar nicht (T3). */
-  const buehne = !hatVideo ? (
+  const hatBilder = !hatVideo && Array.isArray(t.bilder) && t.bilder.length > 1;
+  const buehne = hatBilder ? (
+    <BilderBuehne t={t} />
+  ) : !hatVideo ? (
     <span {...huelle}>{stapel}</span>
   ) : laueft ? (
     <div {...huelle}>{stapel}</div>
@@ -546,6 +667,7 @@ function Kachel({t}) {
  *   eintraege?: Array<object>,
  *   sprachRang?: Record<string, number>,
  *   dataSection?: string,
+ *   karussell?: boolean,  // Pfeile links/rechts, nur bei Überlauf, auch am Handy
  * }} props
  */
 export function IgTestimonialSlideshow({
@@ -555,6 +677,7 @@ export function IgTestimonialSlideshow({
   eintraege = IG_TESTIMONIALS,
   sprachRang = SPRACH_RANG_DE,
   dataSection,
+  karussell = false,
 }) {
   const titelId = useId();
   const bahnRef = useRef(null);
@@ -609,6 +732,55 @@ export function IgTestimonialSlideshow({
     });
   }, [eintraege, produkt, sprachRang]);
 
+  /*
+   * DIE KARUSSELL-BAUART (Elina, EL-20261026-28f53e7d, Punkt 4): „ein
+   * schlichtes Karussell bzw. Galerie: bei mehr Kacheln als Platz mit Pfeilen
+   * links/rechts und per Ziehen/Wischen durchblätterbar, am Computer und am
+   * Handy, ohne Autoplay."
+   *
+   * Sie ist eine PROP und kein neuer Standard: diese Komponente steht auf
+   * allen Produktseiten, und die übrigen Seiten behalten ihre Navigation unter
+   * der Bahn. Ziehen/Wischen leistet die Bahn in beiden Bauarten schon
+   * (useDragSwipe); neu sind nur die Pfeile an den Seiten.
+   *
+   * „BEI MEHR KACHELN ALS PLATZ" wird GEMESSEN, nicht aus der Kachelzahl
+   * geschätzt: wie viele Kacheln passen, hängt an der Fensterbreite. Vor der
+   * ersten Messung (Server-Render) stehen die Pfeile da, sobald es mehr als
+   * eine Kachel gibt; passt danach alles hinein, verschwinden sie. Am Anfang
+   * bzw. Ende ist der jeweilige Pfeil ausgegraut statt weg, damit die Geste
+   * nicht ins Leere führt und nichts springt.
+   */
+  const [rand, setRand] = useState({ueberlauf: true, anfang: true, ende: false});
+  useEffect(() => {
+    if (!karussell) return undefined;
+    const bahn = bahnRef.current;
+    if (!bahn) return undefined;
+    const miss = () => {
+      const weite = bahn.scrollWidth - bahn.clientWidth;
+      const neu = {
+        ueberlauf: weite > 2,
+        anfang: bahn.scrollLeft <= 2,
+        ende: bahn.scrollLeft >= weite - 2,
+      };
+      setRand((alt) =>
+        alt.ueberlauf === neu.ueberlauf &&
+        alt.anfang === neu.anfang &&
+        alt.ende === neu.ende
+          ? alt
+          : neu,
+      );
+    };
+    miss();
+    bahn.addEventListener('scroll', miss, {passive: true});
+    const beobachter =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(miss);
+    if (beobachter) beobachter.observe(bahn);
+    return () => {
+      bahn.removeEventListener('scroll', miss);
+      if (beobachter) beobachter.disconnect();
+    };
+  }, [karussell, liste.length]);
+
   if (liste.length === 0) return null;
 
   /* Eine Kachel ist eine Stimme, mehrere sind Stimmen. Die Begründung steht
@@ -634,6 +806,35 @@ export function IgTestimonialSlideshow({
     }
   };
 
+  const bahnElement = (
+    <div
+      /* `is-eine` trägt KEINE Geometrie und keinen Wert — sie sagt dem
+         Seiten-CSS nur, dass hier genau EINE Kachel steht. Die Bahn ist
+         sonst linksbuendig, was bei zehn Kacheln richtig ist (sie laufen
+         nach rechts weiter) und bei einer einzigen wie ein Rest aussieht:
+         eine Karte am linken Rand unter einer zentrierten Ueberschrift.
+         Die Trennung folgt der Hausregel des Zwillingsbaus — GEOMETRIE
+         gehört der Komponente, AUSSEHEN dem CSS. */
+      className={`qb-igt__bahn${isDragging ? ' is-dragging' : ''}${
+        eine ? ' is-eine' : ''
+      }`}
+      ref={bahnRef}
+      role="group"
+      aria-label={
+        eine
+          ? `Instagram-Beitrag zu ${produkt}`
+          : `Instagram-Beiträge zu ${produkt} — horizontal scrollbar`
+      }
+      tabIndex={0}
+      onKeyDown={beiTaste}
+      {...handlers}
+    >
+      {liste.map((t) => (
+        <Kachel key={`${t.produkt}-${t.code}`} t={t} />
+      ))}
+    </div>
+  );
+
   return (
     <section
       className="qb-igt"
@@ -648,32 +849,33 @@ export function IgTestimonialSlideshow({
         {unterzeile ? <p className="qb-igt__unter">{unterzeile}</p> : null}
       </div>
 
-      <div
-        /* `is-eine` trägt KEINE Geometrie und keinen Wert — sie sagt dem
-           Seiten-CSS nur, dass hier genau EINE Kachel steht. Die Bahn ist
-           sonst linksbuendig, was bei zehn Kacheln richtig ist (sie laufen
-           nach rechts weiter) und bei einer einzigen wie ein Rest aussieht:
-           eine Karte am linken Rand unter einer zentrierten Ueberschrift.
-           Die Trennung folgt der Hausregel des Zwillingsbaus — GEOMETRIE
-           gehört der Komponente, AUSSEHEN dem CSS. */
-        className={`qb-igt__bahn${isDragging ? ' is-dragging' : ''}${
-          eine ? ' is-eine' : ''
-        }`}
-        ref={bahnRef}
-        role="group"
-        aria-label={
-          eine
-            ? `Instagram-Beitrag zu ${produkt}`
-            : `Instagram-Beiträge zu ${produkt} — horizontal scrollbar`
-        }
-        tabIndex={0}
-        onKeyDown={beiTaste}
-        {...handlers}
-      >
-        {liste.map((t) => (
-          <Kachel key={`${t.produkt}-${t.code}`} t={t} />
-        ))}
-      </div>
+      {karussell && !eine ? (
+        <div className="qb-igt__karussell">
+          <button
+            type="button"
+            className="qb-igt__pfeil qb-igt__pfeil--links"
+            onClick={() => blaettere(-1)}
+            disabled={rand.anfang}
+            hidden={!rand.ueberlauf}
+            aria-label="Vorheriger Beitrag"
+          >
+            {'←'}
+          </button>
+          {bahnElement}
+          <button
+            type="button"
+            className="qb-igt__pfeil qb-igt__pfeil--rechts"
+            onClick={() => blaettere(1)}
+            disabled={rand.ende}
+            hidden={!rand.ueberlauf}
+            aria-label="Nächster Beitrag"
+          >
+            {'→'}
+          </button>
+        </div>
+      ) : (
+        bahnElement
+      )}
 
       {/*
         BEI GENAU EINER KACHEL GIBT ES NICHTS ZU BLAETTERN. Zwei Pfeile und ein
@@ -681,7 +883,7 @@ export function IgTestimonialSlideshow({
         die Plural-Ueberschrift darueber: sie versprechen mehr, als da ist, und
         der Pfeil führt ins Leere. Kakao und QiHome tragen heute je eine.
       */}
-      {eine ? null : (
+      {eine || karussell ? null : (
         <div className="qb-igt__nav">
           <button
             type="button"
