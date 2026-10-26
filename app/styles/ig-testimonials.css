@@ -349,6 +349,18 @@ span.qb-igt__flaeche {
   border-color: var(--igt-akzent);
 }
 
+/* KAKAO-LADEN, K2: die runden Pfeile wie auf qiblanco.com/products/qibracelet
+   (Elina, EL-20261026-074aa739: "gleicher Baustein"). Die Basisregel
+   `main button` dieses Ladens (app.css Abschnitt 17) gibt jedem Knopf
+   min-height 44 px und 1,5rem Seitenpolster; .qb-igt__pfeil setzt beides nicht
+   und wurde dadurch 50 x 44 px oval statt 40 x 40 px rund. Gemessen 2026-10-26
+   live, 1366 px. Nur die Computer-Ansicht betrifft es: am Handy sind die
+   Pfeile ausgeblendet (Schmale Flaechen). */
+.qb-igt__nav .qb-igt__pfeil {
+  min-height: 0;
+  padding: 0;
+}
+
 .qb-igt__pfeil:focus-visible {
   outline: 2px solid var(--igt-akzent-tinte);
   outline-offset: 2px;

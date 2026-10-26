@@ -328,7 +328,7 @@
       "upstream": "app/styles/ig-testimonials.css",
       "klasse": "K2",
       "sha256_upstream": "4352f6449bb704066c7c9a1207809a98ff891b3079abd6e58f1156a5792a9114",
-      "sha256_lokal": "a37507cba3596d61f8fc96160eb398beda697b6132f00996dc774895f24c1b84",
+      "sha256_lokal": "aa3475a7df4992388a21b8525cfeae797ad4599b9de414ee489bb4333e90b358",
       "abweichung_grund": "NACHTRAG 2026-09-26 (Job 20260926-crystal-kakao-zwei-vorlagen-features-ig-stimmen-und-kasse-im-browser): K3 ohne lokale Datei -> K2. Uebernommen ist die Sektion der Vorlage (#376) mit drei laden-eigenen Abweichungen im Token-Block: (1) Farben und Bild-Radius aus den --cc-*-Tokens des Ladens statt --qb-akzent (die qb-tokens fuehrt dieser Laden nicht; ohne Zuordnung stuende var() ohne Wert), (2) Schriftstufen auf --cc-fs-1..4 (die 13-px-Stufe der Vorlage neben 12,8 px des Ladens kostete stimmig_typo 20 Punkte), (3) KEIN font-weight am Titel (Laden-H2 700, Vorlage 600 -> zweite H2-Kombi). design-rubrik an beiden Kaufseiten 94 wie ohne Sektion. Naechste Vorlagen-Bewegung faellt ueber sha256_upstream wieder auf. NACHTRAG 2026-10-26 (Elina EL-20261026-28f53e7d, mit EL-20261026-db3cc728 und der Regel-Korrektur EL-20261026-8bdf0028, crystal-cacao-node/REGEL-KAKAO-STIMMEN.md): Abschnitt Karussell-Bauart + Bild-Kachel in Vorlage und Laden gleich angehaengt; die drei laden-eigenen Abweichungen im Token-Block bleiben."
     },
     {
