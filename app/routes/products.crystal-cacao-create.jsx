@@ -344,7 +344,7 @@ export default function Product() {
         dem Kauf. Dieselbe Kachel auf beiden Sorten: der Beitrag nennt keine
         Sorte, er zeigt beide Tueten.
       */}
-      <IgTestimonialSlideshow produkt="Kakao" />
+      <IgTestimonialSlideshow produkt="Kakao" karussell />
       {/* AMAZON-STIL (Grossjob 20260930-GROSSJOB-amazonstil-crystal-cacao-...,
           s04): dieselben Bausteine wie qiblanco.com (s03), byte-gleich
           uebernommen. Direkt nach den Instagram-Stimmen der Sortenvergleich mit
