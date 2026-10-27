@@ -398,6 +398,12 @@ async function regularSearch({request, context}) {
 
   // Search articles, pages, and products for the `q` term
   const {errors, kollektion, ...items} = await storefront.query(SEARCH_QUERY, {
+    // PREIS FRISCH, nicht streichen: ohne `cache` nimmt Hydrogen CacheDefault
+    // (SWR 24 h), dann zeigt die Seite nach einer Preis- oder Kursaenderung bis
+    // zu 24 h den alten Betrag (PL 13.10.: Seite 4.861 zl, Kasse 4.847 zl).
+    // Grossjob 20261004-GROSSJOB-preisanzeige-netto-brutto-rundung-alle-shops-waehrungen s09;
+    // Probe homepage-bauer/pruefungen/probe_preisabfrage_cache_kurz.py.
+    cache: storefront.CacheShort(),
     variables: {...variables, term, kollektion: KAKAO_KOLLEKTION},
   });
   if (items) {
@@ -619,6 +625,12 @@ async function predictiveSearch({request, context}) {
   const {predictiveSearch: items, errors} = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
+      // PREIS FRISCH, nicht streichen: ohne `cache` nimmt Hydrogen CacheDefault
+      // (SWR 24 h), dann zeigt die Seite nach einer Preis- oder Kursaenderung bis
+      // zu 24 h den alten Betrag (PL 13.10.: Seite 4.861 zl, Kasse 4.847 zl).
+      // Grossjob 20261004-GROSSJOB-preisanzeige-netto-brutto-rundung-alle-shops-waehrungen s09;
+      // Probe homepage-bauer/pruefungen/probe_preisabfrage_cache_kurz.py.
+      cache: storefront.CacheShort(),
       variables: {
         // customize search options as needed
         limit,
