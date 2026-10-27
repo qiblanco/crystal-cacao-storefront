@@ -188,6 +188,12 @@ async function loadCriticalData({context, params, request}) {
 
   const [{collection}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
+      // PREIS FRISCH, nicht streichen: ohne `cache` nimmt Hydrogen CacheDefault
+      // (SWR 24 h), dann zeigt die Seite nach einer Preis- oder Kursaenderung bis
+      // zu 24 h den alten Betrag (PL 13.10.: Seite 4.861 zl, Kasse 4.847 zl).
+      // Grossjob 20261004-GROSSJOB-preisanzeige-netto-brutto-rundung-alle-shops-waehrungen s09;
+      // Probe homepage-bauer/pruefungen/probe_preisabfrage_cache_kurz.py.
+      cache: storefront.CacheShort(),
       variables: {handle, ...paginationVariables},
       // Add other queries here, so that they are loaded in parallel
     }),
