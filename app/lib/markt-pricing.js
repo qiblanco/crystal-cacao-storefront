@@ -92,13 +92,15 @@ export function bruttoAnzeige(amount, handle, currencyCode, land) {
  * Ganz-Euro-Zahl eines nicht ganzen Kassenbetrags richtig: abgerundet nennt
  * die Seite weniger, aufgerundet mehr als die Kasse.
  *
- * NOTBEHELF DE, mit Verfall: DE ist das Kalibrierland, dort sind Nettopreise
- * so gesetzt, dass brutto ein ganzer Euro herauskommt. Ein Nettopreis auf den
- * Cent trifft das aber nur auf +-1 Cent (QiOne 2 Pro 913,45 x 1,19 =
- * 1087,0055, Kasse 1087,01). Liegt der DE-Betrag 1 Cent neben einem ganzen
- * Euro, nennt die Seite den ganzen Euro. Diese Toleranz endet mit dem
- * Brutto-Kipp (Job 20260924-kasse-zeigt-bruttopreise-wie-produktseite-prio10):
- * danach ist der DE-Kassenbetrag selbst ganz, und die Zeile hier kann weg.
+ * Keine Ausnahme je Land. Bis zum 27.10.2026 nannte DE einen Betrag 1 Cent
+ * neben einem ganzen Euro als ganzen Euro (Notbehelf aus der Netto-Zeit:
+ * QiOne 2 Pro 913,45 x 1,19 = 1087,0055, Kasse 1087,01). Seit dem Brutto-Kipp
+ * (09.10.2026 14:49:30Z, preis-ssot/preismodus.json) ist der DE-Kassenbetrag
+ * selbst ganz; die Zeile ist abgebaut (Grossjob 20261004-GROSSJOB-
+ * preisanzeige-netto-brutto-rundung-alle-shops-waehrungen s09, KONZEPT 2.4:
+ * dieselbe Regel zugleich in preiswatch.anzeige_ganz_euro und per K1-Nachzug
+ * in crystal). Gemessen vor dem Abbau: 89 von 89 DE-Varianten ganz, der
+ * Leser preis-ssot (toleranz_de) ohne Nutzung.
  *
  * Für MODELLIERTE Beträge (die Kakao-Staffel rechnet einen Festbetragsrabatt
  * als Prozent nach) gilt staffelModellAnzeige(), nicht diese Funktion.
@@ -106,19 +108,14 @@ export function bruttoAnzeige(amount, handle, currencyCode, land) {
  * (homepage-bauer/src/preiswatch.py, anzeige_ganz_euro).
  *
  * @param {number} betrag Kundenbetrag, ungerundet
- * @param {string} [land] ISO-Land des aufgelösten Marktes (Default DE)
+ * Aufrufer übergeben weiter das Land als zweites Argument; es wirkt seit s09
+ * nicht mehr (keine Ausnahme je Land), die Aufrufe bleiben unverändert.
  * @returns {number|null} Anzeigewert auf den Cent
  */
-export function kassenAnzeige(betrag, land) {
+export function kassenAnzeige(betrag) {
   const zahl = Number(betrag);
   if (!Number.isFinite(zahl)) return null;
-  const l = String(land || STEUER_LAND_DEFAULT).toUpperCase();
   const cent = Math.round(zahl * 100);
-  if (l === STEUER_LAND_DEFAULT) {
-    const rest = ((cent % 100) + 100) % 100;
-    if (rest === 1) return (cent - 1) / 100;
-    if (rest === 99) return (cent + 1) / 100;
-  }
   // `+ 0`: aus -0 wird 0, sonst formatiert es als "-0".
   return cent / 100 + 0;
 }
