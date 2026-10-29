@@ -59,7 +59,7 @@ export const VERGLEICH = {
       // bewusst weg: der Bestand nennt sie je Gerät verschieden (750er / High-
       // Carat), in der Tabelle läse sich das als Unterschied. Voller Wortlaut:
       // die Material-Frage direkt darunter.
-      material: 'Gehäuse aus Chirurgenstahl, Gitterchip™ aus Goldlegierung',
+      material: 'Gehäuse aus Chirurgenstahl, Gitterchip® aus Goldlegierung',
       // product-faqs.js FAQ_QIONE_2_PRO[3] "Darf der QiOne® in die Sauna bzw.
       // nass werden?", Antwort beginnt mit "Ja!".
       wasser: 'Ja',
@@ -78,7 +78,7 @@ export const VERGLEICH = {
       einsatz: 'Armreifen zum Tragen am Handgelenk',
       // product-faqs.js FAQ_QIBRACELET[2].a (Chirurgenstahl, Gitterchip™,
       // Goldlegierung); Grad weg wie beim QiOne® 2 Pro.
-      material: 'Gehäuse aus Chirurgenstahl, Gitterchip™ aus Goldlegierung',
+      material: 'Gehäuse aus Chirurgenstahl, Gitterchip® aus Goldlegierung',
       // product-faqs.js FAQ_QIBRACELET[3].a: "... bedenkenlos in feuchten
       // Umgebungen ... eignet sich auch für Saunabesuche ...".
       wasser: 'Ja',
@@ -100,7 +100,7 @@ export const VERGLEICH = {
       // maßgeschneiderten High-Carat-Goldlegierung gefertigt, und die
       // Holzelemente ... aus regionaler deutscher Eiche" (Grad weg, s. o.).
       material:
-        'Gehäuse aus Chirurgenstahl, Gitterchip™ aus Goldlegierung, Holzelemente aus regionaler deutscher Eiche',
+        'Gehäuse aus Chirurgenstahl, Gitterchip® aus Goldlegierung, Holzelemente aus regionaler deutscher Eiche',
       // Christians Produktangabe 28.09.2026 (Festlegung, GL-SPR-0008): "Beim
       // QiHome Air darf dann bei Wasser und Sauna 'Nein' stehen. Das ist ganz
       // klar, dass es nicht für die Sauna ist."
