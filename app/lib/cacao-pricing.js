@@ -403,6 +403,12 @@ async function setsLesen(storefront, variantId, land) {
   if (!storefront?.query) return {};
   try {
     const d = await storefront.query(STAFFEL_SET_QUERY, {
+      // PREIS FRISCH, nicht streichen: ohne `cache` nimmt Hydrogen CacheDefault
+      // (SWR 24 h), dann zeigt die Seite nach einer Preis- oder Kursaenderung bis
+      // zu 24 h den alten Betrag (PL 13.10.: Seite 4.861 zl, Kasse 4.847 zl).
+      // Grossjob 20261004-GROSSJOB-preisanzeige-netto-brutto-rundung-alle-shops-waehrungen s09;
+      // Probe homepage-bauer/pruefungen/probe_preisabfrage_cache_kurz.py.
+      cache: storefront.CacheShort(),
       variables: {id: variantId, country: land},
     });
     const handle = d?.variante?.product?.handle;
