@@ -3922,7 +3922,8 @@ main .cc-erfahrungen h1 {
 
 /* Die Quellenangabe ist eine Herkunftsauskunft, keine Fussnote zum
  * Wegschauen: sie sagt dem Leser, dass der Wortlaut der der Dose ist. */
-.ProductPageKakao .cc-zubereitung__quelle {
+.ProductPageKakao .cc-zubereitung__quelle,
+.ProductPageKakao .cc-zubereitung__video {
   max-width: var(--cc-zeile-max);
   margin-inline: auto;
   margin-block: var(--cc-space-3) 0;
@@ -3930,6 +3931,23 @@ main .cc-erfahrungen h1 {
   font-size: 0.9375rem;
   color: var(--cc-dunkel);
   opacity: 0.75;
+}
+
+/* Der Weg zum Reiter „Zubereitung" (2026-10-30) ist eine Handlung, kein
+ * Quellenhinweis: volle Deckkraft, unterstrichen, Trefferflaeche 44 px. */
+.ProductPageKakao .cc-zubereitung__video {
+  opacity: 1;
+  font-weight: 600;
+  margin-block: var(--cc-space-2) 0;
+}
+
+.ProductPageKakao .cc-zubereitung__video a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--cc-treffer-min);
+  color: var(--cc-dunkel);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 /* Die Dosieranleitung der Verpackung — sie loest den Widerspruch zwischen
@@ -3998,4 +4016,71 @@ main:has(> .cc-sortenaufmacher) > .NormalSectionSize :is(h2, h3):first-child {
 }
 main:has(> .cc-sortenaufmacher) > .cc-belege {
   margin-block: var(--cc-space-6);
+}
+
+/* ==========================================================================
+ * HINWEIS AUF DEN REITER „ZUBEREITUNG" (Kaufseiten, seit 2026-10-30)
+ * components/reusables/ZubereitungHinweis.jsx, direkt unter dem Akt
+ * „Zubereitung" von KakaoTiefe. Er setzt dessen Flaechen-Band fort und rueckt
+ * um --cc-space-5 in dessen Bodenabstand hinein, damit er als Teil des Akts
+ * gelesen wird und nicht als eigener Abschnitt. Nur Tokens: eine Bildgroesse,
+ * --cc-radius-bild, Schrift 20/16, kein Gold (die Handlung ist ein Textlink).
+ * Job 20261030-crystal-cacao-zubereitung-reiter-reel-design-99.
+ * ========================================================================== */
+.cc-zb-hinweis {
+  background: var(--cc-flaeche);
+  box-shadow: 0 0 0 100vmax var(--cc-flaeche);
+  clip-path: inset(0 -100vmax);
+  margin-top: calc(-1 * var(--cc-space-5));
+  padding-bottom: var(--cc-space-6);
+}
+
+.cc-zb-hinweis__innen {
+  align-items: center;
+  display: flex;
+  gap: var(--cc-space-3);
+  margin-inline: auto;
+  max-width: min(72rem, 100%);
+}
+
+.cc-zb-hinweis__bild {
+  flex: none;
+  width: 4.5rem;
+}
+
+.cc-zb-hinweis__bild img {
+  aspect-ratio: 9 / 16;
+  border-radius: var(--cc-radius-bild);
+  display: block;
+  height: auto;
+  object-fit: cover;
+  width: 100%;
+}
+
+.cc-zb-hinweis__text p {
+  margin: 0;
+  max-width: var(--cc-zeile-max);
+}
+
+.cc-zb-hinweis .cc-zb-hinweis__titel {
+  color: var(--cc-dunkel);
+  font-size: var(--cc-fs-3);
+  font-weight: var(--cc-fw-ueberschrift);
+  margin-bottom: var(--cc-space-1);
+}
+
+.cc-zb-hinweis__weiter {
+  align-items: center;
+  color: var(--cc-dunkel);
+  display: inline-flex;
+  font-weight: 600;
+  min-height: var(--cc-treffer-min);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 48em) {
+  .cc-zb-hinweis__bild {
+    width: 6rem;
+  }
 }

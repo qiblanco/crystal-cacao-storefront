@@ -1,3 +1,4 @@
+import {Link} from 'react-router';
 import {bildQuelle} from '../reusables/shopifyBildQuellen';
 import {Belege} from '../reusables/Belege';
 import {AbsichtHinweis} from '../reusables/AbsichtHinweis';
@@ -934,6 +935,14 @@ function Zubereitung() {
           Kunden in seiner Lage: er hat die Packung gleich in der Hand. */}
       <p className="cc-zubereitung__quelle">
         So steht es auch auf der Rückseite deiner Packung.
+      </p>
+      {/* 2026-10-30, Reiter „Zubereitung" (Christian 28.10.): der Weg zum
+          Reel mit allen Schritten. Kauf- und Startseite tragen damit den
+          kurzen Hinweis, die ganze Anleitung steht unter /pages/zubereitung. */}
+      <p className="cc-zubereitung__video">
+        <Link to="/pages/zubereitung" prefetch="intent">
+          Im Video ansehen: So bereiten wir unseren Kakao zu
+        </Link>
       </p>
     </div>
   );
