@@ -1,0 +1,398 @@
+/* Zubereitung (/pages/zubereitung) — Scope `.cc-zb`, haengt nur an dieser Route.
+ *
+ * Nur Tokens aus designstandard-crystal.css: Typo-Stufen 16 / 20 / 31,25 /
+ * 48,8 (Knopf 17,6), Abstaende aus dem 8-px-Raster, EIN Bild-Radius
+ * (--cc-radius-bild), zwei helle Flaechen (--cc-grund, --cc-flaeche). Gold
+ * steht nur auf Handlung: Abspielknopf und die zwei Sorten-Knoepfe.
+ * Job 20261030-crystal-cacao-zubereitung-reiter-reel-design-99. */
+
+.cc-zb {
+  --cc-zb-takt: var(--cc-space-6);
+  color: var(--cc-text);
+}
+
+@media (min-width: 64em) {
+  .cc-zb {
+    --cc-zb-takt: var(--cc-space-7);
+  }
+}
+
+/* Jeder Akt laeuft ueber die volle Breite; main traegt links und rechts
+ * --cc-space-2 Rand (app.css), den der Akt zurueckholt. */
+.cc-zb-akt {
+  margin-inline: calc(-1 * var(--cc-space-2));
+  padding: var(--cc-zb-takt) var(--cc-space-2);
+  background: var(--cc-grund);
+}
+
+.cc-zb-akt--flaeche {
+  background: var(--cc-flaeche);
+}
+
+.cc-zb-innen {
+  margin-inline: auto;
+  max-width: 72rem;
+}
+
+.cc-zb h1 {
+  margin: 0 0 var(--cc-space-3);
+  text-wrap: balance;
+}
+
+/* EIN H2-Stil, linksbuendig wie der Inhalt darunter (die globale Regel
+ * zentriert). Stufe --cc-fs-5: die Seite fuehrt 16 / 20 / 25 / 31,25, je
+ * Schritt 1,25 (design-rubrik Skalen-Fit). */
+.cc-zb h2 {
+  font-size: var(--cc-fs-5);
+  margin: 0 0 var(--cc-space-4);
+  text-align: start;
+  text-wrap: balance;
+}
+
+.cc-zb h3 {
+  color: var(--cc-dunkel);
+  font-size: var(--cc-fs-3);
+  font-weight: var(--cc-fw-ueberschrift);
+  line-height: var(--cc-lh-h3);
+  margin: 0 0 var(--cc-space-1);
+}
+
+.cc-zb p {
+  margin: 0;
+}
+
+.cc-zb a:not(.cc-knopf) {
+  color: var(--cc-dunkel);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.cc-zb a:focus-visible,
+.cc-zb button:focus-visible {
+  outline: 2px solid var(--cc-fokus);
+  outline-offset: 3px;
+}
+
+/* ---- Aufmacher: Text und Reel ------------------------------------------ */
+
+.cc-zb-aufmacher__raster {
+  display: grid;
+  gap: var(--cc-space-4);
+}
+
+@media (min-width: 48em) {
+  .cc-zb-aufmacher__raster {
+    column-gap: var(--cc-space-6);
+    grid-template-areas:
+      'kopf reel'
+      'details reel';
+    grid-template-columns: minmax(0, 1fr) minmax(0, 22.5rem);
+    grid-template-rows: 1fr 1fr;
+    row-gap: 0;
+  }
+
+  .cc-zb-aufmacher__kopf {
+    align-self: end;
+    grid-area: kopf;
+    padding-bottom: var(--cc-space-4);
+  }
+
+  .cc-zb-reel {
+    grid-area: reel;
+  }
+
+  .cc-zb-aufmacher__details {
+    align-self: start;
+    grid-area: details;
+  }
+}
+
+.cc-zb .cc-zb-augenbraue {
+  color: var(--cc-muted);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  margin-bottom: var(--cc-space-2);
+  text-transform: uppercase;
+}
+
+.cc-zb .cc-zb-lead {
+  font-size: var(--cc-fs-3);
+  line-height: var(--cc-lh-lead);
+  max-width: 40ch;
+}
+
+.cc-zb-eckdaten {
+  border-block: 1px solid var(--cc-linie);
+  display: grid;
+  gap: var(--cc-space-2);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 0 var(--cc-space-2);
+  max-width: 30rem;
+  padding-block: var(--cc-space-2);
+}
+
+.cc-zb-eckdaten dt {
+  color: var(--cc-muted);
+}
+
+.cc-zb-eckdaten dd {
+  color: var(--cc-dunkel);
+  font-size: var(--cc-fs-3);
+  font-weight: 600;
+  margin: var(--cc-space-1) 0 0;
+}
+
+.cc-zb .cc-zb-weiter {
+  align-items: center;
+  display: inline-flex;
+  font-weight: 600;
+  min-height: var(--cc-treffer-min);
+}
+
+.cc-zb-reel {
+  justify-self: center;
+  margin: 0;
+  max-width: 20rem;
+  width: 100%;
+}
+
+@media (min-width: 48em) {
+  .cc-zb-reel {
+    max-width: 22.5rem;
+  }
+}
+
+.cc-zb-reel__rahmen {
+  aspect-ratio: 9 / 16;
+  background: var(--cc-flaeche);
+  border-radius: var(--cc-radius-bild);
+  overflow: hidden;
+  position: relative;
+}
+
+.cc-zb-reel__video {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.cc-zb-reel__start {
+  align-items: center;
+  background: var(--cc-gold);
+  border: 0;
+  border-radius: var(--cc-radius-rund);
+  box-shadow: var(--cc-schatten-hover);
+  color: var(--cc-schrift-auf-gold);
+  cursor: pointer;
+  display: flex;
+  height: 4.5rem;
+  justify-content: center;
+  left: 50%;
+  padding: 0 0 0 0.25rem;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 4.5rem;
+}
+
+.cc-zb-reel__unterzeile {
+  color: var(--cc-muted);
+  margin-top: var(--cc-space-2);
+  text-align: center;
+}
+
+/* ---- Was du brauchst ---------------------------------------------------- */
+
+.cc-zb-werkzeug {
+  display: grid;
+  gap: var(--cc-space-4) var(--cc-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 48em) {
+  .cc-zb-werkzeug {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.cc-zb-werkzeug__zeichen {
+  color: var(--cc-dunkel);
+  display: block;
+  margin-bottom: var(--cc-space-2);
+}
+
+.cc-zb-werkzeug h3,
+.cc-zb-werkzeug p {
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+.cc-zb-werkzeug p {
+  color: var(--cc-muted);
+}
+
+/* ---- Schritt fuer Schritt ---------------------------------------------- */
+
+.cc-zb-schritte__liste {
+  display: grid;
+  gap: var(--cc-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cc-zb-schritt {
+  align-items: start;
+  display: grid;
+  gap: var(--cc-space-2);
+  grid-template-columns: 7rem minmax(0, 1fr);
+}
+
+.cc-zb-schritt__bild {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--cc-radius-bild);
+  display: block;
+  height: auto;
+  object-fit: cover;
+  width: 100%;
+}
+
+@media (min-width: 40em) {
+  .cc-zb-schritte__liste {
+    gap: var(--cc-space-5) var(--cc-space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cc-zb-schritt {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cc-zb-schritt__bild {
+    margin-bottom: var(--cc-space-1);
+  }
+}
+
+@media (min-width: 64em) {
+  .cc-zb-schritte__liste {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Schritt- und Sortentitel eine Stufe ueber den Werkzeug-Titeln: sie
+ * tragen die Seite, und die Stufe --cc-fs-4 schliesst die Skala zwischen
+ * 20 und 31,25 (sonst Sprung 1,56, design-rubrik "keine modulare Skala"). */
+.cc-zb-schritt h3,
+.cc-zb-sorte h3 {
+  font-size: var(--cc-fs-4);
+}
+
+.cc-zb-schritt h3 {
+  align-items: center;
+  display: flex;
+  gap: var(--cc-space-1);
+}
+
+.cc-zb-schritt__nummer {
+  align-items: center;
+  border: 1px solid var(--cc-dunkel);
+  border-radius: var(--cc-radius-rund);
+  display: inline-flex;
+  flex: none;
+  font-size: var(--cc-fs-2);
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+/* ---- Deine Dosis -------------------------------------------------------- */
+
+.cc-zb .cc-zb-absatz {
+  margin-bottom: var(--cc-space-4);
+  max-width: var(--cc-zeile-max);
+}
+
+.cc-zb-dosis {
+  display: grid;
+  gap: var(--cc-space-2);
+  margin: 0;
+}
+
+@media (min-width: 40em) {
+  .cc-zb-dosis {
+    gap: var(--cc-space-3);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.cc-zb-dosis__stufe {
+  background: var(--cc-grund);
+  border-radius: var(--cc-radius-bild);
+  padding: var(--cc-space-3);
+}
+
+.cc-zb-dosis__stufe dt {
+  color: var(--cc-muted);
+  font-weight: 600;
+}
+
+.cc-zb-dosis__stufe dd {
+  margin: 0;
+}
+
+.cc-zb-dosis__gramm {
+  color: var(--cc-dunkel);
+  display: block;
+  font-size: var(--cc-fs-4);
+  font-weight: 700;
+  line-height: var(--cc-lh-h3);
+  margin-block: var(--cc-space-1);
+}
+
+.cc-zb-verfeinern {
+  margin-top: var(--cc-space-5);
+  max-width: var(--cc-zeile-max);
+}
+
+/* ---- Welche Sorte ------------------------------------------------------- */
+
+.cc-zb-sorten__liste {
+  display: grid;
+  gap: var(--cc-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 48em) {
+  .cc-zb-sorten__liste {
+    gap: var(--cc-space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.cc-zb-sorte {
+  background: var(--cc-flaeche);
+  border-radius: var(--cc-radius-bild);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-1);
+  padding: var(--cc-space-4);
+}
+
+.cc-zb-sorte h3 {
+  letter-spacing: 0.08em;
+}
+
+.cc-zb .cc-zb-sorte__claim {
+  color: var(--cc-dunkel);
+  font-weight: 600;
+}
+
+.cc-zb-sorte__knopf {
+  align-self: flex-start;
+  margin-top: var(--cc-space-2);
+}

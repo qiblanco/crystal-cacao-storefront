@@ -2,6 +2,7 @@ import {Belege} from '../reusables/Belege';
 import {KakaoTiefe} from '../reusables/KakaoTiefe';
 import {KAKAO_TIEFE_AN} from '../reusables/kakao-tiefe-daten';
 import {AbsichtHinweis} from '../reusables/AbsichtHinweis';
+import {ZubereitungHinweis} from '../reusables/ZubereitungHinweis';
 import {bildQuelle} from '../reusables/shopifyBildQuellen';
 import {ProductFAQ} from '../ProductFAQ';
 import {FAQ_CACAO} from '~/data/product-faqs';
@@ -566,6 +567,10 @@ export function SortenSeite({sorte, faqItems = FAQ_CACAO}) {
     return (
       <>
         <KakaoTiefe sorte={sorte} belege={false} />
+        {/* Direkt unter dem letzten Akt von KakaoTiefe („Zubereitung"): der
+            Weg zum Reiter mit dem Reel (2026-10-30). KakaoTiefe selbst ist
+            K1 und bleibt byte-gleich zur Vorlage. */}
+        <ZubereitungHinweis />
         <Belege sorte={`crystal-cacao-${sorte}`} />
         <AbsichtHinweis />
         <ProductFAQ items={faqItems} />

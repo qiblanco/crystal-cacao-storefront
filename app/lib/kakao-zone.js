@@ -408,6 +408,10 @@ export const KAKAO_CODE_SEITEN = Object.freeze([
   // waere sie live und bei keiner Suchmaschine angemeldet -- ihr ganzer
   // Zweck ist die Suche "Crystal Cacao Erfahrungen".
   'erfahrungen',
+  // 2026-10-30: der Reiter „Zubereitung" (Reel + Schritte). „Zubereitung"
+  // und „zubereiten" stehen in der gezaehlten Kakao-Kundenliste
+  // (kaufueberzeugung kanon.yaml kundenvokabular.kakao_dach_haeufig).
+  'zubereitung',
 ]);
 
 /**
@@ -653,6 +657,16 @@ export const KAKAO_MENUE = Object.freeze({
       id: 'kakao-alle',
       title: 'Alle Sorten',
       url: `/collections/${KAKAO_KOLLEKTION}`,
+      items: [],
+    },
+    // DER REITER „ZUBEREITUNG" — 2026-10-30, Christian am 28.10.: „oben
+    // einen Reiter Zubereitung machen [...] und dann dieses Video als Basis
+    // nehmen". Code-Route app/routes/pages.zubereitung.jsx, in der Sitemap
+    // über KAKAO_CODE_SEITEN. Rückweg: diesen Eintrag entfernen.
+    {
+      id: 'kakao-zubereitung',
+      title: 'Zubereitung',
+      url: '/pages/zubereitung',
       items: [],
     },
   ]),
