@@ -280,9 +280,91 @@ const MARKT_LAENDER = new Set([
   'SE',
 ]);
 
+// LÄNDER-ACHSE AUS SHOPIFY (Grossjob 20261004 preisanzeige, s11, KONZEPT 2.3).
+// Die Liste oben war von Hand gepflegt, und ihr Grund war der gemessene
+// Steuersatz je Land. Seit dem Brutto-Kipp (09.10.) braucht die Seite keinen
+// Satz mehr: sie zeigt den Storefront-Betrag. Shopify verkauft aber in 237
+// Länder (gemessen 2026-10-27), und alle außerhalb der Liste sahen die
+// DE-Seite (1.087 €), während die Kasse den Betrag ihres Liefermarkts nahm
+// (CZ 26.980 CZK, NO 1.383 USD; die Kasse folgt der Lieferadresse).
+// Deshalb gilt die Achse jetzt gegen Shopifys Länderliste: jedes Land löst auf
+// sein KONTEXTLAND auf, dessen Storefront-Preis genau der Warenkorb (= Kasse)
+// des Landes ist. Meist ist das das Land selbst. Ausnahme, gemessen: Länder,
+// die Shopify in EUR lokalisiert, die aber in einem USD-Markt liegen und keine
+// Euro-Landeswährung haben (NO, TR, BY, GE; im DDU-Markt z. B. ZA, BR, MX).
+// Dort nennt die API 1.241,89 €, Warenkorb und Kasse nehmen 1.383 USD. Ihr
+// Kontext ist ein USD-Land desselben Markts (US bzw. BM), dessen Seite genau
+// diese 1.383 USD zeigt. Die Kasse nimmt sie auch, wenn der Käufer dort sein
+// eigenes Land einträgt (gemessen: NO-Korb, NO-Adresse 1.383 USD).
+// MARKT_LAENDER bleibt, wie es ist: es speist auch die CSP-Liste der Google-
+// ccTLDs (entry.server.jsx) und ist dort bewusst klein.
+// Abgeleitet 2026-10-27 aus Shopify: localization.availableCountries und
+// je Land ein Warenkorb. Erzeugt mit `preisanzeige laender --voll --js`
+// (Modul Preisanzeige-Prüfung). Nie von Hand ergänzen: die Probe
+// (preisanzeige laender) wird rot, sobald Shopify in ein Land verkauft,
+// das hier fehlt, oder ein Kontext nicht mehr stimmt.
+export const KASSEN_KONTEXT = Object.freeze({
+  // ch: 1
+  CH: 'CH',
+  // de: 1
+  DE: 'DE',
+  // eu: 26
+  AT: 'AT', BE: 'BE', BG: 'BG', CY: 'CY', CZ: 'CZ', DK: 'DK',
+  EE: 'EE', ES: 'ES', FI: 'FI', FR: 'FR', GR: 'GR', HR: 'HR',
+  HU: 'HU', IE: 'IE', IT: 'IT', LT: 'LT', LU: 'LU', LV: 'LV',
+  MT: 'MT', NL: 'NL', PL: 'PL', PT: 'PT', RO: 'RO', SE: 'SE',
+  SI: 'SI', SK: 'SK',
+  // international: 29
+  AD: 'AD', AL: 'AL', AM: 'AM', AX: 'AX', BA: 'BA', BY: 'US',
+  FO: 'FO', GB: 'GB', GE: 'US', GI: 'GI', GL: 'GL', GP: 'GP',
+  ID: 'ID', IM: 'IM', IS: 'IS', LI: 'LI', MC: 'MC', MD: 'MD',
+  ME: 'ME', MK: 'MK', NO: 'US', RE: 'RE', RS: 'RS', SM: 'SM',
+  TH: 'TH', TR: 'US', UA: 'UA', US: 'US', XK: 'XK',
+  // deliver-duties-unpaid (DDU): 180
+  AC: 'AC', AE: 'AE', AF: 'AF', AG: 'AG', AI: 'AI', AO: 'BM',
+  AR: 'BM', AU: 'AU', AW: 'AW', AZ: 'AZ', BB: 'BB', BD: 'BD',
+  BF: 'BF', BH: 'BM', BI: 'BI', BJ: 'BJ', BL: 'BL', BM: 'BM',
+  BN: 'BN', BO: 'BO', BQ: 'BQ', BR: 'BM', BS: 'BS', BT: 'BM',
+  BW: 'BW', BZ: 'BZ', CA: 'CA', CC: 'CC', CD: 'CD', CF: 'CF',
+  CG: 'CG', CI: 'CI', CK: 'CK', CL: 'BM', CM: 'CM', CN: 'CN',
+  CO: 'BM', CR: 'CR', CV: 'CV', CW: 'CW', CX: 'CX', DJ: 'DJ',
+  DM: 'DM', DO: 'DO', DZ: 'DZ', EC: 'EC', EG: 'EG', EH: 'EH',
+  ER: 'BM', ET: 'ET', FJ: 'FJ', FK: 'FK', GA: 'GA', GD: 'GD',
+  GF: 'GF', GG: 'GG', GH: 'BM', GM: 'GM', GN: 'GN', GQ: 'GQ',
+  GS: 'GS', GT: 'GT', GW: 'GW', GY: 'GY', HK: 'HK', HN: 'HN',
+  HT: 'BM', IL: 'IL', IN: 'IN', IO: 'IO', IQ: 'BM', JE: 'BM',
+  JM: 'JM', JO: 'BM', JP: 'JP', KE: 'KE', KG: 'KG', KH: 'KH',
+  KI: 'BM', KM: 'KM', KN: 'KN', KR: 'KR', KW: 'BM', KY: 'KY',
+  KZ: 'KZ', LA: 'LA', LB: 'LB', LC: 'LC', LK: 'LK', LR: 'BM',
+  LS: 'BM', LY: 'BM', MA: 'MA', MF: 'MF', MG: 'BM', ML: 'ML',
+  MM: 'MM', MN: 'MN', MO: 'MO', MQ: 'MQ', MR: 'BM', MS: 'MS',
+  MU: 'MU', MV: 'MV', MW: 'MW', MX: 'BM', MY: 'MY', MZ: 'BM',
+  NA: 'BM', NC: 'NC', NE: 'NE', NF: 'NF', NG: 'NG', NI: 'NI',
+  NP: 'NP', NR: 'NR', NU: 'NU', NZ: 'NZ', OM: 'BM', PA: 'PA',
+  PE: 'PE', PF: 'PF', PG: 'PG', PH: 'PH', PK: 'PK', PM: 'PM',
+  PN: 'PN', PS: 'PS', PY: 'PY', QA: 'QA', RU: 'BM', RW: 'RW',
+  SA: 'SA', SB: 'SB', SC: 'BM', SD: 'BM', SG: 'SG', SH: 'SH',
+  SJ: 'BM', SL: 'SL', SN: 'SN', SO: 'BM', SR: 'BM', SS: 'BM',
+  ST: 'ST', SV: 'SV', SX: 'SX', SZ: 'BM', TA: 'TA', TC: 'TC',
+  TD: 'TD', TF: 'TF', TG: 'TG', TJ: 'TJ', TK: 'TK', TL: 'TL',
+  TM: 'BM', TN: 'BM', TO: 'TO', TT: 'TT', TV: 'TV', TW: 'TW',
+  TZ: 'TZ', UG: 'UG', UM: 'UM', UY: 'UY', UZ: 'UZ', VA: 'VA',
+  VC: 'VC', VE: 'VE', VG: 'VG', VN: 'VN', VU: 'VU', WF: 'WF',
+  WS: 'WS', YE: 'YE', YT: 'YT', ZA: 'BM', ZM: 'BM', ZW: 'ZW',
+});
+
+function hatKontext(land) {
+  return Object.prototype.hasOwnProperty.call(KASSEN_KONTEXT, land);
+}
+
 /**
- * Markt-Land eines Requests: ?markt-Preview > Geo (nur freigeschaltet) > DE.
- * FAIL-CLOSED: alles Unbekannte/Abgeschaltete rendert den DE-Default.
+ * Markt-Land eines Requests: ?markt-Preview > Geo (freigeschaltet, sonst
+ * KASSEN_KONTEXT) > DE. Ein Land aus KASSEN_KONTEXT liefert sein Kontextland,
+ * auch per ?markt (so misst die Preisanzeige-Prüfung die Seite eines
+ * NO-Besuchers vom eigenen Server).
+ * FAIL-CLOSED: alles Unbekannte/Abgeschaltete rendert den DE-Default. Ein Land,
+ * in das Shopify nicht verkauft, steht nicht in der Tabelle; Shopify selbst
+ * fällt dort ebenfalls auf den DE-Markt zurück (gemessen KP, CU, IR).
  * @param {Request} request
  * @returns {string} ISO-Laendercode
  */
@@ -292,12 +374,14 @@ export function resolveCountry(request) {
       new URL(request.url).searchParams.get('markt') || ''
     ).toUpperCase();
     if (override && MARKT_LAENDER.has(override)) return override;
+    if (override && hatKontext(override)) return KASSEN_KONTEXT[override];
     const geo = (
       request.headers.get('oxygen-buyer-country') || ''
     ).toUpperCase();
     if (geo && MARKT_LAENDER.has(geo) && FREIGESCHALTETE_MAERKTE.includes(geo)) {
       return geo;
     }
+    if (geo && hatKontext(geo)) return KASSEN_KONTEXT[geo];
   } catch {
     // fail-closed: DE-Default
   }
