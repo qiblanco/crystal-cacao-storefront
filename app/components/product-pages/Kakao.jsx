@@ -73,11 +73,11 @@ const B_CHART =
 const B_BANNER_FLOW =
   'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/2024-06-qiblanco-bali-06610.jpg?v=1763050714';
 const B_BANNER_NATURREIN =
-  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC00308_Kopie-1874.webp?v=1793410358';
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC00308_Kopie.webp?v=1763062180';
 const B_SETZLING =
   'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-image.webp?v=1759153567';
 const B_MUSTER =
-  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-muster-1150.webp?v=1793410362';
+  'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/kakao-muster.webp?v=1759179332';
 const B_BAUER_FRUCHT =
   'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01510_Kopie.webp?v=1759179020';
 const B_BAUER_TONNE =
@@ -113,9 +113,9 @@ const BILDER = new Map([
   [B_LOGO_ENERGY, {leiter: [50, 125], sizes: SIZES_LOGO, breite: 125, hoehe: 125}],
   [B_CHART, {leiter: [300, 420, 550, 660, 840, 1100, 1404], sizes: SIZES_HALBSPALTE, breite: 1404, hoehe: 963}],
   [B_BANNER_FLOW, {leiter: [360, 480, 620, 740, 1000, 1160, 1500, 2320], sizes: SIZES_BANNER, breite: 6000, hoehe: 4000}],
-  [B_BANNER_NATURREIN, {leiter: [360, 480, 620, 740, 937, 1160, 1500, 1874], sizes: SIZES_BANNER, breite: 1874, hoehe: 1056}],
+  [B_BANNER_NATURREIN, {leiter: [360, 480, 620, 740, 937], sizes: SIZES_BANNER, breite: 937, hoehe: 528}],
   [B_SETZLING, {leiter: [300, 420, 550, 660, 766], sizes: SIZES_HALBSPALTE, breite: 766, hoehe: 1002}],
-  [B_MUSTER, {leiter: [300, 420, 550, 660, 766, 1150], sizes: SIZES_HALBSPALTE, breite: 1150, hoehe: 1150}],
+  [B_MUSTER, {leiter: [300, 420, 550, 660, 766], sizes: SIZES_HALBSPALTE, breite: 766, hoehe: 766}],
   [B_BAUER_FRUCHT, {leiter: [300, 420, 550, 660, 840, 1000], sizes: SIZES_HALBSPALTE, breite: 1000, hoehe: 1500}],
   [B_BAUER_TONNE, {leiter: [300, 420, 550, 660, 840, 1100, 1650], sizes: SIZES_HALBSPALTE, breite: 3827, hoehe: 5740}],
   [B_KURS_MOCKUP, {leiter: [300, 420, 550, 660, 840, 1024], sizes: SIZES_HALBSPALTE, breite: 1024, hoehe: 599}],
