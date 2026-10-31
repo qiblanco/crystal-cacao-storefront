@@ -1,6 +1,7 @@
 import {startTransition, useEffect, useMemo, useState} from 'react';
 import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
 import {
+  data as mitKoepfen,
   Outlet,
   useRouteError,
   isRouteErrorResponse,
@@ -29,10 +30,19 @@ import kakaoTiefeStyles from '~/styles/kakao-tiefe.css?url';
  * byte-gleichen Komponente. */
 import swipetabStyles from '~/styles/qb-swipetab.css?url';
 import euGewaehrleistungStyles from '~/styles/eu-gewaehrleistung.css?url';
+import einwilligungStyles from '~/styles/einwilligung.css?url';
 import {PageLayout} from './components/PageLayout';
 import {MetaPixel} from './components/MetaPixel';
 import {QpxCommerce} from './components/QpxCommerce';
 import {UpPromoteTracking} from './components/UpPromoteTracking';
+import {Einwilligungshinweis} from './components/Einwilligungshinweis';
+import {
+  cookieAusHeader,
+  leseEinwilligung,
+  motorFuer,
+  wahlGilt,
+} from '~/lib/einwilligung-schalter';
+import {EINWILLIGUNG_FASSUNG, spracheGilt} from '~/lib/einwilligung-texte';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
 import {strictRegions} from '~/lib/consent-policy';
 import {ABSENDER_MARKE, sorteZuPfad} from '~/lib/kakao-zone';
@@ -177,7 +187,32 @@ export async function loader(args) {
 
   const {storefront, env} = args.context;
 
-  return {
+  // EINWILLIGUNGS-MOTOR (Grossjob 20261022-GROSSJOB-cookiebot-abloesen-eigener-
+  // einwilligungshinweis-qiblanco, s08; BAUVERTRAG Abschnitt 1). Dieselbe Weiche
+  // wie im Global Deutsch-Shop: Query vor Sitzungs-Cookie vor Konstante
+  // (app/lib/einwilligung-schalter.js, EINWILLIGUNG_MOTOR). Im Motor 'cookiebot'
+  // kommt KEIN Feld dazu, dann ist das HTML der Stand vor s08: hier gab es nie
+  // ein Cookiebot-Banner (PUBLIC_COOKIEBOT_ID ungesetzt), also keinen Hinweis
+  // und keine Einwilligung. ?qb_einwilligung=cookiebot zeigt diesen Stand je
+  // Besucher und ist der erprobte Rueckweg-Pfad.
+  const cookieHeader = args.request.headers.get('Cookie') || '';
+  const einwilligungsMotor = motorFuer(args.request.url, cookieHeader);
+  const einwilligung =
+    einwilligungsMotor.motor === 'eigen'
+      ? {
+          einwilligung: {
+            motor: 'eigen',
+            sprache: spracheGilt('de'),
+            entschieden: wahlGilt(
+              leseEinwilligung(cookieAusHeader(cookieHeader)),
+              EINWILLIGUNG_FASSUNG,
+            ),
+          },
+        }
+      : {};
+
+  const antwort = {
+    ...einwilligung,
     ...deferredData,
     ...criticalData,
     // --- Tracking-Naht (K3, ADR 0056). Alles env-gesteuert und fail-closed:
@@ -229,6 +264,12 @@ export async function loader(args) {
       language: args.context.storefront.i18n.language,
     },
   };
+  // ?qb_einwilligung=eigen|cookiebot merkt sich die Wahl fuer die Sitzung.
+  return einwilligungsMotor.setzeCookie
+    ? mitKoepfen(antwort, {
+        headers: {'Set-Cookie': einwilligungsMotor.setzeCookie},
+      })
+    : antwort;
 }
 
 /**
@@ -293,6 +334,10 @@ export function Layout({children}) {
     data?.isProductionHost || data?.enableTrackingInPreview;
   const isTrackingPreview =
     Boolean(data?.enableTrackingInPreview) && !data?.isProductionHost;
+  // Motor 'eigen' (s08): eigener Hinweis + /qb-einwilligung.js. Unabhaengig vom
+  // Produktions-Gate wie im Global Deutsch-Shop, damit Vorschau, Sicht-Tor und
+  // Abnahme ihn sehen; die Tracker bleiben hinter shouldLoadThirdPartyScripts.
+  const einwilligungEigen = data?.einwilligung?.motor === 'eigen';
   // Sorten-Kennung fuer die Farbschicht (Job …-prio6 s03). Die Zuordnung
   // Pfad->Sorte steht in app/lib/kakao-zone.js, die Farbe in
   // app/styles/kakao-seiten.css. Hier faellt nur zusammen, was beide wissen —
@@ -335,7 +380,27 @@ export function Layout({children}) {
         <link rel="stylesheet" href={kakaoTiefeStyles}></link>
         <link rel="stylesheet" href={swipetabStyles}></link>
         <link rel="stylesheet" href={euGewaehrleistungStyles}></link>
-        {shouldLoadThirdPartyScripts && data?.cookiebotId ? (
+        {einwilligungEigen && (
+          <link rel="stylesheet" href={einwilligungStyles}></link>
+        )}
+        {/*
+          Motor 'eigen': die Cookiebot-Attrappe muss stehen, bevor ein Leser
+          laeuft (qpx-Lader, Tracker, UpPromote, MetaPixel lesen window.Cookiebot
+          und hoeren auf dessen Ereignisse) - deshalb das ERSTE defer-Skript.
+          Kein Inline-Skript, kein Eingriff in fremde Knoten: Hydrations-neutral.
+          Der Cookiebot-Lader und cookiebot-shopify-consent-sync.js fallen in
+          diesem Motor weg; die Bruecke zu Shopify.customerPrivacy steht in
+          /qb-einwilligung.js.
+        */}
+        {einwilligungEigen && (
+          <script
+            src="/qb-einwilligung.js"
+            nonce={nonce}
+            defer
+            suppressHydrationWarning
+          />
+        )}
+        {!einwilligungEigen && shouldLoadThirdPartyScripts && data?.cookiebotId ? (
           <script
             id="Cookiebot"
             src="https://consent.cookiebot.com/uc.js"
@@ -351,12 +416,14 @@ export function Layout({children}) {
         <Links />
         {shouldLoadThirdPartyScripts && (
           <>
-            <script
-              src="/cookiebot-shopify-consent-sync.js"
-              nonce={nonce}
-              defer
-              suppressHydrationWarning
-            />
+            {!einwilligungEigen && (
+              <script
+                src="/cookiebot-shopify-consent-sync.js"
+                nonce={nonce}
+                defer
+                suppressHydrationWarning
+              />
+            )}
             <script
               src="/qiblanco-tracker.js"
               data-hyros-tag={data?.hyrosTagUrl || undefined}
@@ -403,6 +470,15 @@ export function Layout({children}) {
         )}
       </head>
       <body>
+        {/* Erstes body-Kind (BAUVERTRAG Abschnitt 4): die Tastatur erreicht
+            den Hinweis zuerst. Inhalt per dangerouslySetInnerHTML, React
+            gleicht ihn nie ab. */}
+        {einwilligungEigen && (
+          <Einwilligungshinweis
+            sprache={data.einwilligung.sprache}
+            entschieden={data.einwilligung.entschieden}
+          />
+        )}
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />

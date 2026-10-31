@@ -1,5 +1,5 @@
 import {Suspense} from 'react';
-import {Await, NavLink} from 'react-router';
+import {Await, NavLink, useRouteLoaderData} from 'react-router';
 import {KAKAO_FUSSMENUE} from '~/lib/kakao-zone';
 
 /**
@@ -35,6 +35,12 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
  * }}
  */
 function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
+  // Widerruf-Link (Grossjob Cookiebot-Abloesung s08, BAUVERTRAG Abschnitt 4):
+  // auf jeder Seite, aber nur im Motor 'eigen'. Im Motor 'cookiebot' gibt es
+  // auf diesem Laden keinen Dialog (nie ein Cookiebot-Banner), ein Knopf dort
+  // waere tot.
+  const einwilligungEigen =
+    useRouteLoaderData('root')?.einwilligung?.motor === 'eigen';
   return (
     <nav className="footer-menu" role="navigation">
       {(menu || KAKAO_FUSSMENUE).items.map((item) => {
@@ -63,8 +69,22 @@ function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
           </NavLink>
         );
       })}
+      {einwilligungEigen && (
+        <button
+          type="button"
+          className="footer-menu__einwilligung"
+          data-qb-wahl="einstellungen"
+          onClick={oeffneEinwilligung}
+        >
+          Cookie-Einstellungen
+        </button>
+      )}
     </nav>
   );
+}
+
+function oeffneEinwilligung() {
+  if (window.qbEinwilligung) window.qbEinwilligung.oeffneEinstellungen();
 }
 
 const FALLBACK_FOOTER_MENU = {

@@ -359,7 +359,7 @@ export default function WarumCrystalCacaoPage() {
           </p>
           <p>
             Ich kannte Kakao bis dahin als Getränk mit viel Zucker und als
-            Praline. Ehrlich gesagt kannte ich nur Schokolade. In Mexiko
+            Praline. Eigentlich kannte ich nur Schokolade. In Mexiko
             habe ich die Bohne in ihrer Urform erlebt, von Bäumen, wie sie seit
             Jahrtausenden im Dschungel wachsen. Das hat mich gepackt.
           </p>
