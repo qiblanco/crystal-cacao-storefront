@@ -118,7 +118,8 @@ export function Analyseprofile({vergleich = null, onZurueck = null}) {
 
         <div className="cc-profil__fuss">
           <p className="cc-profil__quelle">
-            Die Nährstoffe misst Dartsch Scientific an der fertigen Mischung.
+            Die Nährstoffe misst das Labor PLENUM Dr. Born an der fertigen
+            Mischung. Die Berichte verantwortet Dartsch Scientific.
             Dazu kommen Mineralstoff-Analysen von SAS hagmann und
             Schadstoff-Prüfzeugnisse von Primoris Belgium für die rohe Bohne.
           </p>
