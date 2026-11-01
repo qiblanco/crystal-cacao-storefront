@@ -115,13 +115,13 @@ export const MARKE = ABSENDER_MARKE;
  */
 export const PRODUKT_BESCHREIBUNGEN = {
   '/products/qione-2-pro':
-    'E-Smog ist überall, wo du bist — der QiOne® 2 Pro auch. Sein Gitterchip™ ' +
+    'E-Smog ist überall, wo du bist — der QiOne® 2 Pro auch. Sein Gitterchip® ' +
     'reduziert die Auswirkungen. Original vom Hersteller, 20 Tage risikofrei.',
   '/products/qibracelet':
     'Schutz, den man nicht sieht: Der QiBracelet® reduziert mit integriertem ' +
-    'Gitterchip™ die Auswirkungen von E-Smog und 5G — elegant am Handgelenk.',
+    'Gitterchip® die Auswirkungen von E-Smog und 5G — elegant am Handgelenk.',
   '/products/qihome-air':
-    'Ein Gitterchip™ für den ganzen Raum: Das QiHome® Air deckt bis zu 300 m² ab ' +
+    'Ein Gitterchip® für den ganzen Raum: Das QiHome® Air deckt bis zu 300 m² ab ' +
     'und schafft eine harmonische Atmosphäre — ideal für Schlafzimmer und Büro.',
   '/products/qione-kette':
     'Die passende Kette für deinen QiOne® 2 Pro: hochwertig verarbeitet und ' +
