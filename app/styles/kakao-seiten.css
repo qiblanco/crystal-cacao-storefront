@@ -866,6 +866,19 @@
 .cc-kaufleiste {
   display: none;
 }
+/* Messelement der Kaufleiste: seine Hoehe ist 100svh, die Fensterhoehe mit
+ * ausgeklappten Browserleisten. Daran entscheidet die Leiste, nicht an
+ * innerHeight, das beim Einklappen waechst (Job 20261101-crystal-kaufleiste-
+ * blendet-mit-browserleisten). Unsichtbar, ohne Platz im Fluss. */
+.cc-kaufleiste-mass {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100svh;
+  visibility: hidden;
+  pointer-events: none;
+}
 @media screen and (max-width: 749px) {
   .cc-kaufleiste {
     position: fixed;
