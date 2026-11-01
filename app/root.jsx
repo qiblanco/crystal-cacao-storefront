@@ -355,7 +355,10 @@ export function Layout({children}) {
       lang="de"
       data-cc-sorte={ccSorte || undefined}
       data-qiblanco-tracking-preview={isTrackingPreview ? 'true' : undefined}
-      data-qb-region={data?.buyerCountry || undefined}
+      // IMMER gesetzt, leer wenn kein Land bekannt (Loopback-Besuch, z. B. der ax41-Browser
+      // ueber den KI-Kanal): das Attribut ist das Identitaetsmerkmal dieses Ladens fuer
+      // storefront_messung; alle Leser lesen getAttribute(...) || '' und behandeln "" wie fehlend.
+      data-qb-region={data?.buyerCountry ?? ''}
       data-qb-consent-strict={data?.consentStrictRegions || undefined}
       data-qb-preismodus={data?.preismodus?.modus || undefined}
       data-qb-preismodus-quelle={data?.preismodus?.quelle || undefined}
