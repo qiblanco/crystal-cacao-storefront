@@ -1,6 +1,7 @@
 import {useEffect, useId, useMemo, useRef, useState} from 'react';
 import {useDragSwipe} from './useDragSwipe';
 import {IG_TESTIMONIALS} from '~/data/ig-testimonials';
+import {reiheErstJedePerson} from '~/lib/reihe-erst-jede-person';
 
 /*
  * IgTestimonialSlideshow — die Instagram-Stimmen eines Produkts als
@@ -195,7 +196,8 @@ const SPRACH_RANG_DE = {de: 0, beide: 1, keine: 2, en: 3};
  * Zwei Regeln, in dieser Rangfolge:
  *   1. Das jüngste Beitragsdatum (`datum`) zuerst; bei gleichem Datum der Code,
  *      damit die Reihe auf Server und Browser dieselbe ist.
- *   2. Nie dieselbe Person direkt nebeneinander. Stünde sie als nächste wieder
+ *   2. Erst jede Person einmal, dann die Wiederholungen (Christian 02.11.2026
+ *      abends), und nie dieselbe Person direkt nebeneinander. Stünde sie als nächste wieder
  *      dran, rückt die nächstjüngere Kachel einer ANDEREN Person vor. Erst wenn
  *      nur noch Kacheln derselben Person übrig sind, stehen sie beieinander —
  *      dann gibt es keine andere Reihe.
@@ -209,20 +211,15 @@ const SPRACH_RANG_DE = {de: 0, beide: 1, keine: 2, en: 3};
  * übrigen Produktseiten stehen Christians ältere Weisungen (fremde Konten
  * vorn, `vorn`, `ansEnde`), und die nennt diese Weisung nicht.
  */
-const personVon = (t) => String(t.person ?? t.profil ?? '').toLowerCase();
-
 export function reiheNachDatum(eintraege) {
-  const offen = [...eintraege].sort((a, b) => {
+  const nachDatum = [...eintraege].sort((a, b) => {
     const d = String(b.datum ?? '').localeCompare(String(a.datum ?? ''));
     return d !== 0 ? d : String(a.code).localeCompare(String(b.code));
   });
-  const reihe = [];
-  while (offen.length > 0) {
-    const vorige = reihe.length > 0 ? personVon(reihe[reihe.length - 1]) : null;
-    const i = offen.findIndex((t) => personVon(t) !== vorige);
-    reihe.push(offen.splice(i === -1 ? 0 : i, 1)[0]);
-  }
-  return reihe;
+  /* Christian 02.11.2026 abends: erst jede Person einmal (nach Datum), dann
+   * die Wiederholungen. Die Runden-Regel steht in ~/lib/reihe-erst-jede-person
+   * und gilt dort für alle Slider; hier bekommt sie die Datums-Reihe. */
+  return reiheErstJedePerson(nachDatum);
 }
 
 /*
