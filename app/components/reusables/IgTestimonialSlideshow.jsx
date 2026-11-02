@@ -187,6 +187,45 @@ const STUFEN_RANG = {T1: 0, T2: 1, T3: 2};
 const SPRACH_RANG_DE = {de: 0, beide: 1, keine: 2, en: 3};
 
 /*
+ * DIE DATUMS-ORDNUNG (Christian 02.11.2026 zur Kakao-Reihe, mit Bildschirmfoto
+ * @vanessastehler, @maxxpansion, @maxxpansion): „bitte dafür sorgen, dass die
+ * gleichen Personen nicht direkt nebeneinander stehen, sondern dass das mehr
+ * nach einem Datum sortiert wird der Beiträge."
+ *
+ * Zwei Regeln, in dieser Rangfolge:
+ *   1. Das jüngste Beitragsdatum (`datum`) zuerst; bei gleichem Datum der Code,
+ *      damit die Reihe auf Server und Browser dieselbe ist.
+ *   2. Nie dieselbe Person direkt nebeneinander. Stünde sie als nächste wieder
+ *      dran, rückt die nächstjüngere Kachel einer ANDEREN Person vor. Erst wenn
+ *      nur noch Kacheln derselben Person übrig sind, stehen sie beieinander —
+ *      dann gibt es keine andere Reihe.
+ *
+ * „Person" ist `person` (für den Fall, dass jemand zwei Konten führt), sonst
+ * das Profil, in Kleinschreibung. Die Regel liegt hier im Code, damit sie
+ * auch für jede künftige Kachel gilt, ohne dass jemand von Hand umstellt.
+ *
+ * Sie gilt nur, wo eine Seite `ordnung="datum"` setzt (die Kakao-Seiten).
+ * Ohne die Prop bleibt die Stufen-Ordnung darunter unverändert: auf den
+ * übrigen Produktseiten stehen Christians ältere Weisungen (fremde Konten
+ * vorn, `vorn`, `ansEnde`), und die nennt diese Weisung nicht.
+ */
+const personVon = (t) => String(t.person ?? t.profil ?? '').toLowerCase();
+
+export function reiheNachDatum(eintraege) {
+  const offen = [...eintraege].sort((a, b) => {
+    const d = String(b.datum ?? '').localeCompare(String(a.datum ?? ''));
+    return d !== 0 ? d : String(a.code).localeCompare(String(b.code));
+  });
+  const reihe = [];
+  while (offen.length > 0) {
+    const vorige = reihe.length > 0 ? personVon(reihe[reihe.length - 1]) : null;
+    const i = offen.findIndex((t) => personVon(t) !== vorige);
+    reihe.push(offen.splice(i === -1 ? 0 : i, 1)[0]);
+  }
+  return reihe;
+}
+
+/*
  * DIE ÜBERSCHRIFT FOLGT DER KACHELZAHL, NICHT EINER PROP JE ROUTE.
  *
  * Zwei der fünf Flächen tragen nach der Auswahl genau EINE Kachel (Kakao,
@@ -386,6 +425,126 @@ function BilderBuehne({t}) {
  * die ist der behobene Fehler. Eine ungenutzte Funktion, die den alten Weg noch
  * kennt, ist die Einladung, ihn wieder anzuschliessen. `app/lib/ig-video-schema.js`
  * trägt seine eigene Fassung für den strukturierten Datensatz. */
+
+/*
+ * DIE GIMMICK-KACHEL: spielt von selbst, stumm, in Endlosschleife.
+ *
+ * Christian am 02.11.2026 zum Video von @geldhelden_org: „hochladen auf dem
+ * Server und auf Autoplay stellen, da es sich mehr um ein Gimmick handelt."
+ * Das ist die Ausnahme von der Fassade oben, und sie ist es nur für eine
+ * Kachel mit `autoplay: true`. In einem Gimmick spricht niemand. Ein Klick,
+ * um Ton zu bekommen, hätte hier nichts zu geben, die Datei hat keine
+ * Tonspur.
+ *
+ * WIE ES AUF DEM iPHONE LÄUFT (auch Chrome auf iOS, das ist WebKit): stumm +
+ * `playsInline` + `.play()` ohne Geste ist dort erlaubt. `muted` wird
+ * zusätzlich am Element gesetzt, weil React es im Server-HTML nicht als
+ * Attribut schreibt. Gespielt wird erst, wenn die Kachel in die Nähe des
+ * Bildschirms kommt, und außerhalb pausiert sie (kein Abruf für Besucher, die
+ * nie hinscrollen). Verweigert das Gerät trotzdem (Stromsparmodus), bleibt
+ * das Standbild liegen, und die erste Berührung irgendwo auf der Seite startet
+ * das Video. Das Standbild ist das erste Bild des Loops, der Wechsel ist also
+ * unsichtbar. Bei „Bewegung reduzieren" bleibt es beim Standbild.
+ *
+ * Kein Play-Knopf und keine Bedienelemente: ein Knopf verspräche etwas zum
+ * Starten, das schon läuft.
+ */
+function GimmickKachel({t}) {
+  const spielerRef = useRef(null);
+  const [spielt, setSpielt] = useState(false);
+
+  useEffect(() => {
+    const el = spielerRef.current;
+    if (!el) return undefined;
+    el.muted = true;
+    el.defaultMuted = true;
+    el.setAttribute('muted', '');
+    const ruhig =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (ruhig) return undefined;
+
+    let sichtbar = typeof IntersectionObserver !== 'function';
+    const spiele = () => {
+      if (!sichtbar) return;
+      const versuch = el.play();
+      if (versuch && typeof versuch.catch === 'function') versuch.catch(() => {});
+    };
+    const beiBeruehrung = () => spiele();
+    document.addEventListener('touchend', beiBeruehrung, {passive: true});
+    document.addEventListener('pointerdown', beiBeruehrung, {passive: true});
+
+    let beobachter = null;
+    if (sichtbar) {
+      spiele();
+    } else {
+      beobachter = new IntersectionObserver(
+        ([eintrag]) => {
+          sichtbar = eintrag.isIntersecting;
+          if (sichtbar) spiele();
+          else el.pause();
+        },
+        {rootMargin: '200px'},
+      );
+      beobachter.observe(el);
+    }
+    return () => {
+      beobachter?.disconnect();
+      document.removeEventListener('touchend', beiBeruehrung);
+      document.removeEventListener('pointerdown', beiBeruehrung);
+    };
+  }, []);
+
+  return (
+    <article
+      className="qb-igt__kachel qb-igt__kachel--gimmick"
+      data-ig-reel={t.code}
+      data-ig-video={t.videoUrl}
+      data-ig-profil={t.profil}
+      data-qb-video-zustand={spielt ? 'spielt' : 'vorschau'}
+      data-qb-autoplay="an"
+    >
+      <span className="qb-igt__flaeche" style={{display: 'block', width: '100%'}}>
+        <span className="qb-igt__buehne" style={STAPEL_STYLE}>
+          <img
+            className="qb-igt__poster"
+            src={t.posterPfad}
+            alt={`Standbild des Instagram-Beitrags von @${t.profil}`}
+            loading="lazy"
+            aria-hidden={spielt ? 'true' : undefined}
+            style={SCHICHT_STYLE}
+          />
+          <video
+            className="qb-igt__player"
+            ref={spielerRef}
+            src={t.videoUrl}
+            poster={t.posterPfad}
+            muted
+            loop
+            playsInline
+            preload="none"
+            aria-label={`Instagram-Beitrag von @${t.profil}, läuft stumm in Schleife`}
+            style={{
+              ...SCHICHT_STYLE,
+              opacity: spielt ? 1 : 0,
+              transition: 'opacity 240ms ease-out',
+            }}
+            onPlaying={() => setSpielt(true)}
+          />
+        </span>
+      </span>
+      <a
+        className="qb-igt__profil"
+        href={t.profilUrl}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+      >
+        <span className="qb-igt__handle">@{t.profil}</span>
+        <span className="qb-igt__aufig">auf Instagram</span>
+      </a>
+    </article>
+  );
+}
 
 /**
  * Eine Kachel. Eigene Komponente, weil jede ihren EIGENEN Zustand hat: in
@@ -668,6 +827,7 @@ function Kachel({t}) {
  *   sprachRang?: Record<string, number>,
  *   dataSection?: string,
  *   karussell?: boolean,  // Pfeile links/rechts, nur bei Überlauf, auch am Handy
+ *   ordnung?: 'stufen' | 'datum',  // 'datum': jüngstes zuerst, nie dieselbe Person nebeneinander
  * }} props
  */
 export function IgTestimonialSlideshow({
@@ -678,6 +838,7 @@ export function IgTestimonialSlideshow({
   sprachRang = SPRACH_RANG_DE,
   dataSection,
   karussell = false,
+  ordnung = 'stufen',
 }) {
   const titelId = useId();
   const bahnRef = useRef(null);
@@ -718,6 +879,7 @@ export function IgTestimonialSlideshow({
      * Die Weisung ist jünger und nennt die Seite; sie sticht dort. Ohne das
      * Feld ändert sich NICHTS: jede Kachel ohne Marke bekommt denselben Rang,
      * und die stabile Sortierung lässt die übrigen Stufen entscheiden. */
+    if (ordnung === 'datum') return reiheNachDatum(meine);
     const OHNE_VORN = Number.MAX_SAFE_INTEGER;
     const vornRang = (t) => (Number.isInteger(t.vorn) ? t.vorn : OHNE_VORN);
     const ansEndeRang = (t) => (t.ansEnde === true ? 1 : 0);
@@ -730,7 +892,7 @@ export function IgTestimonialSlideshow({
       if (s !== 0) return s;
       return (sprachRang[a.sprache] ?? 9) - (sprachRang[b.sprache] ?? 9);
     });
-  }, [eintraege, produkt, sprachRang]);
+  }, [eintraege, produkt, sprachRang, ordnung]);
 
   /*
    * DIE KARUSSELL-BAUART (Elina, EL-20261026-28f53e7d, Punkt 4): „ein
@@ -829,9 +991,13 @@ export function IgTestimonialSlideshow({
       onKeyDown={beiTaste}
       {...handlers}
     >
-      {liste.map((t) => (
-        <Kachel key={`${t.produkt}-${t.code}`} t={t} />
-      ))}
+      {liste.map((t) =>
+        t.autoplay === true && t.videoUrl ? (
+          <GimmickKachel key={`${t.produkt}-${t.code}`} t={t} />
+        ) : (
+          <Kachel key={`${t.produkt}-${t.code}`} t={t} />
+        ),
+      )}
     </div>
   );
 

@@ -280,7 +280,7 @@
     {
       "upstream": "app/components/reusables/IgTestimonialSlideshow.jsx",
       "klasse": "K1",
-      "sha256": "edb65e513cf3e355af6b98af04b9ff80c8937c9fcd7daadd6bce1b96cefe4ddd"
+      "sha256": "6859f0b00bcff836efd4a57ede4866c985b85ad5f7d3a6caee488532d2b2ac92"
     },
     {
       "upstream": "app/data/ig-testimonials.js",
