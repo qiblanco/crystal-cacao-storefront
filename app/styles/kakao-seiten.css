@@ -614,7 +614,9 @@
 .product p.product-rating span:last-child {
   font-size: var(--cc-fs-2);
   color: var(--cc-dunkel);
-  font-weight: 500;
+  /* 400: die Stufe 500 trug allein diese Zeile, der Kopf hielt damit vier
+   * Schriftstaerken statt drei (Shop-Tor D4, Job 20261102-kakao-awake-fuss-…). */
+  font-weight: 400;
 }
 .btn--primary {
   display: block;
@@ -2988,16 +2990,18 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
     align-items: center;
     justify-content: center;
     column-gap: var(--cc-space-5);
-    text-align: left;
+    text-align: center;
     max-width: none;
   }
   .cc-sortenaufmacher__text {
-    /* Der Text steht linksbuendig an der Kante der Wortmarke — zentriert
-     * neben einem Bild entstuenden zwei Achsen und keine. */
-    text-align: left;
+    /* EINE Mittelachse je Spalte: die Wortmarke steht mittig in ihrer, der Text
+     * in seiner, wie alle H2 der Seite. Bis 2026-11-02 linksbuendig; das war die
+     * einzige linke H2 der Seite und kostete die Rubrik 3 Punkte, Score 92 statt
+     * 95 (Job 20261102-kakao-awake-fuss-links-unter-kaufleiste). */
+    text-align: center;
   }
   .cc-sortenaufmacher__wege {
-    justify-content: flex-start;
+    justify-content: center;
   }
 }
 
@@ -3117,11 +3121,11 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
   align-items: center;
   margin-top: var(--cc-space-2);
 }
-/* AB 48em LINKSBUENDIG, WIE DIE ZWEI-SPALTEN-REGEL OBEN ES VORSIEHT — jetzt
- * auch wirksam (2026-10-16, Register F-091, F-108: Ueberschrift zentriert,
- * Satz linksbuendig, Knopf und Link wieder zentriert, keine gemeinsame
- * Kante). Zwei Ursachen: die Grundregel der Wege steht in der Datei NACH der
- * Breitenregel und gewann bei gleicher Spezifitaet, und die Grundregel
+/* AB 48em EINE GEMEINSAME ACHSE, WIE DIE ZWEI-SPALTEN-REGEL OBEN ES VORSIEHT
+ * (2026-10-16, Register F-091, F-108: Ueberschrift zentriert, Satz linksbuendig,
+ * Knopf und Link wieder zentriert, keine gemeinsame Kante; seit 2026-11-02 mittig
+ * statt links). Zwei Ursachen: die Grundregel der Wege steht in der Datei NACH
+ * der Breitenregel und gewann bei gleicher Spezifitaet, und die Grundregel
  * `.ProductPageKakao h2, main h2` (diese Datei) setzt `text-align: center`
  * an der Ueberschrift selbst, die geerbte Ausrichtung der Textspalte kam
  * dort nie an. */
@@ -3130,7 +3134,7 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
     text-align: inherit;
   }
   .cc-sortenaufmacher__wege {
-    justify-content: flex-start;
+    justify-content: center;
   }
   /* Der Zweitweg ist ein Textlink: sein Seitenpolster rueckte den Text 8 px
    * von der gemeinsamen Kante weg. Die Trefferhoehe bleibt (min-height aus
