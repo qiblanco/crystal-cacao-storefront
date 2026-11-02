@@ -94,6 +94,11 @@
       "sha256": "29fbfe87fb1870d30aabcf33666af934d169d1ec5fc0c1a01eab459417722b46"
     },
     {
+      "upstream": "app/lib/reihe-erst-jede-person.js",
+      "klasse": "K1",
+      "sha256": "2b2bb327f4108fe5c09bc866e9976944bdaa7944f2182b23fa4b6170575469f3"
+    },
+    {
       "upstream": "app/lib/entity-schema.js",
       "klasse": "K1",
       "sha256": "ffd1d044f672b352d4cd9a78ee711cb62ee2be2cae2411c36ad915152ee50608"
@@ -280,7 +285,7 @@
     {
       "upstream": "app/components/reusables/IgTestimonialSlideshow.jsx",
       "klasse": "K1",
-      "sha256": "6859f0b00bcff836efd4a57ede4866c985b85ad5f7d3a6caee488532d2b2ac92"
+      "sha256": "bc61eabf72fad3b386c31ea560e9f333118955b664ce3cd43dffa99ded904d23"
     },
     {
       "upstream": "app/data/ig-testimonials.js",
