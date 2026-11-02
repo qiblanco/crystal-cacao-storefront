@@ -29,6 +29,23 @@
  * die Graph-API (business_discovery) am 2026-10-26.
  * Die Reihenfolge ist frei (Elina, EL-20261026-8bdf0028).
  *
+ * Stand 2026-11-02 (Christian, Job 20261102-prio2-echte-stimmen-instagram-…):
+ *  geldhelden-story-20261102  @geldhelden_org  Story-Video, Kakao im Bild,
+ *               volle Rechte (Christian). Es gibt keinen Beitragscode: der Clip
+ *               kam per WhatsApp, und unter den letzten 150 Beiträgen des Kontos
+ *               steht er nicht (Graph-API business_discovery, 2026-11-02). Datum
+ *               ist deshalb der Eingangstag. Gekürzt auf 9,6 s als nahtloser
+ *               Loop, 4:5 mit dem vollen Bild in der Mitte (ein 4:5-Ausschnitt
+ *               hätte die Schrift der Story mitten in der Zeile geschnitten),
+ *               ohne Ton. `autoplay: true`: die Kachel spielt von selbst
+ *               (GimmickKachel in IgTestimonialSlideshow.jsx).
+ *
+ * DIE REIHENFOLGE AUF DER SEITE kommt seit 2026-11-02 aus dem Code, nicht aus
+ * dieser Liste: die Kakao-Seiten setzen `ordnung="datum"`, die Komponente
+ * stellt das jüngste `datum` nach vorn und nie dieselbe Person direkt neben
+ * sich selbst (Christian 02.11.2026). Wer eine Kachel ergänzt, trägt also nur
+ * ein richtiges `datum` ein.
+ *
  * NUTZUNGSRECHTE: Christian 2026-09-12, wörtlich: "Für die anderen Reels
  * haben wir auch die vollen Rechte." Für die Stimmen aus EL-20261026-db3cc728
  * bestätigt Elina, dass die Einverständnisse der Personen vorliegen.
@@ -39,6 +56,9 @@
  *                (die Komponente blättert sie; `posterPfad` = erstes Bild)
  *  anzeige       von der Komponente NICHT gelesen: das Original ist auf
  *                Instagram als "Anzeige" gekennzeichnet.
+ *  autoplay      true: Gimmick-Kachel, spielt stumm in Schleife von selbst
+ *                (Christian 02.11.2026), ohne Play-Knopf.
+ *  person        optional: dieselbe Person unter zwei Konten (Datums-Ordnung).
  *
  * ==================== DAS POSTER TRAEGT EINE BREITE ====================
  * (Job 20260927-crystal-kaufseiten-schicken-dem-telefon-keine-desktop-pixel)
@@ -61,6 +81,26 @@
  * Play bei EINEM Abruf.
  */
 export const IG_TESTIMONIALS = [
+  {
+    code: 'geldhelden-story-20261102',
+    produkt: 'Kakao',
+    stufe: 'T1',
+    typ: 'story',
+    konto: 'geldhelden_org',
+    profil: 'geldhelden_org',
+    profilUrl: 'https://www.instagram.com/geldhelden_org/',
+    verifiziert: true,
+    video: true,
+    datum: '2026-11-02',
+    sprache: 'de',
+    posterPfad:
+      'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/qb-ig-testimonials--cc-kakao-stimme-geldhelden-org-poster--c39edc2afa32.jpg?v=1793619195&width=600',
+    inDerReihe: true,
+    videoUrl:
+      'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/qb-ig-testimonials--cc-kakao-stimme-geldhelden-org--1d333f86add0.mp4?v=1793619176',
+    autoplay: true,
+    anzeige: false,
+  },
   {
     code: 'DUY4iOojqSh',
     produkt: 'Kakao',

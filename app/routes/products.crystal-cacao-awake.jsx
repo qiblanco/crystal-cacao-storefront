@@ -352,7 +352,9 @@ export default function Product() {
       */}
       {/* Baustein wie /products/qibracelet (Elina, EL-20261026-074aa739): runde
           Pfeile + "weiterwischen" unter der Bahn, keine Karussell-Bauart. */}
-      <IgTestimonialSlideshow produkt="Kakao" />
+      {/* ordnung="datum": jüngster Beitrag zuerst, nie dieselbe Person direkt
+          nebeneinander (Christian 02.11.2026). */}
+      <IgTestimonialSlideshow produkt="Kakao" ordnung="datum" />
       {/* AMAZON-STIL (Grossjob 20260930-GROSSJOB-amazonstil-crystal-cacao-...,
           s04): dieselben Bausteine wie qiblanco.com (s03), byte-gleich
           uebernommen. Direkt nach den Instagram-Stimmen der Sortenvergleich mit
