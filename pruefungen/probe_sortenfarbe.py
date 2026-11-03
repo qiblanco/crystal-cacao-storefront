@@ -29,10 +29,19 @@ VIER ARME, jeder waere allein blind:
 ZUSAGE OHNE ZAEHLER-PIN: es steht bewusst nirgends "3 Seiten geprueft". Die
 Zahl der Routen darf wachsen, ohne die Probe rot zu faerben.
 
+MESSORT: Standard ist die LIVE-Seite des Kakao-Ladens (Domain aus der
+Shop-Landkarte storefront-messung, nicht getippt). Bis 2026-10-31 war es
+http://localhost:3399 — einen dev-Server dort startete im stehenden Lauf
+niemand, die Probe meldete deshalb vom 2026-10-12 an nur noch MESSAUSFALL
+(Job 20261031-messblind-bin-kontrast-sweep). Eine Vorschau misst weiter mit
+CC_BASIS=http://localhost:<port>. Kennung des Messverkehrs: der interne
+Marker-UA (sm.marker_ua), kein getarnter Browser.
+
 EXIT
   0 = alles gehalten
   1 = BEFUND
-  4 = MESSAUSFALL (dev-Server aus, Browser fehlt) — ausdruecklich NICHT gruen
+  4 = MESSAUSFALL (Seite nicht erreichbar, falscher Shop, Browser fehlt) —
+      ausdruecklich NICHT gruen
 """
 import json
 import os
@@ -42,7 +51,19 @@ import tempfile
 import urllib.error
 import urllib.request
 
-BASIS = os.environ.get("CC_BASIS", "http://localhost:3399")
+# Shop-Landkarte statt Domain-Literal (wie probe_sorten_eine_seite.py).
+sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+try:
+    import storefront_messung as sm          # noqa: E402
+except Exception as _sm_fehlt:               # Landkarte fehlt -> MESSAUSFALL, nie Befund
+    print("MESSAUSFALL: storefront_messung nicht ladbar (%s)" % _sm_fehlt,
+          file=sys.stderr)
+    raise SystemExit(4)
+
+SHOP = "crystal"
+ZWECK = "probe_sortenfarbe"
+BASIS = os.environ.get("CC_BASIS", f"https://{sm.shop(SHOP).domain}").rstrip("/")
+UA = sm.marker_ua(ZWECK)
 
 # Erwartung aus der Messung an den Verpackungsbildern
 # (pruefungen/farbmessung_verpackung.py, Werte im Kopf von kakao-seiten.css).
@@ -124,14 +145,38 @@ def hue_abstand(a, b):
 
 def erreichbar():
     try:
-        with urllib.request.urlopen(BASIS + NEUTRAL, timeout=10) as r:
+        req = urllib.request.Request(BASIS + NEUTRAL, headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
             return r.status == 200
     except Exception:
         return False
 
 
+def html_sorte(html):
+    """Wert von data-cc-sorte am <html>-Tag, sonst None.
+
+    NUR das Wurzel-Tag zaehlt: die Startseite traegt data-cc-sorte seit dem
+    Sortenwahl-Umbau an Knoepfen, Folien und Legende (gemessen 2026-10-31).
+    Ein Teilstring-Treffer im ganzen Dokument war dort ein Fehlalarm und auf
+    den Sortenseiten blind: verloere <html> die Kennung, hielte ein Knopf im
+    Rumpf den Arm trotzdem gruen."""
+    import re
+    m = re.search(r"<html\b[^>]*>", html, re.I)
+    if not m:
+        return None
+    a = re.search(r"\sdata-cc-sorte=\"([^\"]*)\"", m.group(0))
+    return a.group(1) if a else None
+
+
 def hole_html(pfad):
-    with urllib.request.urlopen(BASIS + pfad, timeout=20) as r:
+    if BASIS.startswith("https://"):
+        # Identitaets-Tor am Server-HTML: ein stiller Shop-Wechsel (HTTP 200,
+        # fremdes Dokument) wirft hier und wird MESSAUSFALL, nie Befund. Am
+        # gerenderten DOM ginge das nicht: dort fehlt nach der Hydrierung
+        # data-qb-region (gemessen 2026-10-31).
+        return sm.hole_url(BASIS + pfad, SHOP, zweck=ZWECK, timeout=20).text
+    req = urllib.request.Request(BASIS + pfad, headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=20) as r:
         return r.read().decode("utf-8", "replace")
 
 
@@ -142,7 +187,9 @@ def messe_dom(pfad):
     with sync_playwright() as p:
         b = p.chromium.launch(args=["--no-sandbox"])
         try:
-            pg = b.new_page(viewport={"width": 1280, "height": 900})
+            ctx = sm.kontext(b, SHOP, zweck=ZWECK,
+                             viewport={"width": 1280, "height": 900})
+            pg = ctx.new_page()
             pg.goto(BASIS + pfad, wait_until="networkidle", timeout=45000)
             return pg.evaluate(js)
         finally:
@@ -153,8 +200,7 @@ def main():
     befunde = []
 
     if not erreichbar():
-        print(f"MESSAUSFALL: {BASIS} nicht erreichbar. "
-              f"Erst `npm run dev -- --port 3399` starten.", file=sys.stderr)
+        print(f"MESSAUSFALL: {BASIS}{NEUTRAL} nicht erreichbar.", file=sys.stderr)
         return 4
 
     # --- Arm A: die Naht SSoT -> Server-Render -----------------------------
@@ -165,8 +211,8 @@ def main():
         except Exception as ex:
             print(f"MESSAUSFALL: {cfg['pfad']} nicht ladbar ({ex})", file=sys.stderr)
             return 4
-        marke = f'data-cc-sorte="{sorte}"'
-        ok = marke in html
+        marke = f'<html data-cc-sorte="{sorte}">'
+        ok = html_sorte(html) == sorte
         print(f"    {cfg['pfad']:38} {marke:28} {'OK' if ok else 'FEHLT'}")
         if not ok:
             befunde.append(f"[A] {cfg['pfad']}: {marke} fehlt im Server-HTML — "
@@ -176,7 +222,7 @@ def main():
     except Exception as ex:
         print(f"MESSAUSFALL: {NEUTRAL} nicht ladbar ({ex})", file=sys.stderr)
         return 4
-    if "data-cc-sorte=" in html_n:
+    if html_sorte(html_n) is not None:
         befunde.append(f"[A] {NEUTRAL}: traegt eine Sorten-Kennung, obwohl die "
                        f"Uebersicht beide Sorten zeigt und neutral bleiben soll.")
     else:
