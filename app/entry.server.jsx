@@ -247,6 +247,10 @@ export default async function handleRequest(
       // Assets, gemessen 2026-10-04). Derselbe Anbieter wie das vorbelegte
       // monorail-edge.shopifysvc.com; qiblanco.com traegt ihn seit 2026-09-18.
       'https://otlp-http-production.shopifysvc.com',
+      // Anmelde-Endpunkt des Mail Managers: die versteckte Testseite /pages/mm-formular-test sendet direkt aus dem
+      // Browser, damit die echte Anmelde-IP im Einwilligungsnachweis steht (Elina EL-20261103-20462087). qiblanco.com
+      // traegt denselben Host. Die bestehenden Formulare dieses Ladens brauchen ihn nicht.
+      'https://anmelden.dienst.qiblanco.com',
     ],
 
     /*
