@@ -1,7 +1,8 @@
 // app/routes/pages.mm-formular-test.tsx
 // Versteckte Testseite des Mail-Manager-Formulars auf crystal-cacao.com (Elina, GO vom 03.11.2026): nicht verlinkt, noindex,
 // nicht in der Sitemap. Ersetzt kein bestehendes Formular. Der Browser sendet direkt an den Endpunkt, damit die echte
-// Anmelde-IP im Einwilligungsnachweis steht.
+// Anmelde-IP im Einwilligungsnachweis steht. Die Formular-Route /api/mm-formular gibt es hier bewusst nicht (der Netzrand
+// ließe sie nicht durch); die Seite braucht deshalb JavaScript, was für eine Testseite genügt.
 // Rückbau: diese Datei und app/styles/mm-formular-test.css löschen, alles andere stört ohne Aufrufer nicht.
 import {MailManagerFormular} from '../components/MailManagerFormular';
 import * as F21 from '../components/formulare/KakaoKursNachbauCcEintragKakaoFormular';
