@@ -103,12 +103,35 @@ import {istBrutto} from '~/lib/preismodus';
  *      wenn die Einzelzeile liegt.
  * 2. und 3. nur auf Wunsch des Aufrufers: der Kakao-Laden ruft sie,
  * qiblanco.com fragt wie bisher. Kill-Schalter für 3.: env KAKAO_SET_DIREKT=off.
+ *
+ * CODES MIT EINZELWEG (Christian 05.11.2026, ROBINKAKAO: 40 € je Packung, egal
+ * wie viele). Der Code gilt nur auf den Einzelpackungen, auf einem Set greift
+ * er nicht (gemessen: 3x im Laden 159 € statt 120 €). Liegt er im Warenkorb,
+ * bleibt die Kakao-Menge deshalb als Einzelzeilen: Schritt 1 läuft, Schritt 2
+ * entfällt. Seine Eingabe löst ein liegendes Set auf, sein Entfernen legt das
+ * Set wieder. Andere Codes lösen hier nichts aus, ihr Warenkorb bleibt centgleich:
+ * eine Code-Aktion wirkt nur mit codeWirkt, das kakaoCodeAktionWirkt vorher bestimmt.
+ * Gilt der Code auf den Einzelzeilen nicht (abgelaufen, deaktiviert), zählt der
+ * Warenkorb wie ohne Code. Die Liste steht nur in dieser .server-Datei und
+ * erreicht den Browser nie.
  */
 const ZEILEN_AKTIONEN = new Set([
   CartForm.ACTIONS.LinesAdd,
   CartForm.ACTIONS.LinesUpdate,
   CartForm.ACTIONS.LinesRemove,
 ]);
+
+export const KAKAO_EINZELWEG_CODES = ['ROBINKAKAO'];
+
+/** Steht dieser Code auf der Einzelweg-Liste? (groß/klein egal) */
+export function istKakaoEinzelwegCode(code) {
+  return KAKAO_EINZELWEG_CODES.includes(String(code ?? '').trim().toUpperCase());
+}
+
+// Neben einer fremden Kakao-Zeile plant kakaoZeilenPlan nur Schritt 1 und kein
+// Set. Genau das braucht der Einzelweg, also fragt er mit dieser Zeile. Sie
+// erscheint nie im Plan: fremde Zeilen werden nicht mitgerechnet.
+const NUR_SCHRITT_1 = {handle: 'crystal-cacao-einzelweg'};
 
 // Bewusst ohne #graphql-Kennung: diese Abfragen gehören nicht in die
 // Codegen-Typen (storefrontapi.generated.d.ts bleibt unberührt).
@@ -158,6 +181,10 @@ ${KAKAO_HANDLES.map(
 const ZEILEN_QUERY = `
   query KakaoSetZeilen($cartId: ID!) {
     cart(id: $cartId) {
+      discountCodes {
+        code
+        applicable
+      }
       lines(first: 100) {
         nodes {
           id
@@ -276,13 +303,20 @@ function zeileAusKnoten(z) {
   };
 }
 
-async function zeilenLesen(storefront, cartId, messung) {
+async function korbLesen(storefront, cartId, messung) {
   zaehle(messung, 'abfragen');
   const {cart} = await storefront.query(ZEILEN_QUERY, {
     variables: {cartId},
     cache: storefront.CacheNone(),
   });
-  return (cart?.lines?.nodes || []).map(zeileAusKnoten);
+  return {
+    zeilen: (cart?.lines?.nodes || []).map(zeileAusKnoten),
+    codes: cart?.discountCodes || [],
+  };
+}
+
+async function zeilenLesen(storefront, cartId, messung) {
+  return (await korbLesen(storefront, cartId, messung)).zeilen;
 }
 
 /*
@@ -306,6 +340,72 @@ function zeilenAusAntwort(result) {
 
 async function zeilenNach(storefront, result, messung) {
   return zeilenAusAntwort(result) ?? (await zeilenLesen(storefront, result.cart.id, messung));
+}
+
+/** Zeilen und Codes: aus der Antwort, wenn sie beides trägt, sonst eine Abfrage. */
+async function korbNach(storefront, result, messung) {
+  const zeilen = zeilenAusAntwort(result);
+  const codes = result?.cart?.discountCodes;
+  const codesLesbar =
+    Array.isArray(codes) && codes.every((c) => typeof c?.applicable === 'boolean');
+  if (zeilen && codesLesbar) return {zeilen, codes};
+  return korbLesen(storefront, result.cart.id, messung);
+}
+
+const einzelwegCodes = (codes) => codes.filter((c) => istKakaoEinzelwegCode(c?.code));
+const einzelwegGilt = (codes) => einzelwegCodes(codes).some((c) => c.applicable);
+
+/**
+ * VOR dem Code-Update fragen: soll diese Code-Aktion die Kakao-Zeilen neu ordnen?
+ * Ja, wenn ein Code der Einzelweg-Liste dabei ist oder die Liste leer wird und
+ * vorher einer lag. Nur der zweite Fall kostet eine Abfrage, und nur beim
+ * Entfernen. Alles andere läuft wie ohne diesen Schritt.
+ * @param {{cart: any, storefront: any, codes: string[], messung?: object}} args
+ */
+export async function kakaoCodeAktionWirkt({cart, storefront, codes, messung}) {
+  if (codes.some(istKakaoEinzelwegCode)) return true;
+  const cartId = cart?.getCartId?.();
+  if (codes.length || !cartId || !storefront) return false;
+  try {
+    const korb = await korbLesen(storefront, cartId, messung);
+    return einzelwegCodes(korb.codes).length > 0;
+  } catch (fehler) {
+    warnen(`Codes vor dem Update nicht lesbar: ${fehler?.message || fehler}`);
+    return false;
+  }
+}
+
+/**
+ * Die zweite Sorte kam nicht in den Warenkorb, die erste steht schon auf ihrer
+ * Einzelform: die Zeilen zurück auf den Stand davor, sonst fehlen Packungen.
+ */
+async function einzelformAufheben({cart, storefront, cartId, zeilen, plan, messung}) {
+  const setzen = [];
+  for (const z of plan.einzelform) {
+    const vorher = zeilen.find((x) => x.id === z.id);
+    const v = vorher && (await variante(storefront, vorher.handle, messung));
+    if (!v) return null;
+    setzen.push({id: z.id, merchandiseId: v.id, quantity: vorher.quantity});
+  }
+  const wieder = [];
+  for (const id of plan.entfernen) {
+    const vorher = zeilen.find((x) => x.id === id);
+    const v = vorher && (await variante(storefront, vorher.handle, messung));
+    if (!v) return null;
+    wieder.push({merchandiseId: v.id, quantity: vorher.quantity});
+  }
+  let r = null;
+  if (setzen.length) {
+    zaehle(messung, 'mutationen');
+    r = await cart.updateLines(setzen, {cartId});
+    if (gescheitert(r)) return null;
+  }
+  if (wieder.length) {
+    zaehle(messung, 'mutationen');
+    r = await cart.addLines(wieder, {cartId});
+    if (gescheitert(r)) return null;
+  }
+  return r;
 }
 
 /**
@@ -418,7 +518,10 @@ async function normalformDirekt({cart, storefront, cartId, zeilen, kandidat, mes
 
 /**
  * @param {{cart: any, storefront: any, env?: Record<string, string>,
- *   action: string, result: any, direkt?: boolean, messung?: object}} args
+ *   action: string, result: any, codeWirkt?: boolean, direkt?: boolean,
+ *   messung?: object}} args
+ *   action: Zeilen-Aktion oder DiscountCodesUpdate.
+ *   codeWirkt: Eine Code-Aktion wirkt nur damit, siehe kakaoCodeAktionWirkt.
  *   direkt: Weg 3 (Festbetrag-Anker in einer Mutation), nur auf Wunsch.
  *   messung: zählt Mutationen und Abfragen dieses Schritts mit.
  */
@@ -428,17 +531,25 @@ export async function legeKakaoSetZeile({
   env,
   action,
   result,
+  codeWirkt = false,
   direkt = false,
   messung,
 }) {
   const cartId = result?.cart?.id;
   if (!cartId || !storefront || aus(env)) return result;
-  if (!ZEILEN_AKTIONEN.has(action)) return result;
+  const codeAktion = action === CartForm.ACTIONS.DiscountCodesUpdate;
+  if (!ZEILEN_AKTIONEN.has(action) && !(codeAktion && codeWirkt)) return result;
 
   let neu = result;
   try {
-    let zeilen = await zeilenNach(storefront, result, messung);
-    let plan = kakaoZeilenPlan(zeilen);
+    const korb = await korbNach(storefront, result, messung);
+    let {zeilen} = korb;
+    let einzelweg = einzelwegCodes(korb.codes).length > 0;
+    let plan = kakaoZeilenPlan(einzelweg ? [...zeilen, NUR_SCHRITT_1] : zeilen);
+    if (einzelweg && !plan && !einzelwegGilt(korb.codes)) {
+      einzelweg = false;
+      plan = kakaoZeilenPlan(zeilen);
+    }
     if (!plan) return result;
 
     // Weg 3: steht der Festbetrag-Anker fest, die Soll-Zeilen gleich an Ort.
@@ -485,8 +596,8 @@ export async function legeKakaoSetZeile({
       if (aendern.length) {
         zaehle(messung, 'mutationen');
         const r = await cart.updateLines(aendern, {cartId});
-        if (!r?.cart || r?.errors?.length) {
-          warnen(`Einzelform gescheitert: ${JSON.stringify(r?.errors || [])}`);
+        if (gescheitert(r)) {
+          warnen(`Einzelform gescheitert: ${JSON.stringify(r?.errors || r?.userErrors || [])}`);
           return neu;
         }
         neu = r;
@@ -494,14 +605,25 @@ export async function legeKakaoSetZeile({
       if (anlegen.length) {
         zaehle(messung, 'mutationen');
         const r = await cart.addLines(anlegen, {cartId});
-        if (!r?.cart || r?.errors?.length) {
-          warnen(`Einzelform (neue Zeile) gescheitert: ${JSON.stringify(r?.errors || [])}`);
-          return neu;
+        if (gescheitert(r)) {
+          warnen(`Einzelform (neue Zeile) gescheitert: ${JSON.stringify(r?.errors || r?.userErrors || [])}`);
+          if (!einzelweg) return neu;
+          return (
+            (await einzelformAufheben({cart, storefront, cartId, zeilen, plan, messung})) ?? neu
+          );
         }
         neu = r;
       }
-      if (!plan.kandidat) return neu;
-      zeilen = await zeilenNach(storefront, neu, messung);
+      if (einzelweg) {
+        const danach = await korbNach(storefront, neu, messung);
+        if (einzelwegGilt(danach.codes)) return neu;
+        zeilen = danach.zeilen;
+        plan = kakaoZeilenPlan(zeilen);
+        if (!plan?.kandidat) return neu;
+      } else {
+        if (!plan.kandidat) return neu;
+        zeilen = await zeilenNach(storefront, neu, messung);
+      }
     }
 
     // Schritt 2: die Einzelzeile(n) auf die Set-Zeile(n) umlegen, wenn das
