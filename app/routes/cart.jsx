@@ -9,6 +9,7 @@ import {
 } from '~/lib/cart-attribution.server';
 import {mergeCartAttributes} from '~/lib/checkout-tracking';
 import {
+  kakaoCodeAktionWirkt,
   kakaoPackungenEingabe,
   kakaoStepperDirekt,
   kakaoVariantenVorladen,
@@ -171,6 +172,7 @@ export async function action({request, context}) {
 
   let status = 200;
   let result;
+  let kakaoCodeWirkt = false;
 
   const zeilenAktion = [
     CartForm.ACTIONS.LinesAdd,
@@ -247,6 +249,11 @@ export async function action({request, context}) {
       // Combine discount codes already applied on cart
       discountCodes.push(...inputs.discountCodes);
 
+      kakaoCodeWirkt = await kakaoCodeAktionWirkt({
+        cart,
+        storefront,
+        codes: discountCodes,
+      });
       result = await cart.updateDiscountCodes(discountCodes);
       break;
     }
@@ -311,6 +318,7 @@ export async function action({request, context}) {
     env,
     action,
     result,
+    codeWirkt: kakaoCodeWirkt,
     direkt: true,
     messung: zaehlungSetzeile,
   });

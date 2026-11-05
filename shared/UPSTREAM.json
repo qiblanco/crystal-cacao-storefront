@@ -321,7 +321,7 @@
     {
       "upstream": "app/lib/kakao-set-zeile.server.js",
       "klasse": "K1",
-      "sha256": "53f0d4bb118c1641a08af0e184f195882a2a68e9f3fd5325fb9a80d394f9f62a"
+      "sha256": "01177dbec87559324520e0f45cc351c4d64f966145edf95bbbebc6fb1acc2fbb"
     },
     {
       "upstream": "app/lib/partnercode-daten.server.js",

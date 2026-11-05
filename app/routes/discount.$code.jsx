@@ -1,4 +1,8 @@
 import {redirect} from 'react-router';
+import {
+  istKakaoEinzelwegCode,
+  legeKakaoSetZeile,
+} from '~/lib/kakao-set-zeile.server';
 
 /**
  * Automatically applies a discount found on the url
@@ -13,7 +17,7 @@ import {redirect} from 'react-router';
  * @param {Route.LoaderArgs}
  */
 export async function loader({request, context, params}) {
-  const {cart} = context;
+  const {cart, env, storefront} = context;
   const {code} = params;
 
   const url = new URL(request.url);
@@ -35,7 +39,18 @@ export async function loader({request, context, params}) {
     return redirect(redirectUrl);
   }
 
-  const result = await cart.updateDiscountCodes([code]);
+  const gesetzt = await cart.updateDiscountCodes([code]);
+  // Ein Code mit Einzelweg löst ein liegendes Kakao-Set auf (kakao-set-zeile.server.js).
+  const result = istKakaoEinzelwegCode(code)
+    ? await legeKakaoSetZeile({
+        cart,
+        storefront,
+        env,
+        action: 'DiscountCodesUpdate',
+        result: gesetzt,
+        codeWirkt: true,
+      })
+    : gesetzt;
   const headers = cart.setCartId(result.cart.id);
 
   // Using set-cookie on a 303 redirect will not work if the domain origin have port number (:3000)
