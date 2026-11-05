@@ -204,6 +204,10 @@ export const CART_MUTATE_FRAGMENT = `
     id
     totalQuantity
     checkoutUrl
+    discountCodes {
+      code
+      applicable
+    }
     appliedGiftCards {
       id
     }
