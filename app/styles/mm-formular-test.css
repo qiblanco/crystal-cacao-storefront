@@ -57,10 +57,14 @@
   font-weight: 600;
   padding: 0.75rem 1.25rem;
   border: 0;
-  border-radius: 6px;
-  background: #1a1a1a;
+  border-radius: 10px;
+  background: #8b5e3c;
   color: #fff;
   cursor: pointer;
+}
+/* Kakao-Kit: Knopf und Hover aus dem Kit Crystal Cacao (Elina EL-20261106-709630e1, EL-20261106-8e06b852). */
+.mm-formular__knopf:hover {
+  background: #734c30;
 }
 .mm-formular__knopf:disabled {
   opacity: 0.6;
