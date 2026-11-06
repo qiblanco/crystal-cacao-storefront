@@ -69,8 +69,17 @@ import '@fontsource-variable/open-sans';
  *
  * Der Wert ist am LIVE ausgelieferten qiblanco.com gemessen
  * (`data-qpx-basis-endpoint`), nicht aus einer Konfigdatei abgeschrieben.
+ *
+ * NAHT-NACHZUG 2026-11-06 (Vorlage #1316, 23295b1e): eigene Domain statt
+ * sslip.io, wie auf beiden Global-Shops. Derselbe Receiver, Caddy fuehrt
+ * qpx.dienst.qiblanco.com als zweiten Namen; der sslip-Name bleibt erreichbar.
+ * Die Vorlage bildet dafuer die Workflow-Env beim Lesen ab
+ * (components/reusables/dienst-domain.js). Hier traegt die Konstante, weil
+ * dieser Laden keine PUBLIC_QPX_BASIS_ENDPOINT-Env bekommt; eine gesetzte Env
+ * bleibt reine Uebersteuerung. Gleicher Host im CSP connect-src
+ * (app/entry.server.jsx). Job 20261106-crystal-cacao-dienste-auf-eigene-domain-und-root-naht.
  */
-const QPX_BASIS_ENDPOINT_DEFAULT = 'https://qpx.65-108-150-121.sslip.io/b';
+const QPX_BASIS_ENDPOINT_DEFAULT = 'https://qpx.dienst.qiblanco.com/b';
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations

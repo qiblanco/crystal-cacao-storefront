@@ -102,7 +102,9 @@ import {refAusAufruf, wendePartnercodeAn} from '~/lib/partnercode.server';
  * PUBLIC_*-Variablen, ein Wert der NUR aus env kaeme waere hier
  * stumm.
  */
-const CSP_BERICHT_ZIEL_DEFAULT = 'https://qpx.65-108-150-121.sslip.io/csp-report';
+// Seit 2026-11-06 eigene Domain statt sslip.io (wie Vorlage #1316); derselbe
+// Empfaenger, CORS fuer https://crystal-cacao.com vorher gemessen (204).
+const CSP_BERICHT_ZIEL_DEFAULT = 'https://qpx.dienst.qiblanco.com/csp-report';
 
 /**
  * Meldeziel aufloesen. Leer oder 'off' = kein Report-Only-Kopf.
@@ -228,7 +230,10 @@ export default async function handleRequest(
      * dafuer waere eine Erlaubnis ohne Benutzer.
      */
     connectSrc: [
-      'https://qpx.65-108-150-121.sslip.io',
+      // Seit 2026-11-06 eigene Domain (wie Vorlage #1316), derselbe Host wie
+      // QPX_BASIS_ENDPOINT_DEFAULT in app/root.jsx. Die Zitate oben nennen
+      // noch den alten Namen, weil sie die Messung vom 2026-09-17 wiedergeben.
+      'https://qpx.dienst.qiblanco.com',
       // UpPromote-Affiliate-Pixel (Job
       // rtbefund-uppromote-kakao-flaeche-wache-20260929). STELLE 2 VON 2 zu
       // scriptSrc unten. GELADEN wird collect.js von static-pixel., GESENDET
