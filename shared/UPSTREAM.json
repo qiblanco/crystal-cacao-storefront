@@ -2,7 +2,7 @@
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
   "upstream_commit": "3f4b94e70cc4d9bc79a6584377c0a44a46a698be",
-  "erzeugt_utc": "2026-11-06T12:33:57Z",
+  "erzeugt_utc": "2026-11-06T12:42:22Z",
   "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 3f4b94e70cc4; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 3f4b94e70cc4). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
@@ -353,12 +353,12 @@
     {
       "upstream": "app/components/reusables/KakaoTiefe.jsx",
       "klasse": "K1",
-      "sha256": "d3c87e14f7d606bedb419badd7767f9b8d181fe6afcdcd85030683d2584dba1e"
+      "sha256": "d6d72e39b047258e091b4246e64122cf6bb2361a3ffa91c1a66153a188c723ed"
     },
     {
       "upstream": "app/components/reusables/kakao-tiefe-daten.js",
       "klasse": "K1",
-      "sha256": "f7791e8111a0cdd6ca031314b005d5208da7bedbfe7ec29db9a4acc1e3464160"
+      "sha256": "ecaa323997e51b39a5f48825bd92d3f87b77d7167137abdbde6c6175e76b6aa1"
     },
     {
       "upstream": "app/styles/kakao-tiefe.css",

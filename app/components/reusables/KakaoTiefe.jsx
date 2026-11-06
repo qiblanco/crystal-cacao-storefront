@@ -4,6 +4,7 @@ import {
   KT_LOQ,
   KT_MINERALSTOFFE,
   KT_PROFIL,
+  KT_REEL,
   KT_SORTEN,
   KT_TEXTE,
 } from './kakao-tiefe-daten';
@@ -436,12 +437,85 @@ function Zubereitung({sprache}) {
             </ol>
             <p className="kt-hinweis">{t.hinweis}</p>
           </div>
-          <figure className="kt-bild">
-            <img {...bildAttr(KT_BILDER.kristall, SIZES_HALB)} alt={t.alt} loading="lazy" decoding="async" />
-          </figure>
+          <Reel t={t} />
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * Annas Reel statt des Bohnenbilds (Z13-Z15, Daten KT_REEL). Hochformat 9:16.
+ * preload="none": vor dem Klick lädt nur das Titelbild; die mp4 steht trotzdem
+ * im Server-HTML. Kein Zustand, kein Effekt: die native Steuerung spielt ab,
+ * so stimmt der Baustein auch als statisches HTML (US-Abschrift).
+ */
+/**
+ * Startknopf über dem Titelbild. Die native Steuerung des Handys zeigt beim
+ * ersten Tipp nur ihre Leiste, ein Startknopf fehlt (gemessen 06.11. an der
+ * Vorschau, Chromium 390 px). Christian: "wenn man da eben draufklickt, die
+ * bei uns sauber abgespielt werden" (Z18).
+ * K1 bleibt ohne Zustand und ohne Effekt: der Ref-Callback setzt nach dem
+ * Hydrieren data-kt-bereit am Rahmen, erst dann zeigt das CSS den Knopf. Im
+ * statischen HTML der US-Abschrift läuft kein Callback, dort fehlt der Knopf
+ * und die native Steuerung trägt allein. Läuft das Video (auch über die
+ * native Steuerung gestartet), setzt onPlay data-kt-spielt, der Knopf geht.
+ */
+function bereit(el) {
+  if (!el) return;
+  el.setAttribute('data-kt-bereit', '');
+  // `hidden` fällt nur, wo kakao-tiefe.css den Knopf gestaltet (position: absolute); im Spiegel
+  // fehlt die Regel bis zum k1-nachzug, dort bleibt er verborgen und die Videosteuerung trägt.
+  const knopf = el.querySelector('.kt-reel__start');
+  if (knopf && getComputedStyle(knopf).position === 'absolute') knopf.hidden = false;
+}
+
+function spielt(e) {
+  e.currentTarget.parentElement?.setAttribute('data-kt-spielt', '');
+}
+
+function starte(e) {
+  const v = e.currentTarget.parentElement?.querySelector('video');
+  if (!v) return;
+  const p = v.play();
+  if (p && typeof p.catch === 'function') p.catch(() => {});
+}
+
+// Radius und Verbergen des Startknopfs stehen bewusst AM ELEMENT: im Spiegel (#ccsp, Awake auf
+// qiblanco.com) setzt isolation.css alles zurück, und die K1-Stile kommen dort aus dem Crystal-Bau,
+// der .kt-reel erst nach dem k1-nachzug kennt. Ohne Radius stand die Videokante sichtbar auf der
+// Fläche (Sicht-Tor medien_kante 06.11.2026), ohne `hidden` ein ungestalteter Knopf. Auf den
+// eigenen Kaufseiten nimmt bereit() das `hidden` wieder weg.
+function Reel({t}) {
+  const r = KT_REEL;
+  return (
+    <figure className="kt-bild kt-reel">
+      <div className="kt-reel__rahmen" ref={bereit}>
+        <video
+          className="kt-reel__video"
+          controls
+          playsInline
+          preload="none"
+          poster={`${r.posterUrl}&width=720`}
+          width={r.breite}
+          height={r.hoehe}
+          aria-label={t.reel_titel}
+          onPlay={spielt}
+          style={{borderRadius: 'var(--kt-radius)'}}
+        >
+          <source src={r.videoUrl} type="video/mp4" />
+        </video>
+        <button type="button" className="kt-reel__start" onClick={starte} aria-label={t.reel_start} hidden>
+          <span className="kt-reel__dreieck" aria-hidden="true" />
+        </button>
+      </div>
+      <figcaption>
+        {t.reel_titel}{' '}
+        <a className="kt-link" href={r.permalink} target="_blank" rel="noopener noreferrer">
+          {t.reel_link}
+        </a>
+      </figcaption>
+    </figure>
   );
 }
 

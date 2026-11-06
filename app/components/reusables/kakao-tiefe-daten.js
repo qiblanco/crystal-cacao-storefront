@@ -164,6 +164,9 @@ export const KT_TEXTE = Object.freeze({
       ],
       hinweis: 'Eine 420-g-Tafel reicht für 28 Tassen.',
       alt: 'Das Kristallmuster einer Crystal-Cacao-Tafel',
+      reel_titel: 'Anna zeigt dir ihre Zubereitung im Video.',
+      reel_link: 'Auf Instagram ansehen',
+      reel_start: 'Video abspielen',
     },
     belege: {
       augenbraue: 'Studien und Belege',
@@ -261,6 +264,9 @@ export const KT_TEXTE = Object.freeze({
       ],
       hinweis: 'One 14.8 oz bar makes 28 cups.',
       alt: 'The crystal pattern of a Crystal Cacao bar',
+      reel_titel: 'Anna shows you how she makes her cup.',
+      reel_link: 'Watch on Instagram',
+      reel_start: 'Play video',
     },
     belege: {
       augenbraue: 'Studies and evidence',
@@ -277,6 +283,34 @@ export const KT_TEXTE = Object.freeze({
       seiten: '{n} pages',
     },
   }),
+});
+
+/**
+ * Annas Zubereitungs-Reel (Akt 5). Christian 01.11.2026 (Grossjob 20261101-
+ * GROSSJOB-crystal-cacao-apple-stil-1zu1-spiegel-videos-selbst-hosten-r2, Z13-Z15):
+ * "dass das Zubereitungsvideo von Anna verlinkt wird. Von meiner Frau Anna.
+ * Von Instagram." Es ersetzt das Bohnenbild unter den drei Schritten.
+ *
+ * Die Werte sind die von crystal-cacao-node/repo/app/data/zubereitung-reel.js
+ * (Job 20261030-crystal-cacao-zubereitung-reiter-reel-design-99): eigener Kanal
+ * @crystal.cacao, mp4 (9,6 MB, faststart) und Titelbild auf dem Shopify-CDN,
+ * Dauer und Masse per ffprobe. Kein Neu-Upload. Sie stehen HIER und nicht in
+ * einem Import, weil KakaoTiefe K1 ist und nur diese Datei mitnimmt (k1-nachzug,
+ * US-Abschrift per renderToStaticMarkup).
+ *
+ * Abgespielt wird bei uns: <video preload="none" poster>, die mp4-Adresse
+ * steht im Server-HTML (Naht-Vertrag §4.2), geladen wird sie erst beim Klick.
+ * Der Link zu Instagram ist ein Link, kein Embed.
+ */
+const REEL_CDN = 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/';
+export const KT_REEL = Object.freeze({
+  code: 'Dd6WjfouvDW',
+  permalink: 'https://www.instagram.com/reel/Dd6WjfouvDW/',
+  dauerSekunden: 46,
+  breite: 720,
+  hoehe: 1280,
+  videoUrl: `${REEL_CDN}qb-cc-zubereitung--reel-dd6wjfouvdw--6782d48fdf77.mp4?v=1793345051`,
+  posterUrl: `${REEL_CDN}qb-cc-zubereitung--reel-poster--68ce2f9aa3e2.jpg?v=1793345055`,
 });
 
 // >>> KT_MINERALSTOFFE (erzeugt von crystal-cacao-node/bin/kakao-tiefe-mineralblock, nicht von Hand ändern)
