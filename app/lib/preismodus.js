@@ -117,9 +117,14 @@ export function uebernehmeMetafeld(wert) {
 }
 
 /**
- * Liest das Metafeld über die Storefront-API (kurzer Cache: der Kipp soll
- * binnen rund einer Minute ankommen) und setzt den Modus. Wirft nie — ein
- * Lesefehler fällt auf die Reihenfolge im Kopf zurück.
+ * Liest das Metafeld über die Storefront-API und setzt den Modus. Wirft nie —
+ * ein Lesefehler fällt auf die Reihenfolge im Kopf zurück.
+ *
+ * CACHE 30 s frisch + 3600 s stale (Ladezeiten-Grossjob, M1): die Abfrage steht
+ * vor jedem Loader, ein Fehlschlag an einer ruhigen Kante verzögerte die ganze
+ * Seite um einen Rundweg. Preis dafür: nach einem Kipp sieht der erste Aufruf
+ * je Kante noch den alten Modus und stößt die Erneuerung an, der nächste sieht
+ * den neuen. Eine Kante ohne Aufruf seit über 3630 s liest direkt frisch.
  * @param {any} storefront Hydrogen-Storefront-Client
  */
 export async function ladePreismodus(storefront) {
@@ -130,7 +135,7 @@ export async function ladePreismodus(storefront) {
         ? storefront.CacheCustom({
             mode: 'public',
             maxAge: 30,
-            staleWhileRevalidate: 30,
+            staleWhileRevalidate: 3600,
           })
         : undefined;
     const data = await storefront.query(PREISMODUS_QUERY, {cache});
