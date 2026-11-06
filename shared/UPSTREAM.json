@@ -2,7 +2,7 @@
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
   "upstream_commit": "3f4b94e70cc4d9bc79a6584377c0a44a46a698be",
-  "erzeugt_utc": "2026-11-06T12:42:23Z",
+  "erzeugt_utc": "2026-11-06T12:54:20Z",
   "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 3f4b94e70cc4; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 3f4b94e70cc4). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
@@ -249,7 +249,7 @@
     {
       "upstream": "app/lib/pixel-content.js",
       "klasse": "K1",
-      "sha256": "2455ad289ba406960fa37589e91e2b47bee5f5c384c90bb9e47ca5166cefe812"
+      "sha256": "68ce2590068bb316d4f8abf3cca02cc74991b8addc09d1eab4cb108b15c1dd5e"
     },
     {
       "upstream": "app/lib/qpx-commerce.js",

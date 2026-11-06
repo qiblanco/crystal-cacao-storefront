@@ -66,3 +66,39 @@ export function viewContentPayload(data) {
     currency: data?.shop?.currency || 'EUR',
   };
 }
+
+/**
+ * Meta-Pixel-Payload für AddToCart aus dem Hydrogen-`product_added_to_cart`-Event.
+ *
+ * Job 20261019-addtocart-contents-wie-viewcontent-prio50-r2, aufgegangen in
+ * 20261031-meta-capi-luecken-dach-bau-ai-server-prio10: wie ViewContent trägt
+ * AddToCart jetzt `contents`. Die übrigen Felder sind der bisherige Inline-
+ * Payload aus MetaPixel.jsx, unverändert: content_ids, content_name,
+ * content_type, value = Stückpreis × Delta-Menge, currency, num_items.
+ * Hydrogen feuert das Event auch bei Mengen-Erhöhung, gezählt wird nur das
+ * Delta. `contents` trägt dieselbe ID wie content_ids, dieselbe Delta-Menge wie
+ * num_items und den Stückpreis.
+ *
+ * @param {{currentLine?: object, prevLine?: object, shop?: {currency?: string}}|undefined|null} data
+ * @returns {object|null} null ohne merchandise (Aufrufer feuert dann nicht)
+ */
+export function addToCartPayload(data) {
+  const line = data?.currentLine;
+  const merchandise = line?.merchandise;
+  if (!merchandise) return null;
+  const unitPrice = parseFloat(merchandise.price?.amount) || 0;
+  const quantity = Math.max(
+    (line.quantity || 1) - (data?.prevLine?.quantity || 0),
+    1,
+  );
+  const id = numericProductId(merchandise.product?.id);
+  return {
+    content_ids: [id].filter(Boolean),
+    contents: id ? [{id, quantity, item_price: unitPrice}] : [],
+    content_name: merchandise.product?.title,
+    content_type: 'product',
+    value: unitPrice * quantity,
+    currency: merchandise.price?.currencyCode || data?.shop?.currency || 'EUR',
+    num_items: quantity,
+  };
+}
