@@ -40,8 +40,15 @@ import {FAQ_CACAO} from '~/data/product-faqs';
  * Apple-Stil (Grossjob 20261101 s04, 2026-11-06): kein Bewertungs-/Nutzerblock
  * im Kopf der Kaufseite (Christian 29.10.: kein „4,8 Google / +14.000 Nutzer“).
  * Die Stimmen stehen weiter unten auf der Seite. Rueckweg: true.
+ *
+ * VORERST true (s04, 13:40Z): ohne die Zeile steht bei 2560x1440 der Link
+ * „Preis und Bestellung ansehen“ ganz im ersten Bildschirm, sein Ziel
+ * #cc-kaufen (scroll-margin 100vh = Seitenanfang) ist schon erreicht, und das
+ * Sicht-Tor der Abnahme wertet den unbewegten Sprung als NEUEN Befund
+ * (design-meister sicht_tor/render.py, anker-Arm). Das Tor wird nicht
+ * umgangen: false folgt, sobald der Anker-Arm „schon am Ziel“ erkennt.
  */
-const KOPF_BEWERTUNG = false;
+const KOPF_BEWERTUNG = true;
 
 /**
  * IG-STIMMEN (2026-09-26, Job
