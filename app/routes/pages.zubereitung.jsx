@@ -208,9 +208,30 @@ function zubereitungsGraph() {
     '@graph': [
       markenOrganisation(organizationSchema(), {origin: CANONICAL_ORIGIN}),
       brotkrume({url: SEITEN_URL, name: 'Zubereitung'}),
+      // Die Seite selbst (GEO R6, Seitentyp ratgeber: WebPage oder Article).
+      // Nur Sichtbares: Name = H1, Beschreibung = Meta, Bild = Crema-Schritt.
+      {
+        '@type': 'WebPage',
+        '@id': SEITEN_URL,
+        url: SEITEN_URL,
+        name: 'So bereitest du Crystal Cacao zu',
+        description: SEITEN_BESCHREIBUNG,
+        inLanguage: 'de-DE',
+        datePublished: isoMitZone(VEROEFFENTLICHT),
+        publisher: {'@id': ORG_ID},
+        breadcrumb: {'@id': `${SEITEN_URL}#brotkrume`},
+        mainEntity: {'@id': `${SEITEN_URL}#rezept`},
+        primaryImageOfPage: {
+          '@type': 'ImageObject',
+          url: TEILBILD.url,
+          width: TEILBILD.breite,
+          height: TEILBILD.hoehe,
+        },
+      },
       {
         '@type': 'Recipe',
         '@id': `${SEITEN_URL}#rezept`,
+        mainEntityOfPage: {'@id': SEITEN_URL},
         name: 'Crystal Cacao zubereiten',
         description: SEITEN_BESCHREIBUNG,
         url: SEITEN_URL,
@@ -296,8 +317,9 @@ function Aufmacher() {
           <p className="cc-zb-augenbraue">Zubereitung</p>
           <h1 id="cc-zb-titel">So bereitest du Crystal Cacao zu</h1>
           <p className="cc-zb-lead">
-            Abwiegen, aufgießen, mixen. Mehr braucht deine Tasse nicht. Im
-            Video zeigen wir dir unser tägliches Ritual.
+            Crystal Cacao bereitest du in wenigen Minuten zu: abwiegen,
+            aufgießen, mixen. Mehr braucht deine Tasse nicht. Im Video zeigen
+            wir dir unser tägliches Ritual.
           </p>
         </div>
         <ReelVideo />
