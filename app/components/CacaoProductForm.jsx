@@ -46,10 +46,18 @@ export function cacaoSizeOptions(selectedVariant, handle, land, staffelKasse) {
     const betragKurz = pricing.teilbar
       ? `je ${pricing.price}`
       : `${pricing.gesamt} für ${pricing.menge}`;
+    // KNAPPFASSUNG (Grossjob 20261101 s04, Christians Handy-Befund 01.11.:
+    // „… für 3 Packun“): in THB lief auch die Kurzfassung auf 360 px ueber
+    // (gemessen 294 px Text gegen 282 px Platz, „3x 420g | 29% Rabatt |
+    // 7.189 THB für 3“). Dieselben Angaben, nur der Rabatt als „−29%“ statt
+    // „29% Rabatt“. Preis und Menge bleiben Wort fuer Wort.
+    const rabattKnapp =
+      pricing.rabattProzent > 0 ? `−${pricing.rabattProzent}% | ` : '';
     return {
       value,
       label: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}${staffelBetragText(pricing)}${hinweis}`,
       kurz: `${value}x ${PACKUNG_GRAMM}g | ${rabatt}${betragKurz}${hinweisKurz}`,
+      knapp: `${value}x ${PACKUNG_GRAMM}g | ${rabattKnapp}${betragKurz}${hinweisKurz}`,
     };
   });
 }
@@ -63,9 +71,11 @@ export function cacaoSizeOptions(selectedVariant, handle, land, staffelKasse) {
  * Fassung (dort gibt es keine Breite); die kurze kommt erst, wenn die Messung
  * sagt, dass die lange nicht passt.
  */
-function useKurzfassung(selectRef, langeZeilen) {
-  const [kurz, setKurz] = useState(false);
-  const schluessel = langeZeilen.join('\n');
+function useKurzfassung(selectRef, fassungen) {
+  // fassungen: Zeilen je Stufe, von lang nach knapp. Ergebnis: die erste
+  // Stufe, deren laengste Zeile passt (sonst die letzte). 0 = lang.
+  const [stufe, setStufe] = useState(0);
+  const schluessel = fassungen.map((z) => z.join('\n')).join('\n\n');
   useEffect(() => {
     const s = selectRef.current;
     if (!s || typeof window === 'undefined') return undefined;
@@ -80,10 +90,18 @@ function useKurzfassung(selectRef, langeZeilen) {
         parseFloat(cs.paddingLeft) -
         parseFloat(cs.paddingRight);
       if (!(platz > 0)) return;
-      const breite = Math.max(
-        ...schluessel.split('\n').map((z) => ctx.measureText(z).width),
-      );
-      setKurz(breite > platz);
+      const stufen = schluessel.split('\n\n');
+      let wahl = stufen.length - 1;
+      for (let i = 0; i < stufen.length; i += 1) {
+        const breite = Math.max(
+          ...stufen[i].split('\n').map((z) => ctx.measureText(z).width),
+        );
+        if (breite <= platz) {
+          wahl = i;
+          break;
+        }
+      }
+      setStufe(wahl);
     };
     pruefe();
     // Die Hausschrift kann nach dem ersten Render nachladen und breiter sein
@@ -92,7 +110,7 @@ function useKurzfassung(selectRef, langeZeilen) {
     window.addEventListener('resize', pruefe);
     return () => window.removeEventListener('resize', pruefe);
   }, [selectRef, schluessel]);
-  return kurz;
+  return stufe;
 }
 
 /**
@@ -134,10 +152,11 @@ export function CacaoProductForm({
   const optionen = cacaoSizeOptions(selectedVariant, handle, marktLand, staffelKasse);
   const selectRef = useRef(null);
   const groesseId = useId();
-  const kurz = useKurzfassung(
-    selectRef,
+  const stufe = useKurzfassung(selectRef, [
     optionen.map((o) => o.label),
-  );
+    optionen.map((o) => o.kurz),
+    optionen.map((o) => o.knapp),
+  ]);
 
   return (
     <div className="product-form">
@@ -155,7 +174,7 @@ export function CacaoProductForm({
         >
           {optionen.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {kurz ? opt.kurz : opt.label}
+              {[opt.label, opt.kurz, opt.knapp][stufe]}
             </option>
           ))}
         </select>

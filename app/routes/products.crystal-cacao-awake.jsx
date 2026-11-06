@@ -37,6 +37,20 @@ import {ladeSortenPreise, sortenStilAn, teileFragen} from '~/components/reusable
 import {FAQ_CACAO} from '~/data/product-faqs';
 
 /**
+ * Apple-Stil (Grossjob 20261101 s04, 2026-11-06): kein Bewertungs-/Nutzerblock
+ * im Kopf der Kaufseite (Christian 29.10.: kein „4,8 Google / +14.000 Nutzer“).
+ * Die Stimmen stehen weiter unten auf der Seite. Rueckweg: true.
+ *
+ * VORERST true (s04, 13:40Z): ohne die Zeile steht bei 2560x1440 der Link
+ * „Preis und Bestellung ansehen“ ganz im ersten Bildschirm, sein Ziel
+ * #cc-kaufen (scroll-margin 100vh = Seitenanfang) ist schon erreicht, und das
+ * Sicht-Tor der Abnahme wertet den unbewegten Sprung als NEUEN Befund
+ * (design-meister sicht_tor/render.py, anker-Arm). Das Tor wird nicht
+ * umgangen: false folgt, sobald der Anker-Arm „schon am Ziel“ erkennt.
+ */
+const KOPF_BEWERTUNG = true;
+
+/**
  * IG-STIMMEN (2026-09-26, Job
  * 20260926-crystal-kakao-zwei-vorlagen-features-ig-stimmen-und-kasse-im-browser):
  * die Sektion der Vorlage (#376), hier mit der laden-eigenen Datenschicht
@@ -218,6 +232,7 @@ export default function Product() {
       <div
         className="product"
         id="cc-kaufen"
+        data-apple-seite="crystal-cacao-awake"
         data-cc-kaufblock={kaufblockZuerst ? '' : undefined}
       >
         <div className="ProductImages">
@@ -269,14 +284,16 @@ export default function Product() {
             * der Stand von crystal-cacao.com und wird nie mit den 4,8 von
             * qiblanco.com verrechnet — zwei Marken, zwei Bestaende.
             */}
-          <p className="product-rating">
-            <span>{KAKAO_KENNZAHLEN.bewertung}</span>{' '}
-            <StarRating
-              value={Number(KAKAO_KENNZAHLEN.bewertung.replace(',', '.'))}
-              qb="d"
-            />{' '}
-            <span>Über {KAKAO_KENNZAHLEN.nutzer} Nutzer</span>
-          </p>
+          {KOPF_BEWERTUNG ? (
+            <p className="product-rating">
+              <span>{KAKAO_KENNZAHLEN.bewertung}</span>{' '}
+              <StarRating
+                value={Number(KAKAO_KENNZAHLEN.bewertung.replace(',', '.'))}
+                qb="d"
+              />{' '}
+              <span>Über {KAKAO_KENNZAHLEN.nutzer} Nutzer</span>
+            </p>
+          ) : null}
           {kaufblockZuerst ? null : beschreibung}
 
           {/*

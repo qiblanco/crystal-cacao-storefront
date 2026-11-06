@@ -133,7 +133,7 @@ export default function ErfahrungenPage() {
   })).filter((f) => f.a);
 
   return (
-    <div className="cc-seite cc-seite--text cc-erfahrungen">
+    <div className="cc-seite cc-seite--text cc-erfahrungen" data-apple-seite="crystal-cacao-erfahrungen">
       <p className="cc-zurueck">
         <Link to="/">← Zurück zum Shop</Link>
       </p>

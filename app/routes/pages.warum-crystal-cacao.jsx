@@ -304,7 +304,7 @@ export function loader() {
 export default function WarumCrystalCacaoPage() {
   const foto = gruenderFotoQuellen(72, '72px');
   return (
-    <div className="cc-seite cc-seite--text cc-absicht">
+    <div className="cc-seite cc-seite--text cc-absicht" data-apple-seite="crystal-cacao-warum-crystal-cacao">
       <p className="cc-zurueck">
         <Link to="/">← Zurück zum Shop</Link>
       </p>
