@@ -508,6 +508,66 @@
   color: var(--kt-muted);
 }
 
+/* Annas Reel im Akt 5 (Grossjob 20261101 crystal-cacao-apple-stil, Z13-Z15).
+ * Hochformat 9:16, Handy zuerst: höchstens 20rem breit und mittig, damit das
+ * Video auf 360 px nicht ueber zwei Bildschirmhoehen wächst. Bild-Radius ist
+ * der eine Token --kt-radius; die Fläche hinter dem Titelbild ist --kt-dunkel. */
+.kt .kt-reel {
+  width: 100%;
+  max-width: 20rem;
+  margin-inline: auto;
+}
+.kt .kt-reel__video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+  border-radius: var(--kt-radius);
+  background: var(--kt-dunkel);
+}
+.kt .kt-reel figcaption {
+  text-align: center;
+}
+/* Startknopf: nur nach dem Hydrieren (data-kt-bereit), weg sobald das Video
+ * läuft (data-kt-spielt). Ein Gold, 64 px Tippziel, mittig auf dem Titelbild. */
+.kt .kt-reel__rahmen {
+  position: relative;
+}
+.kt .kt-reel__start {
+  display: none;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: var(--kt-space-6);
+  height: var(--kt-space-6);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--kt-gold);
+  color: var(--kt-dunkel);
+  cursor: pointer;
+  place-items: center;
+}
+.kt .kt-reel__rahmen[data-kt-bereit] .kt-reel__start {
+  display: grid;
+}
+.kt .kt-reel__rahmen[data-kt-spielt] .kt-reel__start {
+  display: none;
+}
+.kt .kt-reel__start:focus-visible {
+  outline: 2px solid var(--kt-dunkel);
+  outline-offset: 4px;
+}
+.kt .kt-reel__dreieck {
+  width: 0;
+  height: 0;
+  margin-left: var(--kt-space-1);
+  border-style: solid;
+  border-width: var(--kt-space-2) 0 var(--kt-space-2) var(--kt-space-3);
+  border-color: transparent transparent transparent currentColor;
+}
+
 .kt .kt-schritte {
   display: grid;
   gap: var(--kt-space-2);

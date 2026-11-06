@@ -2,7 +2,7 @@
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
   "upstream_commit": "3f4b94e70cc4d9bc79a6584377c0a44a46a698be",
-  "erzeugt_utc": "2026-11-06T12:54:19Z",
+  "erzeugt_utc": "2026-11-06T13:01:16Z",
   "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 3f4b94e70cc4; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 3f4b94e70cc4). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
@@ -363,7 +363,7 @@
     {
       "upstream": "app/styles/kakao-tiefe.css",
       "klasse": "K1",
-      "sha256": "3499f3104fbccf9872a882ae3775ba678dde79eb99d573724ba280b6871d2923"
+      "sha256": "9956a835e1b3f217af5e271d4b6c690d64f4a23cc04569d20e7a2e5c2d7a69fb"
     },
     {
       "upstream": "app/components/reusables/CdnBild.jsx",
