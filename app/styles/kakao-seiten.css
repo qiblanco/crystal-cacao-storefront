@@ -2249,7 +2249,8 @@ html[data-cc-sorte] main :is(p, li, dd, blockquote):not(:where(
  * einzige Ort, an dem beide Toene gleichzeitig sichtbar sind. Auf
  * --cc-flaeche: awake 4,50:1, create 4,52:1. */
 .cc-sortenkachel[data-cc-sorte] .product-item h4 {
-  color: var(--cc-sorte-text);
+  /* Apple-Stil (s04, 2026-11-06): Name in Tinte, die Sorte zeigt die Kante. */
+  color: var(--cc-dunkel);
 }
 
 /* Zustand/Handlung: die Kachel ist ein Link. Beim Zeigen faerbt sich die
@@ -4100,4 +4101,22 @@ main:has(> .cc-sortenaufmacher) > .cc-belege {
   .cc-zb-hinweis__bild {
     width: 6rem;
   }
+}
+
+/* APPLE-STIL AUF DEN SORTENSEITEN (Grossjob 20261101 s04, 2026-11-06).
+ * Die Sortenfarbe steht als Schrift genau einmal: im Claim unter dem Titel
+ * (probe_sortenfarbe Arm B). Gemessen standen auf Awake 11 weitere Schriften
+ * im Sortenton (Positionierung, Legende 2x, Profil 6x, Urstamm), und die
+ * design-rubrik zaehlte daraus eine zweite Farbwelt neben dem Gold. Die
+ * Sorte bleibt an Balken, Legendenfeld und Kanten sichtbar, die Namen stehen
+ * in Tinte. Die kt-Regeln selbst sind K1 (kakao-tiefe.css, byte-gleich zu
+ * qiblanco); dies ist die laden-eigene Schicht darueber, darum die hoehere
+ * Spezifitaet. Rueckweg: diesen Block streichen. */
+[data-cc-sorte] .kt .kt-legende__eintrag,
+[data-cc-sorte] .kt .kt-profil__sorte,
+[data-cc-sorte] .kt .kt-urstamm__name {
+  color: var(--cc-dunkel);
+}
+[data-cc-sorte] .cc-sortenaufmacher__positionierung {
+  color: var(--cc-muted);
 }

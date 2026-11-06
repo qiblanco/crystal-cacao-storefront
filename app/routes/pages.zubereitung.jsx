@@ -275,7 +275,7 @@ export function loader() {
 
 export default function ZubereitungPage() {
   return (
-    <div className="cc-zb">
+    <div className="cc-zb" data-apple-seite="crystal-cacao-zubereitung">
       <Aufmacher />
       <Werkzeug />
       <Schritte />

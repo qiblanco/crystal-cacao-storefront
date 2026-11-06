@@ -317,6 +317,15 @@
   font-size: var(--cc-fs-2);
   color: var(--cc-text);
 }
+/* APPLE-STIL, KEIN PREISANKER IM KOPF (Grossjob 20261101 s04, Christian
+ * 29.10.: kein „4,8 Google / +14.000 Nutzer“-Block). Die Zeile „4,9 ★★★★★ ·
+ * Mehr als 1.000 aktive Nutzer“ steht unter der H1 im ersten Bildschirm.
+ * Das Markup liegt in components/startseite/SortenSlider.jsx (nicht im
+ * Mutationsgebiet dieses Segments), deshalb hier ausgeblendet; die Stimmen
+ * weiter unten bleiben. Rueckweg: diese Regel streichen. */
+.home.cc-start .cc-akt .cc-start-slider__bewertung {
+  display: none;
+}
 .home.cc-start .cc-start-slider__bewertung .qb-sterne {
   color: var(--cc-gold-text);
   letter-spacing: 0.05em;
@@ -335,7 +344,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  /* 8 statt 2 px: shop-tor A1 mass Name -> Zustand als Gedraenge (s04). */
+  gap: var(--cc-space-1);
   min-height: 44px;
   padding: var(--cc-space-2);
   border: 2px solid var(--cc-linie);
@@ -356,10 +366,13 @@
   outline-offset: 2px;
 }
 .home.cc-start .cc-sortenwahl__name {
+  /* Apple-Stil (s04, 2026-11-06): der Name steht in Tinte, die Sorte zeigt
+   * sich an der Kante des aktiven Knopfs. Sortentoene als Schriftfarbe
+   * kamen auf der Startseite je ~10x vor und machten drei Farbwelten. */
   font-size: var(--cc-fs-4);
   font-weight: 700;
   line-height: 1.2;
-  color: var(--cc-sorte-text);
+  color: var(--cc-dunkel);
 }
 .home.cc-start .cc-sortenwahl__zustand {
   font-size: var(--cc-fs-1);
@@ -485,6 +498,8 @@
 }
 .home.cc-start .cc-folie__kauf .cc-kachel-preis {
   margin: 0;
+  /* Preis -> „pro Packung im 3er-Set“ stand 3 px auseinander (shop-tor A1, s04). */
+  row-gap: var(--cc-space-1);
 }
 .home.cc-start .cc-folie__kauf .cc-kachel-preis-jetzt {
   font-size: var(--cc-fs-4);
@@ -605,7 +620,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--cc-space-1);
-  color: var(--cc-sorte-text);
+  color: var(--cc-text);
 }
 .home.cc-start .cc-profil__legende span::before {
   content: '';
@@ -650,9 +665,10 @@
   gap: var(--cc-space-2);
 }
 .home.cc-start .cc-profil__sorte {
+  /* Tinte statt Sortenton: der Balken daneben traegt die Sortenfarbe. */
   font-size: var(--cc-fs-1);
   font-weight: 700;
-  color: var(--cc-sorte-text);
+  color: var(--cc-text);
 }
 .home.cc-start .cc-profil__spur {
   display: block;
@@ -734,8 +750,9 @@
   background: var(--cc-grund);
 }
 .home.cc-start .cc-akt .cc-profil__karte-titel {
+  /* Die Sortenfarbe sitzt in der oberen Kante der Karte. */
   font-weight: 700;
-  color: var(--cc-sorte-text);
+  color: var(--cc-dunkel);
 }
 .home.cc-start .cc-profil__fuss {
   display: flex;

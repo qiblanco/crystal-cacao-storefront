@@ -441,7 +441,10 @@ export default function Homepage() {
   if (data.fassung === 'bestand') return <Bestandsfassung data={data} />;
   if (data.fassung === 'hochwertig') {
     return (
-      <>
+      // Marker des Apple-Stils (Naht-Vertrag §4.1, Grossjob 20261101 s04):
+      // die Huelle ist layoutlos (display: contents), sie traegt nur den
+      // Seitennamen aus design_gate_seiten.yaml.
+      <div data-apple-seite="crystal-cacao-startseite" style={{display: 'contents'}}>
         {data.isShopLinked ? null : <MockShopNotice />}
         <Startseite
           produkte={data.sorten}
@@ -449,7 +452,7 @@ export default function Homepage() {
           sorten={<RecommendedProducts products={data.recommendedProducts} />}
           podcast={<PodcastAbschnitt />}
         />
-      </>
+      </div>
     );
   }
   // 'kakao' (auch ?fassung=bisher): die Startseite vom 08.09. bis 02.10.2026.
