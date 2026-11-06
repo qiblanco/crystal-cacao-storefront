@@ -49,7 +49,7 @@ import anmeldeStyles from './anmeldeformular.css?url';
 
 // STELLE 1 VON 2 — die zweite ist connect-src in app/entry.server.jsx. Fehlt
 // sie dort, blockt die CSP STILL und jede Seite bleibt beim AC-Formular.
-export const ANMELDE_ENDPUNKT = 'https://anmelden.65-108-150-121.sslip.io';
+export const ANMELDE_ENDPUNKT = 'https://anmelden.dienst.qiblanco.com';
 
 const WEICHE_ZEITLIMIT_MS = 2500;
 const WEICHE_GUELTIG_MS = 5 * 60 * 1000;
