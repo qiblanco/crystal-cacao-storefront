@@ -3,6 +3,7 @@ import {AppSession} from '~/lib/session';
 import {CART_MUTATE_FRAGMENT, CART_QUERY_FRAGMENT} from '~/lib/fragments';
 import {resolveCountry} from '~/lib/markt-pricing';
 import {ladePreismodus} from '~/lib/preismodus';
+import {shopifyServerTorEinbauen} from '~/lib/shopify-tracking-tor';
 
 // Define the additional context object
 const additionalContext = {
@@ -77,6 +78,11 @@ export async function createHydrogenRouterContext(
     },
     additionalContext,
   );
+
+  // Shopify-Statistik-/Marketing-Cookies nur nach Einwilligung durchreichen
+  // (Vorlage #1340, Job 20261107-crystal-shopify-analytik-tor-einordnen-1340).
+  // Begründung in lib/shopify-tracking-tor.js.
+  shopifyServerTorEinbauen(hydrogenContext.storefront, request, env);
 
   // PREISMODUS netto|brutto (Grossjob 20260924-kasse-zeigt-bruttopreise-wie-
   // produktseite-prio10, s02): HIER und nicht im root-Loader, weil Kind-Loader
