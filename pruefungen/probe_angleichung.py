@@ -46,6 +46,19 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+# DER MESSORT IST DER KUNDENRAND (umgehaengt 2026-11-07, Job
+# repairkorb-20261107-14-messblind-pruefungen-probe-design). Bis dahin war die
+# Vorgabe der dev-Server http://localhost:3399 der Bau-Segmente; seit dem
+# DNS-Klick am 2026-09-08 liefert crystal-cacao-node den Laden aus, und jeder
+# Lauf ohne --basis endete auf MESSAUSFALL. Die URL kommt aus der Shop-
+# Landkarte, nie getippt; waehrend eines Baus misst --basis die Vorschau.
+try:
+    sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+    import storefront_messung as sm
+    RAND = sm.url("crystal", "/").rstrip("/")
+except Exception:  # noqa: BLE001 - ohne Landkarte kein Rand: main sagt MESSAUSFALL
+    RAND = ""
+
 # Klasse (b): kundensichtbar und anzugleichen. /account fehlt bewusst — die
 # Customer Account API verlangt lokal einen Hydrogen-Tunnel und antwortet ohne
 # ihn mit 400; eine Messung dort waere ein Messausfall, kein Urteil.
@@ -81,6 +94,29 @@ FREMD_MARKEN = re.compile(r"QiOne|QiHome|QiBracelet|Gitterchip", re.I)
 # dort ist die foermliche Anrede der ZWECK und keine Luecke — eine
 # "Korrektur" dort waere eine inhaltliche Aenderung an einer Pflichtangabe.
 SIEZEN = re.compile(r"\b(Sie|Ihnen|Ihre[nrms]?)\b")
+
+
+# "Sie" AM SATZANFANG ist zweideutig: Pronomen ("Die Struktur ... Sie entsteht
+# durch ...") oder Anrede. Die Anrede verlangt IMMER ein Verb im Plural
+# ("Sie erhalten", "Sie sind"), das Pronomen im Singular ("Sie entsteht",
+# "Sie ist"). Gemessen 2026-11-07 am Rand: der einzige Treffer auf / war genau
+# dieses Pronomen. Mitten im Satz gibt es die Grossschreibung nur als Anrede,
+# dort zaehlt jeder Treffer wie bisher.
+_PLURAL_FORMEN = ("sind",)
+
+
+def siez_treffer(txt):
+    treffer = []
+    for m in SIEZEN.finditer(txt):
+        if m.group(1) == "Sie":
+            vor = txt[: m.start()].rstrip()
+            satzanfang = not vor or vor[-1] in ".!?:"
+            nach = re.match(r"\s+([^\W\d_]+)", txt[m.end():])
+            if (satzanfang and nach and not nach.group(1).endswith("n")
+                    and nach.group(1).lower() not in _PLURAL_FORMEN):
+                continue
+        treffer.append(m)
+    return treffer
 OHNE_SIEZEN = [p for p in FLAECHEN_B if not p.startswith("/policies/")]
 
 # Mojibake: echte Umlaute sind Pflicht, ASCII-Ersatz (ae/oe/ue) im
@@ -232,9 +268,9 @@ def arm_sprache(basis, befunde):
             umfeld = txt[max(0, stelle.start() - 30) : stelle.end() + 30]
             befunde.append(f"[E] {pfad}: kaputte Umlaut-Kodierung bei »{umfeld}«")
         if pfad in OHNE_SIEZEN:
-            treffer = SIEZEN.findall(txt)
+            treffer = siez_treffer(txt)
             if treffer:
-                stelle = SIEZEN.search(txt)
+                stelle = treffer[0]
                 umfeld = txt[max(0, stelle.start() - 40) : stelle.end() + 40]
                 befunde.append(
                     f"[E] {pfad}: Sie-Ansprache ({len(treffer)}x), erste bei »{umfeld}«"
@@ -329,7 +365,7 @@ def arm_browser(basis, befunde):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--basis", default="http://localhost:3399")
+    ap.add_argument("--basis", default=RAND)
     ap.add_argument(
         "--ohne-browser",
         action="store_true",
@@ -337,10 +373,14 @@ def main() -> int:
     )
     a = ap.parse_args()
     basis = a.basis.rstrip("/")
+    if not basis:
+        print("MESSAUSFALL: storefront-messung nicht ladbar und keine --basis "
+              "- der Rand ist unbekannt.")
+        return 4
 
     status, _ = hole(basis, "/")
     if status is None:
-        print(f"MESSAUSFALL: {basis} nicht erreichbar. Erst `npm run dev` starten.")
+        print(f"MESSAUSFALL: {basis} nicht erreichbar (Vorschau? dann erst `npm run dev`).")
         return 4
 
     befunde: list[str] = []

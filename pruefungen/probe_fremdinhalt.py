@@ -74,6 +74,19 @@ import sys
 import urllib.error
 import urllib.request
 
+# DER MESSORT IST DER KUNDENRAND (umgehaengt 2026-11-07, Job
+# repairkorb-20261107-14-messblind-pruefungen-probe-design). Bis dahin war die
+# Vorgabe der dev-Server http://localhost:3399 der Bau-Segmente; seit dem
+# DNS-Klick am 2026-09-08 liefert crystal-cacao-node den Laden aus, und jeder
+# Lauf ohne --basis endete auf MESSAUSFALL. Die URL kommt aus der Shop-
+# Landkarte, nie getippt; waehrend eines Baus misst --basis die Vorschau.
+try:
+    sys.path.insert(0, "/srv/openclaw/shared-state/storefront-messung/src")
+    import storefront_messung as sm
+    RAND = sm.url("crystal", "/").rstrip("/")
+except Exception:  # noqa: BLE001 - ohne Landkarte kein Rand: main sagt MESSAUSFALL
+    RAND = ""
+
 # Die Marken des Fremdsortiments. Absichtlich die MARKEN und nicht die Handles:
 # ein Handle kann sich aendern, die Marke steht im Text.
 FREMD_MARKEN = re.compile(r"QiOne|QiHome|QiBracelet|Gitterchip", re.I)
@@ -204,13 +217,17 @@ def sichtbar(html: str) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--basis", default="http://localhost:3399")
+    ap.add_argument("--basis", default=RAND)
     a = ap.parse_args()
     basis = a.basis.rstrip("/")
+    if not basis:
+        print("MESSAUSFALL: storefront-messung nicht ladbar und keine --basis "
+              "- der Rand ist unbekannt.")
+        return 4
 
     status, _, _ = hole(basis, "/")
     if status is None:
-        print(f"MESSAUSFALL: {basis} nicht erreichbar. Erst `npm run dev` starten.")
+        print(f"MESSAUSFALL: {basis} nicht erreichbar (Vorschau? dann erst `npm run dev`).")
         return 4
 
     befunde: list[str] = []
