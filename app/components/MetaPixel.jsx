@@ -1,5 +1,6 @@
 import {useEffect, useRef} from 'react';
-import {useAnalytics, parseGid} from '@shopify/hydrogen';
+import {useAnalytics} from '@shopify/hydrogen';
+import {viewContentPayload, addToCartPayload} from '~/lib/pixel-content';
 
 /**
  * K3-NAHT (crystal-cacao-storefront) — EIGENE Fassung, NICHT geteilt.
@@ -12,6 +13,14 @@ import {useAnalytics, parseGid} from '@shopify/hydrogen';
  * treffen darf. Deshalb kommt sie als Prop aus dem root-Loader
  * (`PUBLIC_META_PIXEL_ID`). Ohne gesetzte Variable bootet der Pixel NICHT:
  * fail-closed, kein Halb-Zustand, keine Fehlzuordnung.
+ *
+ * NACHZUG 2026-11-07 (Vorlage 74248e39 #897 + 92bdac7e #1350): ViewContent und
+ * AddToCart tragen `contents` (Meta da_checks pixel_missing_param_in_events);
+ * der Payload kommt aus app/lib/pixel-content.js (K1, byte-gleich zur Vorlage).
+ * NICHT uebernommen: die eventID aus app/lib/meta-event-id.js. Sie dedupliziert
+ * fbq gegen den Server-Weg capi-rueckspeisung, und der meldet NICHTKAUF-Events
+ * nur fuer den Pixel der Hauptseite. Dieser Pixel hat keinen Server-Partner fuer
+ * ViewContent/AddToCart; eine eventID ohne Gegenstueck dedupliziert nichts.
  *
  * Meta-Pixel (Browser) — Vorlagen-Kommentar ab hier unveraendert:
  *
@@ -158,14 +167,6 @@ function trackPageView(url) {
   fbqTrack('PageView');
 }
 
-function numericProductId(gid) {
-  try {
-    return parseGid(gid).id || undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 /**
  * @param {{metaPixelId?: string}} props
  */
@@ -195,38 +196,17 @@ export function MetaPixel({metaPixelId}) {
     });
 
     subscribe('product_viewed', (data) => {
-      const product = data?.products?.[0];
-      if (!product) return;
-      fbqTrack('ViewContent', {
-        content_ids: [numericProductId(product.id)].filter(Boolean),
-        content_name: product.title,
-        content_type: 'product',
-        value: parseFloat(product.price) || 0,
-        currency: data?.shop?.currency || 'EUR',
-      });
+      // Payload inkl. `contents` aus app/lib/pixel-content.js (Vorlage #897).
+      const payload = viewContentPayload(data);
+      if (!payload) return;
+      fbqTrack('ViewContent', payload);
     });
 
     subscribe('product_added_to_cart', (data) => {
-      const line = data?.currentLine;
-      const merchandise = line?.merchandise;
-      if (!merchandise) return;
-      const unitPrice = parseFloat(merchandise.price?.amount) || 0;
-      // Hydrogen feuert das Event auch bei Mengen-Erhöhung — nur das Delta zählen.
-      const quantity = Math.max(
-        (line.quantity || 1) - (data?.prevLine?.quantity || 0),
-        1,
-      );
-      fbqTrack('AddToCart', {
-        content_ids: [numericProductId(merchandise.product?.id)].filter(
-          Boolean,
-        ),
-        content_name: merchandise.product?.title,
-        content_type: 'product',
-        value: unitPrice * quantity,
-        currency:
-          merchandise.price?.currencyCode || data?.shop?.currency || 'EUR',
-        num_items: quantity,
-      });
+      // Payload inkl. `contents` und Mengen-Delta aus app/lib/pixel-content.js (#1350).
+      const payload = addToCartPayload(data);
+      if (!payload) return;
+      fbqTrack('AddToCart', payload);
     });
   }, [subscribe]);
 
