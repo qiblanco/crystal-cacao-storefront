@@ -45,6 +45,10 @@ import {
 import {EINWILLIGUNG_FASSUNG, spracheGilt} from '~/lib/einwilligung-texte';
 import {isQiblancoProductionHost} from '~/lib/checkout-tracking';
 import {strictRegions} from '~/lib/consent-policy';
+import {
+  shopifyDarfTracken,
+  useShopifyTrackingTor,
+} from '~/lib/shopify-tracking-tor';
 import {ABSENDER_MARKE, sorteZuPfad} from '~/lib/kakao-zone';
 import {
   preismodusStand,
@@ -550,6 +554,19 @@ function AnalytikNachHydration({data, children}) {
   useEffect(() => {
     startTransition(() => setHydriert(true));
   }, []);
+  // Shopify-Analytik erst nach der Wahl, NAHT aus der Vorlage #1340/#1342
+  // (fe861ffe, f7561187; Job 20261107-crystal-shopify-analytik-tor-einordnen-1340).
+  // Ohne `shop` montiert der Provider ShopifyAnalytics nicht: weder
+  // _shopify_analytics/_marketing noch _shopify_y/_s noch monorail vor der Wahl.
+  // Die lib ist byte-gleich zur Vorlage; Begründung, Region-Regel und Rückweg
+  // stehen dort. Den Server-Weg (Set-Cookie am Dokument, auf diesem Laden am
+  // 2026-11-07 gemessen: 10 von 12 ungecachten Abrufen ohne Wahl) schließt
+  // shopifyServerTorEinbauen in lib/context.js.
+  const shopifyTor = useShopifyTrackingTor();
+  // Neue Identität, sobald `tracken` wechselt: der Provider bewertet `publish`
+  // nur dann neu, also gehen die Ansichten der Seite, auf der gewählt wurde,
+  // einmal nach, statt verloren zu gehen (Vorlage, gemessen 2026-11-04).
+  const torDaten = useMemo(() => ({}), [shopifyTor.tracken]);
 
   const seitengeruest = useMemo(
     () => <PageLayout {...data}>{children}</PageLayout>,
@@ -559,8 +576,10 @@ function AnalytikNachHydration({data, children}) {
   return (
     <Analytics.Provider
       cart={data.cart}
-      shop={hydriert ? data.shop : null}
+      shop={hydriert && shopifyTor.montieren ? data.shop : null}
       consent={data.consent}
+      canTrack={shopifyDarfTracken}
+      customData={torDaten}
     >
       {/*
         EU-Gewaehrleistungs-Mitteilung (VO (EU) 2025/1960, anwendbar ab
