@@ -1,14 +1,14 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "3f4b94e70cc4d9bc79a6584377c0a44a46a698be",
-  "erzeugt_utc": "2026-11-06T13:01:16Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 3f4b94e70cc4; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 3f4b94e70cc4). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "7ed944717b8a98774ee88f49a843ce5f467f9c8b",
+  "erzeugt_utc": "2026-11-07T04:53:57Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- ENTSCHEIDUNGEN (--entscheidung): klasse-wechseln app/components/QpxCommerce.jsx -> K2; klasse-wechseln app/components/reusables/IgTestimonialSlideshow.jsx -> K2; aufnehmen app/components/ProductPrice.jsx -> K3; aufnehmen app/components/product-pages/CacaoLeistenPreis.jsx -> K3; aufnehmen app/components/reusables/Kaufleiste.jsx -> K3; aufnehmen app/components/reusables/YoutubeTimestamp.jsx -> K3; aufnehmen app/components/reusables/kaufleiste-lage.js -> K3; aufnehmen app/data/video-lqip.js -> K3; aufnehmen app/data/yt-nutzer-videos.js -> K3; aufnehmen app/lib/kaufleiste-sicht.js -> K3; aufnehmen app/lib/nutzer-video-reihe.js -> K3; aufnehmen app/lib/video-watchtime.js -> K3; aufnehmen app/lib/youtube-einbettung.js -> K3; aufnehmen app/styles/kakao-create-seite.css -> K3; aufnehmen app/styles/qb-kaufleiste.css -> K3; pin-nachziehen app/components/MetaPixel.jsx (upstream 1ef83f767503 -> afded3dc21ee); pin-nachziehen app/data/ig-testimonials.js (upstream 2bb6fec75dc7 -> c375ea2e8707); pin-nachziehen app/styles/ig-testimonials.css (upstream 4352f6449bb7 -> b1910657f2c4) -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 7ed944717b8a; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 3f4b94e70cc4). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/routes/products.crystal-cacao-create.jsx"
     ],
-    "dateien_soll": 50,
+    "dateien_soll": 64,
     "vollstaendigkeit": "streng"
   },
   "dateien": [
@@ -182,9 +182,9 @@
     {
       "upstream": "app/components/MetaPixel.jsx",
       "klasse": "K3",
-      "sha256_upstream": "1ef83f7675033f3bcec41dce349bc7ea649cff5debc4e7f9976af15f540550de",
+      "sha256_upstream": "afded3dc21eeb2dba38caf4c264889f5b605232bcf96fc187c647db87b792a49",
       "enforcer": "python3 /srv/openclaw/shared-state/homepage-bauer/pruefungen/probe_crystal_k3_substanz.py --repo {repo} --datei app/components/MetaPixel.jsx",
-      "grund": "Consent-gegateter Browser-Pixel, nicht in der Huelle. crystal baut ihn eigenstaendig; die Einwilligungs-Logik haengt an der Region und am Host, nicht am Seiteninhalt."
+      "grund": "Consent-gegateter Browser-Pixel, nicht in der Huelle. crystal baut ihn eigenstaendig; die Einwilligungs-Logik haengt an der Region und am Host, nicht am Seiteninhalt. || NACHTRAG 2026-11-07 (Erzeuger --entscheidung, Vorlage 7ed944717b8a): upstream-Pin 1ef83f767503 -> afded3dc21ee. Vorlage 74248e39 (#897, ViewContent traegt contents) und 92bdac7e (#1350, eventID + AddToCart contents). Uebernommen: contents an ViewContent und AddToCart ueber app/lib/pixel-content.js (Laden 1e7775be). Nicht uebernommen: eventID, weil capi-rueckspeisung ViewContent/AddToCart nur fuer den Pixel der Hauptseite meldet und der Laden-Pixel keinen Server-Partner hat. Durchsetzer k3_substanz + probe_metapixel_contents.mjs. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02"
     },
     {
       "upstream": "app/lib/cart-attribution.server.js",
@@ -263,8 +263,10 @@
     },
     {
       "upstream": "app/components/QpxCommerce.jsx",
-      "klasse": "K1",
-      "sha256": "d49fcae164db5c720c252067f476bf6f0208c88efa1004699df40f0d7a060558"
+      "klasse": "K2",
+      "sha256_upstream": "839dee0d52549bf6eda08eb96ca1b8e1e4aaab7be9d1ffb37d0502e758198207",
+      "sha256_lokal": "d49fcae164db5c720c252067f476bf6f0208c88efa1004699df40f0d7a060558",
+      "abweichung_grund": "KLASSENWECHSEL K1 -> K2 2026-11-07 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, alter K1-Pin d49fcae164db, Laden d49fcae164db): Adaption: die Laden-Fassung ist die Vorlage OHNE event_id. Vorlage 92bdac7e (#1350) gibt view_content/add_to_cart dieselbe qbm-Id wie dem Browser-Pixel (meta-event-id.js); capi-rueckspeisung meldet diese Ereignisse server-seitig nur fuer den Pixel der Hauptseite. Der Laden-Pixel hat keinen Server-Partner (siehe MetaPixel.jsx, Laden 1e7775be), eine Id ohne Gegenstueck dedupliziert nichts und koennte Laden-Ereignisse in den Server-Weg der Hauptseite tragen. Bewegt sich die Vorlage weiter, ist die Adaption nachzuziehen. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02"
     },
     {
       "upstream": "app/components/reusables/FaqListe.jsx",
@@ -284,15 +286,17 @@
     },
     {
       "upstream": "app/components/reusables/IgTestimonialSlideshow.jsx",
-      "klasse": "K1",
-      "sha256": "bc61eabf72fad3b386c31ea560e9f333118955b664ce3cd43dffa99ded904d23"
+      "klasse": "K2",
+      "ableitung": "laden-eigen",
+      "sha256_upstream": "7df667e9822e141277e0e20be06983e519443ffa6b1adbcbf962e8771c7e622f",
+      "abweichung_grund": "KLASSENWECHSEL K1 -> K2 2026-11-07 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, alter K1-Pin bc61eabf72fa, Laden bc61eabf72fa): Der Laden fuehrt eine eigene Fassung (Kakao-Stimmen, Elina EL-20261026-28f53e7d/074aa739), die Vorlage eine andere (YouTube-Short QiOne #1067, #1247). Abweichung 65 Prozent, ueber der Untergrenze 50. Der Rueckport in die Vorlage (Zweig 505a29a7) wurde nie gemergt und ist durch Elina EL-20261030-0adb59f3 ersetzt (keine parallelen Kakao-Seiten auf qiblanco.com). Der alte K1-Pin war die Laden-Fassung, nie die Vorlage. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02"
     },
     {
       "upstream": "app/data/ig-testimonials.js",
       "klasse": "K2",
       "ableitung": "laden-eigen",
-      "sha256_upstream": "2bb6fec75dc73a99fd0d2ef9ec0e0e328f4312518d1eb0a2319d9e1c332b94c4",
-      "abweichung_grund": "NACHTRAG 2026-09-26 (Job 20260926-crystal-kakao-zwei-vorlagen-features-ig-stimmen-und-kasse-im-browser): K3 ohne lokale Datei -> K2 laden-eigen. Die Vorlage fuehrt 66 Slots ueber alle Produkte (QiBracelet, QiHome, QiOne, T3 \"Qi Blanco\"); hier steht NUR ein Eintrag: DUY4iOojqSh @vanessastehler als AUSZUG 0-17,75 s (eigene mp4 + Poster auf dem Shopify-CDN), weil sie im Original bei 21-24 s das QiBracelet nennt (Christian 2026-09-02: keine Qi-Blanco-Werbung im Kakao-Laden). Die uebrigen drei Kakao-Eintraege der Vorlage nennen Qi-Produkte oder sind kein Video; Befund je Eintrag im Dateikopf. Feldform gleich der Vorlage, damit Komponente und ig-video-schema.js K1 bleiben. Kommt oben Kakao-Material dazu: je Eintrag Bildtext, Bild und Ton pruefen, nie pauschal uebernehmen. NACHTRAG 2026-10-01 (Job 20261001-crystal-vorlagen-drift-nach-pr747-746-732-preisdatei-je-datei-prio30): sha256_upstream nachgepinnt, lokal unveraendert. Die Vorlage hat in caeb2af (#695) drei QiBracelet-Videos mit dem neuen Feld `vorn` an den Anfang ihrer Reihe gestellt. Keiner der vier Kakao-Eintraege der Vorlage ist beruehrt, und dieser Laden zeigt keine QiBracelet-Beitraege (Christian 2026-09-02). Das Feld `vorn` liest die K1-Komponente IgTestimonialSlideshow.jsx schon (ohne Feld: bisherige Reihenfolge). Nichts zu uebernehmen. NACHTRAG 2026-10-26 (Elina EL-20261026-28f53e7d, mit EL-20261026-db3cc728 und der Regel-Korrektur EL-20261026-8bdf0028, crystal-cacao-node/REGEL-KAKAO-STIMMEN.md): Kakao-Reihe hier = dieselben 6 Eintraege wie in der Vorlage (Vanessa jetzt VOLL statt Auszug, @maxxpansion Reel + Bild-Beitrag mit Feld `bilder`, flucid.temple, friquencita x2); laden-eigen bleibt nur, dass hier allein die Kakao-Eintraege stehen. sha256_upstream auf den Vorlagen-Stand des qiblanco-Zweigs feat/kakao-stimmen-karussell-20261026 gepinnt."
+      "sha256_upstream": "c375ea2e87074fc1896c8d4b4e800f83a43a7002d757c302715f98411ce644a9",
+      "abweichung_grund": "NACHTRAG 2026-09-26 (Job 20260926-crystal-kakao-zwei-vorlagen-features-ig-stimmen-und-kasse-im-browser): K3 ohne lokale Datei -> K2 laden-eigen. Die Vorlage fuehrt 66 Slots ueber alle Produkte (QiBracelet, QiHome, QiOne, T3 \"Qi Blanco\"); hier steht NUR ein Eintrag: DUY4iOojqSh @vanessastehler als AUSZUG 0-17,75 s (eigene mp4 + Poster auf dem Shopify-CDN), weil sie im Original bei 21-24 s das QiBracelet nennt (Christian 2026-09-02: keine Qi-Blanco-Werbung im Kakao-Laden). Die uebrigen drei Kakao-Eintraege der Vorlage nennen Qi-Produkte oder sind kein Video; Befund je Eintrag im Dateikopf. Feldform gleich der Vorlage, damit Komponente und ig-video-schema.js K1 bleiben. Kommt oben Kakao-Material dazu: je Eintrag Bildtext, Bild und Ton pruefen, nie pauschal uebernehmen. NACHTRAG 2026-10-01 (Job 20261001-crystal-vorlagen-drift-nach-pr747-746-732-preisdatei-je-datei-prio30): sha256_upstream nachgepinnt, lokal unveraendert. Die Vorlage hat in caeb2af (#695) drei QiBracelet-Videos mit dem neuen Feld `vorn` an den Anfang ihrer Reihe gestellt. Keiner der vier Kakao-Eintraege der Vorlage ist beruehrt, und dieser Laden zeigt keine QiBracelet-Beitraege (Christian 2026-09-02). Das Feld `vorn` liest die K1-Komponente IgTestimonialSlideshow.jsx schon (ohne Feld: bisherige Reihenfolge). Nichts zu uebernehmen. NACHTRAG 2026-10-26 (Elina EL-20261026-28f53e7d, mit EL-20261026-db3cc728 und der Regel-Korrektur EL-20261026-8bdf0028, crystal-cacao-node/REGEL-KAKAO-STIMMEN.md): Kakao-Reihe hier = dieselben 6 Eintraege wie in der Vorlage (Vanessa jetzt VOLL statt Auszug, @maxxpansion Reel + Bild-Beitrag mit Feld `bilder`, flucid.temple, friquencita x2); laden-eigen bleibt nur, dass hier allein die Kakao-Eintraege stehen. sha256_upstream auf den Vorlagen-Stand des qiblanco-Zweigs feat/kakao-stimmen-karussell-20261026 gepinnt. || NACHTRAG 2026-11-07 (Erzeuger --entscheidung, Vorlage 7ed944717b8a): upstream-Pin 2bb6fec75dc7 -> c375ea2e8707. Der alte Pin 2bb6fec7 war der nie gemergte qiblanco-Zweig 505a29a7 (Elinas Rueckport, ersetzt durch EL-20261030-0adb59f3), keine Vorlagenfassung. Neu gepinnt auf die echte Vorlage c375ea2e (unveraendert seit #695, QiOne-Stimmen). Nichts uebernommen: der Laden fuehrt nur Kakao-Stimmen. Damit entfaellt der Eintrag app/data/ig-testimonials.js@2bb6fec7 in state/k2-entscheid.json von selbst. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02"
     },
     {
       "upstream": "app/lib/ig-video-schema.js",
@@ -302,9 +306,9 @@
     {
       "upstream": "app/styles/ig-testimonials.css",
       "klasse": "K2",
-      "sha256_upstream": "4352f6449bb704066c7c9a1207809a98ff891b3079abd6e58f1156a5792a9114",
+      "sha256_upstream": "b1910657f2c44b0ef143c848ed0f1b5d4a06b8039062d6585b8e961cfcf35f49",
       "sha256_lokal": "aa3475a7df4992388a21b8525cfeae797ad4599b9de414ee489bb4333e90b358",
-      "abweichung_grund": "NACHTRAG 2026-09-26 (Job 20260926-crystal-kakao-zwei-vorlagen-features-ig-stimmen-und-kasse-im-browser): K3 ohne lokale Datei -> K2. Uebernommen ist die Sektion der Vorlage (#376) mit drei laden-eigenen Abweichungen im Token-Block: (1) Farben und Bild-Radius aus den --cc-*-Tokens des Ladens statt --qb-akzent (die qb-tokens fuehrt dieser Laden nicht; ohne Zuordnung stuende var() ohne Wert), (2) Schriftstufen auf --cc-fs-1..4 (die 13-px-Stufe der Vorlage neben 12,8 px des Ladens kostete stimmig_typo 20 Punkte), (3) KEIN font-weight am Titel (Laden-H2 700, Vorlage 600 -> zweite H2-Kombi). design-rubrik an beiden Kaufseiten 94 wie ohne Sektion. Naechste Vorlagen-Bewegung faellt ueber sha256_upstream wieder auf. NACHTRAG 2026-10-26 (Elina EL-20261026-28f53e7d, mit EL-20261026-db3cc728 und der Regel-Korrektur EL-20261026-8bdf0028, crystal-cacao-node/REGEL-KAKAO-STIMMEN.md): Abschnitt Karussell-Bauart + Bild-Kachel in Vorlage und Laden gleich angehaengt; die drei laden-eigenen Abweichungen im Token-Block bleiben."
+      "abweichung_grund": "NACHTRAG 2026-09-26 (Job 20260926-crystal-kakao-zwei-vorlagen-features-ig-stimmen-und-kasse-im-browser): K3 ohne lokale Datei -> K2. Uebernommen ist die Sektion der Vorlage (#376) mit drei laden-eigenen Abweichungen im Token-Block: (1) Farben und Bild-Radius aus den --cc-*-Tokens des Ladens statt --qb-akzent (die qb-tokens fuehrt dieser Laden nicht; ohne Zuordnung stuende var() ohne Wert), (2) Schriftstufen auf --cc-fs-1..4 (die 13-px-Stufe der Vorlage neben 12,8 px des Ladens kostete stimmig_typo 20 Punkte), (3) KEIN font-weight am Titel (Laden-H2 700, Vorlage 600 -> zweite H2-Kombi). design-rubrik an beiden Kaufseiten 94 wie ohne Sektion. Naechste Vorlagen-Bewegung faellt ueber sha256_upstream wieder auf. NACHTRAG 2026-10-26 (Elina EL-20261026-28f53e7d, mit EL-20261026-db3cc728 und der Regel-Korrektur EL-20261026-8bdf0028, crystal-cacao-node/REGEL-KAKAO-STIMMEN.md): Abschnitt Karussell-Bauart + Bild-Kachel in Vorlage und Laden gleich angehaengt; die drei laden-eigenen Abweichungen im Token-Block bleiben. || NACHTRAG 2026-11-07 (Erzeuger --entscheidung, Vorlage 7ed944717b8a): upstream-Pin 4352f6449bb7 -> b1910657f2c4. Vorlage b1910657 (#1067) ergaenzt nur die YouTube-Kachel (--igt-yt-*, .qb-igt__kachel--yt), die der Laden nicht fuehrt (siehe YoutubeTimestamp.jsx K3). Nichts uebernommen. Der alte Laden-Pin 4352f644 war der nie gemergte Zweig 505a29a7. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02"
     },
     {
       "upstream": "app/lib/fremd-html-bilder.js",
@@ -409,6 +413,97 @@
       "upstream": "app/components/reusables/snapZiel.js",
       "klasse": "K1",
       "sha256": "0da53a983d4b8a8f0b282231a6f06e6d0dba6a3cfda6f0da33bc6593957c6898"
+    },
+    {
+      "upstream": "app/components/ProductPrice.jsx",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/components/ProductPrice.jsx --import-aus app/routes/products.crystal-cacao-create.jsx --import-aus app/components/product-pages/Create.jsx --import-aus app/components/product-pages/Kaufleiste.jsx",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden 273a5e96e29a): HUELLE-DRIFT entschieden: NICHT uebernommen, K3. Kommt nur ueber die Vorlagen-Kaufleiste (reusables/Kaufleiste.jsx, #1292) in die Huelle. Der Laden fuehrt unter demselben Pfad eine EIGENE Fassung (ProductPriceKanon fuer die Sammelroute products.$handle, Steuerlogik je Markt), die die geteilte CREATE-Seite nicht zieht. Durchsetzer: CREATE-Route, Create.jsx und die Laden-Kaufleiste importieren ProductPrice nicht. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "635006b57ae5a2bf7fcc3d71ad0a9ce33341b04dd4a70298b02b72ce8dde8853"
+    },
+    {
+      "upstream": "app/components/product-pages/CacaoLeistenPreis.jsx",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/components/product-pages/CacaoLeistenPreis.jsx",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kaufleisten-Familie der Vorlage (#1292) an der CREATE-Route. Der Laden fuehrt eine EIGENE Kaufleiste (app/components/product-pages/Kaufleiste.jsx, Apple-Umbau r2-s04) und zieht diese Datei nicht. Ob die CREATE-Route die Vorlagen-Kaufleiste uebernimmt, entscheidet der K2-Entscheid 20261106-crystal-k2-entscheid-3-dateien-23aed4; uebernimmt er, wird der Durchsetzer rot und der Eintrag ist per Erzeuger neu einzuordnen. CREATE-Sorten-Auswahl (EL-20261002-81b93e47) unberuehrt. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "28a1ecc13a28e22893995c9effa53e42371b7072edef9c5f23ebed87215406be"
+    },
+    {
+      "upstream": "app/components/reusables/Kaufleiste.jsx",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/components/reusables/Kaufleiste.jsx",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kaufleisten-Familie der Vorlage (#1292) an der CREATE-Route. Der Laden fuehrt eine EIGENE Kaufleiste (app/components/product-pages/Kaufleiste.jsx, Apple-Umbau r2-s04) und zieht diese Datei nicht. Ob die CREATE-Route die Vorlagen-Kaufleiste uebernimmt, entscheidet der K2-Entscheid 20261106-crystal-k2-entscheid-3-dateien-23aed4; uebernimmt er, wird der Durchsetzer rot und der Eintrag ist per Erzeuger neu einzuordnen. CREATE-Sorten-Auswahl (EL-20261002-81b93e47) unberuehrt. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "44c9198b11f6a7f8e507308a78768e1c863b6711faf3811fe3da83d9bdc03d5a"
+    },
+    {
+      "upstream": "app/components/reusables/YoutubeTimestamp.jsx",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/components/reusables/YoutubeTimestamp.jsx",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kommt nur ueber die qiblanco-Fassung von IgTestimonialSlideshow.jsx in die Huelle (YouTube-Short QiOne 2 Pro als erste Nutzer-Kachel, #1067). Der Laden fuehrt eine eigene Slideshow mit Kakao-Stimmen (K2 laden-eigen, Elina EL-20261026-28f53e7d/074aa739) ohne YouTube-Kachel; QiOne-Inhalt gehoert nicht auf eine Kakao-Seite. Durchsetzer: Datei und Import fehlen im Laden. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "c06f46c8c000e3a63d89b294fa6d0f4329b800de718efa21d5073cce9491c731"
+    },
+    {
+      "upstream": "app/components/reusables/kaufleiste-lage.js",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/components/reusables/kaufleiste-lage.js",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kaufleisten-Familie der Vorlage (#1292) an der CREATE-Route. Der Laden fuehrt eine EIGENE Kaufleiste (app/components/product-pages/Kaufleiste.jsx, Apple-Umbau r2-s04) und zieht diese Datei nicht. Ob die CREATE-Route die Vorlagen-Kaufleiste uebernimmt, entscheidet der K2-Entscheid 20261106-crystal-k2-entscheid-3-dateien-23aed4; uebernimmt er, wird der Durchsetzer rot und der Eintrag ist per Erzeuger neu einzuordnen. CREATE-Sorten-Auswahl (EL-20261002-81b93e47) unberuehrt. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "827bd2f553594ea5c39a11bfa5606ff7a91c495a82f66db57639b1630f4cee3c"
+    },
+    {
+      "upstream": "app/data/video-lqip.js",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/data/video-lqip.js",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kommt nur ueber die qiblanco-Fassung von IgTestimonialSlideshow.jsx in die Huelle (YouTube-Short QiOne 2 Pro als erste Nutzer-Kachel, #1067). Der Laden fuehrt eine eigene Slideshow mit Kakao-Stimmen (K2 laden-eigen, Elina EL-20261026-28f53e7d/074aa739) ohne YouTube-Kachel; QiOne-Inhalt gehoert nicht auf eine Kakao-Seite. Durchsetzer: Datei und Import fehlen im Laden. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "5d1db873e1eb5ca1bd4ec0d41441d43381f850f5b4c0a944f964bd4286e73da3"
+    },
+    {
+      "upstream": "app/data/yt-nutzer-videos.js",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/data/yt-nutzer-videos.js",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kommt nur ueber die qiblanco-Fassung von IgTestimonialSlideshow.jsx in die Huelle (YouTube-Short QiOne 2 Pro als erste Nutzer-Kachel, #1067). Der Laden fuehrt eine eigene Slideshow mit Kakao-Stimmen (K2 laden-eigen, Elina EL-20261026-28f53e7d/074aa739) ohne YouTube-Kachel; QiOne-Inhalt gehoert nicht auf eine Kakao-Seite. Durchsetzer: Datei und Import fehlen im Laden. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "44109eb891c1a629f9daa4212bec49facd4b9c90188ce805efbde1ea4558b900"
+    },
+    {
+      "upstream": "app/lib/kaufleiste-sicht.js",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/lib/kaufleiste-sicht.js",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kaufleisten-Familie der Vorlage (#1292) an der CREATE-Route. Der Laden fuehrt eine EIGENE Kaufleiste (app/components/product-pages/Kaufleiste.jsx, Apple-Umbau r2-s04) und zieht diese Datei nicht. Ob die CREATE-Route die Vorlagen-Kaufleiste uebernimmt, entscheidet der K2-Entscheid 20261106-crystal-k2-entscheid-3-dateien-23aed4; uebernimmt er, wird der Durchsetzer rot und der Eintrag ist per Erzeuger neu einzuordnen. CREATE-Sorten-Auswahl (EL-20261002-81b93e47) unberuehrt. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "bfe7463ddf03e4c2fed3bda6a8a985a95bf6b9e69f9dfd3af7139a7bcad48a6a"
+    },
+    {
+      "upstream": "app/lib/nutzer-video-reihe.js",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/lib/nutzer-video-reihe.js",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kommt nur ueber die qiblanco-Fassung von IgTestimonialSlideshow.jsx in die Huelle (YouTube-Short QiOne 2 Pro als erste Nutzer-Kachel, #1067). Der Laden fuehrt eine eigene Slideshow mit Kakao-Stimmen (K2 laden-eigen, Elina EL-20261026-28f53e7d/074aa739) ohne YouTube-Kachel; QiOne-Inhalt gehoert nicht auf eine Kakao-Seite. Durchsetzer: Datei und Import fehlen im Laden. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "f1abb715d3b5fae118d21822e0881f6fc85c51110b24230f0cdee622ac60ec5b"
+    },
+    {
+      "upstream": "app/lib/video-watchtime.js",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/lib/video-watchtime.js",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kommt nur ueber die qiblanco-Fassung von IgTestimonialSlideshow.jsx in die Huelle (YouTube-Short QiOne 2 Pro als erste Nutzer-Kachel, #1067). Der Laden fuehrt eine eigene Slideshow mit Kakao-Stimmen (K2 laden-eigen, Elina EL-20261026-28f53e7d/074aa739) ohne YouTube-Kachel; QiOne-Inhalt gehoert nicht auf eine Kakao-Seite. Durchsetzer: Datei und Import fehlen im Laden. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "783ca41d9e8c529f8d0150a010ab61cc0821f6cc5ef0cc4ae85d7505b908d812"
+    },
+    {
+      "upstream": "app/lib/youtube-einbettung.js",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/lib/youtube-einbettung.js",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kommt nur ueber die qiblanco-Fassung von IgTestimonialSlideshow.jsx in die Huelle (YouTube-Short QiOne 2 Pro als erste Nutzer-Kachel, #1067). Der Laden fuehrt eine eigene Slideshow mit Kakao-Stimmen (K2 laden-eigen, Elina EL-20261026-28f53e7d/074aa739) ohne YouTube-Kachel; QiOne-Inhalt gehoert nicht auf eine Kakao-Seite. Durchsetzer: Datei und Import fehlen im Laden. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "062d98d485764600a88b822f8ec0b3c01ba244600fb3e29dced1346af7d529d8"
+    },
+    {
+      "upstream": "app/styles/kakao-create-seite.css",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/styles/kakao-create-seite.css",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kaufleisten-Familie der Vorlage (#1292) an der CREATE-Route. Der Laden fuehrt eine EIGENE Kaufleiste (app/components/product-pages/Kaufleiste.jsx, Apple-Umbau r2-s04) und zieht diese Datei nicht. Ob die CREATE-Route die Vorlagen-Kaufleiste uebernimmt, entscheidet der K2-Entscheid 20261106-crystal-k2-entscheid-3-dateien-23aed4; uebernimmt er, wird der Durchsetzer rot und der Eintrag ist per Erzeuger neu einzuordnen. CREATE-Sorten-Auswahl (EL-20261002-81b93e47) unberuehrt. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "26de805dc6485279fba3b0c28d8c2a80fa771e8a64f5440b0ec8c058b4a19d2e"
+    },
+    {
+      "upstream": "app/styles/qb-kaufleiste.css",
+      "klasse": "K3",
+      "enforcer": "python3 /srv/openclaw/shared-state/crystal-cacao-node/proben/probe_laden_ohne_datei.py --repo {repo} --datei app/styles/qb-kaufleiste.css",
+      "grund": "AUFGENOMMEN 2026-11-07 als K3 (Erzeuger --entscheidung, Vorlage 7ed944717b8a, Laden ohne Datei): HUELLE-DRIFT entschieden: NICHT uebernommen, K3 ohne lokale Datei. Kaufleisten-Familie der Vorlage (#1292) an der CREATE-Route. Der Laden fuehrt eine EIGENE Kaufleiste (app/components/product-pages/Kaufleiste.jsx, Apple-Umbau r2-s04) und zieht diese Datei nicht. Ob die CREATE-Route die Vorlagen-Kaufleiste uebernimmt, entscheidet der K2-Entscheid 20261106-crystal-k2-entscheid-3-dateien-23aed4; uebernimmt er, wird der Durchsetzer rot und der Eintrag ist per Erzeuger neu einzuordnen. CREATE-Sorten-Auswahl (EL-20261002-81b93e47) unberuehrt. Job 20261030-crystal-manifest-rest-create-video-metapixel-igstimmen-s02",
+      "sha256_upstream": "094ded87c89d3518df078d602c35b0dbbd0994206fbbbc41c7cda3f2821550e5"
     }
   ]
 }
