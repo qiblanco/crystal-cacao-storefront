@@ -51,6 +51,7 @@ import os
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 SEITEN = [
@@ -60,7 +61,20 @@ SEITEN = [
 ]
 
 VORLAGE_BASIS = 'https://qiblanco.com'
-CRYSTAL_BASIS_VORGABE = 'http://localhost:3399'
+# DER MESSORT IST DER KUNDENRAND (umgehaengt 2026-11-07, Job
+# repairkorb-20261107-14-messblind-pruefungen-probe-design). Bis dahin stand
+# hier der dev-Server http://localhost:3399 der Werkbank. Den gab es nur
+# waehrend der Bau-Segmente; seit dem DNS-Klick am 2026-09-08 liefert
+# crystal-cacao-node den Laden aus, und die Probe lief seit Oktober in jedem
+# Lauf auf MESSAUSFALL. Die URL kommt aus der Shop-Landkarte, nie getippt.
+# Waehrend eines Baus misst --crystal-basis/CC_BASIS die Vorschau.
+try:
+    sys.path.insert(0, '/srv/openclaw/shared-state/storefront-messung/src')
+    import storefront_messung as sm
+    CRYSTAL_BASIS_VORGABE = sm.url('crystal', '/').rstrip('/')
+except Exception as _exc:                                 # noqa: BLE001
+    sm, CRYSTAL_BASIS_VORGABE = None, ''
+    SM_FEHLER = repr(_exc)
 
 # Der Pin. Siehe Kopf: ohne ihn misst man zwei Maerkte und nennt es Drift.
 MARKT_HEADER = {'oxygen-buyer-country': 'DE'}
@@ -384,7 +398,8 @@ class Messausfall(Exception):
     pass
 
 
-def hole(url: str, timeout: int = 40) -> str:
+def hole(url: str, timeout: int = 40) -> tuple[str, str]:
+    """-> (Dokument, End-URL nach Umleitungen)."""
     req = urllib.request.Request(
         url,
         headers={
@@ -396,7 +411,7 @@ def hole(url: str, timeout: int = 40) -> str:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             if r.status != 200:
                 raise Messausfall(f'{url}: HTTP {r.status}')
-            return r.read().decode('utf-8', 'replace')
+            return r.read().decode('utf-8', 'replace'), r.geturl()
     except urllib.error.URLError as e:
         raise Messausfall(f'{url}: {e}') from e
     except OSError as e:
@@ -660,6 +675,11 @@ def kontrast(hex1: str, hex2: str) -> float:
     return (hell + 0.05) / (dunkel + 0.05)
 
 
+def _pfad(url: str) -> str:
+    teile = urllib.parse.urlsplit(url)
+    return (teile.path.rstrip('/') or '/') + (f'?{teile.query}' if teile.query else '')
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -678,6 +698,10 @@ def main() -> int:
               f'(WCAG AA Fliesstext 4.5:1)')
         return 0 if v >= 4.5 else 1
 
+    if not args.crystal_basis:
+        print(f'MESSAUSFALL: storefront-messung nicht ladbar ({SM_FEHLER}) und '
+              'keine --crystal-basis — der Rand ist unbekannt.')
+        return 4
     seiten = args.seite or SEITEN
     benutzt: set[str] = set()
     befunde = 0
@@ -688,8 +712,8 @@ def main() -> int:
 
     for seite in seiten:
         try:
-            dv = hole(args.vorlage_basis + seite)
-            dc = hole(args.crystal_basis + seite)
+            dv, _ = hole(args.vorlage_basis + seite)
+            dc, ende = hole(args.crystal_basis + seite)
             mv = haupt(dv, args.vorlage_basis + seite)
             mc = haupt(dc, args.crystal_basis + seite)
         except Messausfall as e:
@@ -699,6 +723,15 @@ def main() -> int:
             return 4
 
         print(f'=== {seite}')
+        # Eine Umleitung heisst: die Seite gibt es hier nicht mehr als eigene.
+        # Sie gegen die Zielseite zu diffen, waere ein Vergleich zweier
+        # verschiedener Seiten; benannt wird sie als EINE Abweichung.
+        if _pfad(ende) != _pfad(args.crystal_basis + seite):
+            print(f'  [!!] umgeleitet auf {ende} — kein eigenes Gegenstueck '
+                  'zur Vorlage mehr')
+            befunde += 1
+            print()
+            continue
         for kuerzel, titel, im_main, fn in ACHSEN:
             v = fn(mv if im_main else dv)
             c = fn(mc if im_main else dc)
