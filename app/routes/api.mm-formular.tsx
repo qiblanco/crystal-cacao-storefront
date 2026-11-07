@@ -3,15 +3,32 @@
 // den Mail-Manager-Endpunkt weiter (kein CORS, kein Skript im Browser, funktioniert auch ohne JavaScript).
 import {data, redirect, type ActionFunctionArgs} from 'react-router';
 
-const ENDPUNKT = 'https://anmelden.65-108-150-121.sslip.io';
+const ENDPUNKT = 'https://anmelden.dienst.qiblanco.com';
 const KENNUNG = /^[A-Za-z0-9-]{1,20}$/;
 const ERLAUBTE_ZIELE = /^https:\/\/(www\.|us\.)?(qiblanco\.com|qi-blanco\.com|crystal-cacao\.com)(\/|$)/;
 
-export async function action({request}: ActionFunctionArgs) {
+// Einwilligungsnachweis: der Endpunkt sieht von dieser Route nur die Egress-IP des Oxygen-Edge. Die echte
+// Kunden-IP liefert Oxygen als `oxygen-buyer-ip`; sie reist unter X-MM-Kunden-IP, und die Route weist sich mit
+// X-MM-Weiterleitung aus (Oxygen-Variable MM_FORMULAR_WEITERLEITUNG = Geheimnis aus dem Endpunkt). Ohne die
+// Variable speichert der Endpunkt KEINE IP statt der falschen; aus dem Browser übernimmt er nie eine.
+function weiterleitungsHeader(request: Request, env: Record<string, unknown>): Record<string, string> {
+  const geheim = typeof env.MM_FORMULAR_WEITERLEITUNG === 'string' ? env.MM_FORMULAR_WEITERLEITUNG : '';
+  const k: Record<string, string> = {'X-MM-Weiterleitung': geheim || 'ohne-geheimnis'};
+  const ip = (request.headers.get('oxygen-buyer-ip') || '').trim();
+  if (ip) k['X-MM-Kunden-IP'] = ip;
+  const ua = request.headers.get('User-Agent');
+  if (ua) k['User-Agent'] = ua.slice(0, 300);
+  return k;
+}
+
+export async function action({request, context}: ActionFunctionArgs) {
   const f = await request.formData();
   const w = (k: string, n = 300) => String(f.get(k) ?? '').slice(0, n);
   const id = w('formular_id', 20);
   const ohneJs = !w('dauer_ms');
+  // Technikgrund nur ins Protokoll (Oxygen-Log), nie an den Kunden und nie mit Adresse (Elina EL-20261103-08835161).
+  const protokoll = (grund: string, http = 0, detail = '') =>
+    console.error(`[mm-formular] formular=${id} grund=${grund} http=${http}${detail ? ' detail=' + detail : ''}`);
   const antworte = (ok: boolean, weiter: string, fehler = '') => {
     if (!ohneJs) return data({ok, fehler, weiter: ok && weiter ? weiter : undefined}, {status: ok ? 200 : 400});
     const herkunft = request.headers.get('Referer') || '/';
@@ -34,21 +51,27 @@ export async function action({request}: ActionFunctionArgs) {
   let status = 0;
   try {
     const r = await fetch(`${ENDPUNKT}/f/${encodeURIComponent(id)}`, {
-      method: 'POST', headers: {'Content-Type': 'application/json', Accept: 'application/json'},
-      body: JSON.stringify(nutzlast), signal: AbortSignal.timeout(8000),
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', Accept: 'application/json',
+        ...weiterleitungsHeader(request, (context as unknown as {env?: Record<string, unknown>})?.env ?? {})},
+      body: JSON.stringify(nutzlast), signal: AbortSignal.timeout(20000),
     });
     status = r.status;
     antwort = await r.json().catch(() => ({}));
-  } catch {
-    // Netz/Endpunkt weg: KEIN automatischer Zweitversuch (er wäre eine doppelte Anmeldung).
+  } catch (e) {
+    // Netz/Endpunkt weg: KEIN automatischer Zweitversuch (er wäre eine doppelte Anmeldung). Der Ausgang ist offen: die Anmeldung
+    // kann gespeichert sein, darum sagt das Formular hier nicht „nicht angekommen“ (Elina EL-20261103-ca2f6465). Frist über dem
+    // längsten Weg des Endpunkts: 15 s Datenbank-Warten plus Urteil.
+    protokoll('nicht_erreichbar', 0, String((e as Error)?.message ?? e).slice(0, 160));
     return antworte(false, '', 'nicht_erreichbar');
   }
   if (antwort.ok) return antworte(true, ERLAUBTE_ZIELE.test(erfolg) ? erfolg : '');
-  return antworte(false, '', antwort.fehler || (status === 429 ? 'zu_viele_anfragen' : 'fehler'));
+  const grund = antwort.fehler || (status === 429 ? 'zu_viele_anfragen' : 'fehler');
+  protokoll(grund, status);
+  return antworte(false, '', grund);
 }
 
 // Kein GET: die Route ist nur ein Ziel für Formulare.
 export async function loader() {
   return new Response('Nicht gefunden', {status: 404});
 }
-
