@@ -24,6 +24,22 @@
  * crystal-PRODUKTION verboten (ADR 0056 Festlegung 4). Durchsetzer:
  * homepage-bauer/pruefungen/probe_crystal_consent_bypass.py
  */
+// NACHZUG aus der Vorlage (#1344, 4c94bbbe; hier uebernommen 2026-11-07, Job
+// 20261107-crystal-naht-context-checkout-tracking-1340-1344): die Marketing-
+// Einwilligung wird im Motor 'eigen' so gelesen wie der Hinweis, der sie
+// eingeholt hat (wahlGilt: Fassung, 12 Monate, erstes Cookie, roh). crystal
+// steht auf Fassung 1.0; betroffen waren hier eine Wahl aelter als 12 Monate,
+// zwei CookieConsent-Cookies und eine Wahl ohne utc -- der Server las sie als
+// ja, der Hinweis fragte neu. einwilligung-schalter.js ist byte-gleich zur
+// Vorlage, EINWILLIGUNG_FASSUNG kommt aus der crystal-eigenen texte-Datei.
+import {EINWILLIGUNG_FASSUNG} from './einwilligung-texte.js';
+import {
+  cookieAusHeader,
+  leseEinwilligung,
+  motorFuer,
+  wahlGilt,
+} from './einwilligung-schalter.js';
+
 export const ATTRIBUTION_STORAGE_KEY = 'qiblanco_checkout_attribution';
 export const ATTRIBUTION_COOKIE_NAME = ATTRIBUTION_STORAGE_KEY;
 
@@ -355,12 +371,47 @@ export function mergeCartAttributes(existingAttributes, attributionAttributes) {
 }
 
 /**
+ * Gilt für diese Anfrage der eigene Einwilligungshinweis (Motor 'eigen')?
+ * Dieselbe Reihenfolge wie im Root-Loader (Sitzungs-Cookie vor Konstante);
+ * die Query-Überschreibung setzt das Sitzungs-Cookie und gilt ab der
+ * nächsten Anfrage auch hier.
+ *
  * @param {string | null} cookieHeader
  */
-export function hasCookiebotMarketingConsent(cookieHeader) {
+export function eigenerEinwilligungsMotor(cookieHeader) {
+  return motorFuer('', cookieHeader || '').motor === 'eigen';
+}
+
+/**
+ * Marketing-Einwilligung, so gelesen wie der Hinweis, der sie eingeholt hat.
+ *
+ * Motor 'eigen': nur eine Wahl, die wahlGilt besteht — jünger als 12 Monate
+ * und Hauptnummer der Fassung mindestens EINWILLIGUNG_FASSUNG. Eine Wahl der
+ * Fassung 1 (Cookiebot-Cookie ohne qbv oder qbv '1.x') fragt der Hinweis seit
+ * Fassung 2.0 (PR #1308) neu und meldet sie im Browser als offen
+ * (public/qb-einwilligung.js leseCookie); bis zur neuen Wahl ist sie auch hier
+ * keine Zustimmung. Vorher las der Server sie weiter als ja.
+ * Motor 'cookiebot' (Rückweg): Cookiebot prüft seine Wahl selbst, Lesart wie
+ * bisher.
+ * Eine Ablehnung gilt dagegen in jeder Fassung (hasCookiebotMarketingDeclined).
+ * Gelesen wird wie im Browser: das ERSTE CookieConsent-Cookie, roh und einmal
+ * dekodiert (parseCookieHeader nähme das letzte und dekodierte doppelt; bei
+ * zwei Cookies aus verschiedenen Domains urteilten Server und Hinweis sonst
+ * über verschiedene Wahlen).
+ *
+ * @param {string | null} cookieHeader
+ * @param {number} [jetzt]
+ */
+export function hasCookiebotMarketingConsent(cookieHeader, jetzt = Date.now()) {
+  if (eigenerEinwilligungsMotor(cookieHeader)) {
+    const wahl = leseEinwilligung(cookieAusHeader(cookieHeader));
+    return Boolean(
+      wahl?.marketing && wahlGilt(wahl, EINWILLIGUNG_FASSUNG, jetzt),
+    );
+  }
+
   const cookieConsent = parseCookieHeader(cookieHeader).CookieConsent;
   if (!cookieConsent) return false;
-
   const decoded = safeDecode(cookieConsent);
   return /(?:^|[,{]\s*|["'])marketing["']?\s*:\s*true(?:[,}]|$)/i.test(
     decoded,
@@ -371,11 +422,18 @@ export function hasCookiebotMarketingConsent(cookieHeader) {
  * Aktive Ablehnung: Cookiebot-Stamp vorhanden UND marketing:false.
  * (Kein Stamp = keine Entscheidung => false; Zustimmung => false.)
  * Job 20260718: Grundlage der 'optout'-Policy — nie gegen erklaerten Willen.
+ * Darum ohne Fassungs- und Altersprüfung: auch eine Ablehnung der Fassung 1
+ * bleibt eine Ablehnung, bis der Besucher neu wählt. Im Motor 'eigen' dasselbe
+ * Cookie wie hasCookiebotMarketingConsent (das erste, wie im Browser).
  *
  * @param {string | null} cookieHeader
  */
 export function hasCookiebotMarketingDeclined(cookieHeader) {
-  const cookieConsent = parseCookieHeader(cookieHeader).CookieConsent;
+  // Muster statt leseEinwilligung: auch eine unvollständige Wahl (ohne utc)
+  // mit marketing:false bleibt eine Ablehnung.
+  const cookieConsent = eigenerEinwilligungsMotor(cookieHeader)
+    ? cookieAusHeader(cookieHeader)
+    : parseCookieHeader(cookieHeader).CookieConsent;
   if (!cookieConsent) return false;
 
   const decoded = safeDecode(cookieConsent);
