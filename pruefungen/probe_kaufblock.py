@@ -56,10 +56,24 @@ KEIN GEPINNTER ZAEHLER: die Probe nennt keine Anzahl von Abschnitten, keine
 Seitenlaenge und keinen Preis. Jede Schwelle ist ein VERHAELTNIS oder ein
 Abstand, beides waechst nicht mit dem Ausbau der Seite.
 
+MESS-ZEUGE (Klassenauftrag 20261021-klasse-renderer-bahn-wachen-browser-timeout-als-befund, s05):
+Die Probe laeuft ueber renderer-bahn in system-renderer.slice (CPUWeight 50). Unter Last bekommt der
+Mess-Browser zu wenig CPU, und ein Klick, der in 3 s plus 900 ms nicht "ankommt", oder eine Sternzeile bzw.
+ein Kauf-Knopf, die nach networkidle plus 700 ms nicht im DOM stehen, sind dann eine Aussage ueber das
+Messgeraet, nicht ueber die Seite. Jedes Urteil ueber ABWESENHEIT ([A] kommt nirgendwo an, [A] Sternzeile
+fehlt, [F] Kauf-Knopf fehlt) hoert deshalb vor dem Befund die zwei Zeugen aus
+homepage-bauer/src/mess_zeuge.py (Kontrollseite im eigenen Kontext + HTTP-Nachmessung der Seite):
+  Seite antwortet nicht gesund (keine Antwort, Status >= 400, >= ZEUGE_DECKEL_S)  -> BEFUND bleibt
+  Kontrollseite verhungert oder nicht messbar                                    -> KEINE AUSSAGE (exit 4)
+  Browser messfaehig                                                             -> BEFUND bleibt (+ Zeugensatz)
+Befunde ueber Vorhandenes ([B] [C] [D] [E], [F] verdeckt) brauchen keinen Zeugen. Ein Befund aus einer
+anderen Messung sticht eine Zeugen-Keine-Aussage (exit 1). Selbsttest:
+homepage-bauer/pruefungen/selftest_mess_zeuge_s05.py (Gruppe kaufblock).
+
 EXIT
   0  gruen
   1  Befund
-  4  MESSAUSFALL (Seite/Kaufblock nicht erreichbar, Playwright fehlt) --
+  4  MESSAUSFALL (Seite/Kaufblock nicht erreichbar, Playwright fehlt, Mess-Browser verhungert) --
      ausdruecklich NICHT 'sauber'
 
 AUFRUF
@@ -81,6 +95,10 @@ import sys as _sys_ic
 if "/srv/openclaw/shared-state/tracking-linkage/src" not in _sys_ic.path:
     _sys_ic.path.insert(0, "/srv/openclaw/shared-state/tracking-linkage/src")
 import internal_client as _internal_client  # noqa: E402
+for _p in ("/srv/openclaw/shared-state/homepage-bauer/src", "/srv/openclaw/shared-state/storefront-messung/src"):
+    if _p not in _sys_ic.path:
+        _sys_ic.path.insert(0, _p)
+import mess_zeuge as mz  # noqa: E402
 
 PFADE = ['/products/crystal-cacao-create', '/products/crystal-cacao-awake']
 BREITEN = [390, 768, 1440]
@@ -90,6 +108,8 @@ STREICH_ANTEIL_MAX = 0.70   # [B] Streichpreis <= 70 % der Preis-Schriftgroesse
 ETIKETT_ABSTAND_MIN = 12.0  # [C] px zwischen Etikett und Preiszeile
 GRUND_LUECKE_MAX = 12.0     # [D] px senkrecht zwischen Preiszeile und Grundpreis
 KLICK_SCHWELLE = 4.0        # [A] px Rollweg, ab dem ein Klick "ankommt"
+ZEUGE_DECKEL_S = 45         # Frist der Wache (goto-Timeout); so lange darf die Nachmessung der Seite dauern
+KEINE_AUSSAGE = 'KEINE AUSSAGE'   # Praefix einer Abwesenheit, die der Mess-Zeuge nicht traegt
 
 JS = """
 (rotArm) => {
@@ -205,6 +225,19 @@ def abstand(a, b):
     return round(max(dx, dy, 0.0), 1)
 
 
+def abwesend(page, url, befund, gehoert):
+    """Ein Urteil ueber ABWESENHEIT -> Befund mit Zeugensatz oder KEINE AUSSAGE (Mess-Browser).
+
+    Ein Zeuge je Seitenmessung (gehoert ist der Merker des Aufrufers): alle Abwesenheiten derselben
+    Messung teilen denselben Browser und dieselbe Seite."""
+    if 'u' not in gehoert:
+        gehoert['u'] = mz.zeuge(page, url=url, deckel_s=ZEUGE_DECKEL_S, was='kaufblock')
+    u = gehoert['u']
+    if u['art'] == 'messausfall':
+        return f'{KEINE_AUSSAGE} {befund.split(":", 1)[0]}: {mz.zeile(u)}'
+    return f'{befund} [{u["grund"]}]'
+
+
 def pruefe(page, url, breite, rot_arm):
     page.set_viewport_size({'width': breite, 'height': 900})
     page.goto(url, wait_until='networkidle', timeout=45000)
@@ -214,12 +247,14 @@ def pruefe(page, url, breite, rot_arm):
         return None, [f'MESSAUSFALL: {d["fehlt"]} nicht gefunden ({url} @{breite})']
 
     befunde = []
+    gehoert = {}
     ort = f'{url.split("/products/")[-1]} @{breite}px'
 
     # ---- [A] tote Flaeche -------------------------------------------------
     z = d['sternzeile']
     if z is None:
-        befunde.append(f'[A] {ort}: Sternzeile fehlt ganz (sterne_grafik={d["sterne_grafik_n"]})')
+        befunde.append(abwesend(page, url, f'[A] {ort}: Sternzeile fehlt ganz '
+                                           f'(sterne_grafik={d["sterne_grafik_n"]})', gehoert))
     else:
         bietet_sich_an = z['tag'] in ('a', 'button') or z['fokus'] or z['cursor'] == 'pointer'
         if bietet_sich_an:
@@ -235,12 +270,13 @@ def pruefe(page, url, breite, rot_arm):
             n = page.evaluate('() => ({y: window.scrollY, h: location.hash})')
             kam_an = abs(n['y'] - v['y']) > KLICK_SCHWELLE or v['h'] != n['h']
             if not kam_an:
-                befunde.append(
+                befunde.append(abwesend(
+                    page, url,
                     f'[A] {ort}: Sternzeile bietet sich als Handlung an '
                     f'(<{z["tag"]}> cursor={z["cursor"]} fokussierbar={z["fokus"]}), '
                     f'kommt aber nirgendwo an (Rollweg {abs(n["y"]-v["y"])} px, '
                     f'Hash {v["h"]!r}->{n["h"]!r}, Sprungziele auf der Seite '
-                    f'{d["sprungziele"]})')
+                    f'{d["sprungziele"]})', gehoert))
 
     # ---- [B] Streichpreis --------------------------------------------------
     if d['preis'] and d['streich']:
@@ -279,10 +315,60 @@ def pruefe(page, url, breite, rot_arm):
 
     # ---- [F] Kaufweg -------------------------------------------------------
     if not d['knopf']:
-        befunde.append(f'[F] {ort}: Kauf-Knopf fehlt oder ist unsichtbar')
+        befunde.append(abwesend(page, url, f'[F] {ort}: Kauf-Knopf fehlt oder ist unsichtbar', gehoert))
     elif not d.get('knopf_trifft_sich'):
         befunde.append(f'[F] {ort}: Kauf-Knopf ist verdeckt (Hit-Test trifft ein anderes Element)')
     return d, befunde
+
+
+def lauf(page, basis, pfade, rot_arm=None, breiten=None):
+    """Alle Seitenmessungen auf EINER Seite -> (befunde, ausfall, keine_aussage)."""
+    alle, ausfall, ka = [], [], []
+    for pfad in pfade:
+        for breite in (breiten or BREITEN):
+            try:
+                _, bef = pruefe(page, basis.rstrip('/') + pfad, breite, rot_arm)
+            except Exception as exc:                        # noqa: BLE001
+                ausfall.append(f'MESSAUSFALL {pfad}@{breite}: {exc}')
+                continue
+            for x in bef:
+                if x.startswith('MESSAUSFALL'):
+                    ausfall.append(x)
+                elif x.startswith(KEINE_AUSSAGE):
+                    ka.append(x)
+                else:
+                    alle.append(x)
+    return alle, ausfall, ka
+
+
+def schluss(alle, ausfall, ka, n_pfade, n_breiten=None):
+    """Das Gesamturteil. Reihenfolge: Messausfall einer Seite -> 4; Befund -> 1 (sticht eine
+    Zeugen-Keine-Aussage); nur Zeugen-Keine-Aussage -> 4; sonst 0."""
+    n_breiten = n_breiten or len(BREITEN)
+    if ausfall:
+        for x in ausfall + ka:
+            print(x, file=sys.stderr)
+        print(f'MESSAUSFALL: {len(ausfall)} Messung(en) ohne Aussage — NICHT als sauber lesen',
+              file=sys.stderr)
+        return 4
+    if alle:
+        for x in alle:
+            print(x)
+        for x in ka:
+            print(x)
+        print(f'BEFUND: {len(alle)} Abweichung(en) ueber '
+              f'{n_pfade} Seite(n) x {n_breiten} Breiten')
+        return 1
+    if ka:
+        for x in ka:
+            print(x)
+        print(f'MESSAUSFALL: {len(ka)} Abwesenheit(en) ohne messfaehigen Mess-Browser — '
+              f'keine Aussage ueber die Seite, NICHT als sauber lesen')
+        return 4
+    print(f'[OK] Kaufblock gruen: {n_pfade} Seite(n) x {n_breiten} Breiten, '
+          f'sechs Arme (A tote Flaeche, B Streichpreis, C Etikett, D Grundpreis, '
+          f'E Dopplung, F Kaufweg)')
+    return 0
 
 
 def main():
@@ -293,45 +379,23 @@ def main():
     ap.add_argument('--nur-pfad', default=None)
     a = ap.parse_args()
 
+    # EIN WEG IN DEN BROWSER (Commit-Tor KUNDENRAND_BOOTSTRAP_RIEGEL): fehlt playwright im
+    # Interpreter, startet storefront_messung den Prozess unter dem Playwright-Env neu.
+    import storefront_messung as sm  # noqa: PLC0415
     try:
-        from playwright.sync_api import sync_playwright
-    except ImportError:
-        print('MESSAUSFALL: playwright fehlt', file=sys.stderr)
+        sync_playwright = sm.playwright_oder_hinlaufen(zweck='probe_kaufblock', skript=__file__)
+    except sm.Messausfall as exc:
+        print(f'MESSAUSFALL: playwright fehlt ({exc})', file=sys.stderr)
         return 4
 
     pfade = [a.nur_pfad] if a.nur_pfad else PFADE
-    alle, ausfall = [], []
     with sync_playwright() as pw:
         b = pw.chromium.launch()
         page = b.new_context(locale='de-DE').new_page()
         _internal_client.stumm_schalten(page)
-        for pfad in pfade:
-            for breite in BREITEN:
-                try:
-                    _, bef = pruefe(page, a.basis.rstrip('/') + pfad, breite, a.rot_arm)
-                except Exception as exc:                        # noqa: BLE001
-                    ausfall.append(f'MESSAUSFALL {pfad}@{breite}: {exc}')
-                    continue
-                for x in bef:
-                    (ausfall if x.startswith('MESSAUSFALL') else alle).append(x)
+        alle, ausfall, ka = lauf(page, a.basis, pfade, a.rot_arm)
         b.close()
-
-    if ausfall:
-        for x in ausfall:
-            print(x, file=sys.stderr)
-        print(f'MESSAUSFALL: {len(ausfall)} Messung(en) ohne Aussage — NICHT als sauber lesen',
-              file=sys.stderr)
-        return 4
-    if alle:
-        for x in alle:
-            print(x)
-        print(f'BEFUND: {len(alle)} Abweichung(en) ueber '
-              f'{len(pfade)} Seite(n) x {len(BREITEN)} Breiten')
-        return 1
-    print(f'[OK] Kaufblock gruen: {len(pfade)} Seite(n) x {len(BREITEN)} Breiten, '
-          f'sechs Arme (A tote Flaeche, B Streichpreis, C Etikett, D Grundpreis, '
-          f'E Dopplung, F Kaufweg)')
-    return 0
+    return schluss(alle, ausfall, ka, len(pfade))
 
 
 if __name__ == '__main__':
