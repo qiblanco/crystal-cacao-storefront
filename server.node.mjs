@@ -265,12 +265,7 @@ function zaehlerSchreiben() {
 }
 const zaehlerUhr = setInterval(zaehlerSchreiben, 60_000);
 zaehlerUhr.unref();
-for (const signal of ['SIGTERM', 'SIGINT']) {
-  process.on(signal, () => {
-    zaehlerSchreiben();
-    process.exit(0);
-  });
-}
+// SIGTERM/SIGINT: siehe "Geordnetes Ende" unter dem Server (braucht `server`).
 
 /**
  * Setzt die Laender-Kopfzeile — oder entfernt sie ersatzlos.
@@ -503,6 +498,7 @@ function statischAusliefern(req, res) {
 // Server
 // ---------------------------------------------------------------------------
 const server = http.createServer(async (req, res) => {
+  antwortVerfolgen(res);
   try {
     if (statischAusliefern(req, res)) return;
 
@@ -544,6 +540,107 @@ const server = http.createServer(async (req, res) => {
     res.end('An unexpected error occurred');
   }
 });
+
+// ---------------------------------------------------------------------------
+// Geordnetes Ende auf SIGTERM (graceful shutdown / connection draining)
+// ---------------------------------------------------------------------------
+// WARUM: bis 2026-11-08 endete der Prozess auf SIGTERM sofort mit
+// `process.exit(0)`. Was er in seinen letzten Millisekunden noch angenommen
+// hatte, riss ab. Caddy wiederholt seit s03 (devlog D-220) GET und HEAD, einen
+// POST (Warenkorb `/cart`, `/kurs-eintragung`) aber bewusst nicht, sonst droht
+// eine Doppelbuchung: der Kunde bekam beim Neustart 502. Vorbild im Haus ist
+// qi-salesbot D-599/F-707 (`Connection: close` ab SIGTERM); hier ohne
+// diagnostics_channel, weil der Adapter seinen Handler selbst haelt.
+//
+// WAS ES TUT, ab dem Signal:
+//   1. `server.close()`: der Port nimmt keine neue Verbindung mehr an. Caddy
+//      bekommt "Verbindung abgelehnt" und waehlt neu, fuer JEDE Methode, bis
+//      `lb_try_duration` (3 s) -- bis dahin lauscht der neue Prozess.
+//   2. Leere Keep-alive-Verbindungen werden sofort geschlossen, jede Antwort
+//      ohne gesendeten Kopf bekommt `Connection: close`, und nach jeder
+//      fertigen Antwort werden frei gewordene Verbindungen erneut geschlossen.
+//   3. Laufende Abrufe laufen zu Ende. Sind alle Verbindungen zu: Zaehler
+//      schreiben, exit 0 (Exit-Code wie bisher).
+//   4. DECKEL, CRYSTAL_ABBAU_DECKEL_S (Standard 2 s): danach werden alle
+//      Verbindungen geschlossen und der Prozess endet trotzdem.
+//
+// WARUM DER DECKEL 2 s IST UND NICHT 10: die Neustartluecke ist Drainieren +
+// Start des neuen Prozesses (s03 gemessen 0,41-0,58 s), und Caddy haelt sie
+// nur bis `lb_try_duration 3s` (crystal-cacao.caddy). Ein einziger langsamer
+// Abruf mit 10-s-Deckel zoege die Luecke auf ~10,5 s, und ALLE neuen Abrufe
+// bekaemen nach 3 s ein 502. Mit 2 s bleibt sie unter ~2,6 s. Gemessen am
+// Zugriffslog 29.10.-07.11.2026: POST n=14469, p99 1,49 s, ueber 2 s 11
+// (0,08 %); GET p99 0,22 s. Wer den Deckel hebt, hebt lb_try_duration mit.
+// Die Unit traegt kein TimeoutStopSec (systemd: 90 s); der Deckel liegt weit
+// darunter, ein SIGKILL trifft den Laden also nie.
+//
+// Kill-Schalter: CRYSTAL_SIGTERM_ABBAU=aus (dann sofortiges Ende wie bis
+// 2026-11-08). Ein zweites Signal waehrend des Abbaus beendet sofort.
+// Probe: claude-jobs/20261030-crystal-bau-nachzieher-deploy-fenster-ohne-asset-404-s04/probe_sigterm_abbau.py
+const ABBAU_AN = (process.env.CRYSTAL_SIGTERM_ABBAU ?? '').trim().toLowerCase() !== 'aus';
+const ABBAU_DECKEL_STANDARD_S = 2;
+const ABBAU_DECKEL_S = (() => {
+  const roh = (process.env.CRYSTAL_ABBAU_DECKEL_S ?? '').trim();
+  if (!roh) return ABBAU_DECKEL_STANDARD_S;
+  const wert = Number(roh);
+  // Unlesbar, <= 0 oder nicht unter TimeoutStopSec (90 s): der Standard, laut.
+  if (!Number.isFinite(wert) || wert <= 0 || wert >= 90) {
+    console.error(`[abbau] CRYSTAL_ABBAU_DECKEL_S=${roh} unbrauchbar, Deckel ${ABBAU_DECKEL_STANDARD_S} s`);
+    return ABBAU_DECKEL_STANDARD_S;
+  }
+  return wert;
+})();
+let imAbbau = false;
+const laufendeAntworten = new Set();
+
+function schliessenNachAntwort(res) {
+  if (!res.headersSent && !res.writableEnded) res.setHeader('Connection', 'close');
+}
+
+function antwortVerfolgen(res) {
+  if (imAbbau) schliessenNachAntwort(res);
+  laufendeAntworten.add(res);
+  res.once('close', () => {
+    laufendeAntworten.delete(res);
+    // Eine Antwort, deren Kopf vor dem Signal schon unterwegs war, laesst
+    // ihre Verbindung als Keep-alive zurueck: jetzt ist sie leer, also zu.
+    if (imAbbau) setImmediate(() => server.closeIdleConnections());
+  });
+}
+
+function abbauen(signal) {
+  if (!ABBAU_AN || imAbbau) {
+    if (imAbbau) console.log(`[abbau] zweites ${signal}: sofortiges Ende`);
+    zaehlerSchreiben();
+    process.exit(0);
+  }
+  imAbbau = true;
+  const beginn = Date.now();
+  for (const res of laufendeAntworten) schliessenNachAntwort(res);
+  console.log(
+    `[abbau] ${signal}: Annahme zu, ${laufendeAntworten.size} laufende Antwort(en), Deckel ${ABBAU_DECKEL_S} s`,
+  );
+  const ende = (grund) => {
+    console.log(`[abbau] Ende nach ${Date.now() - beginn} ms (${grund})`);
+    zaehlerSchreiben();
+    process.exit(0);
+  };
+  const deckel = setTimeout(() => {
+    console.log(
+      `[abbau] Deckel ${ABBAU_DECKEL_S} s erreicht: ${laufendeAntworten.size} Antwort(en) offen, Verbindungen werden geschlossen`,
+    );
+    server.closeAllConnections();
+    ende('deckel');
+  }, ABBAU_DECKEL_S * 1000);
+  server.close(() => {
+    clearTimeout(deckel);
+    ende('alle Verbindungen zu');
+  });
+  server.closeIdleConnections();
+}
+for (const signal of ['SIGTERM', 'SIGINT']) {
+  process.on(signal, () => abbauen(signal));
+}
 
 server.listen(PORT, HOST_BIND, () => {
   console.log(
