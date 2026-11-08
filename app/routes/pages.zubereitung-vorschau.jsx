@@ -382,7 +382,9 @@ function Dosieranleitung() {
           ))}
         </tbody>
       </table>
-      <p className="zbv-dosis__empfehlung">Für tiefen Fokus empfehlen wir 20–30&nbsp;g.</p>
+      <p className="zbv-dosis__empfehlung">Für tiefen Fokus empfehlen wir{' '}
+        <span className="zbv-am-stueck">20–30&nbsp;g</span>.
+      </p>
     </div>
   );
 }

@@ -206,6 +206,10 @@
 .zbv .zbv-schritt__text strong {
   color: var(--zbv-titel);
   font-weight: 700;
+  white-space: nowrap; /* Mengen nie am Gedankenstrich umbrechen */
+}
+.zbv-am-stueck {
+  white-space: nowrap;
 }
 
 /* Dosieranleitung: ruhige Tabelle mit feinen Trennlinien */
