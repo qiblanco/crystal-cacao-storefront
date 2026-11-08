@@ -1,0 +1,570 @@
+/*
+ * Zubereitungs-Section, VORSCHAU (/pages/zubereitung-vorschau), Elina 08.11.2026,
+ * EL-20261108-97a6b64a nach fbf1998e + 29de4ddf + 80f6a9be + 7c358c96.
+ * Mobile first; ab 56.25em (900 px) zwei Spalten mit klebendem Bild rechts.
+ * Farben woertlich aus der Vorlage 29de4ddf: Grund #fbf8f4, Versalzeile
+ * #90671d, Zeitleiste #c8985a, Ueberschrift #171310, Text #6b665d.
+ * Alles haengt unter .zbv; keine Regel wirkt ausserhalb dieser Seite.
+ */
+.zbv {
+  --zbv-grund: #fbf8f4;
+  --zbv-gold: #90671d;
+  --zbv-gold-linie: #c8985a;
+  --zbv-creme: #f7efe2;
+  --zbv-titel: #171310;
+  --zbv-text: #6b665d;
+  --zbv-leiste-hoehe: 56px;
+  background: var(--zbv-grund);
+  color: var(--zbv-text);
+  font-family: 'Open Sans Variable', 'Open Sans', sans-serif;
+  padding: 48px 20px calc(var(--zbv-leiste-hoehe) + 56px);
+}
+
+.zbv-unsichtbar {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── Kopf ─────────────────────────────────────────────────────────── */
+.zbv-kopf {
+  text-align: center;
+  max-width: 40rem;
+  margin: 0 auto 32px;
+}
+.zbv .zbv-augenbraue {
+  margin: 0 0 14px;
+  color: var(--zbv-gold);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+.zbv .zbv-kopf h1 {
+  margin: 0;
+  color: var(--zbv-titel);
+  font-family: inherit;
+  font-size: clamp(30px, 8.4vw, 54px);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+.zbv .zbv-kopf h1 strong {
+  font-weight: 700;
+}
+.zbv .zbv-unterzeile {
+  margin: 14px 0 0;
+  color: var(--zbv-text);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── Raster ───────────────────────────────────────────────────────── */
+.zbv-raster {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* Hauptbild: am Handy die Tasse oben, am Desktop der klebende Rahmen. */
+.zbv-medien {
+  margin: 0 auto 40px;
+  max-width: 520px;
+}
+.zbv-rahmen {
+  position: relative;
+  aspect-ratio: 1136 / 1408;
+  border-radius: 28px;
+  overflow: hidden;
+  background: var(--zbv-creme);
+  box-shadow: 0 24px 60px -32px rgba(23, 19, 16, 0.35);
+}
+.zbv-rahmen__bild {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.zbv-nur-breit {
+  display: none;
+}
+
+/* ── Zeitleiste ───────────────────────────────────────────────────── */
+.zbv-schritte {
+  --zbv-fuellung: 0;
+  --zbv-rinne: 36px;
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 var(--zbv-rinne);
+}
+/* fein gepunktete Goldlinie … */
+.zbv-schritte::before,
+.zbv-schritte::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 11px;
+  width: 2px;
+}
+.zbv-schritte::before {
+  background-image: radial-gradient(circle, var(--zbv-gold-linie) 0.9px, transparent 1.2px);
+  background-size: 2px 7px;
+  background-repeat: repeat-y;
+  opacity: 0.9;
+}
+/* … die sich mit dem Scrollen von oben nach unten golden fuellt */
+.zbv-schritte::after {
+  background: linear-gradient(180deg, #e2c08b, var(--zbv-gold-linie) 60%, var(--zbv-gold));
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(200, 152, 90, 0.55);
+  transform-origin: top;
+  transform: scaleY(var(--zbv-fuellung));
+}
+
+.zbv-schritt {
+  position: relative;
+  padding: 0 0 48px;
+}
+.zbv-schritt:last-child {
+  padding-bottom: 8px;
+}
+.zbv-punkt {
+  position: absolute;
+  z-index: 1;
+  left: calc(-1 * var(--zbv-rinne) + 3px);
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--zbv-gold-linie);
+  background: var(--zbv-grund);
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+.zbv-schritt.ist-erreicht .zbv-punkt {
+  background: var(--zbv-gold-linie);
+}
+.zbv-schritt.ist-aktiv .zbv-punkt {
+  background: radial-gradient(circle at 35% 35%, #f1d7a8, var(--zbv-gold-linie) 70%);
+  box-shadow: 0 0 0 5px rgba(200, 152, 90, 0.18), 0 0 18px 2px rgba(200, 152, 90, 0.6);
+}
+/* Der Punkt steht neben der Pill, am Handy also unter dem Bild. */
+.zbv-schritt__marke {
+  position: relative;
+}
+
+.zbv-schritt__bildhuelle {
+  margin: 0 0 18px;
+  border-radius: 22px;
+  overflow: hidden;
+  aspect-ratio: 1136 / 1408;
+  background: var(--zbv-creme);
+}
+.zbv-schritt__bild {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.zbv .zbv-pill {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 4px 12px;
+  border: 1px solid var(--zbv-gold-linie);
+  border-radius: 999px;
+  background: var(--zbv-creme);
+  color: var(--zbv-gold);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+.zbv .zbv-schritt__titel {
+  margin: 0 0 8px;
+  text-align: left;
+  color: var(--zbv-titel);
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  text-transform: none;
+}
+.zbv .zbv-schritt__text {
+  margin: 0;
+  color: var(--zbv-text);
+  font-size: 16px;
+  line-height: 1.65;
+}
+.zbv .zbv-schritt__text strong {
+  color: var(--zbv-titel);
+  font-weight: 700;
+}
+
+/* Dosieranleitung: ruhige Tabelle mit feinen Trennlinien */
+.zbv-dosis {
+  margin: 20px 0 0;
+}
+.zbv-dosis__tabelle {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.zbv-dosis__tabelle th,
+.zbv-dosis__tabelle td {
+  padding: 11px 0;
+  border-top: 1px solid rgba(200, 152, 90, 0.35);
+  text-align: left;
+  vertical-align: baseline;
+  color: var(--zbv-text);
+  font-weight: 400;
+}
+.zbv-dosis__tabelle tr:last-child th,
+.zbv-dosis__tabelle tr:last-child td {
+  border-bottom: 1px solid rgba(200, 152, 90, 0.35);
+}
+.zbv-dosis__tabelle th {
+  width: 4.2em;
+  color: var(--zbv-titel);
+  font-weight: 700;
+}
+.zbv-dosis__rituale {
+  text-align: right !important;
+  white-space: nowrap;
+}
+.zbv .zbv-dosis__empfehlung {
+  margin: 14px 0 0;
+  color: var(--zbv-gold);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.zbv-pflicht {
+  margin: 8px 0 0 var(--zbv-rinne, 36px);
+  font-size: 14px;
+}
+
+/* ── Erscheinen beim Scrollen (nur mit JavaScript) ────────────────── */
+.zbv[data-zbv-js] .zbv-schritt {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.zbv[data-zbv-js] .zbv-schritt[data-zbv-sichtbar] {
+  opacity: 1;
+  transform: none;
+}
+.zbv[data-zbv-js] .zbv-schritt__bild {
+  transform: scale(1);
+  transition: transform 1.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.zbv[data-zbv-js] .zbv-schritt[data-zbv-sichtbar] .zbv-schritt__bild {
+  transform: scale(1.05);
+}
+
+/* ── Kaufleiste ───────────────────────────────────────────────────── */
+.zbv-leiste {
+  position: fixed;
+  z-index: 40;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--zbv-leiste-hoehe);
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 0 0 7px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 10px 30px -8px rgba(23, 19, 16, 0.28), 0 2px 6px rgba(23, 19, 16, 0.08);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+html[data-qb-einwilligung-offen] .zbv-leiste {
+  bottom: calc(12px + var(--qb-ew-hoehe, 0px));
+}
+.zbv-leiste[data-im-bild='nein'] {
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+}
+.zbv-leiste__packshot {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--zbv-creme);
+}
+.zbv-leiste__produkt {
+  flex: none;
+  min-width: 0;
+}
+.zbv .zbv-leiste__name {
+  margin: 0 0 2px;
+  color: var(--zbv-titel);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.zbv-leiste__sorten {
+  display: flex;
+  gap: 2px;
+}
+/* Gegen die Knopf-Regeln des Ladens (Trefferflaeche, Polster) abgesichert. */
+.zbv .zbv-sorte {
+  appearance: none;
+  display: inline-block;
+  width: auto;
+  height: auto;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none;
+  margin: 0;
+  padding: 1px 8px !important;
+  border: 1px solid transparent;
+  border-radius: 999px !important;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px !important;
+  font-weight: 600;
+  line-height: 1.5 !important;
+  cursor: pointer;
+}
+.zbv .zbv-sorte--awake {
+  color: #c23c6b;
+}
+.zbv .zbv-sorte--create {
+  color: #1771bd;
+}
+.zbv .zbv-sorte--awake[aria-pressed='true'] {
+  background: #c23c6b;
+  color: #fff;
+}
+.zbv .zbv-sorte--create[aria-pressed='true'] {
+  background: #1771bd;
+  color: #fff;
+}
+.zbv .zbv-sorte:focus-visible {
+  outline: 2px solid var(--zbv-gold);
+  outline-offset: 1px;
+}
+.zbv-leiste__trenner {
+  flex: none;
+  width: 1px;
+  height: 30px;
+  background: #e7dfd2;
+}
+.zbv .zbv-leiste__preise {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0;
+  white-space: nowrap;
+}
+.zbv-leiste__vorher {
+  color: #9b958b;
+  font-size: 13px;
+  text-decoration: line-through;
+}
+.zbv-leiste__preis {
+  color: var(--zbv-titel);
+  font-size: 17px;
+  font-weight: 700;
+}
+.zbv-leiste__menge {
+  font-size: 12px;
+  font-weight: 600;
+}
+/* runder dunkler Knopf, so hoch wie die Leiste, buendig an ihrem Ende */
+.zbv-leiste__knopf {
+  flex: none;
+  height: 100%;
+  aspect-ratio: 1;
+}
+.zbv-leiste__knopf form {
+  height: 100%;
+  margin: 0;
+}
+.zbv .zbv-leiste__knopf button {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0 !important;
+  margin: 0;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 50% !important;
+  background: #171310;
+  color: #fff !important;
+  font-size: 0 !important;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.zbv .zbv-leiste__knopf button:hover {
+  background: #3a2f25;
+}
+.zbv .zbv-leiste__knopf button:active {
+  transform: scale(0.96);
+}
+.zbv .zbv-leiste__knopf button:focus-visible {
+  outline: 2px solid var(--zbv-gold);
+  outline-offset: 2px;
+}
+.zbv .zbv-leiste__knopf button:disabled {
+  background: #8f877c;
+  cursor: not-allowed;
+}
+
+@media (max-width: 22.4em) {
+  .zbv-leiste__trenner {
+    display: none;
+  }
+  .zbv-leiste__packshot {
+    width: 34px;
+    height: 34px;
+  }
+  .zbv-leiste__vorher {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 37.5em) {
+  .zbv {
+    padding-top: 72px;
+  }
+  .zbv-schritte {
+    --zbv-rinne: 48px;
+  }
+  .zbv .zbv-schritt__titel {
+    font-size: 26px;
+  }
+}
+
+/* ── Desktop: zwei Spalten, Bild rechts klebend ───────────────────── */
+@media (min-width: 56.25em) {
+  .zbv {
+    --zbv-leiste-hoehe: 60px;
+    padding: 64px 40px 120px;
+  }
+  .zbv-kopf {
+    margin-bottom: 48px;
+  }
+  .zbv-raster {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 72px;
+    align-items: start;
+  }
+  .zbv-text {
+    grid-column: 1;
+    grid-row: 1;
+    padding-top: 8px;
+  }
+  .zbv-medien {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: 104px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+  .zbv-rahmen {
+    width: min(100%, calc((100vh - 350px) * 0.8068));
+    margin-left: auto;
+  }
+  .zbv-nur-breit {
+    display: block;
+  }
+  .zbv-nur-schmal {
+    display: none;
+  }
+  .zbv-rahmen__bild {
+    opacity: 0;
+    transform: scale(1.03);
+    transition: opacity 0.7s ease, transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .zbv-rahmen__bild.ist-aktiv {
+    opacity: 1;
+    transform: none;
+  }
+  .zbv-schritt {
+    padding-bottom: 22vh;
+  }
+  .zbv-schritt:last-child {
+    padding-bottom: 12vh;
+  }
+  .zbv .zbv-schritt__text {
+    font-size: 17px;
+    max-width: 34em;
+  }
+  .zbv-dosis {
+    max-width: 30em;
+  }
+  /* Kaufleiste unten im Bild, ueber die Bildbreite mit kleinem Rand */
+  .zbv-leiste {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    max-width: none;
+    gap: 12px;
+    padding-left: 8px;
+  }
+  html[data-qb-einwilligung-offen] .zbv-leiste {
+    bottom: 14px;
+  }
+  .zbv-leiste[data-im-bild='nein'] {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  .zbv-leiste__packshot {
+    width: 44px;
+    height: 44px;
+  }
+  .zbv .zbv-leiste__name {
+    font-size: 14px;
+  }
+  .zbv-leiste__trenner {
+    margin: 0 4px;
+  }
+  .zbv-leiste__vorher {
+    font-size: 14px;
+  }
+  .zbv-leiste__preis {
+    font-size: 19px;
+  }
+  .zbv-pflicht {
+    margin-left: var(--zbv-rinne);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zbv[data-zbv-js] .zbv-schritt,
+  .zbv[data-zbv-js] .zbv-schritt__bild,
+  .zbv-rahmen__bild,
+  .zbv-leiste,
+  .zbv-punkt {
+    transition: none !important;
+    transform: none !important;
+  }
+  .zbv[data-zbv-js] .zbv-schritt {
+    opacity: 1;
+  }
+}
