@@ -213,6 +213,16 @@
     ev.preventDefault();
   }
 
+  // Frühe Wahl (s12, gemessen 09.11.2026): die Leiste steht mit dem Server-HTML da, dieses Skript
+  // läuft erst nach dem Parsen (defer; mobil gedrosselt 2-4 s später). Bis dahin merkt sich das
+  // Inline-Skript aus Einwilligungshinweis.jsx Klicks in window.__qbEwFrueh; hier wird die
+  // letzte nachgeholt. Ohne das ging ein früher Tipp still verloren.
+  function fruehWahl() {
+    var q = w.__qbEwFrueh, wahl = q && q.length ? q[q.length - 1] : '';
+    if (q) q.length = 0;
+    return wahl === 'alle' || wahl === 'notwendig' || wahl === 'einstellungen' ? wahl : '';
+  }
+
   function start() {
     var b = banner();
     d.addEventListener('click', klick);
@@ -221,6 +231,8 @@
       if (ev.key === 'Escape' && dg && !dg.hasAttribute('hidden')) { ev.preventDefault(); schliesseDialog(); }
     });
     w.addEventListener('resize', lage);
+    w.qbEinwilligung.bereit = true;
+    var frueh = fruehWahl();
     if (CB.hasResponse) {
       zeige(b, false);
       feuere('OnConsentReady');
@@ -229,9 +241,12 @@
       runScripts();
       shopifyMitWarten();
     } else {
-      zeige(b, true);
+      zeige(b, !frueh);
       feuere('OnDialogInit');
       feuere('OnDialogDisplay');
+      if (frueh === 'alle') waehle(true, true, true, 'alle');
+      else if (frueh === 'notwendig') waehle(false, false, false, 'notwendig');
+      else if (frueh === 'einstellungen') oeffneEinstellungen();
     }
     meldeStand();
   }
