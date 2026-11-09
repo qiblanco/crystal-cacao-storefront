@@ -64,7 +64,7 @@
  *         waermeren, kakao-getoenten Neutral-Kontinuum. Verwandtschaft ueber
  *         den geteilten Akzent, Eigenstaendigkeit ueber die Flaeche.
  *
- *  MASSE  Knopfhoehe 70px, Knopfschrift 17.6px, Radius 10px und
+ *  MASSE  Knopfhoehe 70px, Knopfschrift 16px, Radius 10px und
  *         Trefferflaeche 44px stammen aus db/tokens/web-dach.yaml (Klasse
  *         `gebaut` bzw. `gesetzt`, gemessen am DACH-Shop). Sie sind die
  *         Verwandtschafts-Anker zu qiblanco und deshalb NICHT frei gewaehlt.
@@ -155,7 +155,7 @@
 
   /* ---- Knopf: Masse aus web-dach.yaml (Klasse `gebaut`) ---- */
   --cc-knopf-hoehe: 70px;
-  --cc-knopf-schrift: 1.1rem;   /* 17.6px */
+  --cc-knopf-schrift: var(--cc-fs-2);   /* 16px, Stufe der Leiter (09.11.2026, vorher 17.6px) */
   --cc-knopf-gewicht: 600;
   --cc-treffer-min: 44px;       /* WCAG 2.5.5 AAA */
 
@@ -1578,7 +1578,8 @@ main img {
 
 /* Knopf-Token: Hoehe/Schrift/Radius aus web-dach.yaml (Klasse `gebaut`),
  * Trefferflaeche aus WCAG 2.5.5. Das ist der Verwandtschafts-Anker zu
- * qiblanco — dort real 70px/17.6px gemessen. */
+ * qiblanco (dort real 70px/17.6px gemessen). Die Schrift steht seit dem
+ * 09.11.2026 auf der Leiter dieses Ladens (16px), die Hoehe bleibt der Anker. */
 .btn--primary,
 .btn--secondary {
   min-height: var(--cc-knopf-hoehe);
