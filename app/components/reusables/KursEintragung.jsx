@@ -1,7 +1,9 @@
 import {
   EINTRAGUNG_PFAD,
+  EINWILLIGUNG,
   FELD_FALLE,
   FELD_MAIL,
+  FELD_ZEIT,
 } from '~/lib/kurs-eintragung';
 
 /**
@@ -19,8 +21,11 @@ import {
  * nicht gewaehlt: die stehende Wache (crystal-cacao-node/bin/
  * eintragungsweg-nachlauf) sucht `input[name=email]` und von dort aus per
  * `.closest('form')` den Absendeknopf; das Erfuellungskriterium k4cc97eb5b2
- * sucht zusaetzlich `type=email` im rohen HTML. Das ActiveCampaign-Formular
- * traegt dort `type="text"` — das ist dort ein Mangel und kein Vorbild.
+ * sucht zusaetzlich `type=email` im rohen HTML.
+ *
+ * DER SATZ AM KNOPF (seit dem AC-Abschluss, Elina EL-20261103-b633cb45) ist
+ * die Einwilligung, die der eigene Endpunkt im Nachweis fuehrt (cc-21). Er
+ * steht im rohen HTML, nicht erst nach einem Skript.
  */
 export function KursEintragung({knopf = 'Zum Kurs anmelden', feldId = 'kurs-mail'}) {
   return (
@@ -40,8 +45,14 @@ export function KursEintragung({knopf = 'Zum Kurs anmelden', feldId = 'kurs-mail
         placeholder="name@beispiel.de"
       />
       {/*
-        DER HONEYPOT. ActiveCampaign wertet ein gefuelltes `fullname` als Spam
-        und verwirft die Eintragung — das Feld gehoert also mit, und es muss
+        Renderzeit in Serverzeit fuer die Zeitfalle des Endpunkts (die Route
+        klemmt sie). Server und Browser rendern verschiedene Zeitpunkte, daher
+        suppressHydrationWarning; gezaehlt wird der Wert im Formular.
+      */}
+      <input type="hidden" name={FELD_ZEIT} defaultValue={String(Date.now())} suppressHydrationWarning />
+      {/*
+        DER HONEYPOT. Ein gefuelltes `fullname` heisst Automat: die Route
+        reicht dann nichts weiter und antwortet wie bei Erfolg — das Feld muss
         LEER bleiben. `display:none` steckt in der Klasse, nicht im Markup,
         damit hier kein freier Wert entsteht.
         `tabIndex={-1}` ist tragend: ein fokussierbares Feld in einem
@@ -61,6 +72,7 @@ export function KursEintragung({knopf = 'Zum Kurs anmelden', feldId = 'kurs-mail
           defaultValue=""
         />
       </div>
+      <p className="cc-eintrag__einwilligung">{EINWILLIGUNG}</p>
       <button className="cc-eintrag__knopf" type="submit">
         {knopf}
       </button>

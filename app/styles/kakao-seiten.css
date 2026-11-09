@@ -3738,6 +3738,16 @@ main .cc-erfahrungen h1 {
   display: none;
 }
 
+/* Der Einwilligungssatz am Knopf (AC-Abschluss, Elina EL-20261103-b633cb45):
+   kleinste Stufe der Skala und der gedaempfte Textton, beide aus dem Bestand
+   (--cc-fs-1 traegt schon die Feldmarke, --cc-muted den Platzhalter). Kein
+   neuer Wert. */
+.cc-eintrag__einwilligung {
+  margin: 0;
+  font-size: var(--cc-fs-1);
+  color: var(--cc-muted);
+}
+
 /* DER KNOPF KOSTET EINEN RUBRIK-PUNKT, UND ER BEHAELT SEIN GOLD — die
  * Begruendung ist gemessen und steht hier, damit niemand sie als Schlamperei
  * liest und "aufraeumt".

@@ -1,15 +1,21 @@
 /**
  * Die eigene Route des Eintragungswegs: sie nimmt die Adresse entgegen,
- * reicht sie serverseitig an ActiveCampaign weiter und antwortet mit UNSERER
- * Bestaetigung.
+ * reicht sie serverseitig an den eigenen Anmelde-Endpunkt weiter (ac-eingang,
+ * POST /f/cc-21; bis zum AC-Abschluss, Elina EL-20261103-b633cb45: an das
+ * ActiveCampaign-Formular 21) und antwortet mit UNSERER Bestaetigung.
  *
  * WARUM SERVERSEITIG UND NICHT PER FREMD-SKRIPT: der Kunde bleibt im Laden.
- * Der Aufruf an proc.php geht vom Node-Prozess aus, nie aus dem Browser —
- * damit setzt die Eintragung keinen Fremd-Cookie und laedt kein Fremd-Skript.
- * Dieser Laden hat keine Einwilligungsverwaltung (kein Cookiebot in der CSP),
- * also darf er auch keine haben, die eine braeuchte. Die Einwilligung selbst
- * holt ActiveCampaign ein: Formular 21 laeuft mit doppelter Bestaetigung,
- * gemessen am 2026-09-17 an der Antwort von proc.php.
+ * Der Aufruf geht vom Node-Prozess aus, nie aus dem Browser — damit setzt die
+ * Eintragung keinen Fremd-Cookie und laedt kein Fremd-Skript, und die CSP
+ * braucht keine neue Zeile. Die Einwilligung holt der Endpunkt mit doppelter
+ * Bestaetigung ein (Mail mit Link); der Satz am Knopf geht als Kennung mit.
+ *
+ * KUNDEN-IP WIE DIE SHOP-ROUTE api.mm-formular in qiblanco-storefront: der
+ * Endpunkt sieht von hier nur den Node-Prozess. Die Kunden-Adresse reist unter
+ * X-MM-Kunden-IP, die Route weist sich mit X-MM-Weiterleitung aus (Variable
+ * MM_FORMULAR_WEITERLEITUNG). Ohne die Variable speichert der Endpunkt KEINE
+ * IP statt der falschen, und gebremst wird am Node-Prozess (alle Kunden dieses
+ * Ladens in einem Topf, 5 je 10 Minuten).
  *
  * KEINE PERSONENBEZOGENEN DATEN IM LOG. Protokolliert wird der Antwort-Code
  * und die Laenge, nie die Adresse — und auch kein Hash davon, denn ein Hash
@@ -22,11 +28,13 @@ import {KursEintragung} from '~/components/reusables/KursEintragung';
 import {canonicalLink} from '~/lib/seo';
 import {ABSENDER_MARKE} from '~/lib/kakao-zone';
 import {
-  AC_PROZESSOR,
+  ANMELDE_ENDPUNKT,
   EINTRAGUNG_PFAD,
+  EINWILLIGUNG,
   FELD_FALLE,
   FELD_MAIL,
-  FORMULAR_21,
+  FELD_ZEIT,
+  FORMULAR_ID,
   STAND,
   adresseTaugt,
 } from '~/lib/kurs-eintragung';
@@ -70,8 +78,7 @@ export async function loader({request, context}) {
  * Rueckweg 2 ist dieser Schalter: `CRYSTAL_KURSFELD=off` in der Unit-Umgebung
  * stellt das WEITERREICHEN ab, ohne das Bundle anzufassen. Gebraucht wird er
  * fuer den Fall, in dem der Bau in Ordnung ist und der WEG nicht — wenn
- * ActiveCampaign seinen Prozessor aendert, wenn Missbrauch ueber das Feld
- * laeuft. Zwei Sperren sind nur unabhaengig, wenn sie verschiedene Groessen
+ * der Endpunkt ausfaellt, wenn Missbrauch ueber das Feld laeuft. Zwei Sperren sind nur unabhaengig, wenn sie verschiedene Groessen
  * lesen; Rueckweg 1 liest ein Artefakt, Rueckweg 2 eine Umgebungsvariable.
  *
  * ER STEHT SERVERSEITIG UND NUR DORT. Ein Schalter, der das Markup
@@ -138,41 +145,90 @@ export async function action({request, context}) {
     return ziel(STAND.adresse);
   }
 
-  const koerper = new URLSearchParams({
-    ...FORMULAR_21,
-    [FELD_MAIL]: adresse,
-    [FELD_FALLE]: '',
-  });
+  // ZEITFALLE DES ENDPUNKTS: t ist die Renderzeit des Formulars in Serverzeit
+  // (Feld angezeigt). Der Endpunkt verwirft STILL (202, nichts gespeichert),
+  // wenn t juenger als 1,5 s oder aelter als 24 h ist. Hier wird t deshalb in
+  // [jetzt - 23 h, jetzt - 1,6 s] geklemmt: eine Seite, die ein Tag offen
+  // stand, und ein schneller Klick bleiben echte Anmeldungen. Gegen Automaten
+  // stehen Honigtopf und Mengenbremse, wie vorher beim AC-Weg.
+  const jetzt = Date.now();
+  const angezeigt = Number(String(daten.get(FELD_ZEIT) || ''));
+  const t = Math.min(
+    jetzt - 1600,
+    Math.max(jetzt - 23 * 3600 * 1000, Number.isFinite(angezeigt) && angezeigt > 0 ? angezeigt : 0),
+  );
+
+  const env = context?.env ?? {};
+  const kopf = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    'X-MM-Weiterleitung':
+      typeof env.MM_FORMULAR_WEITERLEITUNG === 'string' && env.MM_FORMULAR_WEITERLEITUNG
+        ? env.MM_FORMULAR_WEITERLEITUNG
+        : 'ohne-geheimnis',
+  };
+  const kunde = (request.headers.get('oxygen-buyer-ip') || '').trim();
+  if (kunde) kopf['X-MM-Kunden-IP'] = kunde;
+  const ua = request.headers.get('User-Agent');
+  if (ua) kopf['User-Agent'] = ua.slice(0, 300);
 
   try {
-    const antwort = await fetch(AC_PROZESSOR, {
+    const antwort = await fetch(`${ANMELDE_ENDPUNKT}/f/${FORMULAR_ID}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-      body: koerper,
-      // Ohne Deckel haengt eine Kundenanfrage an einem fremden Dienst.
+      headers: kopf,
+      body: JSON.stringify({
+        email: adresse,
+        vorname: '',
+        website: '',
+        t: String(Math.round(t)),
+        einwilligung_id: await einwilligungId(EINWILLIGUNG),
+        seite: seiteAus(request),
+      }),
+      // Ohne Deckel haengt eine Kundenanfrage an einem anderen Dienst.
       signal: AbortSignal.timeout(20000),
     });
-    const text = await antwort.text();
+    const json = await antwort.json().catch(() => ({}));
+    // Nie die Adresse ins Log, nur Code und Ergebnis.
     console.log(
-      '[kurs-eintragung] proc_http=%s laenge=%s quittiert=%s',
+      '[kurs-eintragung] endpunkt_http=%s ok=%s fehler=%s',
       antwort.status,
-      text.length,
-      // Die Quittung von proc.php ist ein Aufruf von `_show_thank_you`.
-      // Geprueft wird die QUITTUNG, nicht nur der Statuscode: proc.php
-      // antwortet auch bei einer verworfenen Eintragung mit HTTP 200.
-      text.includes('_show_thank_you') ? 1 : 0,
+      json && json.ok ? 1 : 0,
+      (json && json.fehler) || '-',
     );
-    if (!antwort.ok || !text.includes('_show_thank_you')) {
+    if (antwort.status === 403) return ziel(STAND.gesperrt);
+    if (antwort.status === 400) return ziel(STAND.adresse);
+    if (antwort.status !== 202 || !json || !json.ok) {
       return ziel(STAND.stoerung);
     }
   } catch (fehler) {
-    console.log('[kurs-eintragung] proc_fehler=%s', fehler?.name || 'unbekannt');
+    console.log('[kurs-eintragung] endpunkt_fehler=%s', fehler?.name || 'unbekannt');
     return ziel(STAND.stoerung);
   }
 
   return ziel(STAND.eingetragen);
+}
+
+/**
+ * Kennung des Einwilligungssatzes wie im Endpunkt (formulare.einwilligung_id):
+ * SHA-256 ueber den Satz mit zusammengezogenen Leerraeumen, die ersten 12
+ * Hex-Zeichen.
+ */
+async function einwilligungId(satz) {
+  const bytes = new TextEncoder().encode(String(satz).split(/\s+/).filter(Boolean).join(' '));
+  const hash = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+    .slice(0, 12);
+}
+
+/** Pfad der Seite, auf der das Formular stand (Startseite oder diese Route). */
+function seiteAus(request) {
+  try {
+    return new URL(request.headers.get('Referer') || request.url).pathname.slice(0, 200);
+  } catch {
+    return EINTRAGUNG_PFAD;
+  }
 }
 
 /** 303: die Antwort auf ein POST ist eine Seite, kein erneutes POST. */
@@ -228,6 +284,20 @@ export default function KursEintragungSeite() {
           dann bekommst du den Kurs.
         </p>
         <p>Die E-Mail kommt sofort. Schau auch im Spam-Ordner nach.</p>
+        <p>Stehst du schon in unserem Newsletter, musst du nichts weiter tun.</p>
+      </Rahmen>
+    );
+  }
+
+  if (stand === STAND.gesperrt) {
+    return (
+      <Rahmen>
+        <h1>Diese Adresse tragen wir nicht wieder ein</h1>
+        <p>
+          Sie ist bei uns gesperrt, zum Beispiel nach einer Abmeldung. Wenn du
+          wieder Post von uns möchtest, schreib uns an{' '}
+          <a href="mailto:info@qiblanco.com">info@qiblanco.com</a>.
+        </p>
       </Rahmen>
     );
   }
