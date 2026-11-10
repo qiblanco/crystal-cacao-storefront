@@ -1100,6 +1100,15 @@
   flex-direction: column;
   gap: var(--cc-space-3);
 }
+/* Deckel 500 CSS-px = Datei 1000 px / dpr 2: ohne ihn wird das Quadrat
+ * zwischen 532 und 767 px (bis 735 px breit) und ab 1128 px auf dpr 2
+ * hochskaliert, ein groesseres Original gibt es nicht (Job 20261109-folge-
+ * bildschuld-C5). Linksbuendig wie der Text darunter; sizes in Startseite.jsx
+ * (SIZES_RITUAL) folgt dem Deckel. */
+.home.cc-start .cc-ritual__reise .cc-bildflaeche--quadrat {
+  width: 100%;
+  max-width: 500px;
+}
 .home.cc-start .cc-ritual__schritte {
   display: grid;
   gap: var(--cc-space-2);

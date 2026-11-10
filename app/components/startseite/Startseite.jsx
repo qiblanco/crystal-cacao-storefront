@@ -34,6 +34,29 @@ const SIZES_KURVE_START =
   '(min-width: 1152px) 512px, (min-width: 48em) calc((100vw - 128px) / 2), calc(100vw - 48px)';
 
 /**
+ * KURS-LEKTIONEN: das Vorschaubild ist ein ANTEIL der Spalte, keine feste
+ * Breite. Mobil 34 % der Zeile (100vw - 2 x 16 px Rand), ab 48em 40 % einer
+ * Halbspalte ((100vw - 2 x 32 px Rand - 64 px Luecke) / 2), gedeckelt bei
+ * 72rem. Gemessen 2026-11-10 (Job 20261109-folge-bildschuld-C5): 360 -> 111,5,
+ * 600 -> 193,1, 767 -> 249,9, 768 -> 128, 1024 -> 179,2, ab 1152 -> 204,8 px.
+ * Das fruehere `(min-width: 48em) 200px, 128px` stimmte nur bei 360 px:
+ * zwischen 400 und 767 px rechnete der Browser mit 128 px und lud `width=300`
+ * fuer bis zu 500 gebrauchte Pixel (Gate 12 bild-aufloesung, mobil-600).
+ */
+const SIZES_LEKTION =
+  '(min-width: 1152px) 205px, (min-width: 48em) calc((100vw - 128px) / 5), calc((100vw - 32px) * 0.34)';
+
+/**
+ * RITUAL-QUADRAT: die Datei hat 1000 px, und ein groesseres Original gibt es
+ * nicht (Suche: claude-jobs/20261031-folge-bildschuld-C-kakao-kurse-
+ * shopifytext/c4/). Die Flaeche ist deshalb in startseite.css auf 500 CSS-px
+ * gedeckelt (1000 / dpr 2), sonst waere sie zwischen 532 und 767 px und ab
+ * 1128 px auf dpr 2 hochskaliert. sizes folgt dem Deckel.
+ */
+const SIZES_RITUAL =
+  '(min-width: 1128px) 500px, (min-width: 48em) calc((100vw - 128px) / 2), (min-width: 532px) 500px, calc(100vw - 32px)';
+
+/**
  * DIE STARTSEITE AUF HIGH-END-NIVEAU — seit 2026-10-02.
  *
  * Grossjob 20261002-GROSSJOB-crystal-cacao-startseite-hochwertig-slider-
@@ -322,7 +345,7 @@ function Ritual() {
             <figure className="cc-bildflaeche cc-bildflaeche--quadrat">
               <img
                 {...ritual}
-                sizes="(min-width: 72em) 540px, (min-width: 48em) 46vw, calc(100vw - 40px)"
+                sizes={SIZES_RITUAL}
                 loading="lazy"
                 alt="Lächelnde Frau im weißen Hemd, das Kinn auf die Hand gestützt"
               />
@@ -436,7 +459,7 @@ function OnlineKurs() {
                   <figure className="cc-bildflaeche cc-bildflaeche--video">
                     <img
                       {...b}
-                      sizes="(min-width: 48em) 200px, 128px"
+                      sizes={SIZES_LEKTION}
                       loading="lazy"
                       alt={v.alt}
                     />
