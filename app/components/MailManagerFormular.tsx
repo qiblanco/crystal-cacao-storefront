@@ -5,7 +5,6 @@
 // der Endpunkt (Bestaetigungsmail mit Knopf). Erfolg: Danke-Text oder Weiterleitung auf die Erfolgsseite.
 // Erzeugt vom Mail Manager (Reiter Formulare). Texte und Einwilligung kommen aus der Formular-Konfiguration.
 import {useEffect, useRef, useState} from 'react';
-import {useFetcher} from 'react-router';
 
 export type MmFeld = {name: string; typ: 'text' | 'email'; label: string; pflicht: boolean};
 export type MmFormularKonfig = {
@@ -27,7 +26,31 @@ export type MmKlassen = Partial<Record<
   'form' | 'titel' | 'hinweis' | 'feld' | 'label' | 'input' | 'knopf' | 'einwilligung' | 'meldung' | 'danke', string>>;
 type Antwort = {ok: boolean; status?: string; fehler?: string; text?: string; weiter?: string};
 
-const FEHLER = {"de": {"fehler": "Deine Anmeldung ist gerade nicht bei uns angekommen. Das liegt an uns, nicht an deiner Adresse. Bitte versuch es in ein paar Minuten noch einmal.", "adresse": "Bitte prüfe deine E-Mail-Adresse. So wie sie dort steht, können wir dir keine Mail schicken.", "pflicht": "Bitte fülle alle Pflichtfelder aus.", "veraltet": "Der Einwilligungstext wurde gerade aktualisiert. Bitte lade die Seite neu.", "unbekannt": "Dieses Formular nimmt gerade keine Anmeldungen an.", "bremse": "Gerade kommen sehr viele Anmeldungen. Bitte versuch es in ein paar Minuten noch einmal.", "gesperrt": "Diese Adresse ist bei uns gesperrt, zum Beispiel nach einer Abmeldung oder weil unsere Mails dort nicht ankamen. Darum tragen wir sie nicht wieder ein. Wenn du wieder Post von uns möchtest, schreib uns an info@qiblanco.com."}, "en": {"fehler": "Your signup did not reach us just now. This is on our side, not your address. Please try again in a few minutes.", "adresse": "Please check your email address. We cannot send a message to it as written.", "pflicht": "Please fill in all required fields.", "veraltet": "The consent text was just updated. Please reload the page.", "unbekannt": "This form is not accepting signups right now.", "bremse": "We are getting a lot of signups right now. Please try again in a few minutes.", "gesperrt": "This address is blocked on our side, for example after an unsubscribe or because our emails could not be delivered. That's why we won't add it again. If you'd like to hear from us again, write to info@qiblanco.com."}} as const;
+const FEHLER = {"de": {"fehler": "Deine Anmeldung ist gerade nicht bei uns angekommen. Das liegt an uns, nicht an deiner Adresse. Bitte versuch es in ein paar Minuten noch einmal.", "unklar": "Wir konnten gerade nicht prüfen, ob deine Anmeldung angekommen ist. Schau bitte in dein Postfach. Kommt in ein paar Minuten keine Mail von uns, versuch es noch einmal.", "adresse": "Bitte prüfe deine E-Mail-Adresse. So wie sie dort steht, können wir dir keine Mail schicken.", "pflicht": "Bitte fülle alle Pflichtfelder aus.", "veraltet": "Der Einwilligungstext wurde gerade aktualisiert. Bitte lade die Seite neu.", "unbekannt": "Dieses Formular nimmt gerade keine Anmeldungen an.", "bremse": "Gerade kommen sehr viele Anmeldungen. Bitte versuch es in ein paar Minuten noch einmal.", "gesperrt": "Diese Adresse ist bei uns gesperrt, zum Beispiel nach einer Abmeldung oder weil unsere Mails dort nicht ankamen. Darum tragen wir sie nicht wieder ein. Wenn du wieder Post von uns möchtest, schreib uns an info@qiblanco.com."}, "en": {"fehler": "Your signup did not reach us just now. This is on our side, not your address. Please try again in a few minutes.", "unklar": "We could not check whether your signup reached us. Please look in your inbox. If no email from us arrives within a few minutes, try again.", "adresse": "Please check your email address. We cannot send a message to it as written.", "pflicht": "Please fill in all required fields.", "veraltet": "The consent text was just updated. Please reload the page.", "unbekannt": "This form is not accepting signups right now.", "bremse": "We are getting a lot of signups right now. Please try again in a few minutes.", "gesperrt": "This address is blocked on our side, for example after an unsubscribe or because our emails could not be delivered. That's why we won't add it again. If you'd like to hear from us again, write to info@qiblanco.com."}} as const;
+
+// Herkunft der Eintragung (Elina EL-20261109-640599de): UTM-Werte und Referrer der Seite, auf der das Formular ausgefüllt
+// wird, gehen mit der Anmeldung an den Mail Manager und stehen dort am Kontakt (Quelle, Medium, Kampagne, Inhalt, Zeitpunkt).
+// Gelesen erst beim Absenden aus der Adresse der Seite; im Browser wird nichts gespeichert. Klick-Kennungen (fbclid, gclid …)
+// gehen nur als Art mit, nie ihr Wert; vom Referrer nur Herkunft und Pfad.
+const HERKUNFT_UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
+const HERKUNFT_KLICK = ['fbclid', 'gclid', 'gbraid', 'wbraid', 'ttclid', 'msclkid'] as const;
+const HERKUNFT_FELDER = [...HERKUNFT_UTM, 'klick', 'referrer'] as const;
+export function herkunftLesen(): Record<string, string> {
+  const aus: Record<string, string> = {};
+  if (typeof window === 'undefined') return aus;
+  try {
+    const q = new URLSearchParams(window.location.search);
+    for (const k of HERKUNFT_UTM) {
+      const v = (q.get(k) ?? '').trim().slice(0, 150);
+      if (v) aus[k] = v;
+    }
+    const klick = HERKUNFT_KLICK.filter((k) => q.has(k));
+    if (klick.length) aus.klick = klick.join(',');
+    const r = document.referrer ? new URL(document.referrer) : null;
+    if (r && /^https?:$/.test(r.protocol)) aus.referrer = `${r.origin}${r.pathname}`.slice(0, 300);
+  } catch { /* ohne lesbare Adresse keine Herkunft */ }
+  return aus;
+}
 
 // Direkt aus dem Browser an den Endpunkt (Prop `direkt`): der Endpunkt sieht die echte Kunden-IP, ohne dass die Route ein
 // Geheimnis braucht. Zeitstempel in Serverzeit (GET /w), wie ihn die Zeitprüfung des Endpunkts erwartet; mindestens
@@ -49,6 +72,7 @@ async function direktSenden(endpunkt: string, konfig: MmFormularKonfig, f: HTMLF
         t: String(Math.round(Date.now() + versatz - Math.max(dauer, 1600))), einwilligung_id: konfig.einwilligungId,
         seite: window.location.pathname, formular_id: konfig.formularId, liste: konfig.liste ?? '',
         tags: (konfig.tags ?? []).join(','), erfolgsseite: konfig.erfolgsseite ?? '',
+        ...herkunftLesen(),
       }),
     });
     const j = await r.json().catch(() => ({}));
@@ -59,13 +83,24 @@ async function direktSenden(endpunkt: string, konfig: MmFormularKonfig, f: HTMLF
   }
 }
 
+// Über die eigene Route. Ein abgerissenes Netz ist hier eine Meldung im Formular: useFetcher warf es an die Fehlerseite der
+// Route, die ganze Seite stand auf „Hoppla 500“ (Elina EL-20261103-ca2f6465).
+async function routeSenden(aktion: string, f: HTMLFormElement): Promise<Antwort> {
+  try {
+    const r = await fetch(aktion, {method: 'POST', body: new FormData(f), headers: {Accept: 'application/json'}});
+    const j = await r.json().catch(() => null);
+    return j && typeof j.ok === 'boolean' ? j : {ok: false, fehler: 'nicht_erreichbar'};
+  } catch {
+    return {ok: false, fehler: 'nicht_erreichbar'};
+  }
+}
+
 export function MailManagerFormular({
   konfig, className, klassen = {}, aktion = '/api/mm-formular', direkt = '', style,
 }: {konfig: MmFormularKonfig; className?: string; klassen?: MmKlassen; aktion?: string; direkt?: string;
     style?: React.CSSProperties}) {
-  const fetcher = useFetcher<Antwort>();
-  const [direktAntwort, setDirektAntwort] = useState<Antwort | null>(null);
-  const [direktSendet, setDirektSendet] = useState(false);
+  const [a, setAntwort] = useState<Antwort | null>(null);
+  const [sendet, setSendet] = useState(false);
   const T = FEHLER[konfig.sprache] ?? FEHLER.de;
   // Anzeige-Zeitpunkt: serverseitig gerendert (ohne JavaScript trägt das Feld die Renderzeit des Servers),
   // im Browser zählt die Anzeigedauer; die Route rechnet daraus den Zeitstempel für die Zeitprüfung.
@@ -74,15 +109,14 @@ export function MailManagerFormular({
   const [meldung, setMeldung] = useState('');
   useEffect(() => { start.current = performance.now(); }, []);
 
-  const a = direktAntwort ?? fetcher.data;
-  const sendet = direktSendet || fetcher.state !== 'idle';
   useEffect(() => {
     if (!a) return;
     if (a.ok && a.weiter && typeof window !== 'undefined') window.location.assign(a.weiter);
     if (!a.ok) setMeldung(
       a.fehler === 'adresse_ungueltig' ? T.adresse : a.fehler === 'einwilligung_veraltet' ? T.veraltet
         : a.fehler === 'formular_unbekannt' ? T.unbekannt : a.fehler === 'zu_viele_anfragen' ? T.bremse
-        : a.fehler === 'adresse_gesperrt' ? T.gesperrt : a.fehler === 'pflicht' ? T.pflicht : T.fehler);
+        : a.fehler === 'adresse_gesperrt' ? T.gesperrt : a.fehler === 'pflicht' ? T.pflicht
+        : a.fehler === 'nicht_erreichbar' ? T.unklar : T.fehler);
   }, [a, T]);
 
   if (a?.ok && !a.weiter) {
@@ -94,7 +128,7 @@ export function MailManagerFormular({
     );
   }
   return (
-    <fetcher.Form method="post" action={aktion} className={className ?? klassen.form ?? 'mm-formular'} style={style}
+    <form method="post" action={aktion} className={className ?? klassen.form ?? 'mm-formular'} style={style}
       noValidate onSubmit={(e) => {
         const f = e.currentTarget;
         const fehlt = konfig.felder.some((x) => x.pflicht && !String((f.elements.namedItem(x.name) as HTMLInputElement)?.value || '').trim());
@@ -102,15 +136,20 @@ export function MailManagerFormular({
         if (fehlt) { e.preventDefault(); setMeldung(T.pflicht); return; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { e.preventDefault(); setMeldung(T.adresse); return; }
         setMeldung('');
-        // Direkt ins Feld (nicht über State): fetcher.Form liest die Formulardaten noch in diesem Ereignis.
+        // Direkt ins Feld (nicht über State): routeSenden liest die Formulardaten noch in diesem Ereignis.
         const dauer = Math.max(1, Math.round(performance.now() - start.current));
         (f.elements.namedItem('dauer_ms') as HTMLInputElement).value = String(dauer);
-        // Mit `direkt` sendet der Browser selbst; ohne JavaScript greift dieser Zweig nicht, dann bleibt es die Route.
-        if (direkt) {
-          e.preventDefault();
-          setDirektSendet(true);
-          void direktSenden(direkt, konfig, f, dauer).then((antwort) => { setDirektAntwort(antwort); setDirektSendet(false); });
+        const hk = herkunftLesen();
+        for (const k of HERKUNFT_FELDER) {
+          const feld = f.elements.namedItem(k) as HTMLInputElement | null;
+          if (feld) feld.value = hk[k] ?? '';
         }
+        // Mit `direkt` sendet der Browser selbst an den Endpunkt, sonst an die Route; ohne JavaScript greift dieser Zweig
+        // nicht, dann sendet der Browser das Formular selbst an die Route.
+        e.preventDefault();
+        setSendet(true);
+        void (direkt ? direktSenden(direkt, konfig, f, dauer) : routeSenden(aktion, f))
+          .then((antwort) => { setAntwort(antwort); setSendet(false); });
       }}>
       {konfig.titel ? <h3 className={klassen.titel ?? 'mm-formular__titel'}>{konfig.titel}</h3> : null}
       {konfig.hinweis ? <p className={klassen.hinweis ?? 'mm-formular__hinweis'}>{konfig.hinweis}</p> : null}
@@ -122,6 +161,7 @@ export function MailManagerFormular({
       <input type="hidden" name="sprache" value={konfig.sprache} />
       <input type="hidden" name="angezeigt" value={String(angezeigt)} suppressHydrationWarning />
       <input type="hidden" name="dauer_ms" defaultValue="" />
+      {HERKUNFT_FELDER.map((k) => <input key={k} type="hidden" name={k} defaultValue="" />)}
       {konfig.felder.map((x) => (
         <div key={x.name} className={klassen.feld ?? 'mm-formular__feld'}>
           <label className={klassen.label ?? 'mm-formular__label'}>
@@ -139,7 +179,6 @@ export function MailManagerFormular({
       <button type="submit" className={klassen.knopf ?? 'mm-formular__knopf'} disabled={sendet}>{konfig.knopf}</button>
       <p className={klassen.einwilligung ?? 'mm-formular__einwilligung'}>{konfig.einwilligung}</p>
       <p className={klassen.meldung ?? 'mm-formular__meldung'} role="status" aria-live="polite">{meldung}</p>
-    </fetcher.Form>
+    </form>
   );
 }
-
