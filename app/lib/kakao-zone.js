@@ -373,6 +373,28 @@ export const KAKAO_KOLLEKTIONEN = Object.freeze([KAKAO_KOLLEKTION]);
 export const KAKAO_SEITEN = Object.freeze(['crystal-cacao', 'kristall-kakao']);
 
 /**
+ * DIENST-SEITEN: CMS-Seiten, die diese Storefront AUSLIEFERT, aber NICHT
+ * ANMELDET — keine Sitemap, keine Suche, `robots: noindex`.
+ *
+ * ANLASS (Elina EL-20261106-e987161b, Job 20261107-doi-danke-seiten-nachzug-
+ * kakao-crystal): nach dem Klick in der Bestaetigungsmail des Kakao-Kurses
+ * soll die Danke-Seite im Crystal-Laden stehen. Die Shopify-Seite
+ * `kakao-kurs-anmeldung-erfolgreich` gibt es (Katalog qi-blanco.myshopify.com),
+ * aber der Sortiments-Zaun oben liess sie nicht durch: HTTP 404.
+ *
+ * WARUM EINE EIGENE LISTE UND NICHT EIN EINTRAG IN KAKAO_SEITEN: KAKAO_SEITEN
+ * hat DREI Leser — die Seitenroute, den Sitemap-Zaun (app/lib/sitemap-zaun.js)
+ * und die Suche (app/routes/search.jsx). Eine Danke-Seite gehoert nur in den
+ * ersten: als Suchtreffer oder Sitemap-Adresse wuerde sie jemandem „Du bist
+ * dabei!" sagen, der sich nie angemeldet hat. Hier steht sie nur fuer die
+ * Seitenroute (istAuslieferbareSeite); Sitemap und Suche lesen weiter nur
+ * KAKAO_SEITEN.
+ *
+ * FORM: Handle ohne `/pages/`-Praefix, genau wie KAKAO_SEITEN.
+ */
+export const KAKAO_DIENST_SEITEN = Object.freeze(['kakao-kurs-anmeldung-erfolgreich']);
+
+/**
  * SEITEN, DIE DIESE STOREFRONT SELBST ALS CODE FUEHRT — und die deshalb in
  * die eigene Sitemap gehoeren.
  *
@@ -604,6 +626,36 @@ export function istKakaoKollektion(handle) {
 /** Darf diese CMS-Seite ausgeliefert werden? @param {string} handle */
 export function istKakaoSeite(handle) {
   return Boolean(handle) && KAKAO_SEITEN.includes(handle);
+}
+
+/** Dienst-Seite (ausgeliefert, aber nie angemeldet)? Siehe KAKAO_DIENST_SEITEN. */
+export function istDienstSeite(handle) {
+  return Boolean(handle) && KAKAO_DIENST_SEITEN.includes(handle);
+}
+
+/** Darf die Seitenroute diese CMS-Seite ausliefern? Nur sie liest beide Listen. */
+export function istAuslieferbareSeite(handle) {
+  return istKakaoSeite(handle) || istDienstSeite(handle);
+}
+
+/**
+ * Die EINE Ueberschrift einer Dienst-Seite.
+ * Die Danke-Seiten tragen ihre Ueberschrift im Body (`<h2>Du bist dabei!</h2>`),
+ * weil das Liquid-Theme des Global Englisch-Shops den Seitentitel nicht zeigt.
+ * Die Seitenroute hier zeigt den Titel als H1 — beides zusammen waere die
+ * doppelte Ueberschrift, die Elina auf der Newsletter-Seite rausnehmen liess.
+ * Steht am Anfang des Body eine Ueberschrift, wird SIE die H1 und faellt aus
+ * dem Body; sonst bleibt der Titel die H1 und der Body unveraendert.
+ * @param {string} titel
+ * @param {string} body
+ * @returns {{ueberschrift: string, body: string}}
+ */
+export function dienstSeiteKopf(titel, body) {
+  const html = String(body || '');
+  const m = html.match(/^\s*<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>\s*/i);
+  const text = m ? m[1].replace(/<[^>]*>/g, '').trim() : '';
+  if (!text) return {ueberschrift: titel || '', body: html};
+  return {ueberschrift: text, body: html.slice(m[0].length)};
 }
 
 /** Darf dieser Blog ausgeliefert werden? @param {string} handle */

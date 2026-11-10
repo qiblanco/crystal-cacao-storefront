@@ -2,7 +2,9 @@ import {redirect, useLoaderData} from 'react-router';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {
   ABSENDER_MARKE,
-  istKakaoSeite,
+  dienstSeiteKopf,
+  istAuslieferbareSeite,
+  istDienstSeite,
   fremdinhaltAbweisen,
   UMGELEITETE_SEITEN,
 } from '~/lib/kakao-zone';
@@ -11,7 +13,10 @@ import {
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `${data?.page.title ?? 'Seite'} | ${ABSENDER_MARKE}`}];
+  const titel = {title: `${data?.page.title ?? 'Seite'} | ${ABSENDER_MARKE}`};
+  // Dienst-Seiten (Danke-Seiten) werden ausgeliefert, aber nie angemeldet.
+  if (istDienstSeite(data?.page?.handle)) return [titel, {name: 'robots', content: 'noindex'}];
+  return [titel];
 };
 
 /**
@@ -39,7 +44,9 @@ async function loadCriticalData({context, request, params}) {
 
   // SORTIMENTS-ZAUN: /pages/studien lieferte hier 105308 Bytes Qi-Blanco-
   // Studienseite mit 59 Fremdnennungen (gemessen 2026-09-02).
-  if (!istKakaoSeite(params.handle)) {
+  // Durch laesst er KAKAO_SEITEN und die Dienst-Seiten (Danke-Seiten, ohne
+  // Sitemap und Suche), siehe app/lib/kakao-zone.js.
+  if (!istAuslieferbareSeite(params.handle)) {
     throw fremdinhaltAbweisen();
   }
 
@@ -87,13 +94,17 @@ function loadDeferredData({context}) {
 export default function Page() {
   /** @type {LoaderReturnData} */
   const {page} = useLoaderData();
+  // Dienst-Seite: die Ueberschrift im Body ist die EINE H1 (keine doppelte).
+  const kopf = istDienstSeite(page.handle)
+    ? dienstSeiteKopf(page.title, page.body)
+    : {ueberschrift: page.title, body: page.body};
 
   return (
     <div className="page">
       <header>
-        <h1>{page.title}</h1>
+        <h1>{kopf.ueberschrift}</h1>
       </header>
-      <main dangerouslySetInnerHTML={{__html: page.body}} />
+      <main dangerouslySetInnerHTML={{__html: kopf.body}} />
     </div>
   );
 }
