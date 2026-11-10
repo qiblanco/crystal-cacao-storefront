@@ -41,10 +41,25 @@
     // diesen Eintrag wird sie nicht gespeichert und haengt allein an der
     // Landeseite. ZWILLING: app/lib/checkout-tracking.js TRACKING_PARAM_NAMES.
     gad_campaignid: true,
+    // Kontakt-Kennung aus dem eigenen Mailversand (Vorgang EL-20261023-35724d07):
+    // gesalzener 16-Hex-Hash der Empfaengeradresse, nie die Adresse. Ohne diesen
+    // Eintrag wird er nicht gespeichert und erreicht die Bestellung nie.
+    // Gespeichert wird nur ein Wert im Format 16 Kleinbuchstaben-Hex (WERT_FORMAT).
+    // ZWILLING: app/lib/checkout-tracking.js TRACKING_PARAM_NAMES.
+    qpx_eh: true,
+  };
+
+  var WERT_FORMAT = {
+    qpx_eh: /^[0-9a-f]{16}$/,
   };
 
   function isTrackingParamName(name) {
     return TRACKING_PARAM_NAMES[name] || /^utm_[a-z0-9_]+$/i.test(name);
+  }
+
+  function wertPasst(name, value) {
+    var format = WERT_FORMAT[name];
+    return !format || format.test(value);
   }
 
   function collectTrackedParams() {
@@ -54,7 +69,9 @@
     var tracked = [];
 
     params.forEach(function (value, name) {
-      if (value && isTrackingParamName(name)) tracked.push([name, value]);
+      if (value && isTrackingParamName(name) && wertPasst(name, value)) {
+        tracked.push([name, value]);
+      }
     });
 
     return tracked.length ? tracked : null;

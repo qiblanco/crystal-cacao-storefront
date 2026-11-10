@@ -126,7 +126,44 @@ const TRACKING_PARAM_NAMES = new Set([
   // Query, also kein Doppelzaehlen). Zwilling: public/qiblanco-tracker.js.
   // Bewacht von crystal-cacao-node/proben/probe_gad_campaignid_grenze.py.
   'gad_campaignid',
+  // Kontakt-Kennung aus dem eigenen Mailversand (Nachzug aus qiblanco-storefront,
+  // Elinas Vorgang EL-20261023-35724d07 Punkt 2; Job 20261024-storefront-
+  // mailkennung-warenkorb-vorschau-el35724d07). Jeder Werbemail-Link traegt
+  // `?qpx_eh=<16 hex>`: den gesalzenen Hash der Empfaengeradresse, nie die
+  // Adresse selbst (Absender mail-ledger/eigenversand/lib/mailklick_kennung.py).
+  // Bis hierher reiste er nur am Pixel-Ereignis als `email_hash`; wer mit einer
+  // anderen Adresse kaufte, als die Mail ging, riss die Kette. Als
+  // Warenkorb-Attribut wird er zum Order-note_attribute; own_source liest es als
+  // email-Kante.
+  //
+  // ZWEI GRENZEN, beide Absicht:
+  //   1. Nur ein Wert im Format 16 Kleinbuchstaben-Hex wird gespeichert oder
+  //      weitergereicht (WERT_FORMAT unten).
+  //   2. Er geht NUR in die Warenkorb-Attribute, NICHT an die Checkout-URL
+  //      (NUR_WARENKORB unten).
+  // Einwilligung: dieselbe wie bei allen Namen dieser Liste.
+  // ZWILLING: public/qiblanco-tracker.js TRACKING_PARAM_NAMES (dort derselbe
+  // Format-Guard).
+  'qpx_eh',
 ]);
+
+// Wertformat je Name: ein Name, der hier steht, wird nur mit passendem Wert
+// gespeichert und weitergereicht. Namen ohne Eintrag bleiben wie bisher.
+const WERT_FORMAT = {
+  qpx_eh: /^[0-9a-f]{16}$/,
+};
+
+// Namen, die als Warenkorb-Attribut reisen, aber nie an die Checkout-URL.
+const NUR_WARENKORB = new Set(['qpx_eh']);
+
+/**
+ * @param {string} name
+ * @param {string | undefined} value
+ */
+function wertPasst(name, value) {
+  const format = WERT_FORMAT[name];
+  return !format || format.test(value);
+}
 
 const TRACKING_COOKIE_NAMES = new Set([
   '_fbc',
@@ -493,6 +530,7 @@ function normalizeSearchParams(searchParams) {
  */
 function appendAllowedTrackingValue(target, name, value) {
   if (!value || !isTrackingParamName(name) || target.has(name)) return;
+  if (NUR_WARENKORB.has(name) || !wertPasst(name, value)) return;
   target.append(name, value);
 }
 
@@ -504,6 +542,7 @@ function appendAllowedTrackingValue(target, name, value) {
  */
 function setAllowedTrackingValue(target, name, value, {overwrite = false} = {}) {
   if (!value || !isTrackingParamName(name)) return;
+  if (!wertPasst(name, value)) return;
   if (!overwrite && target.has(name)) return;
   target.set(name, value);
 }
