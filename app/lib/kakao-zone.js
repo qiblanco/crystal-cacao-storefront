@@ -378,9 +378,12 @@ export const KAKAO_SEITEN = Object.freeze(['crystal-cacao', 'kristall-kakao']);
  *
  * ANLASS (Elina EL-20261106-e987161b, Job 20261107-doi-danke-seiten-nachzug-
  * kakao-crystal): nach dem Klick in der Bestaetigungsmail des Kakao-Kurses
- * soll die Danke-Seite im Crystal-Laden stehen. Die Shopify-Seite
- * `kakao-kurs-anmeldung-erfolgreich` gibt es (Katalog qi-blanco.myshopify.com),
- * aber der Sortiments-Zaun oben liess sie nicht durch: HTTP 404.
+ * soll die Danke-Seite im Crystal-Laden stehen. Der Sortiments-Zaun oben
+ * liess `kakao-kurs-anmeldung-erfolgreich` nicht durch: HTTP 404.
+ * ACHTUNG KATALOG: dieser Laden liest qi-blanco.myshopify.com, und das ist
+ * der GLOBAL DEUTSCH-SHOP (gemessen 2026-11-10: shop.name "Qi Blanco UG",
+ * primaryDomain checkout.qiblanco.com). Eine CMS-Seite fuer crystal-cacao.com
+ * wird dort angelegt (shopify-write --shop dach), nicht im Englisch-Shop.
  *
  * WARUM EINE EIGENE LISTE UND NICHT EIN EINTRAG IN KAKAO_SEITEN: KAKAO_SEITEN
  * hat DREI Leser — die Seitenroute, den Sitemap-Zaun (app/lib/sitemap-zaun.js)
@@ -641,7 +644,8 @@ export function istAuslieferbareSeite(handle) {
 /**
  * Die EINE Ueberschrift einer Dienst-Seite.
  * Die Danke-Seiten tragen ihre Ueberschrift im Body (`<h2>Du bist dabei!</h2>`),
- * weil das Liquid-Theme des Global Englisch-Shops den Seitentitel nicht zeigt.
+ * so wie ihre Geschwister in beiden Shops (das Liquid-Theme des Englisch-Shops
+ * zeigt den Seitentitel gar nicht).
  * Die Seitenroute hier zeigt den Titel als H1 — beides zusammen waere die
  * doppelte Ueberschrift, die Elina auf der Newsletter-Seite rausnehmen liess.
  * Steht am Anfang des Body eine Ueberschrift, wird SIE die H1 und faellt aus
