@@ -220,6 +220,9 @@ const SENSITIVE_QUERY_PARAM_NAMES = new Set([
   'passwd',
   'pwd',
   'secret',
+  // qpx_eh (Mail-Kontaktkennung) geht NUR als eigenes, formgeprueftes Warenkorb-Attribut; in landing_page/
+  // referrer wird es entfernt (adversariale Pruefung Job 20261024-storefront-mailkennung-warenkorb-vorschau-el35724d07).
+  'qpx_eh',
   'token',
   'access_token',
   'id_token',
@@ -350,7 +353,8 @@ export function buildAttributionCartAttributes({
   //   2. Der Marker zaehlt NICHT als Signal — sonst wuerden landing_page und
   //      referrer ploetzlich fuer jeden organischen Besucher mitgeschrieben,
   //      also eine stille Ausweitung der Datenmenge statt eines Fixes.
-  const hasTrackingSignal = attributes.length > 0;
+  // qpx_eh allein ist kein Signal: sonst schriebe ein Mail-Klick zusaetzlich landing_page/referrer.
+  const hasTrackingSignal = attributes.some(({key}) => !NUR_WARENKORB.has(key));
 
   if (hasTrackingSignal) {
     // NACHZUG aus der Vorlage (#175): `landing_page`/`referrer` trugen bisher
