@@ -13,7 +13,7 @@
   --cc-fs-5: 1.9531rem;  /* typo.stufe.5 */
   --cc-fs-6: min(2.4414rem, 10.1vw);  /* typo.stufe.6 */
   --cc-fs-7: min(3.0518rem, 12.6vw);  /* typo.stufe.7 */
-  --cc-knopf-schrift: 1.1rem;  /* typo.stufe.knopf */
+  --cc-knopf-schrift: var(--cc-fs-2);  /* typo.stufe.knopf */
 
   /* --- typo_rollen --- */
   --cc-schrift-h1: var(--cc-fs-7);  /* typo.h1.groesse */

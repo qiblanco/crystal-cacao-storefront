@@ -944,7 +944,7 @@ aside .cart-details {
   line-height: 1.5;
   border-width: 2px;
   border-color: var(--cc-gold, rgb(242, 191, 114));
-  font-size: var(--cc-knopf-schrift, 1.1rem);
+  font-size: var(--cc-knopf-schrift, 1rem);
   font-weight: var(--cc-knopf-gewicht, 600);
 }
 
@@ -1571,7 +1571,7 @@ main p {
 
 /* --- 5. Der Knopf. EINE Form, zwei Rollen ---
  * Masse aus web-dach.yaml (Klasse `gebaut`, am DACH-Shop gemessen) und damit
- * dieselben, die die Kakao-Kaufseiten benutzen: Hoehe 70, Schrift 17.6px,
+ * dieselben, die die Kakao-Kaufseiten benutzen: Hoehe 70, Schrift 16px,
  * Radius 10, Trefferflaeche >= 44. Gold traegt HANDLUNG — und nur die. */
 .cc-knopf {
   align-items: center;
@@ -1580,7 +1580,7 @@ main p {
   border-radius: var(--cc-radius-knopf, 10px);
   color: var(--cc-dunkel, #171310);
   display: inline-flex;
-  font-size: var(--cc-knopf-schrift, 1.1rem);
+  font-size: var(--cc-knopf-schrift, 1rem);
   font-weight: var(--cc-knopf-gewicht, 600);
   justify-content: center;
   line-height: 1.2;
