@@ -3760,10 +3760,12 @@ main .cc-erfahrungen h1 {
 }
 
 /* DER EINWILLIGUNGSSATZ AM KNOPF (seit 2026-11-10, Eintragung an den Mail
-   Manager). Feindruck-Stufe und Textfarbe aus dem Bestand: --cc-fs-1 wie
-   die Feldmarke darueber, --cc-text statt --cc-muted, weil der Satz gelesen
-   werden soll (12,8 px brauchen den vollen Kontrast). Kein neuer Wert. */
+   Manager). Feindruck-Stufe aus dem Bestand: --cc-fs-1 und line-height 1.5
+   wie der Kurs-Hinweis darunter (.cc-kurs__hinweis), aber --cc-text statt
+   --cc-muted, weil der Satz die Einwilligung ist und gelesen werden soll.
+   Ein <small> als Block: keine `p`-Regel einer Seite greift. Kein neuer Wert. */
 .cc-eintrag__einwilligung {
+  display: block;
   margin: 0;
   font-size: var(--cc-fs-1);
   line-height: 1.5;

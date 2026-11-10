@@ -104,9 +104,12 @@ export function KursEintragung({knopf = 'Zum Kurs anmelden', feldId = 'kurs-mail
         DER EINWILLIGUNGSSATZ AM KNOPF, wortgleich mit dem Nachweis im
         Endpunkt (Formular cc-21). Der Endpunkt haelt fest, dass genau dieser
         Satz am Knopf stand; stuende er hier nicht, stimmte der Nachweis nicht
-        mit dem Formular ueberein.
+        mit dem Formular ueberein. `<small>` statt `<p>`: die Seiten setzen
+        ihre Absatzgroesse ueber `p`-Regeln hoher Spezifitaet (Startseite
+        `.home.cc-start .cc-akt p`, 0-3-1); der Satz soll ueberall in der
+        Feindruck-Stufe stehen wie der Hinweis darunter.
       */}
-      <p className="cc-eintrag__einwilligung">{EINWILLIGUNG.text}</p>
+      <small className="cc-eintrag__einwilligung">{EINWILLIGUNG.text}</small>
     </form>
   );
 }
