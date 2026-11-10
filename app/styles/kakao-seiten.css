@@ -3759,6 +3759,17 @@ main .cc-erfahrungen h1 {
   margin-top: var(--cc-space-1);
 }
 
+/* DER EINWILLIGUNGSSATZ AM KNOPF (seit 2026-11-10, Eintragung an den Mail
+   Manager). Feindruck-Stufe und Textfarbe aus dem Bestand: --cc-fs-1 wie
+   die Feldmarke darueber, --cc-text statt --cc-muted, weil der Satz gelesen
+   werden soll (12,8 px brauchen den vollen Kontrast). Kein neuer Wert. */
+.cc-eintrag__einwilligung {
+  margin: 0;
+  font-size: var(--cc-fs-1);
+  line-height: 1.5;
+  color: var(--cc-text);
+}
+
 /* Die Bestaetigungsseite benutzt den Textseiten-Rahmen von Impressum und
    Datenschutz (`cc-seite cc-seite--text` + `cc-rechtstext`). Das Formular
    darin steht im Lesefluss und braucht deshalb Luft nach oben, sonst klebt

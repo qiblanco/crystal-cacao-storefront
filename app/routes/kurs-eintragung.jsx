@@ -1,19 +1,20 @@
 /**
  * Die eigene Route des Eintragungswegs: sie nimmt die Adresse entgegen,
- * reicht sie serverseitig an ActiveCampaign weiter und antwortet mit UNSERER
- * Bestaetigung.
+ * reicht sie serverseitig an den Anmelde-Endpunkt des Mail Managers
+ * (ac-eingang, Formular `cc-21`) weiter und antwortet mit UNSERER
+ * Bestaetigung. Bis 2026-11-10 ging sie an ActiveCampaign (proc.php,
+ * Formular 21); warum nicht mehr, steht in app/lib/kurs-eintragung.js.
  *
  * WARUM SERVERSEITIG UND NICHT PER FREMD-SKRIPT: der Kunde bleibt im Laden.
- * Der Aufruf an proc.php geht vom Node-Prozess aus, nie aus dem Browser —
- * damit setzt die Eintragung keinen Fremd-Cookie und laedt kein Fremd-Skript.
- * Dieser Laden hat keine Einwilligungsverwaltung (kein Cookiebot in der CSP),
- * also darf er auch keine haben, die eine braeuchte. Die Einwilligung selbst
- * holt ActiveCampaign ein: Formular 21 laeuft mit doppelter Bestaetigung,
- * gemessen am 2026-09-17 an der Antwort von proc.php.
+ * Der Aufruf an den Endpunkt geht vom Node-Prozess aus, nie aus dem Browser —
+ * damit setzt die Eintragung keinen Fremd-Cookie, laedt kein Fremd-Skript und
+ * braucht keine Zeile in der CSP. Die Einwilligung holt der Endpunkt ein:
+ * `cc-21` laeuft mit doppelter Bestaetigung (Mail `kurs-kakao-cc`, Klick).
  *
  * KEINE PERSONENBEZOGENEN DATEN IM LOG. Protokolliert wird der Antwort-Code
- * und die Laenge, nie die Adresse — und auch kein Hash davon, denn ein Hash
- * einer E-Mail-Adresse ist ruecksuchbar und damit weiter personenbezogen.
+ * und der Fehlername des Endpunkts, nie die Adresse — und auch kein Hash
+ * davon, denn ein Hash einer E-Mail-Adresse ist ruecksuchbar und damit weiter
+ * personenbezogen.
  */
 import {redirect} from 'react-router';
 import {Link} from 'react-router';
@@ -22,13 +23,19 @@ import {KursEintragung} from '~/components/reusables/KursEintragung';
 import {canonicalLink} from '~/lib/seo';
 import {ABSENDER_MARKE} from '~/lib/kakao-zone';
 import {
-  AC_PROZESSOR,
+  ANMELDE_ENDPUNKT,
   EINTRAGUNG_PFAD,
+  FELD_ANGEZEIGT,
+  FELD_DAUER,
   FELD_FALLE,
   FELD_MAIL,
-  FORMULAR_21,
+  FORMULAR_ID,
   STAND,
   adresseTaugt,
+  anzeigeZeit,
+  nutzlast,
+  standAus,
+  weiterleitungsKoepfe,
 } from '~/lib/kurs-eintragung';
 
 const TITEL = `Kurs-Anmeldung | ${ABSENDER_MARKE}`;
@@ -70,7 +77,7 @@ export async function loader({request, context}) {
  * Rueckweg 2 ist dieser Schalter: `CRYSTAL_KURSFELD=off` in der Unit-Umgebung
  * stellt das WEITERREICHEN ab, ohne das Bundle anzufassen. Gebraucht wird er
  * fuer den Fall, in dem der Bau in Ordnung ist und der WEG nicht — wenn
- * ActiveCampaign seinen Prozessor aendert, wenn Missbrauch ueber das Feld
+ * der Anmelde-Endpunkt ausfaellt oder sich aendert, wenn Missbrauch ueber das Feld
  * laeuft. Zwei Sperren sind nur unabhaengig, wenn sie verschiedene Groessen
  * lesen; Rueckweg 1 liest ein Artefakt, Rueckweg 2 eine Umgebungsvariable.
  *
@@ -138,41 +145,51 @@ export async function action({request, context}) {
     return ziel(STAND.adresse);
   }
 
-  const koerper = new URLSearchParams({
-    ...FORMULAR_21,
-    [FELD_MAIL]: adresse,
-    [FELD_FALLE]: '',
+  const koerper = nutzlast({
+    adresse,
+    falle,
+    t: anzeigeZeit(daten.get(FELD_ANGEZEIGT), daten.get(FELD_DAUER)),
+    referer: request.headers.get('Referer'),
   });
 
+  let stand = STAND.stoerung;
   try {
-    const antwort = await fetch(AC_PROZESSOR, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    const antwort = await fetch(
+      `${ANMELDE_ENDPUNKT}/f/${encodeURIComponent(FORMULAR_ID)}`,
+      {
+        method: 'POST',
+        headers: weiterleitungsKoepfe({
+          geheimnis: context?.env?.MM_FORMULAR_WEITERLEITUNG,
+          // Der Adapter (server.node.mjs kaeuferIpStellen) setzt
+          // oxygen-buyer-ip aus dem letzten X-Forwarded-For; ist er aus
+          // (CRYSTAL_BUYER_IP=off), dieselbe Quelle direkt.
+          xff:
+            request.headers.get('oxygen-buyer-ip') ||
+            request.headers.get('X-Forwarded-For'),
+          ua: request.headers.get('User-Agent'),
+        }),
+        body: JSON.stringify(koerper),
+        // Ohne Deckel haengt eine Kundenanfrage an einem anderen Dienst.
+        // KEIN automatischer Zweitversuch: ohne anmelde_id waere er eine
+        // zweite Anmeldung; der Kunde bekommt die Stoerungsseite mit Feld.
+        signal: AbortSignal.timeout(15000),
       },
-      body: koerper,
-      // Ohne Deckel haengt eine Kundenanfrage an einem fremden Dienst.
-      signal: AbortSignal.timeout(20000),
-    });
-    const text = await antwort.text();
-    console.log(
-      '[kurs-eintragung] proc_http=%s laenge=%s quittiert=%s',
-      antwort.status,
-      text.length,
-      // Die Quittung von proc.php ist ein Aufruf von `_show_thank_you`.
-      // Geprueft wird die QUITTUNG, nicht nur der Statuscode: proc.php
-      // antwortet auch bei einer verworfenen Eintragung mit HTTP 200.
-      text.includes('_show_thank_you') ? 1 : 0,
     );
-    if (!antwort.ok || !text.includes('_show_thank_you')) {
-      return ziel(STAND.stoerung);
-    }
+    const json = await antwort.json().catch(() => null);
+    stand = standAus(antwort.status, json);
+    console.log(
+      '[kurs-eintragung] mm_http=%s formular=%s stand=%s%s',
+      antwort.status,
+      FORMULAR_ID,
+      stand,
+      json && json.fehler ? ` mm_fehler=${String(json.fehler).slice(0, 40)}` : '',
+    );
   } catch (fehler) {
-    console.log('[kurs-eintragung] proc_fehler=%s', fehler?.name || 'unbekannt');
+    console.log('[kurs-eintragung] mm_nicht_erreicht=%s', fehler?.name || 'unbekannt');
     return ziel(STAND.stoerung);
   }
 
-  return ziel(STAND.eingetragen);
+  return ziel(stand);
 }
 
 /** 303: die Antwort auf ein POST ist eine Seite, kein erneutes POST. */
@@ -228,6 +245,19 @@ export default function KursEintragungSeite() {
           dann bekommst du den Kurs.
         </p>
         <p>Die E-Mail kommt sofort. Schau auch im Spam-Ordner nach.</p>
+      </Rahmen>
+    );
+  }
+
+  if (stand === STAND.gesperrt) {
+    return (
+      <Rahmen>
+        <h1>Diese Adresse ist bei uns gesperrt</h1>
+        <p>
+          Das passiert zum Beispiel nach einer Abmeldung. Möchtest du den Kurs
+          doch bekommen, schreib uns an{' '}
+          <a href="mailto:info@qiblanco.com">info@qiblanco.com</a>.
+        </p>
       </Rahmen>
     );
   }

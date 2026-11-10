@@ -1,5 +1,9 @@
+import {useEffect, useRef} from 'react';
 import {
   EINTRAGUNG_PFAD,
+  EINWILLIGUNG,
+  FELD_ANGEZEIGT,
+  FELD_DAUER,
   FELD_FALLE,
   FELD_MAIL,
 } from '~/lib/kurs-eintragung';
@@ -23,8 +27,33 @@ import {
  * traegt dort `type="text"` — das ist dort ein Mangel und kein Vorbild.
  */
 export function KursEintragung({knopf = 'Zum Kurs anmelden', feldId = 'kurs-mail'}) {
+  // DIE ZEITFALLE DES ANMELDE-ENDPUNKTS (seit 2026-11-10, Weg an den Mail
+  // Manager, app/lib/kurs-eintragung.js): ohne lesbaren Anzeige-Zeitpunkt
+  // verwirft er still. `angezeigt` ist die Renderzeit des Servers und steht
+  // im HTML, damit der Weg auch ohne Skript traegt. Mit Skript misst der
+  // Browser die Anzeigedauer und schickt sie beim Absenden als `dauer_ms`;
+  // die Route rechnet daraus den Zeitpunkt in Serverzeit (eine falsch
+  // gehende Uhr im Geraet spielt dann keine Rolle).
+  // `suppressHydrationWarning`: Server- und Browser-Render sehen je eine
+  // eigene Uhrzeit; der Wert im HTML ist der richtige und bleibt stehen.
+  const angezeigt = String(Date.now());
+  const seit = useRef(0);
+  const dauer = useRef(null);
+  useEffect(() => {
+    seit.current = performance.now();
+  }, []);
+  const beimAbsenden = () => {
+    if (dauer.current && seit.current) {
+      dauer.current.value = String(Math.round(performance.now() - seit.current));
+    }
+  };
   return (
-    <form className="cc-eintrag" method="post" action={EINTRAGUNG_PFAD}>
+    <form
+      className="cc-eintrag"
+      method="post"
+      action={EINTRAGUNG_PFAD}
+      onSubmit={beimAbsenden}
+    >
       <label className="cc-eintrag__marke" htmlFor={feldId}>
         Deine E-Mail-Adresse
       </label>
@@ -40,9 +69,9 @@ export function KursEintragung({knopf = 'Zum Kurs anmelden', feldId = 'kurs-mail
         placeholder="name@beispiel.de"
       />
       {/*
-        DER HONEYPOT. ActiveCampaign wertet ein gefuelltes `fullname` als Spam
-        und verwirft die Eintragung — das Feld gehoert also mit, und es muss
-        LEER bleiben. `display:none` steckt in der Klasse, nicht im Markup,
+        DER HONEYPOT. Ein gefuelltes `fullname` beantwortet die Route wie einen
+        Erfolg und reicht nichts weiter — das Feld gehoert also mit, und es
+        muss LEER bleiben. `display:none` steckt in der Klasse, nicht im Markup,
         damit hier kein freier Wert entsteht.
         `tabIndex={-1}` ist tragend: ein fokussierbares Feld in einem
         aria-hidden-Bereich waere ein Bedienfehler fuer die Tastatur.
@@ -61,9 +90,23 @@ export function KursEintragung({knopf = 'Zum Kurs anmelden', feldId = 'kurs-mail
           defaultValue=""
         />
       </div>
+      <input
+        type="hidden"
+        name={FELD_ANGEZEIGT}
+        defaultValue={angezeigt}
+        suppressHydrationWarning
+      />
+      <input type="hidden" name={FELD_DAUER} defaultValue="" ref={dauer} />
       <button className="cc-eintrag__knopf" type="submit">
         {knopf}
       </button>
+      {/*
+        DER EINWILLIGUNGSSATZ AM KNOPF, wortgleich mit dem Nachweis im
+        Endpunkt (Formular cc-21). Der Endpunkt haelt fest, dass genau dieser
+        Satz am Knopf stand; stuende er hier nicht, stimmte der Nachweis nicht
+        mit dem Formular ueberein.
+      */}
+      <p className="cc-eintrag__einwilligung">{EINWILLIGUNG.text}</p>
     </form>
   );
 }
