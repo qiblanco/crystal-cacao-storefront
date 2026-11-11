@@ -2,8 +2,8 @@
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
   "upstream_commit": "a21d8595e06802410faab6119159da2baff7cc46",
-  "erzeugt_utc": "2026-11-11T04:53:22Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- ENTSCHEIDUNGEN (--entscheidung): pin-nachziehen app/lib/seo.js (upstream c49a3b553de8 -> 2d96f4767625) -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen a21d8595e068; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit def5e72e0e85). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "erzeugt_utc": "2026-11-11T04:53:47Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen a21d8595e068; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit a21d8595e068). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/components/AddToCartButton.jsx",
@@ -360,7 +360,7 @@
     {
       "upstream": "app/lib/partnercode-daten.server.js",
       "klasse": "K1",
-      "sha256": "5bb6c5ca7d7623070e0861ecb26db25601cc7866ef9f3407daa63b4b6d385da8"
+      "sha256": "b90310b2a93570e1ab3b9e52c19b568e188e9a875e6fdedb52bd65d4e18f486e"
     },
     {
       "upstream": "app/lib/partnercode.server.js",
