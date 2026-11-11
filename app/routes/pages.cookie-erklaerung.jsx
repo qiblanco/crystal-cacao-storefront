@@ -64,8 +64,18 @@ function datumLang(iso) {
   return `${t}. ${MONATE[m - 1]} ${j}`;
 }
 
+/* Der Motor (qb-einwilligung.js) laedt verzoegert. Ein Tipp davor geht nicht verloren:
+   der Dialog oeffnet, sobald der Motor da ist (load feuert nach den verzoegerten Skripten). */
 function oeffneEinwilligung() {
-  if (window.qbEinwilligung) window.qbEinwilligung.oeffneEinstellungen();
+  if (window.qbEinwilligung) {
+    window.qbEinwilligung.oeffneEinstellungen();
+    return;
+  }
+  window.addEventListener(
+    'load',
+    () => window.qbEinwilligung && window.qbEinwilligung.oeffneEinstellungen(),
+    {once: true},
+  );
 }
 
 function KategorieTabelle({kategorie}) {
@@ -113,8 +123,8 @@ export default function CookieErklaerungPage() {
 
         <section className="ce-einstieg">
           <p>
-            Hier steht jedes Cookie, das auf crystal-cacao.com vorkommt: wer es setzt, wozu und
-            wie lange es bleibt. Welche Kategorien du erlaubst, entscheidest du im Cookie-Hinweis.
+            Hier stehen die Cookies, die unser Cookie-Register für crystal-cacao.com führt: wer
+            sie setzt, wozu und wie lange sie bleiben. Welche Kategorien du erlaubst, entscheidest du im Cookie-Hinweis.
             Notwendige Cookies sind immer aktiv.
           </p>
           <p>Deine Wahl kannst du jederzeit ändern:</p>

@@ -273,7 +273,15 @@ html[data-qb-einwilligung-offen] .cc-kaufleiste {
   margin: 0;
   flex-basis: 100%;
   text-align: center;
-  font-size: var(--cc-fs-1);
+  font-size: var(--cc-fs-2);
+}
+
+/* Ab 1024 px steht der Hinweis in EINER Zeile (nowrap oben). Ist der Opt-out-Weg sichtbar, darf er
+   umbrechen, sonst quetscht flex-basis 100% den Absatz als dritte Spalte neben die Knoepfe. */
+@media (min-width: 1024px) {
+  #qb-einwilligung:has(.qb-ew-optout:not([hidden])) {
+    flex-wrap: wrap;
+  }
 }
 
 .qb-ew-optout[hidden] {

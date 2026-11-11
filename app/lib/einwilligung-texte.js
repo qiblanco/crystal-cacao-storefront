@@ -60,7 +60,7 @@ export const TEXTE = {
     alle: 'Accept all',
     dialogTitel: 'Cookie settings',
     dialogText:
-      'Choose what we may store. You can change your choice at any time via “Cookie settings” at the bottom of the page.',
+      'Choose what we may store. You can change your choice at any time via “Cookie-Einstellungen” (cookie settings) at the bottom of the page.',
     kategorien: {
       necessary: ['Necessary', 'Cart, checkout, security and your cookie choice. Always on.'],
       preferences: ['Preferences', 'Remembers settings such as language and region.'],
