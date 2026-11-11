@@ -97,9 +97,22 @@ export function wahlGilt(einwilligung, fassung, jetzt = Date.now()) {
   return imCookie >= hauptnummer(fassung);
 }
 
-/** Sprache des Hinweises: 'en' unter /en, sonst 'de'. */
-export function spracheFuer(pfad) {
-  return /^\/en(\/|$)/.test(String(pfad || '')) ? 'en' : 'de';
+/**
+ * Sprache des Hinweises (Z11 s02, Lücke 9 „Sprache je Besucher“ wie Cookiebot):
+ * 'en' unter /en; sonst nach der ersten Sprache des Browsers (Accept-Language =
+ * navigator.language): Deutsch -> 'de', jede andere Sprache -> 'en'. Ohne Angabe
+ * (Crawler, Proben ohne Header) 'de', wie bisher. Der Laden führt DE und EN;
+ * weitere Sprachen nur nach Christians Wort.
+ */
+export function spracheFuer(pfad, acceptLanguage = '') {
+  if (/^\/en(\/|$)/.test(String(pfad || ''))) return 'en';
+  const erste = String(acceptLanguage || '')
+    .split(',')[0]
+    .split(';')[0]
+    .trim()
+    .toLowerCase();
+  if (!erste || erste === '*') return 'de';
+  return /^de(-|$)/.test(erste) ? 'de' : 'en';
 }
 
 export function cookieAusHeader(cookieHeader) {

@@ -79,6 +79,15 @@ function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
           Cookie-Einstellungen
         </button>
       )}
+      {/* Z11 s03: Cookie-Erklaerung (aus dem Scanner-Register), auf jeder Seite im Fuss. */}
+      <NavLink
+        end
+        prefetch="intent"
+        style={activeLinkStyle}
+        to="/pages/cookie-erklaerung"
+      >
+        Cookie-Erklärung
+      </NavLink>
     </nav>
   );
 }

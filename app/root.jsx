@@ -38,6 +38,7 @@ import {Einwilligungshinweis} from './components/Einwilligungshinweis';
 import {
   cookieAusHeader,
   leseEinwilligung,
+  spracheFuer,
   motorFuer,
   wahlGilt,
 } from '~/lib/einwilligung-schalter';
@@ -212,7 +213,13 @@ export async function loader(args) {
       ? {
           einwilligung: {
             motor: 'eigen',
-            sprache: spracheGilt('de'),
+            // Z11 s03 (Luecke 9): Sprache je Besucher nach Accept-Language, wie im Global Deutsch-Shop.
+            sprache: spracheGilt(
+              spracheFuer(
+                new URL(args.request.url).pathname,
+                args.request.headers.get('Accept-Language') || '',
+              ),
+            ),
             entschieden: wahlGilt(
               leseEinwilligung(cookieAusHeader(cookieHeader)),
               EINWILLIGUNG_FASSUNG,

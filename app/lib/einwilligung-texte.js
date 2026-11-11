@@ -11,12 +11,18 @@
  * PUBLIC_META_PIXEL_ID aus). Kommt ein Anbieter dazu (etwa die Meta-ID), steigt
  * die Hauptnummer der Fassung, dann fragt der Hinweis alle neu.
  *
- * Nur Deutsch: der Laden hat keine /en-Pfade. Jede andere Sprache faellt auf
- * 'de' zurueck, auch im data-qb-sprache und im Hash.
+ * Sprachen (Z11 s03, 2026-11-11, Luecke 9 "Sprache je Besucher" wie Cookiebot):
+ * Deutsch und Englisch. Der Server waehlt nach der ersten Browser-Sprache
+ * (spracheFuer in einwilligung-schalter.js): Deutsch -> 'de', jede andere -> 'en'.
+ * Der englische Text ist eine sinngetreue Uebersetzung von Crystals deutschem
+ * Wortlaut (nicht der Text des Global Englisch-Shops: hier misst Marketing nur
+ * Link und Empfehlung, es gibt keine Werbeanzeigen-Personalisierung).
+ * Unbekannte Sprache faellt auf 'de' zurueck, auch im data-qb-sprache und im Hash.
  *
- * Kein Link auf /pages/cookie-erklaerung: die Seite gibt es nur im Global
- * Deutsch-Shop. Die Kategorien stehen im Dialog, die Anbieter in der
- * Datenschutzerklaerung dieses Ladens.
+ * Seit Z11 s03 gibt es /pages/cookie-erklaerung auch auf diesem Laden (aus dem
+ * Register des Einwilligungs-Scanners, app/data/cookie-register.json). Link im
+ * Hinweis und im Dialog; der Linktext steht in ZUSATZ, damit TEXTE.de und sein
+ * texte_hash e2ba2e95 byte-gleich bleiben.
  *
  * Die drei Knoepfe stehen woertlich so, wie Christian sie am 22.09. vorgegeben
  * hat: Cookies einstellen · Notwendige Cookies akzeptieren · Alle akzeptieren.
@@ -45,7 +51,54 @@ export const TEXTE = {
     datenschutz: 'Datenschutz',
     fussLink: 'Cookie-Einstellungen',
   },
+  en: {
+    bereich: 'Cookie notice',
+    kurz:
+      'You can keep reading and ordering right away. If you allow statistics and marketing, we see which pages help you and which recommendation brought you to us.',
+    einstellen: 'Cookie settings',
+    notwendig: 'Accept necessary cookies',
+    alle: 'Accept all',
+    dialogTitel: 'Cookie settings',
+    dialogText:
+      'Choose what we may store. You can change your choice at any time via “Cookie settings” at the bottom of the page.',
+    kategorien: {
+      necessary: ['Necessary', 'Cart, checkout, security and your cookie choice. Always on.'],
+      preferences: ['Preferences', 'Remembers settings such as language and region.'],
+      statistics: ['Statistics', 'Shows us which pages and varieties are viewed (Shopify).'],
+      marketing: ['Marketing', 'Measures which link or recommendation brought you to us (our own measurement pixel, UpPromote).'],
+    },
+    speichern: 'Save selection',
+    zu: 'Close',
+    datenschutz: 'Privacy policy',
+    fussLink: 'Cookie settings',
+  },
 };
+
+/**
+ * ZUSATZ (Z11 s03, Port von qiblanco-storefront s02): Texte, die nur in einer Lage erscheinen,
+ * getrennt von TEXTE, damit der deutsche Wortlaut und sein texte_hash byte-gleich bleiben.
+ *   optout       Opt-out-Weg fuer Besucher aus Opt-out-Regionen (Regelwerk je Region, Luecke 2).
+ *   platzhalter  Platzhalter an einer blockierten Einbettung (Luecke 3), Knopf darunter.
+ *   erklaerung   Linktext zur Cookie-Erklaerung (Arm E).
+ */
+export const ZUSATZ = {
+  de: {
+    optout: 'Meine Daten nicht verkaufen oder teilen',
+    platzhalter: 'Das Video kommt von YouTube. Es lädt erst, wenn du Marketing-Cookies erlaubst.',
+    platzhalterKnopf: 'Erlauben und abspielen',
+    erklaerung: 'Cookie-Erklärung',
+  },
+  en: {
+    optout: 'Do Not Sell or Share My Personal Information',
+    platzhalter: 'This video is hosted by YouTube. It loads once you allow marketing cookies.',
+    platzhalterKnopf: 'Allow and play',
+    erklaerung: 'Cookie declaration',
+  },
+};
+
+export function zusatzFuer(sprache) {
+  return ZUSATZ[spracheGilt(sprache)];
+}
 
 /** Sprache, die es gibt: sonst 'de' (Markup, Hash und Protokoll nennen dieselbe). */
 export function spracheGilt(sprache) {
@@ -113,6 +166,11 @@ const esc = (s) =>
 export function hinweisHtml(roh, {entschieden = false} = {}) {
   const sprache = spracheGilt(roh);
   const t = texteFuer(sprache);
+  const z = zusatzFuer(sprache);
+  // Opt-out-Weg (Luecke 2): im Server-HTML verborgen; qb-einwilligung.js zeigt ihn nur, wenn das Regelwerk
+  // der Region Opt-out ist (data-qb-region ausserhalb der strict-Liste).
+  const optout =
+    `<p class="qb-ew-optout" data-qb-optout hidden><a href="#" data-qb-wahl="optout">${esc(z.optout)}</a></p>`;
   const kat = ['preferences', 'statistics', 'marketing']
     .map(
       (k) =>
@@ -123,13 +181,14 @@ export function hinweisHtml(roh, {entschieden = false} = {}) {
   return (
     `<div id="qb-einwilligung" data-qb-einwilligung="banner" role="region" aria-label="${esc(t.bereich)}"` +
     ` data-qb-fassung="${EINWILLIGUNG_FASSUNG}" data-qb-sprache="${sprache}" data-qb-texte-hash="${texteHash(sprache)}"` +
+    ` lang="${sprache}" data-qb-ph-text="${esc(z.platzhalter)}" data-qb-ph-knopf="${esc(z.platzhalterKnopf)}"` +
     `${entschieden ? ' hidden' : ''}>` +
-    `<p class="qb-ew-text">${esc(t.kurz)} <a href="/pages/datenschutz">${esc(t.datenschutz)}</a></p>` +
+    `<p class="qb-ew-text">${esc(t.kurz)} <a href="/pages/cookie-erklaerung">${esc(z.erklaerung)}</a></p>` +
     `<div class="qb-ew-knoepfe">` +
     `<button type="button" class="qb-ew-knopf qb-ew-knopf--leise" data-qb-wahl="einstellungen">${esc(t.einstellen)}</button>` +
     `<button type="button" class="qb-ew-knopf qb-ew-knopf--grau" data-qb-wahl="notwendig">${esc(t.notwendig)}</button>` +
     `<button type="button" class="qb-ew-knopf qb-ew-knopf--gold" data-qb-wahl="alle">${esc(t.alle)}</button>` +
-    `</div></div>` +
+    `</div>${optout}</div>` +
     `<div id="qb-einwilligung-dialog" data-qb-einwilligung="dialog" role="dialog" aria-modal="false" aria-labelledby="qb-ew-titel" hidden>` +
     `<button type="button" class="qb-ew-zu" data-qb-wahl="zu" aria-label="${esc(t.zu)}">×</button>` +
     // Kein <h2>: der Hinweis steht als erstes body-Kind im Server-HTML JEDER Seite; ein h2 dort änderte die
@@ -142,6 +201,6 @@ export function hinweisHtml(roh, {entschieden = false} = {}) {
     `<div class="qb-ew-knoepfe">` +
     `<button type="button" class="qb-ew-knopf qb-ew-knopf--grau" data-qb-wahl="auswahl">${esc(t.speichern)}</button>` +
     `<button type="button" class="qb-ew-knopf qb-ew-knopf--gold" data-qb-wahl="alle">${esc(t.alle)}</button>` +
-    `</div><p class="qb-ew-links"><a href="/pages/datenschutz">${esc(t.datenschutz)}</a></p></div>`
+    `</div>${optout}<p class="qb-ew-links"><a href="/pages/cookie-erklaerung">${esc(z.erklaerung)}</a> · <a href="/pages/datenschutz">${esc(t.datenschutz)}</a></p></div>`
   );
 }

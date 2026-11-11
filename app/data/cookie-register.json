@@ -1,0 +1,72 @@
+{
+  "fassung": "2.0",
+  "stand": "2026-11-11",
+  "flaeche": "crystal",
+  "erzeugt_von": "einwilligung-scanner/bin/einwilligung-register-export",
+  "register_stand": "4fba69576dd9",
+  "kategorien": [
+    {
+      "id": "necessary",
+      "titel": "Notwendig",
+      "beschreibung": "Warenkorb, Kasse, Sicherheit und deine Cookie-Wahl. Immer aktiv.",
+      "cookies": [
+        {
+          "name": "CookieConsent",
+          "anbieter": "Qi Blanco",
+          "zweck": "Speichert deine Cookie-Wahl und die Fassung des Hinweises, dem du zugestimmt hast.",
+          "laufzeit": "12 Monate"
+        },
+        {
+          "name": "_shopify_essential",
+          "anbieter": "Shopify",
+          "zweck": "Hält Sitzung, Warenkorb und Kasse zusammen und schützt vor Manipulation.",
+          "laufzeit": "12 Monate"
+        }
+      ]
+    },
+    {
+      "id": "preferences",
+      "titel": "Präferenzen",
+      "beschreibung": "Merkt sich Einstellungen wie Sprache und Region.",
+      "cookies": []
+    },
+    {
+      "id": "statistics",
+      "titel": "Statistik",
+      "beschreibung": "Zeigt uns, welche Seiten und Sorten angesehen werden (Shopify).",
+      "cookies": [
+        {
+          "name": "_shopify_analytics",
+          "anbieter": "Shopify",
+          "zweck": "Shopify-Statistik über Besuche im Shop und an der Kasse.",
+          "laufzeit": "12 Monate"
+        }
+      ]
+    },
+    {
+      "id": "marketing",
+      "titel": "Marketing",
+      "beschreibung": "Misst, über welchen Link oder welche Empfehlung du kommst (unser eigener Messpixel, UpPromote).",
+      "cookies": [
+        {
+          "name": "_qpx_anon",
+          "anbieter": "Qi Blanco (qpx)",
+          "zweck": "Unsere eigene Messung. Erkennt einen Browser wieder, damit wir einen Kauf der Werbung zuordnen können, die dazu geführt hat.",
+          "laufzeit": "13 Monate"
+        },
+        {
+          "name": "_shopify_marketing",
+          "anbieter": "Shopify",
+          "zweck": "Shopify-Werbemessung über Besuche im Shop und an der Kasse.",
+          "laufzeit": "12 Monate"
+        },
+        {
+          "name": "_up_shop",
+          "anbieter": "UpPromote",
+          "zweck": "Ordnet Käufe dem Empfehlungs- und Partnerprogramm zu.",
+          "laufzeit": "12 Monate"
+        }
+      ]
+    }
+  ]
+}

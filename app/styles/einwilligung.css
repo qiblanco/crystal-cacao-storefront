@@ -264,3 +264,160 @@ html[data-qb-einwilligung-offen] .cc-kaufleiste {
 .footer-menu .footer-menu__einwilligung:hover {
   color: var(--cc-gold);
 }
+
+/* ---- Z11 s03 (2026-11-11): Opt-out-Weg und Platzhalter, Port von qiblanco-storefront s02 ----------
+   Opt-out-Weg: nur in Opt-out-Regionen sichtbar (qb-einwilligung.js nimmt hidden weg), als leiser
+   Textlink unter den Knoepfen. Platzhalter: steht an Stelle einer blockierten Einbettung (Motor).
+   Er sitzt ausserhalb von .qb-einwilligung-wurzel, deshalb die --cc-Tokens direkt. */
+.qb-ew-optout {
+  margin: 0;
+  flex-basis: 100%;
+  text-align: center;
+  font-size: var(--cc-fs-1);
+}
+
+.qb-ew-optout[hidden] {
+  display: none;
+}
+
+.qb-ew-optout a {
+  color: var(--cc-gold-text);
+  text-decoration: underline;
+}
+
+.qb-ew-platzhalter {
+  --qb-ew-abstand: var(--cc-space-1);
+  --qb-ew-ziel: var(--cc-treffer-min);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cc-space-2);
+  box-sizing: border-box;
+  padding: var(--cc-space-4);
+  background: var(--cc-flaeche);
+  color: var(--cc-text);
+  font-size: var(--cc-fs-2);
+  line-height: 1.45;
+  text-align: center;
+  border-radius: var(--cc-radius-bild);
+}
+
+.qb-ew-platzhalter p {
+  margin: 0;
+  max-width: var(--cc-zeile-max);
+}
+
+.qb-ew-platzhalter--video {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: color-mix(in srgb, var(--cc-flaeche) 92%, transparent);
+}
+
+/* ---- Z11 s03 (2026-11-11): Cookie-Erklaerung /pages/cookie-erklaerung --------------------------
+   Port der Tabelle aus dem Global Deutsch-Shop (cookie-erklaerung.css) auf die --cc-Tokens. Die Seite
+   steht in .cc-rechtstext (app.css Abschnitt 9); hier nur, was die Tabelle braucht. Der Knopf ist
+   .cc-knopf (Gold traegt Handlung). Keine eigenen Werte ausser den Spaltenregeln. Alle Texte der Seite in
+   --cc-fs-2 (16 px, Fliesstext-Minimum): mit 12,8 px lief die Zeile in 630 px Breite ueber 75 Zeichen
+   (design-rubrik am Wegwerf 2026-11-11, durchdacht 85, stimmig 88). */
+.ce-seite .ce-meta,
+.ce-seite .ce-hinweis,
+.ce-seite .ce-leer {
+  color: var(--cc-muted);
+  font-size: var(--cc-fs-2);
+}
+
+.ce-seite .ce-knopf {
+  margin: 0 0 var(--cc-space-3);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.ce-seite .ce-knopf:focus-visible {
+  outline: 2px solid var(--cc-gold-text);
+  outline-offset: 2px;
+}
+
+.ce-seite .ce-kategorie {
+  margin-top: var(--cc-space-4);
+}
+
+/* Ueberschriften der Kategorien stehen buendig mit H1 und Text (die globale h2-Regel zentriert). */
+.ce-seite .ce-kategorie h2 {
+  text-align: start;
+}
+
+.ce-seite .cc-rechtstext table.ce-tabelle {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 var(--cc-space-2);
+  font-size: var(--cc-fs-2);
+}
+
+.ce-seite .ce-tabelle th,
+.ce-seite .ce-tabelle td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--cc-space-1) var(--cc-space-2) var(--cc-space-1) 0;
+  border-bottom: 1px solid var(--cc-linie);
+}
+
+.ce-seite .ce-tabelle th {
+  color: var(--cc-dunkel);
+  font-weight: 600;
+}
+
+.ce-seite .ce-tabelle code {
+  font-size: var(--cc-fs-2);
+}
+
+/* Cookie-Namen und Laufzeiten nie mitten im Wort umbrechen; die Zweck-Spalte nimmt den Rest. */
+.ce-seite .ce-tabelle td:first-child,
+.ce-seite .ce-tabelle td:last-child,
+.ce-seite .ce-tabelle th:last-child {
+  white-space: nowrap;
+}
+
+/* Schmal: jede Zeile wird ein Kasten, die Spaltennamen stehen vor dem Wert. */
+@media (max-width: 640px) {
+  .ce-seite .ce-tabelle thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .ce-seite .cc-rechtstext table.ce-tabelle,
+  .ce-seite .ce-tabelle tbody,
+  .ce-seite .ce-tabelle tr,
+  .ce-seite .ce-tabelle td {
+    display: block;
+    width: 100%;
+  }
+
+  .ce-seite .ce-tabelle tr {
+    margin-bottom: var(--cc-space-2);
+    border: 1px solid var(--cc-linie);
+    border-radius: var(--cc-radius-bild);
+    background: var(--cc-flaeche);
+  }
+
+  .ce-seite .ce-tabelle td,
+  .ce-seite .ce-tabelle td:first-child,
+  .ce-seite .ce-tabelle td:last-child {
+    border: 0;
+    padding: var(--cc-space-1) var(--cc-space-2);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .ce-seite .ce-tabelle td::before {
+    content: attr(data-spalte);
+    display: block;
+    font-weight: 600;
+    color: var(--cc-muted);
+  }
+}
