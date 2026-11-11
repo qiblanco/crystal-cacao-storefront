@@ -5,12 +5,11 @@
  * (BAUVERTRAG Abschnitt 1 und 2). Christian 22.10.: „Das können wir doch selber
  * besser machen … und dann für qiblanco.com ersetzen."
  *
- * EINWILLIGUNG_MOTOR ist der Rückweg in einer Zeile. Segment s02 liefert
- * 'cookiebot' (Schatten), nur Segment s06 legt 'eigen' nach der Gegenprobe.
- *
- * Je Besucher überschreibbar, auch auf Produktion: `?qb_einwilligung=eigen|cookiebot`
- * setzt das Sitzungs-Cookie `qb_einwilligung_motor`. Reihenfolge: Query vor
- * Cookie vor Konstante. Andere Werte gelten nicht.
+ * Seit 11.11.2026 gibt es nur noch den Motor 'eigen' (Job
+ * 20261111-cookiebot-code-entfernen-drei-laeden-nach-7-stabilen-tagen). Der
+ * Zweig 'cookiebot' und die Überschreibung `?qb_einwilligung=cookiebot` sind
+ * ausgebaut; ein altes Sitzungs-Cookie `qb_einwilligung_motor` gilt nicht mehr.
+ * Rückweg: git revert <Commit dieses Auftrags> + bin/bau-nachzieher --jetzt.
  *
  * Alles hier ist rein (kein window, kein Request-Objekt): der Root-Loader ruft
  * es am Server, die Probe am Quelltext.
@@ -19,7 +18,7 @@ export const EINWILLIGUNG_MOTOR = 'eigen';
 
 export const MOTOR_COOKIE = 'qb_einwilligung_motor';
 export const MOTOR_QUERY = 'qb_einwilligung';
-const MOTOREN = ['cookiebot', 'eigen'];
+const MOTOREN = ['eigen'];
 
 // 12 Monate wie Cookiebot (gemessen 23.10.: expires = utc + 365 Tage).
 export const EINWILLIGUNG_LAUFZEIT_MS = 365 * 24 * 60 * 60 * 1000;
@@ -32,28 +31,15 @@ function cookieWert(cookieHeader, name) {
 }
 
 /**
- * Welcher Motor gilt für diese Anfrage?
- * -> {motor, setzeCookie} — setzeCookie ist der Set-Cookie-Wert, wenn die
- *    Query eine Überschreibung verlangt, sonst ''.
+ * Welcher Motor gilt für diese Anfrage? Seit 11.11.2026 immer 'eigen'.
+ * Die Signatur bleibt, damit die Leser (root.jsx, checkout-tracking.js,
+ * shopify-tracking-tor.js) unverändert bleiben; Query und Cookie
+ * `qb_einwilligung_motor` werden nicht mehr gelesen.
+ * -> {motor: 'eigen', setzeCookie: ''}
  */
+// eslint-disable-next-line no-unused-vars
 export function motorFuer(url, cookieHeader, konstante = EINWILLIGUNG_MOTOR) {
-  let query = '';
-  try {
-    query = new URL(url).searchParams.get(MOTOR_QUERY) || '';
-  } catch {
-    query = '';
-  }
-  if (MOTOREN.includes(query)) {
-    // Secure nur auf https: Safari/Firefox verwerfen es sonst auf http-Vorschauen.
-    const sicher = String(url).startsWith('https:') ? '; Secure' : '';
-    return {
-      motor: query,
-      setzeCookie: `${MOTOR_COOKIE}=${query}; Path=/; SameSite=Lax${sicher}`,
-    };
-  }
-  const ausCookie = cookieWert(cookieHeader, MOTOR_COOKIE);
-  if (MOTOREN.includes(ausCookie)) return {motor: ausCookie, setzeCookie: ''};
-  return {motor: MOTOREN.includes(konstante) ? konstante : 'cookiebot', setzeCookie: ''};
+  return {motor: MOTOREN.includes(konstante) ? konstante : 'eigen', setzeCookie: ''};
 }
 
 /** Hauptnummer einer Fassung: '1.0' -> 1, '2.3' -> 2, Unlesbares -> 0. */

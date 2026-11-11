@@ -1,7 +1,6 @@
 import {startTransition, useEffect, useMemo, useState} from 'react';
 import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
 import {
-  data as mitKoepfen,
   Outlet,
   useRouteError,
   isRouteErrorResponse,
@@ -203,11 +202,9 @@ export async function loader(args) {
   // EINWILLIGUNGS-MOTOR (Grossjob 20261022-GROSSJOB-cookiebot-abloesen-eigener-
   // einwilligungshinweis-qiblanco, s08; BAUVERTRAG Abschnitt 1). Dieselbe Weiche
   // wie im Global Deutsch-Shop: Query vor Sitzungs-Cookie vor Konstante
-  // (app/lib/einwilligung-schalter.js, EINWILLIGUNG_MOTOR). Im Motor 'cookiebot'
-  // kommt KEIN Feld dazu, dann ist das HTML der Stand vor s08: hier gab es nie
-  // ein Cookiebot-Banner (PUBLIC_COOKIEBOT_ID ungesetzt), also keinen Hinweis
-  // und keine Einwilligung. ?qb_einwilligung=cookiebot zeigt diesen Stand je
-  // Besucher und ist der erprobte Rueckweg-Pfad.
+  // (app/lib/einwilligung-schalter.js). Seit 11.11.2026 gibt es nur noch den
+  // Motor 'eigen': der Cookiebot-Zweig und ?qb_einwilligung=cookiebot sind
+  // ausgebaut (Job 20261111-cookiebot-code-entfernen-drei-laeden-nach-7-stabilen-tagen).
   const cookieHeader = args.request.headers.get('Cookie') || '';
   const einwilligungsMotor = motorFuer(args.request.url, cookieHeader);
   const einwilligung =
@@ -250,9 +247,6 @@ export async function loader(args) {
     metaPixelId: env.PUBLIC_META_PIXEL_ID || '',
     // Hyros-Universal-Script: eigene Tag-Kennung, siehe qiblanco-tracker.js.
     hyrosTagUrl: env.PUBLIC_HYROS_TAG_URL || '',
-    // Cookiebot-Domaingruppe dieser Domain. Ohne sie kein Consent-Banner —
-    // und damit (fail-closed) auch kein marketing-Consent und kein Tracking.
-    cookiebotId: env.PUBLIC_COOKIEBOT_ID || '',
     // PREISMODUS netto|brutto (s02, Grossjob 20260924-kasse-zeigt-brutto-
     // preise-wie-produktseite-prio10): gelesen in lib/context.js, hier nur an
     // den Client gereicht, damit die Hydration denselben Modus rechnet.
@@ -277,12 +271,7 @@ export async function loader(args) {
       language: args.context.storefront.i18n.language,
     },
   };
-  // ?qb_einwilligung=eigen|cookiebot merkt sich die Wahl fuer die Sitzung.
-  return einwilligungsMotor.setzeCookie
-    ? mitKoepfen(antwort, {
-        headers: {'Set-Cookie': einwilligungsMotor.setzeCookie},
-      })
-    : antwort;
+  return antwort;
 }
 
 /**
@@ -404,8 +393,8 @@ export function Layout({children}) {
           laeuft (qpx-Lader, Tracker, UpPromote, MetaPixel lesen window.Cookiebot
           und hoeren auf dessen Ereignisse) - deshalb das ERSTE defer-Skript.
           Kein Inline-Skript, kein Eingriff in fremde Knoten: Hydrations-neutral.
-          Der Cookiebot-Lader und cookiebot-shopify-consent-sync.js fallen in
-          diesem Motor weg; die Bruecke zu Shopify.customerPrivacy steht in
+          Der Cookiebot-Lader und cookiebot-shopify-consent-sync.js sind seit
+          11.11.2026 ausgebaut; die Bruecke zu Shopify.customerPrivacy steht in
           /qb-einwilligung.js.
         */}
         {einwilligungEigen && (
@@ -416,30 +405,10 @@ export function Layout({children}) {
             suppressHydrationWarning
           />
         )}
-        {!einwilligungEigen && shouldLoadThirdPartyScripts && data?.cookiebotId ? (
-          <script
-            id="Cookiebot"
-            src="https://consent.cookiebot.com/uc.js"
-            data-cbid={data.cookiebotId}
-            data-blockingmode="auto"
-            type="text/javascript"
-            nonce={nonce}
-            async
-            suppressHydrationWarning
-          />
-        ) : null}
         <Meta />
         <Links />
         {shouldLoadThirdPartyScripts && (
           <>
-            {!einwilligungEigen && (
-              <script
-                src="/cookiebot-shopify-consent-sync.js"
-                nonce={nonce}
-                defer
-                suppressHydrationWarning
-              />
-            )}
             <script
               src="/qiblanco-tracker.js"
               data-hyros-tag={data?.hyrosTagUrl || undefined}
