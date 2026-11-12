@@ -2,8 +2,8 @@
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
   "upstream_commit": "3745f54c62b1366ad9e2a583a8a252378e3bd461",
-  "erzeugt_utc": "2026-11-12T21:32:53Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 3745f54c62b1; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit e1f03d2d4e44). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "erzeugt_utc": "2026-11-12T21:39:15Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 3745f54c62b1; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 3745f54c62b1). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/components/AddToCartButton.jsx",
@@ -392,7 +392,7 @@
     {
       "upstream": "app/components/reusables/kakao-tiefe-daten.js",
       "klasse": "K1",
-      "sha256": "ecaa323997e51b39a5f48825bd92d3f87b77d7167137abdbde6c6175e76b6aa1"
+      "sha256": "75a0d55f9e1674cad549bb961f4b7fd4b0298dbaa370b1c6a1ba8425ddf9f79a"
     },
     {
       "upstream": "app/styles/kakao-tiefe.css",
