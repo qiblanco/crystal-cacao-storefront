@@ -472,14 +472,14 @@ export const SORTENVERGLEICH = {
         },
         {
           art: 'Nährstoff-Analyse',
-          labor: 'PLENUM Dr. Born und Dartsch Scientific',
+          labor: 'PLENUM Dr. Born',
           datum: '04.11.2025',
           sprache: 'en',
           url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-awake-2025-11-04.pdf?v=1788373343',
         },
         {
           art: 'Mineralstoff-Analyse',
-          labor: 'SAS hagmann und Dartsch Scientific',
+          labor: 'SAS hagmann',
           datum: '24.03.2026',
           sprache: 'en',
           url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/mineralstoffanalyse-dartsch-crystal-cacao-awake-2026-03-24.pdf?v=1789034539',
@@ -519,14 +519,14 @@ export const SORTENVERGLEICH = {
         },
         {
           art: 'Nährstoff-Analyse',
-          labor: 'PLENUM Dr. Born und Dartsch Scientific',
+          labor: 'PLENUM Dr. Born',
           datum: '27.10.2025',
           sprache: 'de',
           url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/naehrstoffanalyse-dartsch-crystal-cacao-create-2025-10-27.pdf?v=1788373349',
         },
         {
           art: 'Mineralstoff-Analyse',
-          labor: 'SAS hagmann und Dartsch Scientific',
+          labor: 'SAS hagmann',
           datum: '12.03.2026',
           sprache: 'en',
           url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/mineralstoffanalyse-dartsch-crystal-cacao-create-2026-03-12.pdf?v=1789034532',
