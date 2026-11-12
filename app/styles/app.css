@@ -944,7 +944,13 @@ aside .cart-details {
   line-height: 1.5;
   border-width: 2px;
   border-color: var(--cc-gold, rgb(242, 191, 114));
-  font-size: var(--cc-knopf-schrift, 1rem);
+  /* Kasse in der Schublade folgt der VORLAGE qiblanco.com (17,6 px), nicht der
+   * Knopfstufe der Kaufseiten (--cc-knopf-schrift 16 px seit 8d9acaf, 09.11.).
+   * Christian 10.09.: "genauso aufbauen wie auf www.qiblanco.com" geht der
+   * Rubrik-Skala vor (AI-CEO-Entscheid K2, Posten 095, 12.11.2026).
+   * Gemessen von rt crystal-warenkorb-schublade-wie-vorlage, Arm K1. */
+  --cc-kasse-schrift: 1.1rem;
+  font-size: var(--cc-kasse-schrift);
   font-weight: var(--cc-knopf-gewicht, 600);
 }
 
