@@ -10,7 +10,6 @@ import {
 } from '@shopify/hydrogen';
 import {ProductImage} from '~/components/ProductImage';
 import {CacaoProductForm} from '~/components/CacaoProductForm';
-import {EuGewaehrleistungsListenpunkt} from '~/components/EuGewaehrleistungsLabel';
 import {CacaoPriceDisplay} from '~/components/CacaoPriceDisplay';
 import {ladeStaffelKasse} from '~/lib/cacao-pricing';
 import {ProductImageList} from '~/components/ProductImageList';
@@ -322,10 +321,12 @@ export default function Product() {
             quantity={quantity}
             onQuantityChange={setQuantity}
             staffelKasse={staffelKasse}
-            /* Die Mitteilung haengt auf dieser Kaufflaeche IN der
-               Vertrauensliste darunter. Hier abgeschaltet — sonst stuende sie
-               zweimal auf der Seite. */
-            gewaehrleistungsHinweis={false}
+            /* Seit 2026-11-12 haengt die Mitteilung wieder hier, unter dem
+               Kauf-Knopf (Default von CacaoProductForm), und NICHT mehr als
+               Listenpunkt in der Vertrauensliste. Grund: Shop-Regel D1,
+               Christian 27.10.2026 „keine gimgis vor den aufzaehlungspunkten“;
+               shop-tor rief STOP am Zeichen .eu-gwl__zeichen vor dem Punkt.
+               Vorbild qiblanco /products/qibracelet-b (HINWEIS_UNTER_DEM_KNOPF). */
           />
           <CacaoBenefitList />
           {kaufblockZuerst ? beschreibung : null}
@@ -388,7 +389,19 @@ export default function Product() {
 }
 
 /**
- * DIE VERTRAUENSLISTE — seit dem 2026-09-08 mit einer sechsten Zeile.
+ * DIE VERTRAUENSLISTE.
+ *
+ * STAND 2026-11-12 (Job 20261112-el-0a9978b4-rest-s11-kakao-quelle, Elina
+ * EL-20261112-0a9978b4): reine Textzeilen ohne Emoji davor und OHNE den
+ * Gewaehrleistungs-Listenpunkt. Die Pflichtmitteilung steht wieder unter dem
+ * Kauf-Knopf (CacaoProductForm-Default), das goldene Zeichen (Elina
+ * EL-20261001-ddef0479) bleibt dort erhalten. Grund: Shop-Regel D1 (Christian
+ * 27.10.2026 „keine gimgis vor den aufzaehlungspunkten“). „Laboranalytisch
+ * geprueft“ ohne Institutsnamen (Elina: keine Personen- oder Institutsnamen
+ * im Fliesstext). Der Text unten beschreibt den Stand 2026-09-08 bis
+ * 2026-11-12 und bleibt als Herleitung stehen.
+ *
+ * (Stand 2026-09-08: mit einer sechsten Zeile.)
  *
  * Christian: „Der Button gesetzliche Garantie ist mega gross und komisch.
  * Das sollte einfach als weitere Zeile bei den Gimmicks aufgelistet werden."
@@ -427,12 +440,11 @@ function CacaoBenefitList() {
   return (
     <div className="CacaoBenefitList">
       <ul>
-        <li>✅ Kostenloser Versand ab 99 € innerhalb Deutschlands</li>
-        <li>🚚 In 1-3 Tagen bei Dir</li>
-        <li>🔄 100 % Geld-zurück-Garantie bei Unzufriedenheit</li>
-        <li>🔬 Laboranalytisch geprüft (Dartsch Institut)</li>
-        <li>🌿 Bio-zertifiziert nach DE-ÖKO-006</li>
-        <EuGewaehrleistungsListenpunkt />
+        <li>Kostenloser Versand ab 99 € innerhalb Deutschlands</li>
+        <li>In 1-3 Tagen bei Dir</li>
+        <li>100 % Geld-zurück-Garantie bei Unzufriedenheit</li>
+        <li>Laboranalytisch geprüft</li>
+        <li>Bio-zertifiziert nach DE-ÖKO-006</li>
       </ul>
     </div>
   );

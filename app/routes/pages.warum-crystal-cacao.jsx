@@ -447,8 +447,7 @@ export default function WarumCrystalCacaoPage() {
           <p>
             Das <strong>Wirkstoffprofil</strong> hat das Labor PLENUM Dr. Born
             in Ennepetal an der fertigen Mischung gemessen, aus der
-            verschlossenen Originalpackung. Den Bericht dazu verantwortet
-            Dartsch Scientific in Dießen am Ammersee. In 100 Gramm Create stecken 5,62
+            verschlossenen Originalpackung. In 100 Gramm Create stecken 5,62
             Gramm Polyphenole und Flavanole, 1,05 Gramm Theobromin und 140
             Milligramm Koffein. Bei Awake sind es 5,03 Gramm, 0,95 Gramm und
             120 Milligramm.

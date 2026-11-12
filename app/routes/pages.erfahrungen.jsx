@@ -233,8 +233,9 @@ export default function ErfahrungenPage() {
             </a>
           </p>
           <p>
-            Zu Quecksilber und Arsen gibt es eine eigene Untersuchung. Dartsch
-            Scientific hat den Kakao einmal auf alle Elemente untersucht.
+            Zu Quecksilber und Arsen gibt es eine eigene Untersuchung. Ein
+            Labor hat den Kakao in unserem Auftrag einmal auf alle Elemente
+            untersucht.
             Quecksilber war darin nicht nachweisbar. Arsen fand sich in sehr
             geringen Spuren, die nicht quantifizierbar sind.
           </p>
@@ -261,8 +262,7 @@ export default function ErfahrungenPage() {
             1,05 Gramm Theobromin und 140 Milligramm Koffein. Bei Awake sind es
             5,03 Gramm, 0,95 Gramm und 120 Milligramm. Gemessen hat das Labor
             PLENUM Dr. Born in Ennepetal, an der fertigen Mischung aus der
-            verschlossenen Originalpackung. Den Bericht verantwortet Dartsch
-            Scientific.
+            verschlossenen Originalpackung.
           </p>
           <p>
             Den Mineralstoffgehalt hat die SAS hagmann GmbH in Horb am Neckar mit
