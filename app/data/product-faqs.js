@@ -28,7 +28,7 @@ export const FAQ_CACAO = [
   },
   {
     q: 'Wie wird zeremonieller Kakao zubereitet?',
-    a: 'Das ist ganz unkompliziert, und nach den ersten Versuchen wird es dir schnell vertraut und macht sogar richtig Freude. Erwärm etwa 75 ml Wasser oder Pflanzenmilch, zum Beispiel Hafermilch, auf höchstens 85 °C. Zerkleinere die Kakaomasse, wieg 15 g für eine Tasse ab und lös sie in der warmen Flüssigkeit auf, am besten unter Rühren. Wenn du magst, verfeinerst du deinen Kakao mit verschiedenen Gewürzen. Und dann nimm dir Zeit, ihn zu spüren und zu genießen.',
+    a: 'Die Zubereitung ist ganz unkompliziert, und nach den ersten Versuchen wird sie dir schnell vertraut und macht sogar richtig Freude. Erwärm etwa 75 ml Wasser oder Pflanzenmilch, zum Beispiel Hafermilch, auf höchstens 85 °C. Zerkleinere die Kakaomasse, wieg 15 g für eine Tasse ab und lös sie in der warmen Flüssigkeit auf, am besten unter Rühren. Wenn du magst, verfeinerst du deinen Kakao mit verschiedenen Gewürzen. Und dann nimm dir Zeit, ihn zu spüren und zu genießen.',
   },
   {
     q: 'Für wen ist Kakao (un)geeignet?',

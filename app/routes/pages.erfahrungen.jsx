@@ -82,13 +82,17 @@ import {canonicalLink} from '~/lib/seo';
  */
 
 const PFAD = '/pages/erfahrungen';
-// TITLE BLEIBT bis zum Urteil ueber GS-098 (live 2026-10-07, Wirkzeit 28 Tage):
-// er IST die Massnahme der Hypothese „Crystal Cacao Erfahrungen“ und wird von
-// proben/probe_erfahrungen_am_kundenrand.py Arm B gehalten. Der Job
-// 20261015-m5f2-crystal-liest-kakao-liste hat dafuer am 2026-10-16 den
-// geprueften Kakao-Title „Kakao-Erfahrungen: Stimmen und Laborwerte | Crystal
-// Cacao®“ vorbereitet; er wartet auf das GS-098-Urteil (Folgejob im RESULT).
-const TITEL = 'Crystal Cacao Erfahrungen: echte Stimmen und Laborwerte';
+// TITLE nach dem GS-098-Urteil (verworfen 2026-11-09, Job km-entw-auswerten-
+// gs-098-20261104): der alte Title „Crystal Cacao Erfahrungen: echte Stimmen
+// und Laborwerte“ war die Massnahme und hat nicht getragen. Jetzt gilt die am
+// 2026-10-16 adversarial gepruefte Fassung (folge/20261015-crystal/pruefer-
+// urteil-titles.md, 58 Zeichen): Kundenwort Kakao vorn, Marke am Ende
+// (Seitenregel R3). „Erfahrungen“ und „Crystal Cacao“ bleiben fuer die Suche
+// darin. Arm B der Probe haelt genau das (Erfahrungen + Marke am Ende), die
+// H1 bleibt „Crystal Cacao Erfahrungen“. Job 20261112-m5f2-crystal-
+// erfahrungen-title-nach-gs098. GS-295 (Link von der Startseite) startet
+// danach und nennt diesen Tausch als gleichzeitige Aenderung.
+const TITEL = 'Kakao-Erfahrungen: Stimmen und Laborwerte | Crystal Cacao®';
 const BESCHREIBUNG =
   'Echte Google-Bewertungen zu Crystal Cacao im Wortlaut, dazu die ' +
   'Laborwerte zu Cadmium und Schwermetallen, die Zubereitung und 20 Tage ' +
