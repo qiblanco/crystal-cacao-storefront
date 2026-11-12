@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "9e6d0e64056f00d6ab33a7159e8332f437f89821",
-  "erzeugt_utc": "2026-11-11T10:53:37Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- ENTSCHEIDUNGEN (--entscheidung): pin-nachziehen app/lib/seo.js (upstream 2d96f4767625 -> 2439c0e5f396) -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 9e6d0e64056f; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit a21d8595e068). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "0a390a5dafbc43c9be632a88c4b93c0ba9f0d6b3",
+  "erzeugt_utc": "2026-11-12T01:59:58Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 0a390a5dafbc; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 9e6d0e64056f). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/components/AddToCartButton.jsx",
@@ -432,7 +432,7 @@
     {
       "upstream": "app/components/reusables/Anmeldeweiche.jsx",
       "klasse": "K1",
-      "sha256": "7081f50e60dc19e61e3483dd54e45fbd6f44dc982eb8d1dea923e0617618ee12"
+      "sha256": "ad5b8c7ac05328288f41bff633ecc56603fde035011203d3f5f7940071ddb165"
     },
     {
       "upstream": "app/components/reusables/anmeldeformular.css",
@@ -539,6 +539,11 @@
       "upstream": "app/lib/reihe-erst-jede-person.js",
       "klasse": "K1",
       "sha256": "2b2bb327f4108fe5c09bc866e9976944bdaa7944f2182b23fa4b6170575469f3"
+    },
+    {
+      "upstream": "app/components/reusables/anmelde-puffer.js",
+      "klasse": "K1",
+      "sha256": "76f11f632bd997d269971783bca53936e12d88a25c1a756ae3b500f95a915fea"
     }
   ]
 }

@@ -1,5 +1,6 @@
 import {useEffect, useId, useRef, useState} from 'react';
 import anmeldeStyles from './anmeldeformular.css?url';
+import {beobachten, starteNachschicken, zustellen} from './anmelde-puffer';
 
 /*
  * ANMELDEWEICHE — eigenes Anmeldeformular statt ActiveCampaign, je Formular
@@ -56,6 +57,21 @@ const WEICHE_GUELTIG_MS = 5 * 60 * 1000;
 const MIN_ANZEIGE_MS = 1600;
 const MAX_ANZEIGE_MS = 23 * 3600 * 1000;
 const VORSCHAU_SCHLUESSEL = 'qb-anmeldung-vorschau';
+
+// Rückfall-Puffer (Elina EL-20261107-af9594f2, Punkt 4; anmelde-puffer.js): nur, wenn die Anmeldung
+// nachweislich im Browser liegt. Sonst gilt der bisherige Weg (Rückfall auf AC bzw. „in ein paar Minuten“).
+const PUFFER_TEXT = {
+  de: {
+    wartet: 'Wir haben deine Anmeldung. Sie wird gleich übertragen.',
+    gemerkt:
+      'Wir haben deine Anmeldung. Sie wird übertragen, sobald die Verbindung wieder steht. Lass die Seite dafür offen oder schau später noch einmal vorbei. Danach kommt die Mail zum Bestätigen.',
+  },
+  en: {
+    wartet: 'We have your sign-up. It will be sent in a moment.',
+    gemerkt:
+      'We have your sign-up. It will be sent as soon as the connection is back. Keep this page open or visit us again later. Then you will get the email to confirm.',
+  },
+};
 
 let wegeAnfrage = null;
 let wegeGeholt = 0;
@@ -142,6 +158,8 @@ export function AnmeldeWeiche({formId, ac, dunkel = false}) {
   const [lage, setLage] = useState({weg: 'offen'});
 
   useEffect(() => {
+    // Jede Seite trägt die Fußzeile: hier gehen liegengebliebene Anmeldungen beim nächsten Seitenaufruf raus.
+    starteNachschicken({endpunkt: ANMELDE_ENDPUNKT});
     let aktiv = true;
     holeWege()
       .then((wege) => {
@@ -201,11 +219,28 @@ function EigenesFormular({formId, anzeige: ersteAnzeige, versatz: ersterVersatz,
   const versatz = useRef(ersterVersatz || 0);
   const [stand, setStand] = useState('bereit');
   const [meldung, setMeldung] = useState('');
+  const gepuffert = useRef('');
   const deutsch = anzeige.sprache !== 'en';
+  const puffer = PUFFER_TEXT[deutsch ? 'de' : 'en'];
 
   useEffect(() => {
     angezeigt.current = Date.now();
   }, []);
+
+  // Geht die gepufferte Anmeldung später durch (Takt, Netz zurück), zeigt das Formular den Danke-Satz.
+  useEffect(() => {
+    if (stand !== 'gepuffert') return undefined;
+    return beobachten((id, ergebnis) => {
+      if (id !== gepuffert.current || ergebnis.status !== 202 || !ergebnis.antwort || !ergebnis.antwort.ok) return;
+      setMeldung(
+        ergebnis.antwort.text ||
+          (deutsch
+            ? 'Wir haben dir gerade eine Mail geschickt. Bestätige darin deine Anmeldung.'
+            : "We've just sent you an email. Confirm your subscription there."),
+      );
+      setStand('fertig');
+    });
+  }, [stand, deutsch]);
 
   async function absenden(ereignis) {
     ereignis.preventDefault();
@@ -222,30 +257,30 @@ function EigenesFormular({formId, anzeige: ersteAnzeige, versatz: ersterVersatz,
     const rest = MIN_ANZEIGE_MS - (Date.now() - angezeigt.current);
     if (rest > 0) await new Promise((fertig) => setTimeout(fertig, rest));
 
-    let status = 0;
-    let antwort = null;
-    try {
-      const r = await fetch(
-        `${ANMELDE_ENDPUNKT}/f/${encodeURIComponent(formId)}`,
-        {
-          method: 'POST',
-          credentials: 'omit',
-          headers: {'Content-Type': 'application/json', Accept: 'application/json'},
-          body: JSON.stringify({
-            vorname: String(daten.get('vorname') || ''),
-            email: String(daten.get('email') || ''),
-            website: String(daten.get('website') || ''),
-            t: String(t),
-            einwilligung_id: String(anzeige.einwilligung_id),
-            seite: window.location.pathname,
-          }),
+    // Rückfall-Puffer: ablegen, bis zu drei Runden direkt und über die Shop-Route (anmelde-puffer.js).
+    const ergebnis = await zustellen(
+      {
+        formular: formId,
+        felder: {
+          vorname: String(daten.get('vorname') || ''),
+          email: String(daten.get('email') || ''),
+          website: String(daten.get('website') || ''),
+          einwilligung_id: String(anzeige.einwilligung_id),
+          seite: window.location.pathname,
         },
-      );
-      status = r.status;
-      antwort = await r.json().catch(() => null);
-    } catch {
-      status = 0;
+        t,
+        versatz: versatz.current,
+      },
+      {endpunkt: ANMELDE_ENDPUNKT, beiWarten: (gemerkt) => gemerkt && setMeldung(puffer.wartet)},
+    );
+    if (ergebnis.gepuffert) {
+      gepuffert.current = ergebnis.id;
+      setMeldung(puffer.gemerkt);
+      setStand('gepuffert');
+      starteNachschicken({endpunkt: ANMELDE_ENDPUNKT, sofort: false});
+      return;
     }
+    const {status, antwort} = ergebnis;
 
     if (status === 202 && antwort && antwort.ok) {
       setStand('fertig');
@@ -306,6 +341,16 @@ function EigenesFormular({formId, anzeige: ersteAnzeige, versatz: ersterVersatz,
             : 'Please sign up here once more.'}
         </p>
         {ac}
+      </div>
+    );
+  }
+
+  if (stand === 'gepuffert') {
+    return (
+      <div className={klasse} data-anmeldeweg="gepuffert" data-formular={formId}>
+        <p className="qb-anmelden__danke" role="status">
+          {meldung}
+        </p>
       </div>
     );
   }
@@ -388,7 +433,7 @@ function EigenesFormular({formId, anzeige: ersteAnzeige, versatz: ersterVersatz,
         {anzeige.knopf}
       </button>
       {meldung ? (
-        <p className="qb-anmelden__meldung" role="alert">
+        <p className="qb-anmelden__meldung" role={stand === 'sendet' ? 'status' : 'alert'}>
           {meldung}
         </p>
       ) : null}
