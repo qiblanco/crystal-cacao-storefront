@@ -1381,33 +1381,18 @@
    * Rangfolge zu retten, bezahlt sie mit dem Inhalt. */
   margin-top: var(--cc-space-3);   /* 24px */
 }
-.Bestseller-Price .BestsellerLabel {
-  position: static;
-  /* s03, 2026-09-04: war `linear-gradient(90deg,#f30,#ff6f82)` — ZWEI weitere
-   * freie Rottoene, und zwar direkt neben dem Preis, den derselbe Bau gerade
-   * aus dem Rot geholt hat. Ein Verlauf aus zwei Signalfarben ist die
-   * lauteste Flaeche der ganzen Kaufspalte; sie zog das Auge vom goldenen
-   * Kaufknopf weg auf ein Etikett.
-   * JETZT DIE UMKEHRUNG DES KAUFKNOPFES, mit denselben zwei Token und keinem
-   * dritten: der Knopf ist Gold auf Dunkel-Schrift, das Etikett ist Dunkel
-   * mit Gold-Schrift. Es bleibt deutlich sichtbar, ordnet sich dem Knopf
-   * aber unter, statt mit ihm zu konkurrieren. Kontrast --cc-gold auf
-   * --cc-dunkel: 10,97:1 (schon beim Token oben gemessen). */
-  background: var(--cc-dunkel);
-  padding: 5px 10px;
-  border-radius: var(--cc-radius-knopf);
-  font-weight: 600;
-  color: var(--cc-gold);
-}
-/* 2026-09-10 ENTFERNT: die 750-px-Sonderfassung des Preisblocks.
- * Sie hat oberhalb von 750 px genau das hergestellt, was die Grundregel jetzt
- * auf ALLEN Breiten tut (flex, align-items:center, Etikett im Fluss). Ihr
- * einziger verbliebener Unterschied war `gap: 20px` — ein freier Wert neben
- * der 8pt-Skala — und `width: fit-content`. Zwei Bauformen fuer dieselbe
- * Absicht sind die Bruchkante, an der Christians Befund entstanden ist:
- * unterhalb der Kante lag das Etikett ueber dem Preis, oberhalb daneben. */
-.Bestseller-Price .BestsellerLabel {
-  width: fit-content;
+/* 2026-11-12 ENTFERNT: das Etikett .BestsellerLabel (Dunkel mit Gold-Schrift,
+ * 5 px x 10 px Polster, Knopf-Ecken 10 px) samt seiner `width: fit-content`-
+ * Regel. Es trug EINEN Text je Stufe ohne Zahl ("Exklusiv", "Angebot",
+ * "Bestseller Angebot"). Jetzt traegt der Preis die Schildchen Variante B
+ * (Christian 12.11.2026: "Und bei den Preisschildern machen wir es auch so,
+ * die B-Juwelier-Effekt."): Preisvorteil mit Zahl + Auszeichnung, Form aus
+ * app/styles/preis-schild.css (byte-gleich zur Vorlage qiblanco), Komponente
+ * reusables/PreisSchild.jsx. Hier bleibt nur die Lage im Preisblock: die
+ * Schilder stehen im selben Fluss wie Preis und Streichpreis, 16 px daneben
+ * (column-gap des Blocks), und brechen als Paar um, nie einzeln. */
+.Bestseller-Price .qb-schilder {
+  flex: none;
 }
 .CacaoPriceMain {
   display: flex;

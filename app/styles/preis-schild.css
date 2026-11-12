@@ -1,0 +1,133 @@
+/* PREIS-SCHILDCHEN, VARIANTE B "JUWELIER-ETIKETT" (Christian 12.11.2026: "Und bei den
+   Preisschildern machen wir es auch so, die B-Juwelier-Effekt.")
+   Standard: design-meister/db/designstandard/_basis.yaml, Baustein `schildchen`;
+   Herleitung: Claude/Postausgang/Preis-Schildchen-Varianten/SCHILDCHEN-STANDARD.md.
+   Job 20261112-prio1-preis-schildchen-variante-b-juwelier-etikett-beide-shops-live.
+
+   ZWEI ARTEN, EINE FORM:
+   - Auszeichnung (.qb-schild):        Tinte-Pille, Schrift Kauf-Gold, feine Goldlinie,
+                                       oben 1 px Licht, Raute 5 x 5 px vor dem Wort.
+   - Preisvorteil (.qb-schild--vorteil): Tiefrot-Pille, weisse Schrift, Lichtkante des
+                                       roten Qi-Alpha-Knopfs, keine Raute.
+   Ein Schildchen ist kein Knopf: 24 px hoch, ganz rund, kein Glanz, kein Schatten
+   nach aussen, kein Hover, keine Bewegung, kein Link.
+   Kontrast am Bild: Gold auf Tinte 8,5 : 1, Weiss auf Tiefrot 7,3 : 1.
+
+   Die Raute ist ein leeres ::before mit Hintergrund: sie hat keinen Text, Vorlese-
+   programme lesen sie nicht.
+
+   ALTBESTAND: die Schildchen-Klassen aus der Zeit vor dem Standard (BestsellerLabel,
+   lp-*-product__badge, v2/v3-produkt__badge, rd3-trio__badge, lp-vp-product__bestseller,
+   ghx-pak__pill/__save) bekommen dieselbe Form ueber die Liste unten. Das gilt auch fuer den
+   Kakao-Spiegel unter #ccsp (erzeugt aus crystal-cacao-node): seine Schild-TEXTE kommen aus
+   der crystal-Quelle und werden dort getrennt (Folgeauftrag), die FORM steht schon hier.
+   Bis dahin: --red ("Angebot") traegt die Preisvorteil-Farbe, --gold/--gradient die Auszeichnung. */
+
+:root {
+  --schild-tinte: #2c2a26;
+  --schild-gold: #f2bf72;
+  --schild-gold-linie: rgba(242, 191, 114, 0.5);
+  --schild-licht: rgba(255, 255, 255, 0.12);
+  --schild-rot: #a81f00;
+  --schild-rot-licht: rgba(255, 255, 255, 0.38);
+  --schild-hoehe: 24px;
+  --schild-schrift: 12px;
+}
+
+/* --- Form, für beide Arten gleich --- */
+.qb-schild,
+:where(.Bestseller-Price) .BestsellerLabel,
+.lp-a-product__badge,
+.lp-b-product__badge,
+.lp-d-product__badge,
+.lp-vp-product__bestseller,
+.v2-produkt__badge,
+.v3-produkt__badge,
+.rd3-trio__badge,
+.ghx-pill.ghx-pak__pill,
+.ghx-pill.ghx-pak__save {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px;
+  box-sizing: border-box !important;
+  height: var(--schild-hoehe) !important;
+  min-height: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  padding: 0 10px !important;
+  margin: 0;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: var(--schild-tinte) !important;
+  background-image: none !important;
+  color: var(--schild-gold) !important;
+  -webkit-text-fill-color: currentColor;
+  box-shadow:
+    inset 0 0 0 1px var(--schild-gold-linie),
+    inset 0 1px 0 var(--schild-licht) !important;
+  font-family: inherit;
+  font-size: var(--schild-schrift) !important;
+  font-weight: 700 !important;
+  font-style: normal !important;
+  letter-spacing: 0.08em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  text-shadow: none !important;
+  white-space: nowrap !important;
+  vertical-align: middle;
+  cursor: default;
+  pointer-events: none;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* --- Raute vor der Auszeichnung --- */
+.qb-schild:not(.qb-schild--vorteil)::before,
+:where(.Bestseller-Price) .BestsellerLabel:not(.qb-schild--vorteil):not(.BestsellerLabel--red)::before,
+.lp-a-product__badge::before,
+.lp-b-product__badge::before,
+.lp-d-product__badge::before,
+.lp-vp-product__bestseller::before,
+.v2-produkt__badge::before,
+.v3-produkt__badge::before,
+.rd3-trio__badge::before,
+.ghx-pill.ghx-pak__pill::before {
+  content: '' !important;
+  display: block !important;
+  flex: none;
+  width: 5px !important;
+  height: 5px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--schild-gold) !important;
+  transform: rotate(45deg) !important;
+}
+
+/* --- Preisvorteil: Tiefrot, weisse Schrift, Lichtkante des roten A+B-Knopfs --- */
+.qb-schild--vorteil,
+:where(.Bestseller-Price) .BestsellerLabel.qb-schild--vorteil,
+:where(.Bestseller-Price) .BestsellerLabel.BestsellerLabel--red,
+.ghx-pill.ghx-pak__save {
+  background: var(--schild-rot) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 0 var(--schild-rot-licht) !important;
+}
+.ghx-pill.ghx-pak__save::before {
+  content: none !important;
+}
+
+/* --- Zwei Schilder am Preis: 10 px zum Preis, 6 px dazwischen, gemeinsamer Umbruch --- */
+.qb-schilder {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+}
+.qb-schilder:empty {
+  display: none;
+}

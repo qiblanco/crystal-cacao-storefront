@@ -1,5 +1,6 @@
 import {cacaoPricing} from './CacaoProductForm';
 import {useMarktLand} from '~/lib/markt-land';
+import {PreisSchilder} from '~/components/reusables/PreisSchild';
 
 /**
  * Preis-Anzeige der Kakao-Mengenstaffel — DYNAMISCH aus dem API-Preis der
@@ -20,6 +21,19 @@ export function CacaoPriceDisplay({quantity, selectedVariant, handle, staffelKas
   const jePackung = pricing.teilbar;
   const kopf = jePackung ? pricing.price : pricing.gesamt;
   const kopfVorher = jePackung ? pricing.compareAt : pricing.compareAtGesamt;
+  // SCHILDCHEN VARIANTE B (Christian 12.11.2026, Standard design-meister
+  // _basis.yaml `schildchen`): der Preisvorteil nennt die Zahl, die zu GENAU
+  // dem Preispaar daneben passt. Dieser Laden zeigt oben den Packungspreis
+  // (teilbar), die Vorlage qiblanco den Zeilenbetrag; deshalb rechnet die
+  // Anzeige hier aus ihrem eigenen Paar und nicht aus pricing.vorteil
+  // (Zeilenbetrag: 3x 159 gegen 228 waere "−69 €" neben "53 € / 76 €").
+  const kopfNum = jePackung ? pricing.priceNum : pricing.gesamtNum;
+  const kopfVorherNum =
+    pricing.compareAtGesamtNum != null
+      ? jePackung
+        ? pricing.compareAtGesamtNum / pricing.menge
+        : pricing.compareAtGesamtNum
+      : null;
   const nebenzeile = [
     jePackung ? null : `für ${pricing.menge} Packungen`,
     pricing.per100g,
@@ -37,9 +51,15 @@ export function CacaoPriceDisplay({quantity, selectedVariant, handle, staffelKas
           <span className="CacaoPriceCompare">{kopfVorher}</span>
         )}
       </div>
-      <div className={`BestsellerLabel BestsellerLabel--${pricing.badgeStyle}`}>
-        {pricing.badge}
-      </div>
+      {/* Preisvorteil mit Zahl (Tiefrot), dann die Auszeichnung (Tinte, Gold,
+          Raute). Vorher EIN Schild je Stufe mit Text ohne Zahl: 'Exklusiv' /
+          'Angebot' / 'Bestseller Angebot'. */}
+      <PreisSchilder
+        preis={kopfNum}
+        vergleich={kopfVorher ? kopfVorherNum : null}
+        waehrung={pricing.waehrung}
+        auszeichnung={pricing.auszeichnung}
+      />
       <div className="CacaoPricePer100g">{nebenzeile}</div>
     </div>
   );

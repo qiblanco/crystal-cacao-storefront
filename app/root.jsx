@@ -18,6 +18,10 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import kakaoStyles from '~/styles/kakao-seiten.css?url';
 import kakaoTiefeStyles from '~/styles/kakao-tiefe.css?url';
+/* PREIS-SCHILDCHEN VARIANTE B (Christian 12.11.2026): byte-gleich zur Vorlage
+ * qiblanco-storefront app/styles/preis-schild.css (dort global in root.jsx).
+ * Traegt .qb-schild / .qb-schild--vorteil fuer CacaoPriceDisplay. */
+import preisSchildStyles from '~/styles/preis-schild.css?url';
 /* DER CSS-VERTRAG DER SWIPE-TABELLE — nachgezogen 2026-09-03 (s06).
  * app/components/reusables/SwipeTable.jsx kam als K1-Datei byte-gleich aus
  * der Vorlage herueber, ihr Stylesheet NICHT: app/styles/ fuehrte nur
@@ -389,6 +393,7 @@ export function Layout({children}) {
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <link rel="stylesheet" href={kakaoStyles}></link>
+        <link rel="stylesheet" href={preisSchildStyles}></link>
         <link rel="stylesheet" href={kakaoTiefeStyles}></link>
         <link rel="stylesheet" href={swipetabStyles}></link>
         <link rel="stylesheet" href={euGewaehrleistungStyles}></link>

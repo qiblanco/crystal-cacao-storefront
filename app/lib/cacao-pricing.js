@@ -5,6 +5,7 @@ import {
   staffelModellAnzeige,
 } from './markt-pricing.js';
 import {KAKAO_EINZEL, KAKAO_SETS} from './kakao-set-zeile.js';
+import {vorteilText} from '../components/reusables/preis-schild-regel.js';
 
 /**
  * KAKAO-MENGENSTAFFEL — die Rechnung hinter Kaufbox, Preisblock und
@@ -23,10 +24,17 @@ import {KAKAO_EINZEL, KAKAO_SETS} from './kakao-set-zeile.js';
  *   round((netto - trunc2(netto * rabatt)) * (1 + satz))
  * — reproduziert exakt 76/61/53 beim heutigen Netto 71,03 (satz 7 %).
  */
+//
+// SCHILDCHEN (Standard Variante B, Christian 12.11.2026): je Stufe hoechstens
+// EINE Auszeichnung und EIN Preisvorteil, nie ein Schild mit zwei Aussagen.
+// Der Preisvorteil ist keine Konstante: er wird aus Preis und Vergleichspreis
+// daneben gerechnet (components/reusables/preis-schild-regel.js, unter 100 Prozent, sonst Betrag).
+// 'Exklusiv' an der Einzelpackung und 'Angebot' ohne Zahl entfallen.
+// badge/badgeStyle bleiben für Altleser bestehen (crystal-spiegel liest sie).
 export const CACAO_STAFFEL = {
-  '1': {rabattProzent: 0, badge: 'Exklusiv', badgeStyle: 'gold'},
-  '2': {rabattProzent: 20, badge: 'Angebot', badgeStyle: 'red'},
-  '3': {rabattProzent: 30, badge: 'Bestseller Angebot', badgeStyle: 'gradient'},
+  '1': {rabattProzent: 0, badge: 'Exklusiv', badgeStyle: 'gold', auszeichnung: null},
+  '2': {rabattProzent: 20, badge: 'Angebot', badgeStyle: 'red', auszeichnung: null},
+  '3': {rabattProzent: 30, badge: 'Bestseller Angebot', badgeStyle: 'gradient', auszeichnung: 'Bestseller'},
 };
 
 // FAIL-CLOSED: letzter bekannter guter Stand (DE/EUR-Anzeige), wenn der
@@ -196,6 +204,14 @@ export function cacaoPricing(quantity, selectedVariant, handle, land, staffelKas
     per100g: formatPer100g(gesamtNum / menge / (PACKUNG_GRAMM / 100), waehrung),
     badge: staffel.badge,
     badgeStyle: staffel.badgeStyle,
+    auszeichnung: staffel.auszeichnung || null,
+    compareAtGesamtNum: compareAtGesamtNum != null ? compareAtGesamtNum : null,
+    waehrung,
+    // Preisvorteil-Schild: Zahl passend zum Streichpreis daneben, sonst null.
+    vorteil:
+      compareAtGesamtNum != null
+        ? vorteilText(gesamtNum, compareAtGesamtNum, waehrung)
+        : null,
     rabattProzent,
     rabattImWarenkorb,
   };
