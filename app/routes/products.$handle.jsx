@@ -18,6 +18,7 @@ import {
   ABSENDER_MARKE,
   UMGELEITETE_PRODUKTE,
 } from '~/lib/kakao-zone';
+import {bfKakaoUmleitung} from '~/lib/bf-kakao-umleitung';
 import {produktMeta} from '~/lib/produkt-seo';
 import {istNichtIndexierbaresProdukt, noindexMeta} from '~/lib/seo';
 import {istVorlageOhneIndexwert} from '~/lib/sitemap-zaun';
@@ -138,6 +139,14 @@ async function loadCriticalData({context, params, request}) {
   // hängt sie an nichts als dem Handle aus der Adresse.
   // Die Liste wohnt in kakao-zone.js, weil sie ZWEI Leser hat (diese Route und
   // die Sitemap) — zwei Stellen für denselben Zustand wären die teurere Form.
+  // BF-KAKAO (Elina EL-20261111-fa47cfd9, bis 30.11.2026): alte Kakao-Deal-Adressen per 302 auf
+  // die eine Kakao-Deal-Seite (app/lib/bf-kakao-umleitung.js); die normalen Set-Seiten erst nach
+  // der Produktabfrage und nur im Euro-Markt (unten).
+  const bfKakao = bfKakaoUmleitung(handle, request.url);
+  if (bfKakao && !bfKakao.nurEuro) {
+    throw redirect(bfKakao.ziel, 302);
+  }
+
   const umleitungsZiel = UMGELEITETE_PRODUKTE[handle];
   if (umleitungsZiel) {
     throw redirect(umleitungsZiel, 301);
@@ -166,6 +175,13 @@ async function loadCriticalData({context, params, request}) {
   // Fremdproduktseite — gemessen 2026-09-02, 26497 Bytes.
   if (!istKakaoProdukt(product.collections?.nodes?.map((k) => k.handle))) {
     throw fremdinhaltAbweisen();
+  }
+
+  if (
+    bfKakao?.nurEuro &&
+    product.selectedOrFirstAvailableVariant?.price?.currencyCode === 'EUR'
+  ) {
+    throw redirect(bfKakao.ziel, 302);
   }
 
   // The API handle might be localized, so redirect to the localized handle
