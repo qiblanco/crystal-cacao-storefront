@@ -2,8 +2,8 @@
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
   "upstream_commit": "85a9b1eb4d87e290ffaf43c5f44114733cf18db1",
-  "erzeugt_utc": "2026-11-13T02:01:09Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- ENTSCHEIDUNGEN (--entscheidung): klasse-wechseln app/components/AddToCartButton.jsx -> K2 -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 85a9b1eb4d87; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 3745f54c62b1). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "erzeugt_utc": "2026-11-13T02:14:36Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 85a9b1eb4d87; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 85a9b1eb4d87). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/components/AddToCartButton.jsx",
@@ -100,7 +100,7 @@
     {
       "upstream": "app/components/reusables/ActiveCampaignForm.jsx",
       "klasse": "K1",
-      "sha256": "a70055e873c4383907693d67a4523dcd33e28bc3ef8528acbec10cd02e301b17"
+      "sha256": "b407b62c008a8eb3f5e1a9e4feafad35e7482bbe05becb12129565272907e87c"
     },
     {
       "upstream": "app/components/reusables/LazyImage.jsx",
@@ -434,7 +434,7 @@
     {
       "upstream": "app/components/reusables/Anmeldeweiche.jsx",
       "klasse": "K1",
-      "sha256": "ad5b8c7ac05328288f41bff633ecc56603fde035011203d3f5f7940071ddb165"
+      "sha256": "65ca48414cef1e94b695d29150e657f2f3b6bd6177ea3dd535d3e05cb0f4575c"
     },
     {
       "upstream": "app/components/reusables/anmeldeformular.css",
@@ -551,6 +551,16 @@
       "upstream": "app/components/reusables/preis-schild-regel.js",
       "klasse": "K1",
       "sha256": "2e39b57d7e61f00b96a491beea73c827ba518a65997d2cbccd902e1f1c1665eb"
+    },
+    {
+      "upstream": "app/components/reusables/anmelde-rueckfallstand.js",
+      "klasse": "K1",
+      "sha256": "e4d9f499d1cbec1fbe82bb16e84f32efb5b78febd45934dd773e0493c715f83f"
+    },
+    {
+      "upstream": "app/components/reusables/anmelde-weiche-entscheidung.js",
+      "klasse": "K1",
+      "sha256": "c25beaa047a3c62d7314e8a2a69534055eab4be17213ff1d1e8848df3b0199e8"
     }
   ]
 }

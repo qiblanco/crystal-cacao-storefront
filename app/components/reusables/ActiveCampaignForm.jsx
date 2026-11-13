@@ -3,9 +3,10 @@ import {AnmeldeWeiche} from './Anmeldeweiche';
 
 // Seit der AC-Ablösung (Stufe E1, s11) ist dies eine Weiche: je Formular
 // entscheidet der eigene Anmelde-Endpunkt zur Laufzeit, ob das AC-Embed oder
-// das eigene Formular erscheint. Solange er 'ac' meldet oder nicht antwortet,
-// bleibt alles wie bisher (Begründung in Anmeldeweiche.jsx). Formulare, die er
-// nicht kennt (z. B. 33 auf /pages/coming-home), bleiben immer beim Embed.
+// das eigene Formular erscheint. Das AC-Embed nur noch, wenn er ausdrücklich
+// 'ac' meldet; antwortet er nicht, kommt das eigene Formular mit dem Satz aus
+// dem Rückfallstand oder eine Hinweiszeile (Elina EL-20261110-5a9e5746 Punkt 3,
+// Begründung in Anmeldeweiche.jsx).
 export function ActiveCampaignForm({formId}) {
   return (
     <AnmeldeWeiche formId={formId} ac={<ActiveCampaignEmbed formId={formId} />} />
