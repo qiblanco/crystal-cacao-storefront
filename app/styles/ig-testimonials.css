@@ -246,6 +246,10 @@ span.qb-igt__flaeche {
 .qb-igt__buehne {
   border-radius: var(--igt-r2);
   background: var(--igt-flaeche);
+  /* Ecken-Dauerregel (Elina EL-20261111-9de914fc): das Video liegt auf
+     einer eigenen Ebene, die Safari an overflow + border-radius nicht
+     beschneidet. clip-path hält alle vier Ecken gleich rund. */
+  clip-path: inset(0 round var(--igt-r2));
 }
 
 /* ─── Das Zeichen: Play, dann Laden ──────────────────────────────────────── */
