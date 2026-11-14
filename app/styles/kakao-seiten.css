@@ -4119,3 +4119,76 @@ main:has(> .cc-sortenaufmacher) > .cc-belege {
 [data-cc-sorte] .cc-sortenaufmacher__positionierung {
   color: var(--cc-muted);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * APPLE-VORSCHRIFT E1 — EIN GOLD, EIN H2-STIL, EIN KOPFBILD (2026-11-14,
+ * Grossjob 20261101-crystal-cacao-apple-stil, Segment s10, Entscheidung E1).
+ *
+ * Gemessen mit s02/abschnittsabgleich.py (Pruefpunkte ein_gold, ein_h2,
+ * kopf_bild) am Kundenrand, vorher: Kaufseiten 75, Startseite 68,8,
+ * Erfahrungen 62,5, Warum 68,8. Soll: das Minimum der drei Qi-Blanco-Eichseiten.
+ *
+ * 1. EIN GOLD. qb-tokens (Christian 23.09.2026): ein Gold fuer Flaeche und Linie
+ *    (--cc-gold #F2BF72), hoechstens ein dunkleres fuer Schrift (--cc-gold-text
+ *    #90671D). Drei Ausreisser standen im Ruhezustand sichtbar da:
+ *    --cc-sorte-text auf --cc-gold-tief #C8985A (Akzente ohne Sorte), der
+ *    Kakao-Balken im Tassen-Vergleich (startseite.css, --cc-gold-tief), --kt-gold-tief #C8985A (Leiter-Kante in Kakao-Tiefe, K1-Datei,
+ *    deshalb hier ueberschrieben statt dort geaendert) und der EU-Gewaehrleistungs-
+ *    Link mit dem Rueckfallwert #856828, weil dieser Laden --color-accent-ink nie
+ *    gesetzt hat. designstandard-crystal.css nennt fuer --cc-sorte-text schon
+ *    --cc-gold-text; die Regel unten zieht nur den Laden nach.
+ *    Rueckweg: diesen Block entfernen.
+ */
+:root {
+  --cc-sorte-text: var(--cc-gold-text);
+  --color-accent-ink: var(--cc-gold-text);
+}
+:root .kt {
+  --kt-gold-tief: var(--cc-gold);
+}
+/* Der Kakao-Balken im Tassen-Vergleich der Startseite ist Flaeche: Kit-Gold. */
+html .home.cc-start .cc-vgl [data-cc-spalte='kakao'] .cc-vgl__balken {
+  background: var(--cc-gold);
+}
+
+/* 2. EIN H2-STIL AUF DEN KAUFSEITEN. Am Telefon steht der Sorten-Claim auf
+ *    --cc-fs-4, weil er auf --cc-fs-6 den Kaufweg unter den Falz schiebt (Grund
+ *    weiter oben, unveraendert). Die uebrigen H2 der Seite standen auf --cc-fs-6
+ *    (39 px): zwei H2-Stile. Statt den Claim gross zu ziehen, folgen am Telefon
+ *    alle H2 der Kaufseite seiner Stufe. 25 px ist auf 390 px Breite die
+ *    Apple-Groesse fuer Abschnittstitel; die H1 bleibt auf --cc-fs-7. */
+@media (max-width: 29.99em) {
+  main:has(> .cc-sortenaufmacher) h2 {
+    font-size: var(--cc-fs-4);
+  }
+}
+
+/* 3. EIN BILD IM ERSTEN BILDSCHIRM. Startseite: am Telefon stand das Sortenbild
+ *    nach Wortmarke und Claim und war im ersten Bildschirm nur 203 px hoch zu
+ *    sehen. Es rueckt direkt hinter "Sorte 1 von 2", Wortmarke und Claim folgen
+ *    darunter; ab 48em bleibt die Zwei-Spalten-Folie unveraendert. Die uebrige
+ *    Reihenfolge steht in startseite.css. */
+@media (max-width: 47.99em) {
+  html .home.cc-start .cc-folie__bild { order: 2; }
+  html .home.cc-start .cc-folie__name { order: 3; }
+  html .home.cc-start .cc-folie__claim { order: 4; }
+}
+/* Info-Seiten (Erfahrungen, Warum): ein Kopfbild aus dem Bestand des Ladens
+ *    direkt unter der Einleitung. Ein Bild-Radius (--cc-radius-bild), keine
+ *    Bewegung: es steht im ersten Bildschirm (Elinas Design-Regel D3). */
+.cc-kopfbild {
+  margin: var(--cc-space-3) 0 var(--cc-space-4);
+}
+.cc-kopfbild img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--cc-radius-bild);
+}
+@media (min-width: 48em) {
+  .cc-kopfbild img {
+    aspect-ratio: 16 / 9;
+  }
+}

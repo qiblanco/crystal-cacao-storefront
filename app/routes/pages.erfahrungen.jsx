@@ -130,6 +130,11 @@ export function loader() {
   return {};
 }
 
+const KOPFBILD = {
+  url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC02183_1.jpg?v=1764259399',
+  alt: 'Rohe Kakaobohnen in einem offenen Sack',
+};
+
 export default function ErfahrungenPage() {
   const fragen = FRAGEN.map((f) => ({
     ...f,
@@ -148,6 +153,21 @@ export default function ErfahrungenPage() {
           Kundinnen und Kunden haben bei Google über Crystal Cacao geschrieben.
           Du liest ihre Worte im Original, mit Namen und Datum.
         </p>
+
+        {/* Kopfbild (s10, E1 Apple-Vorschrift kopf_bild): ein Bild aus dem
+            Bestand des Ladens im ersten Bildschirm, nicht lazy, ohne Bewegung. */}
+        <figure className="cc-kopfbild">
+          <img
+            src={`${KOPFBILD.url}&width=800`}
+            srcSet={`${KOPFBILD.url}&width=400 400w, ${KOPFBILD.url}&width=800 800w, ${KOPFBILD.url}&width=1200 1200w`}
+            sizes="(min-width: 48em) 720px, 100vw"
+            width={1333}
+            height={1000}
+            alt={KOPFBILD.alt}
+            fetchPriority="high"
+            decoding="async"
+          />
+        </figure>
 
         <section aria-labelledby="cc-erfahrungen-stimmen">
           <h2 id="cc-erfahrungen-stimmen">Was Kundinnen und Kunden schreiben</h2>
@@ -289,8 +309,11 @@ export default function ErfahrungenPage() {
             die 100 % Geld-zurück-Garantie, selbst bei geöffneter Packung.
           </p>
           <div className="cc-knopfreihe cc-erfahrungen__knoepfe">
-            <Link className="cc-knopf" to="/">
-              Unseren Kakao ansehen
+            <Link className="cc-knopf" to="/products/crystal-cacao-awake">
+              Awake ansehen
+            </Link>
+            <Link className="cc-knopf" to="/products/crystal-cacao-create">
+              Create ansehen
             </Link>
             <Link
               className="cc-knopf cc-knopf--ruhig"

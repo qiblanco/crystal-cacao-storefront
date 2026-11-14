@@ -301,6 +301,11 @@ export function loader() {
   return {};
 }
 
+const KOPFBILD = {
+  url: 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/DSC01401.jpg?v=1766919672',
+  alt: 'Kakaobauer hält zwei frisch geöffnete Kakaofrüchte',
+};
+
 export default function WarumCrystalCacaoPage() {
   const foto = gruenderFotoQuellen(72, '72px');
   return (
@@ -336,6 +341,21 @@ export default function WarumCrystalCacaoPage() {
             <time dateTime={VEROEFFENTLICHT}>{VEROEFFENTLICHT_TEXT}</time>
           </p>
         </div>
+
+        {/* Kopfbild (s10, E1 Apple-Vorschrift kopf_bild): ein Bild aus dem
+            Bestand des Ladens im ersten Bildschirm, nicht lazy, ohne Bewegung. */}
+        <figure className="cc-kopfbild">
+          <img
+            src={`${KOPFBILD.url}&width=800`}
+            srcSet={`${KOPFBILD.url}&width=400 400w, ${KOPFBILD.url}&width=800 800w, ${KOPFBILD.url}&width=1200 1200w`}
+            sizes="(min-width: 48em) 720px, 100vw"
+            width={1333}
+            height={1000}
+            alt={KOPFBILD.alt}
+            fetchPriority="high"
+            decoding="async"
+          />
+        </figure>
 
         <p className="cc-lead">
           Ich möchte Kaffee ablösen. Mit einer Tasse, die dir etwas mitbringt:
@@ -467,6 +487,17 @@ export default function WarumCrystalCacaoPage() {
         </section>
 
         <Belege id="pruefdokumente" />
+
+        {/* Weg zum Kauf (s10, E1 Apple-Vorschrift kaufbox): Links zu den Kaufseiten,
+            kein Kaufknopf (ohne Preis daneben sperrt das Sicht-Tor), vor "Schreib mir". */}
+        <div className="cc-knopfreihe cc-absicht__kaufwege">
+          <Link className="cc-knopf" to="/products/crystal-cacao-awake">
+            Awake ansehen
+          </Link>
+          <Link className="cc-knopf" to="/products/crystal-cacao-create">
+            Create ansehen
+          </Link>
+        </div>
 
         <section className="cc-absicht__unterschrift">
           <h2>Schreib mir</h2>
