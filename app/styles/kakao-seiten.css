@@ -4169,9 +4169,24 @@ html .home.cc-start .cc-vgl [data-cc-spalte='kakao'] .cc-vgl__balken {
  *    darunter; ab 48em bleibt die Zwei-Spalten-Folie unveraendert. Die uebrige
  *    Reihenfolge steht in startseite.css. */
 @media (max-width: 47.99em) {
-  html .home.cc-start .cc-folie__bild { order: 2; }
-  html .home.cc-start .cc-folie__name { order: 3; }
-  html .home.cc-start .cc-folie__claim { order: 4; }
+  html .home.cc-start .cc-folie .cc-folie__bild { order: 2; }
+  html .home.cc-start .cc-folie .cc-folie__name { order: 3; }
+  html .home.cc-start .cc-folie .cc-folie__claim { order: 4; }
+}
+/*   s11 (2026-11-14): eine Klasse mehr (.cc-folie) im Selektor. Im Spiegel auf
+ *   qiblanco.com wird "html" zu "#ccsp" und startseite.css laedt NACH dieser
+ *   Datei; bei gleicher Spezifitaet gewann dort order:4 aus startseite.css und
+ *   das Bild blieb unter Name und Claim (top 757 statt 520). Mit der
+ *   zusaetzlichen Klasse gewinnt diese Regel unabhaengig von der Ladefolge. */
+/*   Erster Akt am Telefon etwas dichter (s11): auf qiblanco.com stehen ueber
+ *   dem Spiegel 116 px mehr Rahmen (Kopfzeile, Reiter). Mit 32 px Abstand oben
+ *   und 32 px Luecken blieben dort vom Sortenbild 210 px im ersten Bildschirm,
+ *   Soll 211 (25 % von 844). 16 px oben und 24 px Luecken (8pt-Raster, Token)
+ *   geben 240 px. Je eine Klasse mehr als in startseite.css, damit die Regel
+ *   auch im Spiegel gewinnt, wo startseite.css spaeter laedt. */
+@media (max-width: 47.99em) {
+  html .home.cc-start .cc-akt.cc-akt--grund.cc-start-slider { padding-top: var(--cc-space-2); }
+  html .home.cc-start .cc-start-slider > .cc-akt__innen { gap: var(--cc-space-3); }
 }
 /* Info-Seiten (Erfahrungen, Warum): ein Kopfbild aus dem Bestand des Ladens
  *    direkt unter der Einleitung. Ein Bild-Radius (--cc-radius-bild), keine
