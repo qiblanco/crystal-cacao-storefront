@@ -4143,11 +4143,15 @@ main:has(> .cc-sortenaufmacher) > .cc-belege {
   --cc-sorte-text: var(--cc-gold-text);
   --color-accent-ink: var(--cc-gold-text);
 }
-:root .kt {
+/* s11: je eine Klasse mehr (.kt-akt, .cc-vgl-rahmen). Im qiblanco-Spiegel werden
+ * kakao-tiefe.css und startseite.css NACH dieser Datei geladen; bei gleicher
+ * Spezifitaet gewann dort die alte Farbe #C8985A (gemessen 14.11.: Leiter-Kante
+ * und Kakao-Balken rgb(200,152,90) auf qiblanco.com, auf crystal-cacao.com nicht). */
+:root .kt .kt-akt {
   --kt-gold-tief: var(--cc-gold);
 }
 /* Der Kakao-Balken im Tassen-Vergleich der Startseite ist Flaeche: Kit-Gold. */
-html .home.cc-start .cc-vgl [data-cc-spalte='kakao'] .cc-vgl__balken {
+html .home.cc-start .cc-vgl-rahmen .cc-vgl [data-cc-spalte='kakao'] .cc-vgl__balken {
   background: var(--cc-gold);
 }
 
