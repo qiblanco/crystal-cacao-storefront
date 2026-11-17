@@ -22,23 +22,19 @@
  * Zwei-stufiger Ausschluss (Belt-and-Suspenders):
  *  (1) PRIMAER: ein explizites `flag`-Feld am Q&A-Item (gesetzt in
  *      product-faqs.js, dokumentiert im FLAG-FAQ-CHRISTIAN.md-Report).
- *  (2) SICHERHEITSNETZ: ein Deny-Token-Scan gegen das bekannte Eso-/
- *      Wirkmechanismus-Vokabular — faengt ein versehentlich NICHT geflaggtes
- *      Item ab, bevor eine Wirkaussage in strukturierte Daten leckt.
+ *  (2) FAKTEN-NETZ: nur noch der bekannte Faktenwiderspruch (270/170 nm).
+ *      Das Wort-Netz gegen Eso-/Wirk-Vokabular ist seit dem Verbotsputz
+ *      17.11.2026 entfernt.
  * Kein sauberes Bestands-Item enthält eines dieser Tokens (verifiziert im
  * Selftest), d.h. das Netz erzeugt keine False-Positives auf dem Ist-Content.
  */
+// Verbotsputz 17.11.2026 (Christian: keine Verbote, keine Rechtspruefung am Content) - Job
+// 20261117-prio1-wurzel-alle-eigenen-verbots-vorsichts-wortlisten-serverweit-loeschen-verursacher s02:
+// das Wort-Netz gegen Eso-/Wirk-/Detox-Vokabular ist entfernt. Es bleibt nur der Faktenwiderspruch
+// (Wellenlaenge 270/170 nm gegen Warnke 2019). Die `flag`-Felder in product-faqs.js (Christians
+// Umformulierung ausstehend) wirken unveraendert.
 export const FORBIDDEN_PATTERNS = [
-  /selbstvermehr/i, // "selbstvermehrend" — Mechanismus behauptet, nicht gemessen
-  /(wirken|wirkt)\s+immer/i, // "wirken IMMER" — unfalsifizierbar
   /\b\d{3}\s?nm\b/i, // "270nm"/"170nm" — Faktenwiderspruch (Warnke 2019)
-  /absorbiert\s+verst/i, // "absorbiert verstaerkt Licht" — Messclaim
-  /entgift/i, // Detox-Schuldumkehr
-  /k(ö|oe)rpersensorik/i, // Schuldumkehr ("Empfinden lag an dir")
-  /\bdetox\b/i,
-  /koh(ä|ae)rent/i, // "kohärente Wasserstruktur/Domaene/Zustand" — unbelegter Wirkmechanismus
-  /statisches?\s+feld/i, // Wirkmechanismus als Faktum
-  /energetisch/i, // Eso-Buzzword
 ];
 
 /**
