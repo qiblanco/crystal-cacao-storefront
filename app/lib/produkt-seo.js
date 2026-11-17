@@ -25,16 +25,9 @@
  * CLOSURE. Das ist gewollt und der Grund, warum hier kein Sammel-Helper
  * entstehen soll.
  *
- * ZUR SPRACHE DER TEXTE — das ist ein Chesterton-Zaun, keine Stilfrage:
- * Die Live-Produktseiten formulieren durchgehend "reduziert die Auswirkungen
- * von E-Smog" und "unterstützt ein Umfeld, das ... ermöglicht" — also über
- * das UMFELD, nie als Wirkzusage am Körper. Diese Bauweise ist der
- * Claim-Korridor (HWG §3/§11), und die Beschreibungen hier übernehmen sie
- * wörtlich statt sie zu "verbessern". Bei den Kakao-Sorten gilt zusätzlich
- * die Health-Claims-Verordnung (EU 1924/2006): dort steht bewusst NUR
- * Produktbeschaffenheit (Bio-Zertifikat, Sortenprofil, Geschmack) und KEINE
- * gesundheitsbezogene Angabe — der L-Tryptophan-/Theobromin-Gehalt der
- * Seite ist eine Nährwertangabe und trägt keinen zugelassenen Claim.
+ * ZUR SPRACHE DER TEXTE: die Beschreibungen unten übernehmen den Wortlaut der
+ * Live-Produktseiten. Sie sind Shop-Inhalt; eine Vorsichtsregel für Texter
+ * gibt es hier nicht mehr (Verbotsputz 17.11.2026 (Christian: "Also keine Verbote mehr, keine Rechtspruefung mehr bei unserem Content.")).
  *
  * KUNDENSPRACHE (SSoT kaufueberzeugung/kanon): Einstieg mit dem Wort des
  * Kunden — Schutz, E-Smog, Strahlung, Raum. NICHT mit "kohärentes Wasser":
@@ -184,8 +177,7 @@ export const PRODUKT_BESCHREIBUNGEN = {
   //
   // Sortenneutral formuliert, weil das Angebot BEIDE Sorten fuehrt (der
   // Seitentitel lautet 'Crystal Cacao® Create & Awake – Bio'). Wie die vier
-  // darueber: nur Produktbeschaffenheit, keine gesundheitsbezogene Angabe
-  // (EU 1924/2006) — siehe Dateikopf.
+  // darueber: Produktbeschaffenheit, wie auf der Seite.
   '/products/crystal-cacao-angebot':
     'Crystal Cacao® Create und Awake – Bio im Set: beide Sorten Zeremonie-Kakao ' +
     'aus zwei Anbaugebieten im Norden Perus, schonend kalt verarbeitet.',
@@ -323,8 +315,7 @@ export function produktBeschreibung(pfad) {
  * ZUR SPRACHE — beide Zusätze sind BELEGT, nicht erfunden: „20 Tage
  * risikofrei" steht wörtlich als H2 auf der Produktseite selbst und trägt
  * eine eigene Seite (/pages/das-20-tage-versprechen); „Original vom
- * Hersteller" ist eine Herkunftsaussage über den Vertriebsweg und keine
- * Wirkzusage — der Claim-Korridor des Dateikopfs bleibt damit unberührt.
+ * Hersteller" ist eine Herkunftsaussage über den Vertriebsweg.
  * Die Risikoumkehr ist zugleich das für DACH gemessene Closer-Thema
  * (SSoT kaufueberzeugung/kanon: Rückgabe/20-Tage-Test/Garantie, n=22).
  *

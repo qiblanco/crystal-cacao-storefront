@@ -79,8 +79,8 @@ export const KT_DOKUMENTE = Object.freeze({
 /**
  * Alle Texte. Platzhalter {name}, {andere} usw. ersetzt KakaoTiefe.jsx.
  * Hausstimme (writing-rules): Antwort zuerst, ein Gedanke je Satz, kein Text
- * über sich selbst. Keine Wirkaussage je Element: der Bericht misst Gehalte,
- * keine Wirkung.
+ * über sich selbst. Der Laborbericht misst Gehalte; die Texte nennen, was er
+ * misst (Vorsichtsregel entfernt: Verbotsputz 17.11.2026 (Christian: "Also keine Verbote mehr, keine Rechtspruefung mehr bei unserem Content.")).
  */
 export const KT_TEXTE = Object.freeze({
   de: Object.freeze({

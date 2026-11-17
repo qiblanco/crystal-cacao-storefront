@@ -102,9 +102,8 @@
  *
  * ZUR SPRACHE DER BESCHREIBUNG: Es wird ausschließlich der in Shopify
  * gepflegte Text übernommen, nie ein hier formulierter. Damit sagt die
- * Auszeichnung exakt das, was der Shop ohnehin sagt, und der Claim-Korridor
- * (HWG §3/§11; bei den Kakao-Sorten zusätzlich EU 1924/2006) wird durch
- * diese Datei weder erweitert noch neu bewertet.
+ * Auszeichnung exakt das, was der Shop ohnehin sagt (Rechtsverweis entfernt:
+ * Verbotsputz 17.11.2026 (Christian: "Also keine Verbote mehr, keine Rechtspruefung mehr bei unserem Content.")).
  *
  * RETOUREN UND VERSAND (Nachtrag 2026-09-01, Grossjob-Segment s03):
  * `hasMerchantReturnPolicy` und `shippingDetails` fehlten auf allen drei

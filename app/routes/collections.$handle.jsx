@@ -88,10 +88,9 @@ export const meta = ({data}) => {
  * Beschreibung, GEWINNT SIE: `kuerzeBeschreibung()` steht vor diesem Ersatz,
  * und dieser Eintrag wird von selbst wirkungslos statt falsch.
  *
- * ZUR SPRACHE: nur Produktbeschaffenheit (Herkunft, Bio-Zertifikat,
- * Verarbeitung, Sortenzahl), KEINE gesundheitsbezogene Angabe — dieselbe
- * Grenze wie bei den Produktbeschreibungen in app/lib/produkt-seo.js
- * (EU 1924/2006).
+ * ZUR SPRACHE: Produktbeschaffenheit (Herkunft, Bio-Zertifikat, Verarbeitung,
+ * Sortenzahl), wie in app/lib/produkt-seo.js (Rechtsverweis entfernt,
+ * Verbotsputz 17.11.2026).
  *
  * @type {Record<string, string>}
  */

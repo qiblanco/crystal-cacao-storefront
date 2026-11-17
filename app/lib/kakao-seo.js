@@ -139,8 +139,8 @@ export function markenGraph() {
  * „aus dem Piura-Tal" waere fuer die eine Sorte wahr und fuer die andere
  * falsch. Gemeinsam wahr ist allein „Peru".
  *
- * AUF DEM BILD STEHT NUR PRODUKTBESCHAFFENHEIT, keine gesundheitsbezogene
- * Angabe (EU 1924/2006). Die Startseite traegt die Zeile „Zwei Sorten, ein
+ * AUF DEM BILD STEHT PRODUKTBESCHAFFENHEIT (Rechtsverweis entfernt, Verbotsputz
+ * 17.11.2026). Die Startseite traegt die Zeile „Zwei Sorten, ein
  * Kakao: Awake fuer den Start in den Tag, Create fuer den klaren Kopf" — davon
  * ist die ERSTE Haelfte uebernommen und die zweite bewusst weggelassen.
  *
