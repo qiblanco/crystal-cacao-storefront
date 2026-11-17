@@ -1,55 +1,10 @@
-import {useEffect, useRef} from 'react';
 import {AnmeldeWeiche} from './Anmeldeweiche';
 
-// Seit der AC-Ablösung (Stufe E1, s11) ist dies eine Weiche: je Formular
-// entscheidet der eigene Anmelde-Endpunkt zur Laufzeit, ob das AC-Embed oder
-// das eigene Formular erscheint. Das AC-Embed nur noch, wenn er ausdrücklich
-// 'ac' meldet; antwortet er nicht, kommt das eigene Formular mit dem Satz aus
-// dem Rückfallstand oder eine Hinweiszeile (Elina EL-20261110-5a9e5746 Punkt 3,
-// Begründung in Anmeldeweiche.jsx).
+// Hülle für die Anmeldeformulare der Kurs- und Aktionsseiten (Name aus der Zeit vor der AC-Ablösung, damit die
+// Seiten unverändert bleiben). Seit 17.11.2026 gibt es hier kein ActiveCampaign-Embed mehr (Elina
+// EL-20261117-190e62ed: "ALLE Formulare laufen ab sofort NUR noch über den Mail Manager ... kein AC-Rückfall
+// mehr"): es erscheint immer das eigene Formular des Mail Managers, bei Störung mit dem Satz aus dem
+// Rückfallstand oder eine Hinweiszeile (Begründung in Anmeldeweiche.jsx).
 export function ActiveCampaignForm({formId}) {
-  return (
-    <AnmeldeWeiche formId={formId} ac={<ActiveCampaignEmbed formId={formId} />} />
-  );
-}
-
-function ActiveCampaignEmbed({formId}) {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const formDiv = document.createElement('div');
-    formDiv.className = `_form_${formId}`;
-    container.appendChild(formDiv);
-
-    const script = document.createElement('script');
-    script.src = `https://qiblanco.activehosted.com/f/embed.php?id=${formId}`;
-    script.charset = 'utf-8';
-
-    const removeStrays = () => {
-      document
-        .querySelectorAll(`._form_${formId}`)
-        .forEach((el) => {
-          if (!container.contains(el)) el.remove();
-        });
-    };
-
-    script.addEventListener('load', () => {
-      // The script may append extra form elements to the body — remove them
-      removeStrays();
-      // Some AC scripts inject asynchronously, catch those too
-      setTimeout(removeStrays, 1000);
-    });
-
-    container.appendChild(script);
-
-    return () => {
-      container.innerHTML = '';
-      removeStrays();
-    };
-  }, [formId]);
-
-  return <div ref={containerRef} />;
+  return <AnmeldeWeiche formId={formId} />;
 }

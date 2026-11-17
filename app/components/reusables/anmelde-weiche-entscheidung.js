@@ -1,6 +1,7 @@
 // Was die Anmeldeweiche zeigt — reine Entscheidung ohne Browser, damit sie hermetisch prüfbar ist
-// (anmelde-weiche-entscheidung.test.mjs). Elina EL-20261110-5a9e5746 Punkt 3: das AC-Formular nur noch bei
-// ausdrücklichem 'ac' aus /w; sonst das eigene Formular (Satz aus /w oder aus dem Rückfallstand) oder eine Hinweiszeile.
+// (anmelde-weiche-entscheidung.test.mjs). Seit 17.11.2026 (Elina EL-20261117-190e62ed: "ActiveCampaign ist abgeschaltet,
+// ALLE Formulare laufen ab sofort NUR noch über den Mail Manager ... kein AC-Rückfall mehr") gibt es keinen AC-Weg mehr:
+// auch ein 'ac' aus /w zeigt das eigene Formular (Satz aus /w oder aus dem Rückfallstand); 'aus' zeigt die Hinweiszeile.
 import {RUECKFALL_ANZEIGE} from './anmelde-rueckfallstand.js';
 
 // Kennung wie ac-eingang einwilligung_id(): Hex aus sha256 (heute 12 Zeichen). Leer, Leerzeichen oder Objekt zählen nicht.
@@ -32,27 +33,28 @@ export function rueckfallAnzeige(formId) {
  * Was die Weiche zeigt (rein, ohne Browser; anmelde-weiche-entscheidung.test.mjs).
  *   wege    Antwort von /w oder null (keine Antwort, zu spät, 5xx, kaputtes JSON)
  *   vorschau  localStorage-Vorschau für dieses Formular
- * -> {weg: 'ac'} nur bei ausdrücklichem 'ac';
- *    {weg: 'eigen', anzeige, versatz, rueckfallAc, quelle: 'w'|'rueckfallstand'};
+ * -> nie mehr {weg: 'ac'} (EL-20261117-190e62ed); ein altes 'ac' aus /w gilt wie 'eigen';
+ *    {weg: 'eigen', anzeige, versatz, rueckfallAc: false, quelle: 'w'|'rueckfallstand'};
  *    {weg: 'hinweis'} wenn kein Satz mit Kennung da ist.
  */
 export function weicheEntscheiden(formId, wege, vorschau = false) {
   const id = String(formId);
   const weg = wege && wege.formulare ? wege.formulare[id] : undefined;
   const anzeige = wege && wege.anzeige ? wege.anzeige[id] : null;
-  if (weg === 'ac' && !vorschau) return {weg: 'ac'};
-  if ((weg === 'eigen' || vorschau) && anzeigeVollstaendig(anzeige)) {
+  // Ein altes 'ac' aus /w zählt wie 'eigen': ActiveCampaign ist abgeschaltet, eine Anmeldung dort ginge verloren.
+  const eigen = weg === 'eigen' || weg === 'ac';
+  if ((eigen || vorschau) && anzeigeVollstaendig(anzeige)) {
     return {
       weg: 'eigen',
       anzeige,
       versatz: wege.versatz || 0,
-      // Nur ein ausdrückliches true öffnet den AC-Rückfall nach gescheitertem Absenden; fehlt das Feld, bleibt er zu.
-      rueckfallAc: wege.rueckfall_ac === true,
+      // Kein AC-Rückfall mehr nach gescheitertem Absenden, auch nicht bei rueckfall_ac: true (EL-20261117-190e62ed).
+      rueckfallAc: false,
       quelle: 'w',
     };
   }
   // Ein ausdrücklich abgeschaltetes Formular (z. B. 'aus') bekommt kein Formular aus dem Rückfallstand.
-  if (weg !== undefined && weg !== 'eigen' && !vorschau)
+  if (weg !== undefined && !eigen && !vorschau)
     return {weg: 'hinweis'};
   const ersatz = rueckfallAnzeige(id);
   if (ersatz) {
