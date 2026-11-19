@@ -250,11 +250,6 @@
   font-weight: 600;
 }
 
-.zbv-pflicht {
-  margin: 8px 0 0 var(--zbv-rinne, 36px);
-  font-size: 14px;
-}
-
 /* ── Erscheinen beim Scrollen (nur mit JavaScript) ────────────────── */
 .zbv[data-zbv-js] .zbv-schritt {
   opacity: 0;
@@ -553,9 +548,6 @@ html[data-qb-einwilligung-offen] .zbv-leiste {
   }
   .zbv-leiste__preis {
     font-size: 19px;
-  }
-  .zbv-pflicht {
-    margin-left: var(--zbv-rinne);
   }
 }
 

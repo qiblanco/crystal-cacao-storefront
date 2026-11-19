@@ -7,10 +7,15 @@
 // KAKAO_CODE_SEITEN). Einbau auf den Kaufseiten erst nach Elinas GO; bis dahin
 // beruehrt diese Datei keine bestehende Seite.
 //
-// INHALT: die sechs Schritte und die Dosieranleitung sind Wortlaut der
-// Packungsrueckseite, wortgleich zu ZUBEREITUNG_SCHRITTE in
-// components/product-pages/Kakao.jsx (dort auch die Herkunft). Nur die Mengen
-// sind fett gesetzt; kein Wort ist neu.
+// INHALT: Schrittfolge nach Elina (EL-20261119-a0beb64f), FUENF Schritte:
+// Kakao portionieren, Aufgiessen (heisses Wasser oder pflanzliche Milch),
+// Kurz warten, Aufschaeumen und Verfeinern, Geniessen. "Tasse vorwaermen" ist
+// gestrichen. Die Saetze sind sonst Wortlaut der Packungsrueckseite
+// (ZUBEREITUNG_SCHRITTE in components/product-pages/Kakao.jsx, dort weiter
+// sechs Schritte; die Kaufseiten sind hiervon unberuehrt). Mengen fett.
+//
+// KEIN EU-GEWAEHRLEISTUNGSBLOCK (div.zbv-pflicht) auf dieser Vorschau:
+// ausdruecklicher Elina-Wunsch EL-20261119-a0beb64f. Nicht wieder einbauen.
 //
 // BILDER (Elina, EL-20261119-cd98879b): NUR ECHTE FOTOS, keine KI-Bilder
 // (Dauerregel fuer Crystal-Cacao-Shop-Seiten). Die frueheren Canva-/KI-Bilder
@@ -31,7 +36,6 @@ import {useEffect, useRef, useState} from 'react';
 import {useLoaderData} from 'react-router';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
-import {EuGewaehrleistungsHinweis} from '~/components/EuGewaehrleistungsLabel';
 import {cacaoPricing, ladeStaffelKasse} from '~/lib/cacao-pricing';
 import {useMarktLand} from '~/lib/markt-land';
 import vorschauStyles from '~/styles/zubereitung-vorschau.css?url';
@@ -62,19 +66,11 @@ const SCHRITTE = [
     alt: 'Grob gehackter Blockkakao mit einem Messer auf einem Holzbrett',
   },
   {
-    titel: 'Tasse vorwärmen',
-    text: [
-      ['Fülle deine Lieblingstasse kurz mit heißem Wasser, leere sie – so bleibt dein Kakao länger warm und aromatisch.'],
-    ],
-    // kein passendes echtes Foto im Bestand -> ohne Bild (Elina liefert nach)
-    bild: null,
-  },
-  {
     titel: 'Aufgießen',
     text: [
       ['Übergieße den Kakao mit '],
       ['ca. 150\u00a0ml', true],
-      [' heißem Wasser oder (pflanzlicher) Milch ('],
+      [' heißem Wasser oder pflanzlicher Milch ('],
       ['max. 85\u00a0°C', true],
       [') – das bewahrt die wertvollen Aromen und Inhaltsstoffe des Kakaos.'],
     ],
@@ -82,7 +78,7 @@ const SCHRITTE = [
     bild: null,
   },
   {
-    titel: 'Aroma erwachen lassen',
+    titel: 'Kurz warten',
     text: [
       ['Warte '],
       ['etwa 1\u00a0Minute', true],
@@ -93,7 +89,7 @@ const SCHRITTE = [
     alt: 'Tasse Crystal Cacao steht in der Sonne auf einer Balkonbrüstung',
   },
   {
-    titel: 'Verfeinern & Aufschäumen',
+    titel: 'Aufschäumen und Verfeinern',
     text: [
       ['Rühre den geschmolzenen Kakao cremig – ideal mit einem Milchaufschäumer. Nach Belieben mit Honig süßen und mit Blue-Lotus-Öl, Safran, Muskat, Cayennepfeffer, Vanille oder Himalaya-Salz veredeln.'],
     ],
@@ -301,7 +297,7 @@ export default function ZubereitungVorschau() {
       <header className="zbv-kopf">
         <p className="zbv-augenbraue">Zubereitung</p>
         <h1 id="zbv-titel">
-          Dein Ritual in <strong>6 Schritten</strong>
+          Dein Ritual in <strong>5 Schritten</strong>
         </h1>
         <p className="zbv-unterzeile">
           So steht es auch auf der Rückseite deiner Packung.
@@ -380,9 +376,13 @@ export default function ZubereitungVorschau() {
               </li>
             ))}
           </ol>
-          <div className="zbv-pflicht">
-            <EuGewaehrleistungsHinweis />
-          </div>
+          {/* KEIN EU-Gewaehrleistungsblock auf DIESER Vorschau-Seite:
+              ausdruecklicher Wunsch von Elina (EL-20261119-a0beb64f).
+              Nicht wieder einbauen, auch nicht durch eine Label-Wache oder
+              einen Vorlagen-Nachzug; Waechter: proben/
+              probe_zubereitung_vorschau_fuenf_schritte.py. Die Kaufseiten
+              Awake/Create tragen den Hinweis unveraendert ueber
+              CacaoProductForm. */}
         </div>
       </div>
     </section>
