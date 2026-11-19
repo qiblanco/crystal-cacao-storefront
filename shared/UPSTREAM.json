@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "565e834bac77eb563fc2271fb72da5b306482f69",
-  "erzeugt_utc": "2026-11-17T16:53:50Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- ENTSCHEIDUNGEN (--entscheidung): pin-nachziehen app/lib/seo.js (upstream 116b1007e64c -> 27f6cc113845) -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 565e834bac77; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit fa9fb17bce52). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "dbf9dea92caff4d98c378b54755157f4a53274a2",
+  "erzeugt_utc": "2026-11-19T16:53:54Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen dbf9dea92caf; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 565e834bac77). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/components/AddToCartButton.jsx",
@@ -357,7 +357,7 @@
     {
       "upstream": "app/lib/kakao-set-zeile.server.js",
       "klasse": "K1",
-      "sha256": "01177dbec87559324520e0f45cc351c4d64f966145edf95bbbebc6fb1acc2fbb"
+      "sha256": "91e0ddb04c8681f9abecf08755b7da1ac54651e9dcc1884029c5446a9c164207"
     },
     {
       "upstream": "app/lib/partnercode-daten.server.js",

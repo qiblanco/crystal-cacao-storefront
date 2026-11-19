@@ -189,6 +189,10 @@ const ZEILEN_QUERY = `
         nodes {
           id
           quantity
+          attributes {
+            key
+            value
+          }
           merchandise {
             ... on ProductVariant {
               product {
@@ -286,16 +290,30 @@ async function variante(storefront, handle, messung) {
   }
 }
 
+/** Merkmal, das der Deal-Knopf an jede BF-Deal-Zeile hängt (bf-deals-daten.js). */
+export const BF_DEAL_MERKMAL_SERVER = '_bf_deal';
+
+/** Trägt dieser Warenkorb-Knoten das BF-Deal-Merkmal? */
+export function istBfDealKnoten(z) {
+  return (z?.attributes || []).some((a) => a?.key === BF_DEAL_MERKMAL_SERVER && a?.value);
+}
+
 /** Eine Warenkorb-Zeile in der Form, mit der hier gerechnet wird. */
 function zeileAusKnoten(z) {
   const netto = Number.parseFloat(z.cost?.totalAmount?.amount);
   const code = (z.discountAllocations || [])
     .filter((a) => a.code)
     .reduce((s, a) => s + Number.parseFloat(a.discountedAmount?.amount || 0), 0);
+  const handle = z.merchandise?.product?.handle;
   return {
     id: z.id,
     quantity: z.quantity,
-    handle: z.merchandise?.product?.handle,
+    // BF-Deal-Zeilen (Merkmal _bf_deal) rechnet die Normalform nie mit: der
+    // BF-Code gilt nur auf genau diesem Set, ein Umlegen auf ein größeres Set
+    // oder Einzelpackungen nähme dem Kunden den Pre-Sale-Preis (Notbahn
+    // 20261119, Kundin NL: ab 2 Bundles Normalpreis). Der Präfix macht die
+    // Zeile für KAKAO_ZEILEN unsichtbar und auch nicht zur fremden Kakao-Zeile.
+    handle: istBfDealKnoten(z) && handle ? `bf-deal:${handle}` : handle,
     // Betrag der Zeile VOR einem Code (nach der Automatik): damit wird das
     // Set verglichen, denn auf dem Set greift der Code ja noch dazu.
     vorCode: Number.isFinite(netto) ? netto + code : NaN,
@@ -324,6 +342,9 @@ async function zeilenLesen(storefront, cartId, messung) {
  * ZEILEN_QUERY liest (auch die ersten 100 Zeilen wie dort). Sonst null, und
  * es wird nachgelesen.
  */
+// attributes (BF-Deal-Merkmal) ist dort bewusst keine Pflicht: qiblanco.com
+// bekommt aus der Mutation keine Zeilen (Hydrogen-Standardfragment) und liest
+// immer ZEILEN_QUERY, das die Merkmale trägt.
 function zeilenAusAntwort(result) {
   const knoten = result?.cart?.lines?.nodes;
   if (!Array.isArray(knoten)) return null;
@@ -768,12 +789,58 @@ export async function legeKakaoSetZeile({
  *
  * @param {{storefront: any, inputs: any, cart?: any, messung?: object}} args
  */
+/**
+ * Ist die Stepper-Zeile eine BF-Deal-Zeile? Dann die neue Set-Menge, sonst null.
+ * Liest den Warenkorb nur, wenn ein Stepper auf einer Set-Zeile kommt; jeder
+ * Lesefehler heißt null (dann der bisherige Weg).
+ */
+async function bfDealSetMenge({storefront, cart, wunsch, eigene, messung}) {
+  // Der Warenkorb (CartLineItem) zählt Packungen und kennt das BF-Merkmal
+  // nicht; darum liest der Server die Zeile. Kosten: eine Abfrage (gemessen
+  // 0,10 bis 0,15 s) je Stepper-Klick auf einer Set-Zeile, nur dort.
+  const art = kakaoSetArt(wunsch?.handle);
+  const cartId = cart?.getCartId?.();
+  if (!art || !cartId || !storefront?.query) return null;
+  let knoten;
+  try {
+    zaehle(messung, 'abfragen');
+    const {cart: korb} = await storefront.query(ZEILEN_QUERY, {
+      variables: {cartId},
+      cache: storefront.CacheNone(),
+    });
+    knoten = (korb?.lines?.nodes || []).find((z) => z.id === wunsch.lineId);
+  } catch (fehler) {
+    warnen(`BF-Prüfung am Stepper nicht lesbar: ${fehler?.message || fehler}`);
+    return null;
+  }
+  if (!knoten || !istBfDealKnoten(knoten)) return null;
+  const menge = Math.max(1, Number.parseInt(eigene?.quantity ?? knoten.quantity, 10) || 1);
+  const wunschPackungen = Number.parseInt(wunsch.packungen, 10);
+  if (!Number.isFinite(wunschPackungen)) return null;
+  const jetzt = art.packungen * menge;
+  const sets =
+    wunschPackungen >= jetzt
+      ? Math.ceil(wunschPackungen / art.packungen)
+      : Math.floor(wunschPackungen / art.packungen);
+  return Math.max(1, sets);
+}
+
 export async function kakaoPackungenEingabe({storefront, inputs, cart, messung}) {
   const zeilen = Array.isArray(inputs?.lines) ? inputs.lines : [];
   const wunsch = inputs?.kakaoPackungen;
   if (!wunsch || typeof wunsch !== 'object' || !storefront) return zeilen;
   // Zeilenmenge: das Formular schickt die Zeile mit ihrer aktuellen Menge mit.
   const eigene = zeilen.find((z) => z.id === wunsch.lineId);
+  // BF-Deal-Set: ein Stepper-Klick ist ein ganzes Set (Notbahn 20261119).
+  // Der Browser schickt Packungen; daraus wird die Set-Menge in Richtung des
+  // Klicks, die Zeile bleibt dasselbe Set mit dem BF-Code.
+  const bfSets = await bfDealSetMenge({storefront, cart, wunsch, eigene, messung});
+  if (bfSets) {
+    return [
+      ...zeilen.filter((z) => z.id !== wunsch.lineId),
+      {id: wunsch.lineId, quantity: bfSets},
+    ];
+  }
   const ziel = wunsch.lineId
     ? stepperEinzelZeilen(
         wunsch.handle,
