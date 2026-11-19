@@ -17,8 +17,14 @@
 // KEIN EU-GEWAEHRLEISTUNGSBLOCK (div.zbv-pflicht) auf dieser Vorschau:
 // ausdruecklicher Elina-Wunsch EL-20261119-a0beb64f. Nicht wieder einbauen.
 //
-// BILDER (Elina, EL-20261119-cd98879b): NUR ECHTE FOTOS, keine KI-Bilder
-// (Dauerregel fuer Crystal-Cacao-Shop-Seiten). Die frueheren Canva-/KI-Bilder
+// BILDER (Elina, EL-20261119-c5f03cf2, praezisiert Regel D10): KI-Bilder sind
+// ERLAUBT, wenn sie fotorealistisch aussehen. Schritte 2-4 (Aufgiessen, Kurz
+// warten, Aufschaeumen und Verfeinern) tragen fotorealistische Bilder im Look
+// von Schritt 1 (helles Holzbrett, seitliches Tageslicht) mit der gelb-orangen
+// Tasse aus dem Anna-Bild, erzeugt per bild_client flux-2-edit mit Schritt-1-
+// Foto und Tassen-Ausschnitt als Referenz (qb-cc-zubereitung-vorschau--
+// fotoreal-schritt*). Schritt 1, Schritt 5 und das grosse Bild oben bleiben.
+// Vorgeschichte (Elina, EL-20261119-cd98879b): erst "nur echte Fotos". Die frueheren Canva-/KI-Bilder
 // (Tasse midjourney_hvsm_…, Schrittbilder qb-cc-zubereitung-vorschau--
 // zubereitung-schritt-1..6) sind raus. Quellen jetzt: Elinas Crystal-Cacao-
 // Handy-Shooting vom 15.10.2026 (bildmaterial/crystal-cacao-2026-10, per
@@ -74,8 +80,9 @@ const SCHRITTE = [
       ['max. 85\u00a0°C', true],
       [') – das bewahrt die wertvollen Aromen und Inhaltsstoffe des Kakaos.'],
     ],
-    // kein passendes echtes Foto im Bestand -> ohne Bild (Elina liefert nach)
-    bild: null,
+    // fotorealistisch erzeugt (EL-20261119-c5f03cf2), Look von Schritt 1
+    bild: {datei: 'qb-cc-zubereitung-vorschau--fotoreal-schritt3-aufgiessen--a4d1cbab4150.jpg?v=1', breite: 1536, hoehe: 1536},
+    alt: 'Heißes Wasser wird über die Kakao-Stücke in eine gelb-orange Tasse gegossen',
   },
   {
     titel: 'Kurz warten',
@@ -84,18 +91,18 @@ const SCHRITTE = [
       ['etwa 1\u00a0Minute', true],
       [' und spüre, wie sich das volle Bouquet entfaltet.'],
     ],
-    // Crystal-Cacao-Shooting 15.10.2026, IMG_0478
-    bild: {datei: 'qb-cc-zubereitung-vorschau--echtfoto-tasse-sonne-balkon-0478--846d23a052d9.jpg?v=1795104467', breite: 1440, hoehe: 1920},
-    alt: 'Tasse Crystal Cacao steht in der Sonne auf einer Balkonbrüstung',
+    // fotorealistisch erzeugt (EL-20261119-c5f03cf2), Look von Schritt 1
+    bild: {datei: 'qb-cc-zubereitung-vorschau--fotoreal-schritt4-aroma-erwachen--999626e96935.jpg?v=1', breite: 1536, hoehe: 1536},
+    alt: 'Dampfender Kakao in einer gelb-orangen Tasse auf einem Holzbrett, daneben Kakao-Stücke',
   },
   {
     titel: 'Aufschäumen und Verfeinern',
     text: [
       ['Rühre den geschmolzenen Kakao cremig – ideal mit einem Milchaufschäumer. Nach Belieben mit Honig süßen und mit Blue-Lotus-Öl, Safran, Muskat, Cayennepfeffer, Vanille oder Himalaya-Salz veredeln.'],
     ],
-    // Crystal-Cacao-Shooting 15.10.2026, IMG_0445
-    bild: {datei: 'qb-cc-zubereitung-vorschau--echtfoto-tasse-schaum-hand-0445--2d00212d9159.jpg?v=1795104472', breite: 1440, hoehe: 1920},
-    alt: 'Hand hält eine Tasse Crystal Cacao mit cremigem Milchschaum',
+    // fotorealistisch erzeugt (EL-20261119-c5f03cf2), Look von Schritt 1
+    bild: {datei: 'qb-cc-zubereitung-vorschau--fotoreal-schritt5-verfeinern-aufschaeumen--40d5cea16acb.jpg?v=1', breite: 1536, hoehe: 1536},
+    alt: 'Kakao wird in einer gelb-orangen Tasse mit dem Milchaufschäumer aufgeschäumt, daneben Honig und Cayennepfeffer',
   },
   {
     titel: 'Genießen',
