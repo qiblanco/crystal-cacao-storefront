@@ -12,10 +12,15 @@
 // components/product-pages/Kakao.jsx (dort auch die Herkunft). Nur die Mengen
 // sind fett gesetzt; kein Wort ist neu.
 //
-// BILDER: Kakaotasse = Shopify-Datei midjourney_hvsm_…df3b33fc…_3.jpg (Hauptbild);
-// je Schritt ein Bild, das Elina in Canva generiert hat (Medien-IDs in
-// SCHRITTE.canva), per Canva Connect abgeholt (1136 x 1408) und mit
-// medien-hosting/bin/cdn-publish in die Shopify-Dateien geladen.
+// BILDER (Elina, EL-20261119-cd98879b): NUR ECHTE FOTOS, keine KI-Bilder
+// (Dauerregel fuer Crystal-Cacao-Shop-Seiten). Die frueheren Canva-/KI-Bilder
+// (Tasse midjourney_hvsm_…, Schrittbilder qb-cc-zubereitung-vorschau--
+// zubereitung-schritt-1..6) sind raus. Quellen jetzt: Elinas Crystal-Cacao-
+// Handy-Shooting vom 15.10.2026 (bildmaterial/crystal-cacao-2026-10, per
+// cdn-publish in die Shopify-Dateien) und das Berlin-Shooting 2022 (liegt schon
+// in den Shopify-Dateien). Ein Schritt ohne passendes echtes Foto hat
+// bild: null -> am Handy kein Bild ueber dem Schritt, am Desktop bleibt das
+// zuletzt gezeigte Bild stehen ("lieber weniger Bilder als KI-Bilder").
 //
 // PREISE kommen live aus Shopify: Variante der Sorte, Mengenstaffel 3 (das
 // vorausgewaehlte 3er-Set der Kaufseiten) ueber cacaoPricing — dieselbe
@@ -34,11 +39,12 @@ import vorschauStyles from '~/styles/zubereitung-vorschau.css?url';
 const CDN = 'https://cdn.shopify.com/s/files/1/0279/3095/1750/files/';
 const MENGE = '3';
 
-/** Hauptbild: die Kakaotasse aus den Shopify-Dateien (1024 x 1024). */
+/** Hauptbild: echtes Foto aus Elinas Crystal-Cacao-Shooting (IMG_0427). */
 const TASSE = Object.freeze({
-  url: `${CDN}midjourney_hvsm_a_photo_of_a_cup_of_ceremonial_cacao_in_sunli_df3b33fc-3959-4749-a48f-00a70ffb0ff8_3.jpg?v=1766919263`,
-  breite: 1024,
-  alt: 'Tasse mit heißem Kakao auf einem Leinentuch',
+  url: `${CDN}qb-cc-zubereitung-vorschau--echtfoto-tasse-holztisch-0427--2e603cad9cab.jpg?v=1795104462`,
+  breite: 1440,
+  hoehe: 1920,
+  alt: 'Tasse Crystal Cacao mit Milchschaum und Kakaopulver auf einem Holztisch',
 });
 
 /* Wortlaut der Packungsrueckseite (= Kakao.jsx ZUBEREITUNG_SCHRITTE), in
@@ -51,18 +57,17 @@ const SCHRITTE = [
       ['20–30\u00a0g', true],
       [' – und zerbrösele sie grob.'],
     ],
-    canva: 'MAHaWw3ff_Q',
-    bild: 'qb-cc-zubereitung-vorschau--zubereitung-schritt-1--da97cc59b3d2.jpg?v=1794167930',
-    alt: 'Hände brechen eine Tafel Crystal Cacao in eine Schale',
+    // Berlin-Shooting 2022, schon in den Shopify-Dateien
+    bild: {datei: '2022-07-26-qiblanco-berlin-1001239-2.jpg?v=1739881879', breite: 2292, hoehe: 2292},
+    alt: 'Grob gehackter Blockkakao mit einem Messer auf einem Holzbrett',
   },
   {
     titel: 'Tasse vorwärmen',
     text: [
       ['Fülle deine Lieblingstasse kurz mit heißem Wasser, leere sie – so bleibt dein Kakao länger warm und aromatisch.'],
     ],
-    canva: 'MAHaW3POMOQ',
-    bild: 'qb-cc-zubereitung-vorschau--zubereitung-schritt-2--4f0b57d6a529.jpg?v=1794167936',
-    alt: 'Heißes Wasser wird in eine Keramiktasse gegossen',
+    // kein passendes echtes Foto im Bestand -> ohne Bild (Elina liefert nach)
+    bild: null,
   },
   {
     titel: 'Aufgießen',
@@ -73,9 +78,8 @@ const SCHRITTE = [
       ['max. 85\u00a0°C', true],
       [') – das bewahrt die wertvollen Aromen und Inhaltsstoffe des Kakaos.'],
     ],
-    canva: 'MAHaW-HP-bE',
-    bild: 'qb-cc-zubereitung-vorschau--zubereitung-schritt-3--0e7e7130b547.jpg?v=1794167942',
-    alt: 'Heißes Wasser fließt über Kakaostücke in der Tasse',
+    // kein passendes echtes Foto im Bestand -> ohne Bild (Elina liefert nach)
+    bild: null,
   },
   {
     titel: 'Aroma erwachen lassen',
@@ -84,27 +88,27 @@ const SCHRITTE = [
       ['etwa 1\u00a0Minute', true],
       [' und spüre, wie sich das volle Bouquet entfaltet.'],
     ],
-    canva: 'MAHaWxVfxdc',
-    bild: 'qb-cc-zubereitung-vorschau--zubereitung-schritt-4--06f01abe5bcb.jpg?v=1794167948',
-    alt: 'Dampfende Tasse Kakao auf einem Leinentuch',
+    // Crystal-Cacao-Shooting 15.10.2026, IMG_0478
+    bild: {datei: 'qb-cc-zubereitung-vorschau--echtfoto-tasse-sonne-balkon-0478--846d23a052d9.jpg?v=1795104467', breite: 1440, hoehe: 1920},
+    alt: 'Tasse Crystal Cacao steht in der Sonne auf einer Balkonbrüstung',
   },
   {
     titel: 'Verfeinern & Aufschäumen',
     text: [
       ['Rühre den geschmolzenen Kakao cremig – ideal mit einem Milchaufschäumer. Nach Belieben mit Honig süßen und mit Blue-Lotus-Öl, Safran, Muskat, Cayennepfeffer, Vanille oder Himalaya-Salz veredeln.'],
     ],
-    canva: 'MAHaW4kjpDs',
-    bild: 'qb-cc-zubereitung-vorschau--zubereitung-schritt-5--9032961157eb.jpg?v=1794167957',
-    alt: 'Milchaufschäumer rührt den Kakao cremig, daneben Honig und Gewürze',
+    // Crystal-Cacao-Shooting 15.10.2026, IMG_0445
+    bild: {datei: 'qb-cc-zubereitung-vorschau--echtfoto-tasse-schaum-hand-0445--2d00212d9159.jpg?v=1795104472', breite: 1440, hoehe: 1920},
+    alt: 'Hand hält eine Tasse Crystal Cacao mit cremigem Milchschaum',
   },
   {
     titel: 'Genießen',
     text: [
       ['Nimm dir Zeit. Trinke langsam, atme den Duft ein – und spüre, wie jeder Schluck dein Herz öffnet und dir neue Kraft schenkt.'],
     ],
-    canva: 'MAHaW8iRv2I',
-    bild: 'qb-cc-zubereitung-vorschau--zubereitung-schritt-6--4d4824a31376.jpg?v=1794167963',
-    alt: 'Frau hält eine Tasse Kakao in beiden Händen',
+    // Berlin-Shooting 2022, schon in den Shopify-Dateien
+    bild: {datei: '2022-07-26-qiblanco-berlin-1001190_Kopie_2.jpg?v=1765893937', breite: 1373, hoehe: 1373},
+    alt: 'Lächelnde Frau genießt eine Tasse Kakao in der Sonne',
   },
 ];
 
@@ -128,7 +132,21 @@ function bildQuellen(url, breiten) {
   };
 }
 
-const schrittUrl = (s) => `${CDN}${s.bild}`;
+const schrittUrl = (s) => `${CDN}${s.bild.datei}`;
+
+/** Breitenstufen fuer srcset, nie breiter als das Foto selbst. */
+const stufen = (breiten, max) => {
+  const b = breiten.filter((w) => w < max);
+  return b.length === breiten.length ? breiten : [...b, max];
+};
+
+/* Desktop: zu Schritt i gehoert das Bild des letzten Schritts <= i, der ein
+ * eigenes Foto hat; davor die Tasse. So bleibt bei einem Schritt ohne Bild das
+ * zuletzt gezeigte Bild stehen, statt dass der Rahmen leer wird. */
+const RAHMEN_BILD = SCHRITTE.reduce((acc, s, i) => {
+  acc.push(s.bild ? i + 1 : i > 0 ? acc[i - 1] : 0);
+  return acc;
+}, []);
 
 export function links() {
   return [{rel: 'stylesheet', href: vorschauStyles}];
@@ -271,7 +289,7 @@ export default function ZubereitungVorschau() {
   }, []);
 
   // Desktop: erst die Tasse, danach das Bild des gelesenen Schritts.
-  const bildIndex = bildSchritt < 0 ? 0 : bildSchritt + 1;
+  const bildIndex = bildSchritt < 0 ? 0 : RAHMEN_BILD[bildSchritt] ?? 0;
 
   return (
     <section
@@ -295,30 +313,32 @@ export default function ZubereitungVorschau() {
           <div className="zbv-rahmen">
             <img
               className={`zbv-rahmen__bild${bildIndex === 0 ? ' ist-aktiv' : ''}`}
-              {...bildQuellen(TASSE.url, [480, 720, 1024])}
+              {...bildQuellen(TASSE.url, [480, 720, 1136])}
               sizes="(min-width: 56.25em) 46vw, 100vw"
-              width={1136}
-              height={1408}
+              width={TASSE.breite}
+              height={TASSE.hoehe}
               alt={TASSE.alt}
               fetchPriority="high"
               decoding="async"
             />
-            {SCHRITTE.map((s, i) => (
+            {SCHRITTE.map((s, i) =>
+              s.bild ? (
               <img
-                key={s.canva}
+                key={s.titel}
                 className={`zbv-rahmen__bild zbv-nur-breit${
                   bildIndex === i + 1 ? ' ist-aktiv' : ''
                 }`}
-                {...bildQuellen(schrittUrl(s), [480, 720, 1136])}
+                {...bildQuellen(schrittUrl(s), stufen([480, 720, 1136], s.bild.breite))}
                 sizes="46vw"
-                width={1136}
-                height={1408}
+                width={s.bild.breite}
+                height={s.bild.hoehe}
                 alt=""
                 aria-hidden="true"
                 loading="lazy"
                 decoding="async"
               />
-            ))}
+              ) : null,
+            )}
             <Kaufleiste produkte={produkte} imBild={imBild} />
           </div>
         </div>
@@ -327,23 +347,25 @@ export default function ZubereitungVorschau() {
           <ol ref={liste} className="zbv-schritte" data-qb-wortlaut="verpackung">
             {SCHRITTE.map((s, i) => (
               <li
-                key={s.canva}
+                key={s.titel}
                 className={`zbv-schritt${i === aktiv ? ' ist-aktiv' : ''}${
                   i < aktiv ? ' ist-erreicht' : ''
                 }`}
               >
-                <div className="zbv-schritt__bildhuelle zbv-nur-schmal">
-                  <img
-                    className="zbv-schritt__bild"
-                    {...bildQuellen(schrittUrl(s), [360, 480, 720, 1136])}
-                    sizes="(min-width: 37.5em) 520px, calc(100vw - 88px)"
-                    width={1136}
-                    height={1408}
-                    alt={s.alt}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
+                {s.bild ? (
+                  <div className="zbv-schritt__bildhuelle zbv-nur-schmal">
+                    <img
+                      className="zbv-schritt__bild"
+                      {...bildQuellen(schrittUrl(s), stufen([360, 480, 720, 1136], s.bild.breite))}
+                      sizes="(min-width: 37.5em) 520px, calc(100vw - 88px)"
+                      width={s.bild.breite}
+                      height={s.bild.hoehe}
+                      alt={s.alt}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                ) : null}
                 <div className="zbv-schritt__marke">
                   <span className="zbv-punkt" aria-hidden="true" />
                   <p className="zbv-pill">Schritt {i + 1}</p>
