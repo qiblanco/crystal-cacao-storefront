@@ -432,6 +432,37 @@ export const KAKAO_FESTBETRAG_CENT = {
   US: {USD: {4: 27800, 5: 34700, 6: 41600, 7: 48500}},
 };
 
+/*
+ * EUR GILT IN JEDEM LAND MIT EUR-WARENKORB (Job 20261004-update-kakao-markt-arm-
+ * jeder-freigeschaltete-markt--vollzug-ov861ef836f0, gemessen im Nachtlauf
+ * 2026-11-20): AT, BE, ES, FR, IE, IT, NL, PT (und FI) rechnen mit derselben
+ * EUR-Preisliste wie DE (Einzelpackung 76 €, Set 213 / 266 / 319 / 372 €).
+ * Stand die Tabelle nur unter DE, lehnte "nie teurer" dort 213 gegen 212,80 €
+ * ab: vier Einzelpackungen mit Automatik blieben liegen, und der Partnercode
+ * griff ab 4 Packungen nicht (DISCOUNT_CODE_NOT_HONOURED). Christians
+ * Festbeträge vom 09.10. gelten darum für jeden EUR-Warenkorb. Die übrigen
+ * Bedingungen bleiben: brutto, und JEDE Set-Zeile kostet auf den Cent den
+ * Festbetrag; eine abweichende EUR-Preisliste trifft ihn nie und bleibt beim
+ * Einzelweg. Hat ein Land eine eigene Tabelle, gilt die.
+ */
+export const KAKAO_FESTBETRAG_EUR_JEDES_LAND = true;
+
+/**
+ * Festbetrag-Tabelle für Land und Währung: zuerst die des Landes, sonst in
+ * EUR die von DE (siehe oben). undefined, wenn es keine gibt.
+ *
+ * @param {string|undefined} land
+ * @param {string|undefined} waehrung
+ */
+export function kakaoFestbetragTabelle(land, waehrung) {
+  const eigene = KAKAO_FESTBETRAG_CENT[String(land || '').toUpperCase()]?.[waehrung];
+  if (eigene) return eigene;
+  if (KAKAO_FESTBETRAG_EUR_JEDES_LAND && waehrung === 'EUR') {
+    return KAKAO_FESTBETRAG_CENT.DE.EUR;
+  }
+  return undefined;
+}
+
 /**
  * Trifft der Warenkorb die Festbeträge? Alle Bedingungen oben, sonst false.
  * Je Set-Zeile zählt zuerst der Betrag ihrer Zusammensetzung (`je`), sonst
@@ -444,8 +475,7 @@ export const KAKAO_FESTBETRAG_CENT = {
  */
 export function kakaoFestbetragGetroffen({land, waehrung, brutto, sets}) {
   if (brutto !== true) return false;
-  const tabelle =
-    KAKAO_FESTBETRAG_CENT[String(land || '').toUpperCase()]?.[waehrung];
+  const tabelle = kakaoFestbetragTabelle(land, waehrung);
   if (!tabelle || !Array.isArray(sets) || !sets.length) return false;
   return sets.every((s) => {
     if (!Number.isFinite(s?.cent)) return false;
