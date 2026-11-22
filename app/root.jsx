@@ -54,6 +54,9 @@ import {
   useShopifyTrackingTor,
 } from '~/lib/shopify-tracking-tor';
 import {ABSENDER_MARKE, sorteZuPfad} from '~/lib/kakao-zone';
+// Produktnamen-Umbruchschutz, byte-gleich zur Vorlage qiblanco (K1 im Manifest),
+// Job 20261122-crystal-spiegel-umbruch-ccsp-r2-prio20.
+import {starteUmbruchSchutz} from '~/components/reusables/produktnamen-umbruch';
 import {
   preismodusStand,
   rootDatenGesehen,
@@ -357,6 +360,15 @@ export function Layout({children}) {
   // ohne eine Zeile in den K1-geschuetzten Produktrouten anzufassen.
   const {pathname} = useLocation();
   const ccSorte = sorteZuPfad(pathname);
+  // Produktnamen und Zahl + Einheit nie trennen (geschützte Leerzeichen),
+  // NAHT aus der Vorlage (qiblanco #1698 + Hydrations-Repair #1700): erst nach
+  // der Hydration und nur an hydriertem Text, damit Server- und Client-Text
+  // gleich bleiben. Grund hier: der Crystal-Spiegel auf qiblanco.com trägt
+  // denselben Schutz und brach auf 390 px anders um (+26 px Höhe); mit dem
+  // Schutz auf beiden Seiten bleibt er 1:1 (Christian 16.10.2026 und
+  // 22.11.2026). Unbedingt, feste Stelle (Hook-Reihenfolge).
+  // Rückweg: diese Zeile und den Import entfernen, bin/bau-nachzieher --jetzt.
+  useEffect(() => starteUmbruchSchutz(document), []);
   // Client: den Preismodus des Servers übernehmen, BEVOR ein Kind rechnet.
   if (typeof window !== 'undefined' && data?.preismodus?.modus) {
     setzePreismodus(data.preismodus.modus, data.preismodus.quelle);
