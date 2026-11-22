@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "b4432eaa23be89879276e78c39b3428705baf6a7",
-  "erzeugt_utc": "2026-11-20T10:55:58Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen b4432eaa23be; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit b4432eaa23be). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "d36ed27e908c7b9d6576fd8291878b903075d7cc",
+  "erzeugt_utc": "2026-11-22T01:54:31Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen d36ed27e908c; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit b4432eaa23be). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/components/AddToCartButton.jsx",
@@ -50,8 +50,9 @@
       "app/styles/amazonstil.css",
       "app/styles/qb-swipetab.css"
     ],
-    "dateien_soll": 2,
-    "vollstaendigkeit": "streng"
+    "dateien_soll": 50,
+    "vollstaendigkeit": "streng",
+    "dateien_ist": 50
   },
   "dateien": [
     {
