@@ -344,7 +344,7 @@ export default function WarumCrystalCacaoPage() {
 
         {/* Kopfbild (s10, E1 Apple-Vorschrift kopf_bild): ein Bild aus dem
             Bestand des Ladens im ersten Bildschirm, nicht lazy, ohne Bewegung. */}
-        <figure className="cc-kopfbild">
+        <figure className="cc-kopfbild" data-section="cc-warum-kopfbild">
           <img
             src={`${KOPFBILD.url}&width=800`}
             srcSet={`${KOPFBILD.url}&width=400 400w, ${KOPFBILD.url}&width=800 800w, ${KOPFBILD.url}&width=1200 1200w`}
@@ -363,7 +363,7 @@ export default function WarumCrystalCacaoPage() {
           uralten Kakaobohne.
         </p>
 
-        <section>
+        <section data-section="cc-warum-herkunft">
           <h2>Wie der Kakao zu uns kam</h2>
           <p>
             Anna und ich haben über drei Jahre in Tulum gelebt, in Mexiko. Es
@@ -385,7 +385,7 @@ export default function WarumCrystalCacaoPage() {
           </p>
         </section>
 
-        <section>
+        <section data-section="cc-warum-mineralmedizin">
           <h2>Was ich mit Mineralmedizin meine</h2>
           <p>
             Crystal Cacao kommt aus meinem Wunsch, Mineralmedizin zu
@@ -400,7 +400,7 @@ export default function WarumCrystalCacaoPage() {
           </p>
         </section>
 
-        <section>
+        <section data-section="cc-warum-kakao-statt-kaffee">
           <h2>Warum Kakao statt Kaffee</h2>
           <p>
             Kaffee gibt dir einen schnellen Kick, und danach kommt das Tief.
@@ -416,7 +416,7 @@ export default function WarumCrystalCacaoPage() {
           </p>
         </section>
 
-        <section>
+        <section data-section="cc-warum-absicht">
           <h2>Worum es mir eigentlich geht</h2>
           <p>Mein eigentliches Ziel mit Crystal Cacao ist dieses:</p>
           <blockquote className="cc-absicht__zitat">
@@ -438,7 +438,7 @@ export default function WarumCrystalCacaoPage() {
           </p>
         </section>
 
-        <section>
+        <section data-section="cc-warum-herstellung">
           <h2>Wie wir den Kakao machen</h2>
           <p>
             Dazu nutzen wir uralten Kakao und die schonendste
@@ -457,7 +457,7 @@ export default function WarumCrystalCacaoPage() {
           </p>
         </section>
 
-        <section>
+        <section data-section="cc-warum-nachweis">
           <h2>Woran du erkennst, dass das stimmt</h2>
           <p>
             Das erkennst du am Wirkstoffprofil und am Mineralstoffgehalt.
@@ -486,11 +486,14 @@ export default function WarumCrystalCacaoPage() {
           </p>
         </section>
 
-        <Belege id="pruefdokumente" />
+        <Belege id="pruefdokumente" anker="cc-warum-pruefdokumente" />
 
         {/* Weg zum Kauf (s10, E1 Apple-Vorschrift kaufbox): Links zu den Kaufseiten,
             kein Kaufknopf (ohne Preis daneben sperrt das Sicht-Tor), vor "Schreib mir". */}
-        <div className="cc-knopfreihe cc-absicht__kaufwege">
+        <div
+          className="cc-knopfreihe cc-absicht__kaufwege"
+          data-section="cc-warum-kaufwege"
+        >
           <Link className="cc-knopf" to="/products/crystal-cacao-awake">
             Awake ansehen
           </Link>
@@ -499,7 +502,10 @@ export default function WarumCrystalCacaoPage() {
           </Link>
         </div>
 
-        <section className="cc-absicht__unterschrift">
+        <section
+          className="cc-absicht__unterschrift"
+          data-section="cc-warum-schreib-mir"
+        >
           <h2>Schreib mir</h2>
           <p>
             Ich freue mich, wenn du den Kakao selbst erlebst. Wenn du Fragen

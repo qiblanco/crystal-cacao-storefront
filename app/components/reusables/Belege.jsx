@@ -99,8 +99,13 @@ function felderVon(beleg) {
 /**
  * `sorte` ist der Produkt-Handle (crystal-cacao-awake | crystal-cacao-create).
  * Ohne `sorte` werden alle Sorten gezeigt (Übersichts-/Startseite).
+ *
+ * `anker` (optional) setzt `data-section` am Block: der Abschnittsname, unter
+ * dem das Pixel (qpx) Sichtung und Lesedauer meldet und der in
+ * verhaltens-schicht/sektion_registry.yaml (markt CRYSTAL) steht. Ohne `anker`
+ * rendert der Block wie zuvor. Nicht umbenennen, ohne die Registry mitzuziehen.
  */
-export function Belege({sorte, titel = 'Prüfdokumente zum Nachlesen', id}) {
+export function Belege({sorte, titel = 'Prüfdokumente zum Nachlesen', id, anker}) {
   const gruppen = belegeNachSorte(sorte || null);
   if (!gruppen.length) return null;
 
@@ -110,7 +115,7 @@ export function Belege({sorte, titel = 'Prüfdokumente zum Nachlesen', id}) {
   const zeigeSortenTitel = gruppen.length > 1;
 
   return (
-    <div className="cc-belege" id={id}>
+    <div className="cc-belege" id={id} data-section={anker || undefined}>
       <h3 className="cc-belege__titel">{titel}</h3>
 
       {gruppen.map((gruppe) => (

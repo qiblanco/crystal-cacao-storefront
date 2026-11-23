@@ -39,6 +39,7 @@ export function KaffeeVergleich({kurve, logos}) {
     <section
       className="cc-akt cc-akt--grund cc-kaffee"
       id="cc-kaffee-vergleich"
+      data-section="cc-start-kaffeevergleich"
       aria-labelledby="cc-kaffee-titel"
     >
       <div className="cc-akt__innen">

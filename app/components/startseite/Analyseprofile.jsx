@@ -39,6 +39,7 @@ export function Analyseprofile({vergleich = null, onZurueck = null}) {
     <section
       className="cc-akt cc-akt--flaeche cc-profil"
       id="cc-analyseprofile"
+      data-section="cc-start-analyseprofile"
       aria-labelledby="cc-analyseprofile-titel"
       data-cc-vergleich={sorte || undefined}
     >

@@ -146,6 +146,7 @@ export function SortenSlider({produkte = null, onVergleich = null}) {
   return (
     <section
       className="cc-akt cc-akt--grund cc-start-slider"
+      data-section="cc-start-sorten"
       aria-labelledby="cc-start-titel"
     >
       <div className="cc-akt__innen">
