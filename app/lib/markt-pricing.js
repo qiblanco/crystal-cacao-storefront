@@ -26,6 +26,7 @@ import {
   taxRateForHandle,
 } from './cart-display-pricing.js';
 import {istBrutto} from './preismodus.js';
+import {landAusCookie} from '../components/reusables/land-waehrung.js';
 
 /**
  * Anzeige-Steuersatz eines Produkts im Markt-Kontext.
@@ -375,6 +376,13 @@ export function resolveCountry(request) {
     ).toUpperCase();
     if (override && MARKT_LAENDER.has(override)) return override;
     if (override && hatKontext(override)) return KASSEN_KONTEXT[override];
+    // GEWÄHLTE WÄHRUNG (Kopf/Fuß, Job 20261122-prio1-shop-design-header-…):
+    // Cookie qb_land = Vertreterland der Währung, die der Besucher gewählt
+    // hat (components/reusables/land-waehrung.js). Geht der Geo-Erkennung
+    // vor, ?markt bleibt Prüf-Vorrang. Unbekanntes Land = keine Wahl.
+    const wahlLand = landAusCookie(request.headers.get('Cookie') || '');
+    if (wahlLand && MARKT_LAENDER.has(wahlLand)) return wahlLand;
+    if (wahlLand && hatKontext(wahlLand)) return KASSEN_KONTEXT[wahlLand];
     const geo = (
       request.headers.get('oxygen-buyer-country') || ''
     ).toUpperCase();

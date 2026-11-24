@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "d36ed27e908c7b9d6576fd8291878b903075d7cc",
-  "erzeugt_utc": "2026-11-22T01:54:31Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen d36ed27e908c; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit b4432eaa23be). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "666f1754ea157c68cb55c311df00a2252fa59eff",
+  "erzeugt_utc": "2026-11-24T01:50:56Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 666f1754ea15; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit d36ed27e908c). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/components/AddToCartButton.jsx",
@@ -50,9 +50,9 @@
       "app/styles/amazonstil.css",
       "app/styles/qb-swipetab.css"
     ],
-    "dateien_soll": 50,
+    "dateien_soll": 51,
     "vollstaendigkeit": "streng",
-    "dateien_ist": 50
+    "dateien_ist": 51
   },
   "dateien": [
     {
@@ -151,7 +151,7 @@
     {
       "upstream": "app/lib/markt-pricing.js",
       "klasse": "K1",
-      "sha256": "e3b46bd6a2dac4f5e6dc24c29ead3380a7c99667713d8ccec2c529fedf011dbe"
+      "sha256": "4013760e70d9f53337a3529c91604d7ba19f62c3829e0685588f5ea031e3ee4d"
     },
     {
       "upstream": "app/lib/produkt-schema.js",
@@ -567,6 +567,11 @@
       "upstream": "app/components/reusables/produktnamen-umbruch.js",
       "klasse": "K1",
       "sha256": "87092cf3996c99f97507a8834f897370e58beefdaa6d6a4404e5073ded4b0f84"
+    },
+    {
+      "upstream": "app/components/reusables/land-waehrung.js",
+      "klasse": "K1",
+      "sha256": "6681fa32e5decee9dec5e3f9fc889db72ab6046ff3f18ab79c7f5128f92473e0"
     }
   ]
 }
