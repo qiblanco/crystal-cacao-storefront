@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "upstream_repo": "qiblanco/qiblanco-storefront",
-  "upstream_commit": "666f1754ea157c68cb55c311df00a2252fa59eff",
-  "erzeugt_utc": "2026-11-24T01:50:56Z",
-  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 666f1754ea15; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit d36ed27e908c). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
+  "upstream_commit": "6244270d14da8cead754bdcff557b67b846b952a",
+  "erzeugt_utc": "2026-11-26T04:57:04Z",
+  "erzeuger": "homepage-bauer/pruefungen/erzeuge_upstream_manifest.py -- FORTSCHREIB-MODUS (K2/K3-fest): K1 erzeugt gegen 6244270d14da; K2/K3 samt Gruenden unveraendert aus der Vorfassung (deren upstream_commit 666f1754ea15). Historie der Hand-Nachtraege: git log -- shared/UPSTREAM.json.",
   "huelle": {
     "wurzeln": [
       "app/components/AddToCartButton.jsx",
@@ -566,7 +566,7 @@
     {
       "upstream": "app/components/reusables/produktnamen-umbruch.js",
       "klasse": "K1",
-      "sha256": "87092cf3996c99f97507a8834f897370e58beefdaa6d6a4404e5073ded4b0f84"
+      "sha256": "ca7eb9107259600c7b188f90873b134e3c530be6fb37a71a434749225dad7352"
     },
     {
       "upstream": "app/components/reusables/land-waehrung.js",

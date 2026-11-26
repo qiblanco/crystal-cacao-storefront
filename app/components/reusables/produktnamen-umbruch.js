@@ -92,6 +92,37 @@ function reactSchluessel(knoten, praefix) {
 }
 const hatFiber = (k) => reactSchluessel(k, '__reactFiber$') !== null;
 
+// React-Flags (React 18.3): Placement 2, Hydrating 4096. Dieselbe Prüfung wie
+// Reacts getNearestMountedFiber/isFiberMounted: ein Knoten gilt erst als
+// übernommen, wenn auf dem Weg zur Wurzel kein Vorfahr mehr „wird eingefügt“
+// oder „wird hydriert“ trägt und der Weg an der Wurzel (tag 3) endet.
+const PLATZIERT_ODER_HYDRIERT = 2 | 4096;
+
+/**
+ * Hat React den Knoten übernommen (Commit), oder hydriert es ihn noch?
+ * @param {Node} knoten Knoten mit `__reactFiber$`
+ * @returns {boolean}
+ */
+export function montiert(knoten) {
+  const fiber = knoten && knoten[reactSchluessel(knoten, '__reactFiber$')];
+  if (!fiber || typeof fiber !== 'object') return false;
+  let knotenF = fiber;
+  let naechsterMontiert = fiber;
+  if (fiber.alternate) {
+    while (knotenF.return) knotenF = knotenF.return;
+  } else {
+    let weiter = knotenF;
+    let schritte = 0;
+    do {
+      knotenF = weiter;
+      if ((knotenF.flags & PLATZIERT_ODER_HYDRIERT) !== 0) naechsterMontiert = knotenF.return;
+      weiter = knotenF.return;
+      schritte++;
+    } while (weiter && schritte < 10000);
+  }
+  return knotenF.tag === 3 && naechsterMontiert === fiber;
+}
+
 // Suspense-Marken im Server-HTML (React 18): <!--$--> fertig, <!--$?--> wartet,
 // <!--$!--> Rückfall im Browser, <!--/$--> Ende. Liegt `kind` unter `eltern`
 // zwischen einer offenen und ihrer schließenden Marke, gehört es zu einer Grenze.
@@ -111,10 +142,12 @@ function inGrenze(eltern, kind) {
 
 /**
  * Darf der Schutz diesen Textknoten jetzt ändern?
- * 'frei'   – React hat ihn hydriert, er gehört nie React, oder es gibt hier
- *            gar kein React (Test, Seite ohne Hydration).
- * 'warten' – Server-Text einer noch nicht hydrierten Suspense-Grenze;
- *            später erneut prüfen.
+ * 'frei'   – React hat ihn hydriert und die Hydration ist übernommen, er
+ *            gehört nie React, oder es gibt hier gar kein React (Test, Seite
+ *            ohne Hydration).
+ * 'warten' – Server-Text einer noch nicht hydrierten Suspense-Grenze, oder
+ *            React hydriert die Grenze gerade (Schlüssel gesetzt, aber noch
+ *            nicht übernommen); später erneut prüfen.
  * 'nie'    – nicht anfassen (kein Elternknoten, Skript/Stil/Eingabe,
  *            Streaming-Ablage <div hidden id="S:…">, die React gleich
  *            an ihren Platz verschiebt; dort meldet ihn der Beobachter neu).
@@ -124,15 +157,22 @@ function inGrenze(eltern, kind) {
 export function zustand(text) {
   const p = text && text.parentNode;
   if (!p || UEBERSPRINGEN.has(p.nodeName) || p.isContentEditable) return 'nie';
-  if (hatFiber(text) || hatFiber(p)) return 'frei';
+  // Erster Knoten mit React-Schlüssel: der Text selbst (eigener Textknoten
+  // in React), sonst ein Vorfahr (Text als einziges Kind seines Elements hat
+  // nie einen eigenen Schlüssel).
   let kind = text;
-  let ahn = p;
+  let ahn = text;
   while (ahn && !hatFiber(ahn)) {
     if (ahn.nodeName === 'DIV' && ahn.hidden && /^S:/.test(ahn.id || '')) return 'nie';
     kind = ahn;
     ahn = ahn.parentNode;
   }
   if (!ahn) return 'frei';
+  // Der Schlüssel allein heißt nicht „hydriert“: React setzt ihn schon während
+  // der Hydration einer Grenze. Wird sie unterbrochen und neu begonnen, liest
+  // React den Text noch einmal (React #425/#418, Rückfall 24./25.11.2026).
+  if (!montiert(ahn)) return 'warten';
+  if (ahn === text) return 'frei';
   const props = ahn[reactSchluessel(ahn, '__reactProps$')];
   if (props && props.dangerouslySetInnerHTML) return 'frei';
   return inGrenze(ahn, kind) ? 'warten' : 'frei';
