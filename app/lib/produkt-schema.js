@@ -126,11 +126,14 @@
  * Deutschland sagen beide dasselbe — deshalb steht hier nur Deutschland.
  *
  * WAS BEWUSST NICHT DRINSTEHT — `returnShippingFeesAmount`: Die
- * Widerrufsbelehrung sagt, wer die Rücksendung zahlt („Sie tragen die
- * unmittelbaren Kosten der Rücksendung der Waren"), aber nirgends, wie viel
- * das ist. `ReturnFeesCustomerResponsibility` drückt genau diese Aussage aus
- * und braucht keinen Betrag; `ReturnShippingFees` würde einen verlangen, den
- * wir uns ausdenken müssten.
+ * Rücksendung ist für den Kunden kostenlos. Widerrufsbelehrung
+ * (/policies/refund-policy) und AGB (/policies/terms-of-service) sagen
+ * beide „Wir übernehmen die Kosten für die Rücksendung der Waren."
+ * (am Kundenrand nachgemessen 2026-11-26). `FreeReturn` drückt genau das aus
+ * und braucht keinen Betrag. Bis 2026-11 stand dort „Sie tragen die
+ * unmittelbaren Kosten der Rücksendung der Waren", und hier stand deshalb
+ * `ReturnFeesCustomerResponsibility`; der Arm ruecksendung in
+ * crystal-cacao-node/proben/probe_seo_grundlagen.py hält beide Seiten gleich.
  */
 
 import {CANONICAL_ORIGIN} from './seo.js';
@@ -325,10 +328,9 @@ function retourenRichtlinie() {
     returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
     merchantReturnDays: RETOURENFRIST_TAGE_AB_ERHALT,
     returnMethod: 'https://schema.org/ReturnByMail',
-    // „Sie tragen die unmittelbaren Kosten der Rücksendung der Waren."
-    // (/policies/refund-policy) — die Aussage ohne Betrag, den niemand
-    // beziffert hat.
-    returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
+    // „Wir übernehmen die Kosten für die Rücksendung der Waren."
+    // (/policies/refund-policy und /policies/terms-of-service).
+    returnFees: 'https://schema.org/FreeReturn',
   };
 }
 
